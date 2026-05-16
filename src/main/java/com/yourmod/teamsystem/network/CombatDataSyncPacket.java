@@ -18,25 +18,20 @@ public class CombatDataSyncPacket {
         this.deaths = deaths;
     }
 
-    public void encode(FriendlyByteBuf buf) {
-        buf.writeInt(teamOrdinal);
-        buf.writeInt(kills);
-        buf.writeInt(deaths);
+    public static void encode(CombatDataSyncPacket msg, FriendlyByteBuf buf) {
+        buf.writeInt(msg.teamOrdinal);
+        buf.writeInt(msg.kills);
+        buf.writeInt(msg.deaths);
     }
 
     public static CombatDataSyncPacket decode(FriendlyByteBuf buf) {
-        int teamOrdinal = buf.readInt();
-        int kills = buf.readInt();
-        int deaths = buf.readInt();
-        return new CombatDataSyncPacket(teamOrdinal, kills, deaths);
+        return new CombatDataSyncPacket(buf.readInt(), buf.readInt(), buf.readInt());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
-        NetworkEvent.Context ctx = contextSupplier.get();
-        ctx.enqueueWork(() -> {
-            Team team = Team.fromOrdinal(teamOrdinal);
-            ClientTeamData.setLocalPlayerData(team, kills, deaths);
+    public static void handle(CombatDataSyncPacket msg, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            ClientTeamData.setLocalPlayerData(Team.fromOrdinal(msg.teamOrdinal), msg.kills, msg.deaths);
         });
-        ctx.setPacketHandled(true);
+        ctx.get().setPacketHandled(true);
     }
 }

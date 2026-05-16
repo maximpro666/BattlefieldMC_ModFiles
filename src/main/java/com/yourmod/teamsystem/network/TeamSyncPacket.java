@@ -24,8 +24,7 @@ public class TeamSyncPacket {
 
     public static void handle(TeamSyncPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            Team team = Team.values()[msg.teamOrdinal];
-            ClientTeamData.setLocalPlayerTeam(team);
+            ClientTeamData.setLocalPlayerTeam(Team.fromOrdinal(msg.teamOrdinal));
         });
         ctx.get().setPacketHandled(true);
     }
