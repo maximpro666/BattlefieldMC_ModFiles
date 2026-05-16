@@ -14,21 +14,19 @@ public class TeamSyncPacket {
         this.teamOrdinal = teamOrdinal;
     }
 
-    public void encode(FriendlyByteBuf buf) {
-        buf.writeInt(teamOrdinal);
+    public static void encode(TeamSyncPacket msg, FriendlyByteBuf buf) {
+        buf.writeInt(msg.teamOrdinal);
     }
 
     public static TeamSyncPacket decode(FriendlyByteBuf buf) {
-        int teamOrdinal = buf.readInt();
-        return new TeamSyncPacket(teamOrdinal);
+        return new TeamSyncPacket(buf.readInt());
     }
 
-    public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
-        NetworkEvent.Context ctx = contextSupplier.get();
-        ctx.enqueueWork(() -> {
-            Team team = Team.fromOrdinal(teamOrdinal);
+    public static void handle(TeamSyncPacket msg, Supplier<NetworkEvent.Context> ctx) {
+        ctx.get().enqueueWork(() -> {
+            Team team = Team.values()[msg.teamOrdinal];
             ClientTeamData.setLocalPlayerTeam(team);
         });
-        ctx.setPacketHandled(true);
+        ctx.get().setPacketHandled(true);
     }
 }

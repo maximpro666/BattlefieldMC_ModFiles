@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.PlayerCombatData;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
@@ -26,37 +25,37 @@ public class TeamCommand {
         );
     };
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, TeamManager manager) {
         dispatcher.register(
             Commands.literal("team")
                 .requires(source -> source.hasPermission(0))
                 .then(Commands.argument("teamname", StringArgumentType.word())
                     .suggests(TEAM_SUGGESTIONS)
-                    .executes(TeamCommand::joinTeam)
+                    .executes(context -> joinTeam(context, manager))
                 )
-                .executes(TeamCommand::showCurrentTeam)
+                .executes(context -> showCurrentTeam(context, manager))
         );
 
         dispatcher.register(
             Commands.literal("teamstats")
                 .requires(source -> source.hasPermission(0))
-                .executes(TeamCommand::showStats)
+                .executes(context -> showStats(context, manager))
         );
 
         dispatcher.register(
             Commands.literal("teambalance")
                 .requires(source -> source.hasPermission(0))
-                .executes(TeamCommand::showBalance)
+                .executes(context -> showBalance(context, manager))
         );
 
         dispatcher.register(
             Commands.literal("resetstats")
                 .requires(source -> source.hasPermission(2))
-                .executes(TeamCommand::resetStats)
+                .executes(context -> resetStats(context, manager))
         );
     }
 
-    private static int joinTeam(CommandContext<CommandSourceStack> context) {
+    private static int joinTeam(CommandContext<CommandSourceStack> context, TeamManager manager) {
         if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
             context.getSource().sendFailure(Component.literal("Only players can use this command"));
             return 0;
@@ -71,8 +70,7 @@ public class TeamCommand {
             return 0;
         }
 
-        TeamManager manager = TeamSystem.getTeamManager();
-        Team currentTeam = manager.getPlayerTeam(player);
+        Team currentTeam = manager.getOrCreatePlayerData(player.getUUID()).getTeam();
 
         if (currentTeam == team) {
             player.sendSystemMessage(Component.literal("You are already in team ")
@@ -96,14 +94,13 @@ public class TeamCommand {
         return 1;
     }
 
-    private static int showCurrentTeam(CommandContext<CommandSourceStack> context) {
+    private static int showCurrentTeam(CommandContext<CommandSourceStack> context, TeamManager manager) {
         if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
             context.getSource().sendFailure(Component.literal("Only players can use this command"));
             return 0;
         }
 
-        TeamManager manager = TeamSystem.getTeamManager();
-        PlayerCombatData data = manager.getPlayerData(player);
+        PlayerCombatData data = manager.getOrCreatePlayerData(player.getUUID());
 
         player.sendSystemMessage(Component.literal("Your team: ")
             .append(data.getTeam().getColoredName())
@@ -116,14 +113,13 @@ public class TeamCommand {
         return 1;
     }
 
-    private static int showStats(CommandContext<CommandSourceStack> context) {
+    private static int showStats(CommandContext<CommandSourceStack> context, TeamManager manager) {
         if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
             context.getSource().sendFailure(Component.literal("Only players can use this command"));
             return 0;
         }
 
-        TeamManager manager = TeamSystem.getTeamManager();
-        PlayerCombatData data = manager.getPlayerData(player);
+        PlayerCombatData data = manager.getOrCreatePlayerData(player.getUUID());
 
         player.sendSystemMessage(Component.literal("=== Your Combat Stats ===")
             .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
@@ -144,17 +140,15 @@ public class TeamCommand {
         return 1;
     }
 
-    private static int showBalance(CommandContext<CommandSourceStack> context) {
+    private static int showBalance(CommandContext<CommandSourceStack> context, TeamManager manager) {
         if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
             context.getSource().sendFailure(Component.literal("Only players can use this command"));
             return 0;
         }
 
-        TeamManager manager = TeamSystem.getTeamManager();
-
-        int natoCount = manager.getTeamPlayerCount(Team.NATO);
-        int russiaCount = manager.getTeamPlayerCount(Team.RUSSIA);
-        int spectatorCount = manager.getTeamPlayerCount(Team.SPECTATOR);
+        int natoCount = countPlayersInTeam(manager, Team.NATO);
+        int russiaCount = countPlayersInTeam(manager, Team.RUSSIA);
+        int spectatorCount = countPlayersInTeam(manager, Team.SPECTATOR);
 
         player.sendSystemMessage(Component.literal("=== Team Balance ===")
             .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
@@ -180,18 +174,22 @@ public class TeamCommand {
         return 1;
     }
 
-    private static int resetStats(CommandContext<CommandSourceStack> context) {
+    private static int resetStats(CommandContext<CommandSourceStack> context, TeamManager manager) {
         if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
             context.getSource().sendFailure(Component.literal("Only players can use this command"));
             return 0;
         }
 
-        TeamManager manager = TeamSystem.getTeamManager();
-        manager.resetPlayerStats(player);
-
+        manager.getOrCreatePlayerData(player.getUUID()).resetStats();
         player.sendSystemMessage(Component.literal("Your stats have been reset!")
             .withStyle(ChatFormatting.GREEN));
 
         return 1;
+    }
+
+    private static int countPlayersInTeam(TeamManager manager, Team team) {
+        return (int) manager.getServer().getPlayerList().getPlayers().stream()
+            .filter(p -> manager.getOrCreatePlayerData(p.getUUID()).getTeam() == team)
+            .count();
     }
 }

@@ -1,25 +1,22 @@
-[16мая2026 23:10:58.495] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientuserdev, --version, MOD_DEV, --assetIndex, asset-index, --assetsDir, C:\Users\maska\.gradle\caches\minecraft\assets\1.20.1, --gameDir, ., --fml.forgeVersion, 47.1.79, --fml.fmlVersion, 47.1.47, --fml.mcVersion, 1.20.1, --fml.mcpVersion, 20230612.114412]
-[16мая2026 23:10:58.503] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 10.0.10+10.0.10+main.22f00f84 starting: java version 17.0.15 by Microsoft; OS Windows 11 arch amd64 version 10.0
-[16мая2026 23:10:58.729] [main/INFO] [net.minecraftforge.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
-[16мая2026 23:10:58.841] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
-[16мая2026 23:10:59.268] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
-[16мая2026 23:10:59.378] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/C:/Users/maska/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23169!/ Service=ModLauncher Env=CLIENT
-[16мая2026 23:10:59.464] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce GTX 1060 6GB/PCIe/SSE2 GL version 4.6.0 NVIDIA 582.28, NVIDIA Corporation
-[16мая2026 23:10:59.802] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-lowcode\47.1.47\b9cb4bc84722dc99e902883f8ea5a952c0415d5c\language-lowcode-47.1.47.jar is missing mods.toml file
-[16мая2026 23:10:59.807] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\core\47.1.47\915a0dc36418f3c3bf74e56015d1cb79ef5430f0\core-47.1.47.jar is missing mods.toml file
-[16мая2026 23:10:59.814] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-minecraft\47.1.47\70c137579710b203f0220b80a90eff3db19b32a2\language-minecraft-47.1.47.jar is missing mods.toml file
-[16мая2026 23:10:59.818] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-java\47.1.47\9f5f057de5fea5106fca0df2b0faea12a85bc283\language-java-47.1.47.jar is missing mods.toml file
-[16мая2026 23:10:59.853] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-lowcode-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@77ee25f1
-[16мая2026 23:10:59.853] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "core-47.1.47.jar" of type LIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@77ee25f1
-[16мая2026 23:10:59.853] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-minecraft-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@77ee25f1
-[16мая2026 23:10:59.854] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-java-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@77ee25f1
-[16мая2026 23:10:59.854] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "forge-1.20.1-47.1.79.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@77ee25f1
-[16мая2026 23:10:59.854] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "main" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@77ee25f1
-[16мая2026 23:10:59.854] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@77ee25f1
-[16мая2026 23:10:59.904] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "events-47.1.47.jar" of type GAMELIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.BuiltinGameLibraryLocator@1dcca8d3
-[16мая2026 23:11:00.011] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
-[16мая2026 23:11:02.289] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientuserdev' with arguments [--version, MOD_DEV, --gameDir, ., --assetsDir, C:\Users\maska\.gradle\caches\minecraft\assets\1.20.1, --assetIndex, asset-index]
-[16мая2026 23:11:05.467] [pool-4-thread-1/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function flowing_fluid_block
+[16мая2026 23:33:18.773] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--nogui, --launchTarget, forgeserveruserdev, --gameDir, ., --fml.forgeVersion, 47.1.79, --fml.fmlVersion, 47.1.47, --fml.mcVersion, 1.20.1, --fml.mcpVersion, 20230612.114412]
+[16мая2026 23:33:18.781] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 10.0.10+10.0.10+main.22f00f84 starting: java version 17.0.15 by Microsoft; OS Windows 11 arch amd64 version 10.0
+[16мая2026 23:33:19.025] [main/INFO] [net.minecraftforge.fml.loading.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserveruserdev
+[16мая2026 23:33:19.111] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/C:/Users/maska/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23169!/ Service=ModLauncher Env=SERVER
+[16мая2026 23:33:19.617] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-lowcode\47.1.47\b9cb4bc84722dc99e902883f8ea5a952c0415d5c\language-lowcode-47.1.47.jar is missing mods.toml file
+[16мая2026 23:33:19.623] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\core\47.1.47\915a0dc36418f3c3bf74e56015d1cb79ef5430f0\core-47.1.47.jar is missing mods.toml file
+[16мая2026 23:33:19.629] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-minecraft\47.1.47\70c137579710b203f0220b80a90eff3db19b32a2\language-minecraft-47.1.47.jar is missing mods.toml file
+[16мая2026 23:33:19.635] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-java\47.1.47\9f5f057de5fea5106fca0df2b0faea12a85bc283\language-java-47.1.47.jar is missing mods.toml file
+[16мая2026 23:33:19.666] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-lowcode-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3b152928
+[16мая2026 23:33:19.666] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "core-47.1.47.jar" of type LIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3b152928
+[16мая2026 23:33:19.667] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-minecraft-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3b152928
+[16мая2026 23:33:19.667] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-java-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3b152928
+[16мая2026 23:33:19.667] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "forge-1.20.1-47.1.79.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3b152928
+[16мая2026 23:33:19.668] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "main" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3b152928
+[16мая2026 23:33:19.669] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3b152928
+[16мая2026 23:33:19.721] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "events-47.1.47.jar" of type GAMELIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.BuiltinGameLibraryLocator@6b3871d6
+[16мая2026 23:33:19.807] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
+[16мая2026 23:33:21.751] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserveruserdev' with arguments [--gameDir, ., --nogui]
+[16мая2026 23:33:25.383] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function flowing_fluid_block
 java.lang.IllegalStateException: No field with name f_54689_ found
 	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
 	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$15$1602A$\^eval\_.initializeCoreMod#transformer-3(<eval>:42) ~[?:?]
@@ -41,15 +38,26 @@ java.lang.IllegalStateException: No field with name f_54689_ found
 	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
 	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at net.minecraft.world.level.block.FireBlock.bootStrap(FireBlock.java:301) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:46) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.client.main.Main.lambda$main$0(Main.java:151) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) ~[?:?]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?]
-	at java.lang.Thread.run(Thread.java:840) ~[?:?]
-[16мая2026 23:11:05.530] [pool-4-thread-1/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function stairsblock
+	at net.minecraft.world.level.block.FireBlock.bootStrap(FireBlock.java:301) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:46) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Main.main(Main.java:121) ~[forge-1.20.1-47.1.79.jar:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:118) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.ForgeServerUserdevLaunchHandler.runService(ForgeServerUserdevLaunchHandler.java:16) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-47.1.47.jar:47.1]
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
+[16мая2026 23:33:25.477] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function stairsblock
 java.lang.IllegalStateException: No field with name f_56858_ found
 	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
 	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$16$2336A$\^eval\_.initializeCoreMod#transformer-5(<eval>:62) ~[?:?]
@@ -71,15 +79,26 @@ java.lang.IllegalStateException: No field with name f_56858_ found
 	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
 	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at net.minecraft.world.level.block.FireBlock.bootStrap(FireBlock.java:301) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:46) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.client.main.Main.lambda$main$0(Main.java:151) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) ~[?:?]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?]
-	at java.lang.Thread.run(Thread.java:840) ~[?:?]
-[16мая2026 23:11:05.647] [pool-4-thread-1/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function flowerpotblock
+	at net.minecraft.world.level.block.FireBlock.bootStrap(FireBlock.java:301) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:46) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Main.main(Main.java:121) ~[forge-1.20.1-47.1.79.jar:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:118) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.ForgeServerUserdevLaunchHandler.runService(ForgeServerUserdevLaunchHandler.java:16) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-47.1.47.jar:47.1]
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
+[16мая2026 23:33:25.595] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function flowerpotblock
 java.lang.IllegalStateException: No field with name f_53525_ found
 	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
 	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$17$2821A$\^eval\_.initializeCoreMod#transformer-6(<eval>:73) ~[?:?]
@@ -101,15 +120,26 @@ java.lang.IllegalStateException: No field with name f_53525_ found
 	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
 	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at net.minecraft.world.level.block.FireBlock.bootStrap(FireBlock.java:301) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:46) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.client.main.Main.lambda$main$0(Main.java:151) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) ~[?:?]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?]
-	at java.lang.Thread.run(Thread.java:840) ~[?:?]
-[16мая2026 23:11:06.568] [pool-4-thread-1/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function itemstack
+	at net.minecraft.world.level.block.FireBlock.bootStrap(FireBlock.java:301) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:46) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Main.main(Main.java:121) ~[forge-1.20.1-47.1.79.jar:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:118) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.ForgeServerUserdevLaunchHandler.runService(ForgeServerUserdevLaunchHandler.java:16) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-47.1.47.jar:47.1]
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
+[16мая2026 23:33:26.523] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function itemstack
 java.lang.IllegalStateException: No field with name f_41589_ found
 	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
 	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$18$3210A$\^eval\_.initializeCoreMod#transformer-7(<eval>:83) ~[?:?]
@@ -131,21 +161,32 @@ java.lang.IllegalStateException: No field with name f_41589_ found
 	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
 	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at net.minecraft.core.cauldron.CauldronInteraction.lambda$newInteractionMap$7(CauldronInteraction.java:110) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.Util.make(Util.java:359) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.core.cauldron.CauldronInteraction.newInteractionMap(CauldronInteraction.java:109) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.core.cauldron.CauldronInteraction.<clinit>(CauldronInteraction.java:33) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.world.level.block.CauldronBlock.<init>(CauldronBlock.java:19) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.world.level.block.Blocks.<clinit>(Blocks.java:416) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.world.level.block.FireBlock.bootStrap(FireBlock.java:301) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:46) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.client.main.Main.lambda$main$0(Main.java:151) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) ~[?:?]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?]
-	at java.lang.Thread.run(Thread.java:840) ~[?:?]
-[16мая2026 23:11:07.444] [pool-4-thread-1/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function bucketitem
+	at net.minecraft.core.cauldron.CauldronInteraction.lambda$newInteractionMap$7(CauldronInteraction.java:110) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.Util.make(Util.java:359) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.core.cauldron.CauldronInteraction.newInteractionMap(CauldronInteraction.java:109) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.core.cauldron.CauldronInteraction.<clinit>(CauldronInteraction.java:33) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.world.level.block.CauldronBlock.<init>(CauldronBlock.java:19) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.world.level.block.Blocks.<clinit>(Blocks.java:416) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.world.level.block.FireBlock.bootStrap(FireBlock.java:301) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:46) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Main.main(Main.java:121) ~[forge-1.20.1-47.1.79.jar:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:118) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.ForgeServerUserdevLaunchHandler.runService(ForgeServerUserdevLaunchHandler.java:16) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-47.1.47.jar:47.1]
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
+[16мая2026 23:33:27.542] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function bucketitem
 java.lang.IllegalStateException: No field with name f_40687_ found
 	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
 	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$19$1965A$\^eval\_.initializeCoreMod#transformer-4(<eval>:52) ~[?:?]
@@ -167,16 +208,26 @@ java.lang.IllegalStateException: No field with name f_40687_ found
 	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
 	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at net.minecraft.world.level.block.ComposterBlock.bootStrap(ComposterBlock.java:66) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:47) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.client.main.Main.lambda$main$0(Main.java:151) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) ~[?:?]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?]
-	at java.lang.Thread.run(Thread.java:840) ~[?:?]
-[16мая2026 23:11:08.696] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 188 Datafixer optimizations took 283 milliseconds
-[16мая2026 23:11:09.455] [pool-4-thread-1/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function potion
+	at net.minecraft.world.level.block.ComposterBlock.bootStrap(ComposterBlock.java:66) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:47) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Main.main(Main.java:121) ~[forge-1.20.1-47.1.79.jar:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:118) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.ForgeServerUserdevLaunchHandler.runService(ForgeServerUserdevLaunchHandler.java:16) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-47.1.47.jar:47.1]
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
+[16мая2026 23:33:29.710] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function potion
 java.lang.IllegalStateException: No field with name f_19502_ found
 	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
 	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$20$1194A$\^eval\_.initializeCoreMod#transformer-2(<eval>:32) ~[?:?]
@@ -198,17 +249,28 @@ java.lang.IllegalStateException: No field with name f_19502_ found
 	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
 	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at net.minecraft.world.food.Foods.<clinit>(Foods.java:14) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.world.item.Items.<clinit>(Items.java:780) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.world.level.block.ComposterBlock.bootStrap(ComposterBlock.java:66) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:47) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.client.main.Main.lambda$main$0(Main.java:151) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) ~[?:?]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?]
-	at java.lang.Thread.run(Thread.java:840) ~[?:?]
-[16мая2026 23:11:10.249] [pool-4-thread-1/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function structure
+	at net.minecraft.world.food.Foods.<clinit>(Foods.java:14) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.world.item.Items.<clinit>(Items.java:780) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.world.level.block.ComposterBlock.bootStrap(ComposterBlock.java:66) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:47) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Main.main(Main.java:121) ~[forge-1.20.1-47.1.79.jar:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:118) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.ForgeServerUserdevLaunchHandler.runService(ForgeServerUserdevLaunchHandler.java:16) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-47.1.47.jar:47.1]
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
+[16мая2026 23:33:30.532] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function structure
 java.lang.IllegalStateException: No field with name f_226555_ found
 	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
 	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$21$805A$\^eval\_.initializeCoreMod#transformer-1(<eval>:22) ~[?:?]
@@ -230,34 +292,45 @@ java.lang.IllegalStateException: No field with name f_226555_ found
 	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
 	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at net.minecraft.world.level.levelgen.structure.StructureSet$StructureSelectionEntry.lambda$static$0(StructureSet.java:32) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at com.mojang.serialization.codecs.RecordCodecBuilder.create(RecordCodecBuilder.java:72) ~[datafixerupper-6.0.8.jar%23107!/:?]
-	at net.minecraft.world.level.levelgen.structure.StructureSet$StructureSelectionEntry.<clinit>(StructureSet.java:31) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.world.level.levelgen.structure.StructureSet.lambda$static$0(StructureSet.java:14) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at com.mojang.serialization.codecs.RecordCodecBuilder.create(RecordCodecBuilder.java:72) ~[datafixerupper-6.0.8.jar%23107!/:?]
-	at net.minecraft.world.level.levelgen.structure.StructureSet.<clinit>(StructureSet.java:13) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.world.level.levelgen.structure.placement.StructurePlacement$ExclusionZone.lambda$static$0(StructurePlacement.java:111) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at com.mojang.serialization.codecs.RecordCodecBuilder.create(RecordCodecBuilder.java:72) ~[datafixerupper-6.0.8.jar%23107!/:?]
-	at net.minecraft.world.level.levelgen.structure.placement.StructurePlacement$ExclusionZone.<clinit>(StructurePlacement.java:110) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.world.level.levelgen.structure.placement.StructurePlacement.placementCodec(StructurePlacement.java:31) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement.lambda$static$0(RandomSpreadStructurePlacement.java:16) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at com.mojang.serialization.codecs.RecordCodecBuilder.mapCodec(RecordCodecBuilder.java:76) ~[datafixerupper-6.0.8.jar%23107!/:?]
-	at net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement.<clinit>(RandomSpreadStructurePlacement.java:15) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType.<clinit>(StructurePlacementType.java:8) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.core.registries.BuiltInRegistries.lambda$static$40(BuiltInRegistries.java:342) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.core.registries.BuiltInRegistries.lambda$internalRegister$53(BuiltInRegistries.java:448) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.core.registries.BuiltInRegistries.lambda$createContents$54(BuiltInRegistries.java:462) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
+	at net.minecraft.world.level.levelgen.structure.StructureSet$StructureSelectionEntry.lambda$static$0(StructureSet.java:32) ~[forge-1.20.1-47.1.79.jar:?]
+	at com.mojang.serialization.codecs.RecordCodecBuilder.create(RecordCodecBuilder.java:72) ~[datafixerupper-6.0.8.jar:?]
+	at net.minecraft.world.level.levelgen.structure.StructureSet$StructureSelectionEntry.<clinit>(StructureSet.java:31) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.world.level.levelgen.structure.StructureSet.lambda$static$0(StructureSet.java:14) ~[forge-1.20.1-47.1.79.jar:?]
+	at com.mojang.serialization.codecs.RecordCodecBuilder.create(RecordCodecBuilder.java:72) ~[datafixerupper-6.0.8.jar:?]
+	at net.minecraft.world.level.levelgen.structure.StructureSet.<clinit>(StructureSet.java:13) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.world.level.levelgen.structure.placement.StructurePlacement$ExclusionZone.lambda$static$0(StructurePlacement.java:111) ~[forge-1.20.1-47.1.79.jar:?]
+	at com.mojang.serialization.codecs.RecordCodecBuilder.create(RecordCodecBuilder.java:72) ~[datafixerupper-6.0.8.jar:?]
+	at net.minecraft.world.level.levelgen.structure.placement.StructurePlacement$ExclusionZone.<clinit>(StructurePlacement.java:110) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.world.level.levelgen.structure.placement.StructurePlacement.placementCodec(StructurePlacement.java:31) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement.lambda$static$0(RandomSpreadStructurePlacement.java:16) ~[forge-1.20.1-47.1.79.jar:?]
+	at com.mojang.serialization.codecs.RecordCodecBuilder.mapCodec(RecordCodecBuilder.java:76) ~[datafixerupper-6.0.8.jar:?]
+	at net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement.<clinit>(RandomSpreadStructurePlacement.java:15) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType.<clinit>(StructurePlacementType.java:8) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.core.registries.BuiltInRegistries.lambda$static$40(BuiltInRegistries.java:342) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.core.registries.BuiltInRegistries.lambda$internalRegister$53(BuiltInRegistries.java:448) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.core.registries.BuiltInRegistries.lambda$createContents$54(BuiltInRegistries.java:462) ~[forge-1.20.1-47.1.79.jar:?]
 	at java.util.LinkedHashMap.forEach(LinkedHashMap.java:721) ~[?:?]
-	at net.minecraft.core.registries.BuiltInRegistries.createContents(BuiltInRegistries.java:461) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.core.registries.BuiltInRegistries.bootStrap(BuiltInRegistries.java:455) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:55) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.client.main.Main.lambda$main$0(Main.java:151) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) ~[?:?]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?]
-	at java.lang.Thread.run(Thread.java:840) ~[?:?]
-[16мая2026 23:11:10.482] [pool-4-thread-1/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function biome
+	at net.minecraft.core.registries.BuiltInRegistries.createContents(BuiltInRegistries.java:461) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.core.registries.BuiltInRegistries.bootStrap(BuiltInRegistries.java:455) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:55) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Main.main(Main.java:121) ~[forge-1.20.1-47.1.79.jar:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:118) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.ForgeServerUserdevLaunchHandler.runService(ForgeServerUserdevLaunchHandler.java:16) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-47.1.47.jar:47.1]
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
+[16мая2026 23:33:30.747] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function biome
 java.lang.IllegalStateException: No field with name f_47437_ found
 	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
 	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$22$292A$\^eval\_.initializeCoreMod#transformer(<eval>:11) ~[?:?]
@@ -279,43 +352,36 @@ java.lang.IllegalStateException: No field with name f_47437_ found
 	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
 	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
 	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at net.minecraft.world.level.biome.FixedBiomeSource.<clinit>(FixedBiomeSource.java:16) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.world.level.biome.BiomeSources.bootstrap(BiomeSources.java:8) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.core.registries.BuiltInRegistries.lambda$internalRegister$53(BuiltInRegistries.java:448) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.core.registries.BuiltInRegistries.lambda$createContents$54(BuiltInRegistries.java:462) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
+	at net.minecraft.world.level.biome.FixedBiomeSource.<clinit>(FixedBiomeSource.java:16) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.world.level.biome.BiomeSources.bootstrap(BiomeSources.java:8) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.core.registries.BuiltInRegistries.lambda$internalRegister$53(BuiltInRegistries.java:448) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.core.registries.BuiltInRegistries.lambda$createContents$54(BuiltInRegistries.java:462) ~[forge-1.20.1-47.1.79.jar:?]
 	at java.util.LinkedHashMap.forEach(LinkedHashMap.java:721) ~[?:?]
-	at net.minecraft.core.registries.BuiltInRegistries.createContents(BuiltInRegistries.java:461) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.core.registries.BuiltInRegistries.bootStrap(BuiltInRegistries.java:455) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:55) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at net.minecraft.client.main.Main.lambda$main$0(Main.java:151) ~[forge-1.20.1-47.1.79.jar%23197!/:?]
-	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:539) ~[?:?]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:264) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136) ~[?:?]
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635) ~[?:?]
-	at java.lang.Thread.run(Thread.java:840) ~[?:?]
-[16мая2026 23:11:11.254] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/maska/OneDrive/Desktop/BattlefieldMC_ModFiles/.gradle/repositories/ng_dummy_ng/net/neoforged/forge/1.20.1-47.1.79/forge-1.20.1-47.1.79.jar%23197!/assets/.mcassetsroot' uses unexpected schema
-[16мая2026 23:11:11.256] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/maska/OneDrive/Desktop/BattlefieldMC_ModFiles/.gradle/repositories/ng_dummy_ng/net/neoforged/forge/1.20.1-47.1.79/forge-1.20.1-47.1.79.jar%23197!/data/.mcassetsroot' uses unexpected schema
-[16мая2026 23:11:11.296] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
-[16мая2026 23:11:11.308] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
-[16мая2026 23:11:11.496] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.1 build 7
-[16мая2026 23:11:11.853] [modloading-worker-0/INFO] [com.yourmod.teamsystem.TeamSystem/]: Initializing Team System
-[16мая2026 23:11:11.879] [modloading-worker-0/INFO] [net.minecraftforge.common.ForgeMod/FORGEMOD]: NeoForge mod loading, version 47.1.79, for MC 1.20.1 with MCP 20230612.114412
-[16мая2026 23:11:11.879] [modloading-worker-0/INFO] [net.minecraftforge.common.MinecraftForge/FORGE]: NeoForge v47.1.79 Initialized
-[16мая2026 23:11:13.196] [Render thread/INFO] [net.minecraftforge.gametest.ForgeGameTestHooks/]: Enabled Gametest Namespaces: [teamsystem]
-[16мая2026 23:11:13.384] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, mod_resources
-[16мая2026 23:11:13.461] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Configuration file C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\run\config\forge-client.toml is not correct. Correcting
-[16мая2026 23:11:13.466] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client was corrected from null to its default, SimpleCommentedConfig:{}. 
-[16мая2026 23:11:13.467] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.alwaysSetupTerrainOffThread was corrected from null to its default, false. 
-[16мая2026 23:11:13.467] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.experimentalForgeLightPipelineEnabled was corrected from null to its default, false. 
-[16мая2026 23:11:13.468] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.showLoadWarnings was corrected from null to its default, true. 
-[16мая2026 23:11:13.468] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.useCombinedDepthStencilAttachment was corrected from null to its default, false. 
-[16мая2026 23:11:13.468] [modloading-worker-0/WARN] [net.minecraftforge.common.ForgeConfigSpec/CORE]: Incorrect key client.compressLanIPv6Addresses was corrected from null to its default, true. 
-[16мая2026 23:11:13.723] [Worker-Main-8/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.0.06.hex, loading
-[16мая2026 23:11:13.843] [Forge Version Check/INFO] [net.minecraftforge.fml.VersionChecker/]: [forge] Starting version check at https://maven.neoforged.net/releases/net/neoforged/forge/promotions_slim.json
-[16мая2026 23:11:13.869] [Render thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Common setup complete
-[16мая2026 23:11:13.876] [Render thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Network packets registered
-[16мая2026 23:11:13.876] [Render thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Network packets registered
-[16мая2026 23:11:14.620] [Forge Version Check/WARN] [net.minecraftforge.fml.VersionChecker/]: Failed to process update information
+	at net.minecraft.core.registries.BuiltInRegistries.createContents(BuiltInRegistries.java:461) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.core.registries.BuiltInRegistries.bootStrap(BuiltInRegistries.java:455) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:55) ~[forge-1.20.1-47.1.79.jar:?]
+	at net.minecraft.server.Main.main(Main.java:121) ~[forge-1.20.1-47.1.79.jar:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
+	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
+	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
+	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:118) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.ForgeServerUserdevLaunchHandler.runService(ForgeServerUserdevLaunchHandler.java:16) ~[loader-47.1.47.jar:47.1]
+	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-47.1.47.jar:47.1]
+	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
+	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
+[16мая2026 23:33:31.365] [modloading-worker-0/INFO] [net.minecraftforge.common.ForgeMod/FORGEMOD]: NeoForge mod loading, version 47.1.79, for MC 1.20.1 with MCP 20230612.114412
+[16мая2026 23:33:31.365] [modloading-worker-0/INFO] [net.minecraftforge.common.MinecraftForge/FORGE]: NeoForge v47.1.79 Initialized
+[16мая2026 23:33:32.136] [modloading-worker-0/INFO] [com.yourmod.teamsystem.TeamSystem/]: Team System packets registered
+[16мая2026 23:33:32.641] [Forge Version Check/INFO] [net.minecraftforge.fml.VersionChecker/]: [forge] Starting version check at https://maven.neoforged.net/releases/net/neoforged/forge/promotions_slim.json
+[16мая2026 23:33:33.317] [Forge Version Check/WARN] [net.minecraftforge.fml.VersionChecker/]: Failed to process update information
 com.google.gson.JsonSyntaxException: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1 path $
 	at com.google.gson.Gson.fromJson(Gson.java:1226) ~[gson-2.10.jar%23138!/:?]
 	at com.google.gson.Gson.fromJson(Gson.java:1124) ~[gson-2.10.jar%23138!/:?]
@@ -330,22 +396,29 @@ Caused by: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING
 	at com.google.gson.internal.bind.MapTypeAdapterFactory$Adapter.read(MapTypeAdapterFactory.java:144) ~[gson-2.10.jar%23138!/:?]
 	at com.google.gson.Gson.fromJson(Gson.java:1214) ~[gson-2.10.jar%23138!/:?]
 	... 6 more
-[16мая2026 23:11:18.098] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
-[16мая2026 23:11:18.098] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
-[16мая2026 23:11:18.173] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device OpenAL Soft on Динамики (High Definition Audio Device)
-[16мая2026 23:11:18.175] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
-[16мая2026 23:11:18.366] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
-[16мая2026 23:11:18.378] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
-[16мая2026 23:11:18.381] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
-[16мая2026 23:11:18.382] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
-[16мая2026 23:11:18.383] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
-[16мая2026 23:11:18.389] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
-[16мая2026 23:11:18.393] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
-[16мая2026 23:11:18.393] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
-[16мая2026 23:11:18.393] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
-[16мая2026 23:11:18.768] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
-[16мая2026 23:11:18.834] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x0 minecraft:textures/atlas/particles.png-atlas
-[16мая2026 23:11:18.835] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x0 minecraft:textures/atlas/paintings.png-atlas
-[16мая2026 23:11:18.835] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x128x0 minecraft:textures/atlas/mob_effects.png-atlas
-[16мая2026 23:11:22.284] [Realms Notification Availability checker #1/INFO] [com.mojang.realmsclient.client.RealmsClient/]: Could not authorize you against Realms server: java.lang.RuntimeException: Failed to parse into SignedJWT: 0
-[16мая2026 23:11:29.542] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!
+[16мая2026 23:33:33.981] [main/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[16мая2026 23:33:34.117] [main/INFO] [net.minecraftforge.registries.GameData/REGISTRIES]: Injecting existing registry data into this CLIENT instance
+[16мая2026 23:33:35.003] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/maska/OneDrive/Desktop/BattlefieldMC_ModFiles/.gradle/repositories/ng_dummy_ng/net/neoforged/forge/1.20.1-47.1.79/forge-1.20.1-47.1.79.jar%23197!/assets/.mcassetsroot' uses unexpected schema
+[16мая2026 23:33:35.003] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/maska/OneDrive/Desktop/BattlefieldMC_ModFiles/.gradle/repositories/ng_dummy_ng/net/neoforged/forge/1.20.1-47.1.79/forge-1.20.1-47.1.79.jar%23197!/data/.mcassetsroot' uses unexpected schema
+[16мая2026 23:33:36.730] [main/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 7 recipes
+[16мая2026 23:33:36.876] [main/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 1271 advancements
+[16мая2026 23:33:37.328] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting minecraft server version 1.20.1
+[16мая2026 23:33:37.328] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Loading properties
+[16мая2026 23:33:37.328] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Default game type: SURVIVAL
+[16мая2026 23:33:37.329] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[16мая2026 23:33:37.390] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting Minecraft server on *:25565
+[16мая2026 23:33:37.406] [Server thread/INFO] [net.minecraft.server.network.ServerConnectionListener/]: Using default channel type
+[16мая2026 23:33:37.689] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Preparing level "world"
+[16мая2026 23:33:38.589] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[16мая2026 23:33:40.864] [Worker-Main-8/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[16мая2026 23:33:40.885] [Worker-Main-11/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[16мая2026 23:33:40.893] [Worker-Main-8/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[16мая2026 23:33:40.904] [Worker-Main-11/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[16мая2026 23:33:40.950] [Worker-Main-8/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[16мая2026 23:33:41.091] [Worker-Main-4/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[16мая2026 23:33:41.591] [Worker-Main-10/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 56%
+[16мая2026 23:33:41.801] [Server thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 3211 ms
+[16мая2026 23:33:41.802] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Done (4.161s)! For help, type "help"
+[16мая2026 23:33:41.805] [Server thread/INFO] [net.minecraftforge.gametest.ForgeGameTestHooks/]: Enabled Gametest Namespaces: [teamsystem]
+[16мая2026 23:33:41.809] [Server thread/INFO] [net.minecraftforge.server.permission.PermissionAPI/]: Successfully initialized permission handler forge:default_handler
+[16мая2026 23:33:41.815] [Server thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Team System initialized

@@ -28,17 +28,4 @@ public class ClientTeamData {
     public static int getLocalPlayerDeaths() {
         return localPlayerDeaths;
     }
-
-    public static double getLocalPlayerKDRatio() {
-        if (localPlayerDeaths == 0) {
-            return localPlayerKills;
-        }
-        return (double) localPlayerKills / localPlayerDeaths;
-    }
-
-    public static void reset() {
-        localPlayerTeam = Team.SPECTATOR;
-        localPlayerKills = 0;
-        localPlayerDeaths = 0;
-    }
 }

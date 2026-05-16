@@ -10,6 +10,11 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class CombatEventHandler {
+    private final TeamManager teamManager;
+
+    public CombatEventHandler(TeamManager teamManager) {
+        this.teamManager = teamManager;
+    }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onLivingAttack(LivingAttackEvent event) {
@@ -19,9 +24,7 @@ public class CombatEventHandler {
 
         DamageSource source = event.getSource();
         if (source.getEntity() instanceof ServerPlayer attacker) {
-            TeamManager manager = TeamSystem.getTeamManager();
-
-            if (manager != null && manager.isFriendly(attacker, victim)) {
+            if (teamManager.isFriendly(attacker, victim)) {
                 event.setCanceled(true);
 
                 TeamSystem.LOGGER.debug("Blocked friendly fire from {} to {}",
@@ -37,23 +40,18 @@ public class CombatEventHandler {
             return;
         }
 
-        TeamManager manager = TeamSystem.getTeamManager();
-        if (manager == null) {
-            return;
-        }
-
-        manager.addDeath(victim);
+        teamManager.incrementDeaths(victim.getUUID());
 
         DamageSource source = event.getSource();
         if (source.getEntity() instanceof ServerPlayer killer) {
             if (!killer.getUUID().equals(victim.getUUID())) {
-                manager.addKill(killer);
+                teamManager.incrementKills(killer.getUUID());
 
                 TeamSystem.LOGGER.info("Player {} killed {} (K/D: {}/{})",
                     killer.getName().getString(),
                     victim.getName().getString(),
-                    manager.getPlayerData(killer).getKills(),
-                    manager.getPlayerData(killer).getDeaths());
+                    teamManager.getOrCreatePlayerData(killer.getUUID()).getKills(),
+                    teamManager.getOrCreatePlayerData(killer.getUUID()).getDeaths());
             }
         }
     }

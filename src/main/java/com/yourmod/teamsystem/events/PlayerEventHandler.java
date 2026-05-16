@@ -7,44 +7,31 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class PlayerEventHandler {
+    private final TeamManager teamManager;
 
-    @SubscribeEvent
-    public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            TeamManager manager = TeamSystem.getTeamManager();
-            if (manager != null) {
-                manager.onPlayerJoin(player);
-            }
-        }
+    public PlayerEventHandler(TeamManager teamManager) {
+        this.teamManager = teamManager;
     }
 
     @SubscribeEvent
-    public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+    public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            TeamManager manager = TeamSystem.getTeamManager();
-            if (manager != null) {
-                manager.onPlayerLeave(player);
-            }
+            teamManager.fullSyncPlayer(player);
+            TeamSystem.LOGGER.info("Synced team data for player: {}", player.getName().getString());
         }
     }
 
     @SubscribeEvent
     public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            TeamManager manager = TeamSystem.getTeamManager();
-            if (manager != null) {
-                manager.syncPlayerData(player);
-            }
+            teamManager.fullSyncPlayer(player);
         }
     }
 
     @SubscribeEvent
     public void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            TeamManager manager = TeamSystem.getTeamManager();
-            if (manager != null) {
-                manager.syncPlayerData(player);
-            }
+            teamManager.fullSyncPlayer(player);
         }
     }
 }
