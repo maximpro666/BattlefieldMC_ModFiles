@@ -58,6 +58,9 @@ public class TeamManager extends SavedData {
         PlayerCombatData data = getOrCreatePlayerData(player.getUUID());
         data.setTeam(team);
 
+        // Remove player from all other vanilla scoreboard teams before adding to new one
+        removePlayerFromAllScoreboardTeams(player);
+
         addPlayerToScoreboardTeam(player, team);
 
         syncPlayerTeam(player);
@@ -65,6 +68,20 @@ public class TeamManager extends SavedData {
 
         setDirty();
         TeamSystem.LOGGER.info("Player {} assigned to team {}", player.getName().getString(), team.name());
+    }
+
+    /**
+     * Removes the player from all vanilla scoreboard teams to prevent multiple membership.
+     */
+    private void removePlayerFromAllScoreboardTeams(ServerPlayer player) {
+        Scoreboard scoreboard = server.getScoreboard();
+        String playerName = player.getScoreboardName();
+        // Get all teams that contain this player and remove them
+        for (PlayerTeam team : scoreboard.getPlayerTeams()) {
+            if (team.getPlayers().contains(playerName)) {
+                scoreboard.removePlayerFromTeam(playerName, team);
+            }
+        }
     }
 
     private void addPlayerToScoreboardTeam(ServerPlayer player, Team team) {
@@ -85,12 +102,14 @@ public class TeamManager extends SavedData {
         PlayerCombatData data = getOrCreatePlayerData(playerId);
         data.addKill();
         setDirty();
+        // Note: syncPlayerData is called by CombatEventHandler after incrementing
     }
 
     public void incrementDeaths(UUID playerId) {
         PlayerCombatData data = getOrCreatePlayerData(playerId);
         data.addDeath();
         setDirty();
+        // Note: syncPlayerData is called by CombatEventHandler after incrementing
     }
 
     public boolean isFriendly(ServerPlayer player1, ServerPlayer player2) {
@@ -136,6 +155,18 @@ public class TeamManager extends SavedData {
         }
         return members;
     }
+
+    /**
+     * TODO: CapturePointManager integration point.
+     * In future: manage capture points, track ownership, calculate ticket bleed.
+     * For now, reserved for future expansion.
+     */
+
+    /**
+     * TODO: TicketManager integration point.
+     * In future: manage ticket pool per team, deduct on deaths, track ticket state.
+     * For now, reserved for future expansion.
+     */
 
     public MinecraftServer getServer() {
         return server;

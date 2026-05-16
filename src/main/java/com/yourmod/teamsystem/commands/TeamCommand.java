@@ -36,6 +36,31 @@ public class TeamCommand {
                 .executes(context -> showCurrentTeam(context, manager))
         );
 
+        // Literal subcommands for convenience: /team nato, /team russia, /team spectator
+        dispatcher.register(
+            Commands.literal("team")
+                .requires(source -> source.hasPermission(0))
+                .then(Commands.literal("nato")
+                    .executes(context -> joinTeamLiteral(context, manager, Team.NATO))
+                )
+        );
+
+        dispatcher.register(
+            Commands.literal("team")
+                .requires(source -> source.hasPermission(0))
+                .then(Commands.literal("russia")
+                    .executes(context -> joinTeamLiteral(context, manager, Team.RUSSIA))
+                )
+        );
+
+        dispatcher.register(
+            Commands.literal("team")
+                .requires(source -> source.hasPermission(0))
+                .then(Commands.literal("spectator")
+                    .executes(context -> joinTeamLiteral(context, manager, Team.SPECTATOR))
+                )
+        );
+
         dispatcher.register(
             Commands.literal("teamstats")
                 .requires(source -> source.hasPermission(0))
@@ -91,6 +116,29 @@ public class TeamCommand {
 
         manager.getServer().getPlayerList().broadcastSystemMessage(announcement, false);
 
+        return 1;
+    }
+
+    /**
+     * Helper method to join team via literal subcommand (/team nato, /team russia, /team spectator).
+     * Executes the same logic as joinTeam but with pre-resolved Team enum.
+     */
+    private static int joinTeamLiteral(CommandContext<CommandSourceStack> context, TeamManager manager, Team team) {
+        if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
+            context.getSource().sendFailure(Component.literal("Only players can use this command"));
+            return 0;
+        }
+
+        Team currentTeam = manager.getOrCreatePlayerData(player.getUUID()).getTeam();
+
+        if (currentTeam == team) {
+            player.sendSystemMessage(Component.literal("You are already in team ")
+                .append(team.getColoredName()));
+            return 0;
+        }
+
+        manager.setPlayerTeam(player, team);
+        // Broadcast handled by setPlayerTeam, which calls info log and broadcastSystemMessage
         return 1;
     }
 

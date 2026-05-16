@@ -15,6 +15,8 @@ public class PacketHandler {
 
     private static int nextId = 0;
 
+    // Protocol version "1": TeamSyncPacket (team ordinal), CombatDataSyncPacket (team ordinal, kills, deaths)
+    // Do not increment version unless packet format changes (breaking compatibility).
     public static void register() {
         CHANNEL.registerMessage(
             nextId++,
