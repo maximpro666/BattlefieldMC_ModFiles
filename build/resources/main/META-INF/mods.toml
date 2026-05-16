@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="MIT"
+
+[[mods]]
+modId="teamsystem"
+version="1.0.0"
+displayName="Team System"
+authors="YourName"
+description='''Squad-like team system for Minecraft'''
+
+[[dependencies.teamsystem]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47.1,48)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.teamsystem]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.21)"
+    ordering="NONE"
+    side="BOTH"

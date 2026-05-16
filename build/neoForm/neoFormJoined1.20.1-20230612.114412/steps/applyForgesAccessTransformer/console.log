@@ -1,0 +1,8 @@
+JVM Args:          
+Run Args:          "--inJar", "C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\steps\rename\output.jar", "--outJar", "C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\steps\applyForgesAccessTransformer\output.jar", "--atFile", "C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\accesstransformers\Forges\accesstransformer.cfg"
+JVM:               C:\Users\maska\AppData\Roaming\PrismLauncher\java\java-runtime-gamma\bin\java.exe
+Classpath:         C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\accesstransformers\8.0.7\4cba12b2b7087c94f754f7fc09a94d931a865182\accesstransformers-8.0.7-fatjar.jar
+Working Dir:       C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\steps\applyForgesAccessTransformer
+Main Class:        net.minecraftforge.accesstransformer.TransformerProcessor
+Program log file:  C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\steps\applyForgesAccessTransformer\log.log
+Output file:       C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\steps\applyForgesAccessTransformer\output.jar

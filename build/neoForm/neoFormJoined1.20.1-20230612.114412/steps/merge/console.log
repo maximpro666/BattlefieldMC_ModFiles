@@ -1,0 +1,8 @@
+JVM Args:          
+Run Args:          "--client", "C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\steps\stripClient\output.jar", "--server", "C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\steps\stripServer\output.jar", "--ann", "1.20.1", "--output", "C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\steps\merge\output.jar", "--inject", "false"
+JVM:               C:\Users\maska\AppData\Roaming\PrismLauncher\java\java-runtime-gamma\bin\java.exe
+Classpath:         C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\mergetool\1.1.7\3d41564f78f123d64573cae7948014baf3aaba3f\mergetool-1.1.7-fatjar.jar
+Working Dir:       C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\steps\merge
+Main Class:        net.minecraftforge.mergetool.ConsoleMerger
+Program log file:  C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\steps\merge\log.log
+Output file:       C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\neoForm\neoFormJoined1.20.1-20230612.114412\steps\merge\output.jar
