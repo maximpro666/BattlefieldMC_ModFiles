@@ -354,151 +354,101 @@ Caused by: java.net.ConnectException: Connection refused: getsockopt
 	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.82.Final.jar%23195!/:4.1.82.Final]
 	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.82.Final.jar%23195!/:4.1.82.Final]
 	at java.lang.Thread.run(Thread.java:840) ~[?:?]
-necraft-47.1.47.jar is missing mods.toml file
-[17мая2026 01:13:55.762] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-java\47.1.47\9f5f057de5fea5106fca0df2b0faea12a85bc283\language-java-47.1.47.jar is missing mods.toml file
-[17мая2026 01:13:55.796] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-lowcode-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.796] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "core-47.1.47.jar" of type LIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.797] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-minecraft-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.798] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-java-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.798] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "forge-1.20.1-47.1.79.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.799] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "main" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.803] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.852] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "events-47.1.47.jar" of type GAMELIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.BuiltinGameLibraryLocator@6ef81f31
-[17мая2026 01:13:55.918] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
-[17мая2026 01:13:58.152] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserveruserdev' with arguments [--gameDir, ., --nogui]
-[17мая2026 01:14:02.417] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function flowing_fluid_block
-java.lang.IllegalStateException: No field with name f_54689_ found
-	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
-	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$15$1602A$\^eval\_.initializeCoreMod#transformer-3(<eval>:42) ~[?:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptFunctionData.invoke(ScriptFunctionData.java:648) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptFunction.invoke(ScriptFunction.java:513) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptRuntime.apply(ScriptRuntime.java:520) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.api.scripting.ScriptObjectMirror.call(ScriptObjectMirror.java:111) ~[nashorn-core-15.3.jar:?]
-	at net.minecraftforge.coremod.NashornFactory.lambda$getFunction$0(NashornFactory.java:18) ~[coremods-5.0.1.jar:5.0.1+15+master.dc5a2922]
-	at net.minecraftforge.coremod.transformer.CoreModClassTransformer.runCoremod(CoreModClassTransformer.java:18) ~[coremods-5.0.1.jar:?]
-	at net.minecraftforge.coremod.transformer.CoreModClassTransformer.runCoremod(CoreModClassTransformer.java:10) ~[coremods-5.0.1.jar:?]
-	at net.minecraftforge.coremod.transformer.CoreModBaseTransformer.transform(CoreModBaseTransformer.java:38) ~[coremods-5.0.1.jar:?]
-	at cpw.mods.modlauncher.TransformerHolder.transform(TransformerHolder.java:41) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.ClassTransformer.performVote(ClassTransformer.java:179) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.ClassTransformer.transform(ClassTransformer.java:117) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.TransformingClassLoader.maybeTransformClassBytes(TransformingClassLoader.java:50) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.readerToClass(ModuleClassLoader.java:113) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.lambda$findClass$15(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.loadFromModule(ModuleClassLoader.java:229) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at net.minecraft.world.level.block.FireBlock.bootStrap(FireBlock.java:301) ~[forge-1.20.1-47.1.79.jar:?]
-	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:46) ~[forge-1.20.1-47.1.79.jar:?]
-	at net.minecraft.server.Main.main(Main.java:121) ~[forge-1.20.1-47.1.79.jar:?]
-	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
-	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
-	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
-	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-47.1.47.jar:47.1]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:118) ~[loader-47.1.47.jar:47.1]
-	at net.minecraftforge.fml.loading.targets.ForgeServerUserdevLaunchHandler.runService(ForgeServerUserdevLaunchHandler.java:16) ~[loader-47.1.47.jar:47.1]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-47.1.47.jar:47.1]
-	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
-[17мая2026 01:14:02.640] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function stairsblock
-java.lang.IllegalStateException: No field with name f_56858_ found
-	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
-	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$16$2336A$\^eval\_.initializeCoreMod#transformer-5(<eval>:62) ~[?:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptFunctionData.invoke(ScriptFunctionData.java:648) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptFunction.invoke(ScriptFunction.java:513) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptRuntime.apply(ScriptRuntime.java:520) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.api.scripting.ScriptObjectMirror.call(ScriptObjectMirror.java:111) ~[nashorn-core-15.3.jar:?]
-	at net.minecraftforge.coremod.NashornFactory.lambda$getFunction$0(NashornFactory.java:18) ~[coremods-5.0.1.jar:5.0.1+15+master.dc5a2922]
-	at net.minecraftforge.coremod.transformer.CoreModClassTransformer.runCoremod(CoreModClassTransformer.java:18) ~[coremods-5.0.1.jar:?]
-	at net.minecraftforge.coremod.transformer.CoreModClassTransformer.runCoremod(CoreModClassTransformer.java:10) ~[coremods-5.0.1.jar:?]
-	at net.minecraftforge.coremod.transformer.CoreModBaseTransformer.transform(CoreModBaseTransformer.java:38) ~[coremods-5.0.1.jar:?]
-	at cpw.mods.modlauncher.TransformerHolder.transform(TransformerHolder.java:41) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.ClassTransformer.performVote(ClassTransformer.java:179) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.ClassTransformer.transform(ClassTransformer.java:117) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.TransformingClassLoader.maybeTransformClassBytes(TransformingClassLoader.java:50) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.readerToClass(ModuleClassLoader.java:113) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.lambda$findClass$15(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.loadFromModule(ModuleClassLoader.java:229) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at net.minecraft.world.level.block.FireBlock.bootStrap(FireBlock.java:301) ~[forge-1.20.1-47.1.79.jar:?]
-	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:46) ~[forge-1.20.1-47.1.79.jar:?]
-	at net.minecraft.server.Main.main(Main.java:121) ~[forge-1.20.1-47.1.79.jar:?]
-	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
-	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
-	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
-	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-47.1.47.jar:47.1]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:118) ~[loader-47.1.47.jar:47.1]
-	at net.minecraftforge.fml.loading.targets.ForgeServerUserdevLaunchHandler.runService(ForgeServerUserdevLaunchHandler.java:16) ~[loader-47.1.47.jar:47.1]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-47.1.47.jar:47.1]
-	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
-[17мая2026 01:14:02.837] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function flowerpotblock
-java.lang.IllegalStateException: No field with name f_53525_ found
-	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
-	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$17$2821A$\^eval\_.initializeCoreMod#transformer-6(<eval>:73) ~[?:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptFunctionData.invoke(ScriptFunctionData.java:648) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptFunction.invoke(ScriptFunction.java:513) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptRuntime.apply(ScriptRuntime.java:520) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.api.scripting.ScriptObjectMirror.call(ScriptObjectMirror.java:111) ~[nashorn-core-15.3.jar:?]
-	at net.minecraftforge.coremod.NashornFactory.lambda$getFunction$0(NashornFactory.java:18) ~[coremods-5.0.1.jar:5.0.1+15+master.dc5a2922]
-	at net.minecraftforge.coremod.transformer.CoreModClassTransformer.runCoremod(CoreModClassTransformer.java:18) ~[coremods-5.0.1.jar:?]
-	at net.minecraftforge.coremod.transformer.CoreModClassTransformer.runCoremod(CoreModClassTransformer.java:10) ~[coremods-5.0.1.jar:?]
-	at net.minecraftforge.coremod.transformer.CoreModBaseTransformer.transform(CoreModBaseTransformer.java:38) ~[coremods-5.0.1.jar:?]
-	at cpw.mods.modlauncher.TransformerHolder.transform(TransformerHolder.java:41) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.ClassTransformer.performVote(ClassTransformer.java:179) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.ClassTransformer.transform(ClassTransformer.java:117) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.TransformingClassLoader.maybeTransformClassBytes(TransformingClassLoader.java:50) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.readerToClass(ModuleClassLoader.java:113) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.lambda$findClass$15(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.loadFromModule(ModuleClassLoader.java:229) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:219) ~[securejarhandler-2.1.10.jar:?]
-	at cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:135) ~[securejarhandler-2.1.10.jar:?]
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:525) ~[?:?]
-	at net.minecraft.world.level.block.FireBlock.bootStrap(FireBlock.java:301) ~[forge-1.20.1-47.1.79.jar:?]
-	at net.minecraft.server.Bootstrap.bootStrap(Bootstrap.java:46) ~[forge-1.20.1-47.1.79.jar:?]
-	at net.minecraft.server.Main.main(Main.java:121) ~[forge-1.20.1-47.1.79.jar:?]
-	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:?]
-	at jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[?:?]
-	at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:?]
-	at java.lang.reflect.Method.invoke(Method.java:569) ~[?:?]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:126) ~[loader-47.1.47.jar:47.1]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:118) ~[loader-47.1.47.jar:47.1]
-	at net.minecraftforge.fml.loading.targets.ForgeServerUserdevLaunchHandler.runService(ForgeServerUserdevLaunchHandler.java:16) ~[loader-47.1.47.jar:47.1]
-	at net.minecraftforge.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:108) ~[loader-47.1.47.jar:47.1]
-	at cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.Launcher.run(Launcher.java:108) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.Launcher.main(Launcher.java:78) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) ~[modlauncher-10.0.9.jar:?]
-	at cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:141) ~[bootstraplauncher-1.1.2.jar:?]
-[17мая2026 01:14:04.372] [main/ERROR] [net.minecraftforge.coremod.transformer.CoreModBaseTransformer/COREMOD]: Error occurred applying transform of coremod coremods/field_to_method.js function itemstack
-java.lang.IllegalStateException: No field with name f_41589_ found
-	at net.minecraftforge.coremod.api.ASMAPI.redirectFieldToMethod(ASMAPI.java:257) ~[coremods-5.0.1.jar:?]
-	at org.openjdk.nashorn.internal.scripts.Script$Recompilation$18$3210A$\^eval\_.initializeCoreMod#transformer-7(<eval>:83) ~[?:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptFunctionData.invoke(ScriptFunctionData.java:648) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptFunction.invoke(ScriptFunction.java:513) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.internal.runtime.ScriptRuntime.apply(ScriptRuntime.java:520) ~[nashorn-core-15.3.jar:?]
-	at org.openjdk.nashorn.api.scripting.ScriptObjectMirror.call(ScriptObjectMirror.java:111) ~[nashorn-core-15.3.jar:?]
-	at net.minecraftforge.coremod.NashornFactory.lambda$getFunction$0(NashornFactory.java:18) ~[coremods-5.0.1.jar:5.0.1+15+master.dc5a2922]
-	at net.minecraftforge.coremod.transformer.CoreModClassTransformer.runCoremod(CoreModClassTransformer.java:18) ~[coremods-5.0.1.jar:?]
+[17мая2026 01:20:03.490] [Render thread/INFO] [net.minecraft.client.gui.screens.ConnectScreen/]: Connecting to localhost, 25565
+[17мая2026 01:20:04.568] [Render thread/INFO] [net.minecraftforge.registries.GameData/REGISTRIES]: Injecting existing registry data into this CLIENT instance
+[17мая2026 01:20:05.773] [Netty Client IO #10/INFO] [net.minecraftforge.network.NetworkHooks/]: Connected to a modded server.
+[17мая2026 01:20:08.203] [Render thread/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 2 advancements
+[17мая2026 01:20:17.191] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev телепортирован к AnquineNFT
+[17мая2026 01:20:22.664] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Установлена ясная погода
+[17мая2026 01:20:26.330] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Установлено время: 1000
+[17мая2026 01:20:43.355] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT получил достижение «[Охотник на монстров]»
+[17мая2026 01:21:00.896] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный аргумент для команды
+[17мая2026 01:21:00.896] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team NATO<--[ЗДЕСЬ]
+[17мая2026 01:21:03.055] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный аргумент для команды
+[17мая2026 01:21:03.055] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team NATO<--[ЗДЕСЬ]
+[17мая2026 01:21:11.293] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный компонент строки чата: Use JsonReader.setLenient(true) to accept malformed JSON at line 1 column 1 path $
+[17мая2026 01:21:11.293] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ... add NATO NATO<--[ЗДЕСЬ]
+[17мая2026 01:21:12.881] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Создана команда [NATO]
+[17мая2026 01:21:18.057] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [NATO]
+[17мая2026 01:21:23.409] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT добавлен в команду [NATO]
+[17мая2026 01:21:35.419] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Ваш режим игры изменён на Режим выживания
+[17мая2026 01:21:45.337] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [Not Secure] [CHAT] [NATO] <AnquineNFT> 1
+[17мая2026 01:21:47.914] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [Not Secure] [CHAT] [NATO] <AnquineNFT> 1213123
+[17мая2026 01:21:58.359] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Создана команда [RUSSIA]
+[17мая2026 01:21:59.242] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Команда с таким названием уже существует
+[17мая2026 01:22:04.363] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [RUSSIA]
+[17мая2026 01:22:17.456] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [Not Secure] [CHAT] -> [RUSSIA] <Dev> 13213
+[17мая2026 01:22:30.711] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Исключено 1 участников из команды [NATO]
+[17мая2026 01:23:13.196] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неизвестная или неполная команда; см. ниже, чтобы найти ошибку
+[17мая2026 01:23:13.196] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] teamstat<--[ЗДЕСЬ]
+[17мая2026 01:23:18.330] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный аргумент для команды
+[17мая2026 01:23:18.330] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team stats<--[ЗДЕСЬ]
+[17мая2026 01:23:27.513] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Задан постфикс команды: 1
+[17мая2026 01:23:55.670] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT добавлен в команду [NATO]
+[17мая2026 01:24:10.971] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [NATO] теперь «ни с кем не могут сталкиваться»
+[17мая2026 01:24:26.859] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Исключено 1 участников из команды [RUSSIA]
+[17мая2026 01:24:34.670] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [NATO]
+[17мая2026 01:24:41.406] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [NATO] теперь «могут толкать только участников своей команды»
+[17мая2026 01:24:46.656] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [NATO] теперь «могут толкать только участников других команд»
+[17мая2026 01:24:55.471] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Цвет команды [NATO] изменён на aqua
+[17мая2026 01:25:09.789] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Команда [1] переименована
+[17мая2026 01:25:17.062] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] У команды [1] отключён огонь по своим
+[17мая2026 01:25:28.472] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Ничего не изменилось. Эта команда уже может видеть невидимых союзников
+[17мая2026 01:25:38.102] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «не показываются участникам других команд»
+[17мая2026 01:25:42.066] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «не показываются участникам этой команды»
+[17мая2026 01:25:43.888] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «не показываются участникам других команд»
+[17мая2026 01:25:53.362] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неизвестная или неполная команда; см. ниже, чтобы найти ошибку
+[17мая2026 01:25:53.362] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team leave<--[ЗДЕСЬ]
+[17мая2026 01:25:57.866] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev исключён из своей команды
+[17мая2026 01:26:01.395] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неизвестная или неполная команда; см. ниже, чтобы найти ошибку
+[17мая2026 01:26:01.395] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team<--[ЗДЕСЬ]
+[17мая2026 01:26:07.868] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «не показываются участникам этой команды»
+[17мая2026 01:26:11.933] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «никому не показываются»
+[17мая2026 01:26:15.229] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «не показываются участникам других команд»
+[17мая2026 01:26:22.171] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [RUSSIA]
+[17мая2026 01:26:39.263] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Цвет команды [RUSSIA] изменён на black
+[17мая2026 01:28:55.744] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неизвестная или неполная команда; см. ниже, чтобы найти ошибку
+[17мая2026 01:28:55.745] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team leave<--[ЗДЕСЬ]
+[17мая2026 01:28:57.918] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev исключён из своей команды
+[17мая2026 01:29:01.883] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [1]
+[17мая2026 01:29:18.264] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный компонент строки чата: Use JsonReader.setLenient(true) to accept malformed JSON at line 1 column 1 path $
+[17мая2026 01:29:18.265] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ...TO prefix NAt<--[ЗДЕСЬ]
+[17мая2026 01:29:23.061] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный компонент строки чата: Use JsonReader.setLenient(true) to accept malformed JSON at line 1 column 1 path $
+[17мая2026 01:29:23.061] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ...TO suffix AASD<--[ЗДЕСЬ]
+[17мая2026 01:29:25.185] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Задан постфикс команды: 123
+[17мая2026 01:29:29.234] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Задан префикс команды: 2313
+[17мая2026 01:29:35.218] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [1] теперь «могут сталкиваться со всеми»
+[17мая2026 01:29:40.961] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [1] теперь «могут толкать только участников своей команды»
+[17мая2026 01:29:51.428] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [1] теперь «могут толкать только участников других команд»
+[17мая2026 01:29:56.255] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [1] теперь «могут толкать только участников своей команды»
+[17мая2026 01:30:00.065] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неизвестная или неполная команда; см. ниже, чтобы найти ошибку
+[17мая2026 01:30:00.065] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ...iendlyFire<--[ЗДЕСЬ]
+[17мая2026 01:30:01.554] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Ничего не изменилось. Огонь по своим уже отключён у этой команды
+[17мая2026 01:30:05.535] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Включён огонь по своим у команды [1]
+[17мая2026 01:30:10.081] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] У команды [1] отключён огонь по своим
+[17мая2026 01:30:20.857] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Команда [12312] переименована
+[17мая2026 01:30:29.715] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Сообщения о смерти участников команды [12312] теперь «не показываются участникам других команд»
+[17мая2026 01:30:32.473] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] 2313Dev123 убит
+[17мая2026 01:30:41.697] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT исключён из своей команды
+[17мая2026 01:30:48.415] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT добавлен в команду [RUSSIA]
+[17мая2026 01:30:51.467] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] 2313Dev123 убит
+[17мая2026 01:31:06.763] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] 2313Dev123 телепортирован к AnquineNFT
+[17мая2026 01:31:32.743] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Ничего не изменилось. Правило столкновения уже имеет указанное значение
+[17мая2026 01:31:40.879] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [12312] теперь «могут толкать только участников других команд»
+[17мая2026 01:32:14.668] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [RUSSIA] теперь «могут толкать только участников других команд»
+[17мая2026 01:32:24.759] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [RUSSIA] теперь «могут толкать только участников своей команды»
+[17мая2026 01:32:33.121] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [12312] теперь «могут сталкиваться со всеми»
+[17мая2026 01:34:32.764] [Render thread/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 30 advancements
+[17мая2026 01:34:49.605] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [12312]
+[17мая2026 01:34:52.332] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [RUSSIA]
+[17мая2026 01:35:03.114] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] У команды [RUSSIA] отключён огонь по своим
+[17мая2026 01:35:09.837] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [12312]
+[17мая2026 01:35:23.865] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Включён огонь по своим у команды [RUSSIA]
+[17мая2026 01:35:30.055] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [RUSSIA]
+[17мая2026 01:35:31.733] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT был убит Dev
+[17мая2026 01:37:24.662] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT покинул игру
+[17мая2026 01:37:27.372] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!
+sTransformer.java:18) ~[coremods-5.0.1.jar:?]
 	at net.minecraftforge.coremod.transformer.CoreModClassTransformer.runCoremod(CoreModClassTransformer.java:10) ~[coremods-5.0.1.jar:?]
 	at net.minecraftforge.coremod.transformer.CoreModBaseTransformer.transform(CoreModBaseTransformer.java:38) ~[coremods-5.0.1.jar:?]
 	at cpw.mods.modlauncher.TransformerHolder.transform(TransformerHolder.java:41) ~[modlauncher-10.0.9.jar:?]
@@ -784,3 +734,77 @@ Caused by: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING
 [17мая2026 01:14:40.924] [Netty Server IO #2/ERROR] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channels [teamsystem:main] rejected their client side version number
 [17мая2026 01:14:40.925] [Netty Server IO #2/ERROR] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Terminating connection with client, mismatched mod list
 [17мая2026 01:14:40.970] [Server thread/INFO] [net.minecraft.server.network.ServerLoginPacketListenerImpl/]: com.mojang.authlib.GameProfile@2cb6e610[id=<null>,name=AnquineNFT,properties={},legacy=false] (/[::1]:53860) lost connection: Connection closed - mismatched mod channel list
+[17мая2026 01:19:34.056] [Server thread/INFO] [net.minecraft.server.network.ServerLoginPacketListenerImpl/]: com.mojang.authlib.GameProfile@4fd4c05a[id=<null>,name=AnquineNFT,properties={},legacy=false] (/[::1]:60029) lost connection: Disconnected
+[17мая2026 01:19:55.311] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: AnquineNFT[/[::1]:50562] logged in with entity id 184 at (5.5, 70.0, 38.5)
+[17мая2026 01:19:55.365] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: AnquineNFT joined the game
+[17мая2026 01:19:55.542] [Server thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Synced team data for player: AnquineNFT
+[17мая2026 01:20:01.172] [Server thread/WARN] [net.minecraft.server.level.ServerPlayerGameMode/]: Mismatch in destroy block pos: BlockPos{x=0, y=0, z=0} BlockPos{x=5, y=70, z=39}
+[17мая2026 01:20:01.175] [Server thread/WARN] [net.minecraft.server.level.ServerPlayerGameMode/]: Mismatch in destroy block pos: BlockPos{x=0, y=0, z=0} BlockPos{x=5, y=70, z=39}
+[17мая2026 01:20:01.708] [Server thread/WARN] [net.minecraft.server.MinecraftServer/]: Can't keep up! Is the server overloaded? Running 2115ms or 42 ticks behind
+[17мая2026 01:20:05.798] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[/[::1]:55746] logged in with entity id 212 at (-3.0588724598053583, 75.90156321536142, 56.290809069535975)
+[17мая2026 01:20:05.851] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
+[17мая2026 01:20:05.926] [Server thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Synced team data for player: Dev
+[17мая2026 01:20:17.171] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Teleported Dev to AnquineNFT]
+[17мая2026 01:20:17.172] [Server thread/WARN] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev moved too quickly! -6.642517439416229,-9.11318538480289,-9.725645437299647
+[17мая2026 01:20:22.664] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set the weather to clear]
+[17мая2026 01:20:26.329] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set the time to 1000]
+[17мая2026 01:20:43.351] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: AnquineNFT has made the advancement [Monster Hunter]
+[17мая2026 01:21:12.875] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Created team [NATO]]
+[17мая2026 01:21:18.056] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [NATO]]
+[17мая2026 01:21:23.406] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added AnquineNFT to team [NATO]]
+[17мая2026 01:21:35.418] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set own game mode to Survival Mode]
+[17мая2026 01:21:58.358] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Created team [RUSSIA]]
+[17мая2026 01:22:04.360] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [RUSSIA]]
+[17мая2026 01:22:30.705] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Removed 1 member(s) from team [NATO]]
+[17мая2026 01:23:55.663] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added AnquineNFT to team [NATO]]
+[17мая2026 01:24:10.970] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Collision rule for team [NATO] is now "Never"]
+[17мая2026 01:24:26.853] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Removed 1 member(s) from team [RUSSIA]]
+[17мая2026 01:24:34.667] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [NATO]]
+[17мая2026 01:24:41.404] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Collision rule for team [NATO] is now "Push own team"]
+[17мая2026 01:24:46.651] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Collision rule for team [NATO] is now "Push other teams"]
+[17мая2026 01:24:55.470] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Updated the color for team [NATO] to aqua]
+[17мая2026 01:25:09.787] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Updated the name of team [1]]
+[17мая2026 01:25:17.056] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Disabled friendly fire for team [1]]
+[17мая2026 01:25:38.093] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Nametag visibility for team [1] is now "Hide for other teams"]
+[17мая2026 01:25:42.063] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Nametag visibility for team [1] is now "Hide for own team"]
+[17мая2026 01:25:43.886] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Nametag visibility for team [1] is now "Hide for other teams"]
+[17мая2026 01:25:57.863] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Removed Dev from any team]
+[17мая2026 01:26:07.867] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Nametag visibility for team [1] is now "Hide for own team"]
+[17мая2026 01:26:11.931] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Nametag visibility for team [1] is now "Never"]
+[17мая2026 01:26:15.225] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Nametag visibility for team [1] is now "Hide for other teams"]
+[17мая2026 01:26:22.168] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [RUSSIA]]
+[17мая2026 01:26:39.255] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Updated the color for team [RUSSIA] to black]
+[17мая2026 01:28:57.918] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Removed Dev from any team]
+[17мая2026 01:29:01.882] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [1]]
+[17мая2026 01:29:35.216] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [1] is now "Always"]
+[17мая2026 01:29:40.960] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [1] is now "Push own team"]
+[17мая2026 01:29:51.422] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [1] is now "Push other teams"]
+[17мая2026 01:29:56.254] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [1] is now "Push own team"]
+[17мая2026 01:30:05.533] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Enabled friendly fire for team [1]]
+[17мая2026 01:30:10.079] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Disabled friendly fire for team [1]]
+[17мая2026 01:30:20.852] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Updated the name of team [12312]]
+[17мая2026 01:30:29.710] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Death message visibility for team [12312] is now "Hide for other teams"]
+[17мая2026 01:30:32.458] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Killed 2313Dev123]
+[17мая2026 01:30:41.692] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Removed AnquineNFT from any team]
+[17мая2026 01:30:48.411] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Added AnquineNFT to team [RUSSIA]]
+[17мая2026 01:30:51.465] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Killed 2313Dev123]
+[17мая2026 01:31:06.762] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Teleported 2313Dev123 to AnquineNFT]
+[17мая2026 01:31:06.763] [Server thread/WARN] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev moved too quickly! 8.800000011920929,-1.0,5.585736645371757
+[17мая2026 01:31:40.878] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [12312] is now "Push other teams"]
+[17мая2026 01:32:14.667] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [RUSSIA] is now "Push other teams"]
+[17мая2026 01:32:24.756] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [RUSSIA] is now "Push own team"]
+[17мая2026 01:32:33.120] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [12312] is now "Always"]
+[17мая2026 01:33:55.901] [Server thread/WARN] [net.minecraft.server.level.ServerPlayerGameMode/]: Mismatch in destroy block pos: BlockPos{x=0, y=0, z=0} BlockPos{x=-1, y=71, z=16}
+[17мая2026 01:34:32.703] [Server thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Player AnquineNFT killed Dev (K/D: 1/0)
+[17мая2026 01:34:49.599] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Added Dev to team [12312]]
+[17мая2026 01:34:52.331] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Added Dev to team [RUSSIA]]
+[17мая2026 01:35:03.109] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Disabled friendly fire for team [RUSSIA]]
+[17мая2026 01:35:09.835] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [12312]]
+[17мая2026 01:35:23.861] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Enabled friendly fire for team [RUSSIA]]
+[17мая2026 01:35:30.049] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Added Dev to team [RUSSIA]]
+[17мая2026 01:35:31.726] [Server thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Player Dev killed AnquineNFT (K/D: 1/3)
+[17мая2026 01:35:31.726] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: AnquineNFT was slain by Dev
+[17мая2026 01:37:24.653] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: AnquineNFT lost connection: Disconnected
+[17мая2026 01:37:24.653] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: AnquineNFT left the game
+[17мая2026 01:37:27.409] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: Disconnected
+[17мая2026 01:37:27.410] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev left the game

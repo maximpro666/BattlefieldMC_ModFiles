@@ -4797,228 +4797,277 @@ Caused by: java.net.ConnectException: Connection refused: getsockopt
 	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.82.Final.jar%23195!/:4.1.82.Final]
 	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.82.Final.jar%23195!/:4.1.82.Final]
 	at java.lang.Thread.run(Thread.java:840) ~[?:?]
-38bf6
-[17мая2026 01:13:55.152] [main/DEBUG] [net.minecraftforge.fml.loading.FMLLoader/CORE]: Found ForgeSPI package specification 5
-[17мая2026 01:13:55.152] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: Loaded service fml
-[17мая2026 01:13:55.154] [main/DEBUG] [cpw.mods.modlauncher.TransformationServicesHandler/MODLAUNCHER]: Configuring option handling for services
-[17мая2026 01:13:55.180] [main/DEBUG] [cpw.mods.modlauncher.TransformationServicesHandler/MODLAUNCHER]: Transformation services initializing
-[17мая2026 01:13:55.182] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: Initializing transformation service mixin
-[17мая2026 01:13:55.209] [main/DEBUG] [mixin/]: MixinService [ModLauncher] was successfully booted in cpw.mods.cl.ModuleClassLoader@1e683a3e
-[17мая2026 01:13:55.246] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.5 Source=union:/C:/Users/maska/.gradle/caches/modules-2/files-2.1/org.spongepowered/mixin/0.8.5/9d1c0c3a304ae6697ecd477218fa61b850bf57fc/mixin-0.8.5.jar%23169!/ Service=ModLauncher Env=SERVER
-[17мая2026 01:13:55.251] [main/DEBUG] [mixin/]: Initialising Mixin Platform Manager
-[17мая2026 01:13:55.252] [main/DEBUG] [mixin/]: Adding mixin platform agents for container ModLauncher Root Container(ModLauncher:4f56a0a2)
-[17мая2026 01:13:55.254] [main/DEBUG] [mixin/]: Instancing new MixinPlatformAgentMinecraftForge for ModLauncher Root Container(ModLauncher:4f56a0a2)
-[17мая2026 01:13:55.254] [main/DEBUG] [mixin/]: MixinPlatformAgentMinecraftForge rejected container ModLauncher Root Container(ModLauncher:4f56a0a2)
-[17мая2026 01:13:55.256] [main/DEBUG] [mixin/]: Instancing new MixinPlatformAgentDefault for ModLauncher Root Container(ModLauncher:4f56a0a2)
-[17мая2026 01:13:55.256] [main/DEBUG] [mixin/]: MixinPlatformAgentDefault accepted container ModLauncher Root Container(ModLauncher:4f56a0a2)
-[17мая2026 01:13:55.260] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: Initialized transformation service mixin
-[17мая2026 01:13:55.261] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: Initializing transformation service fml
-[17мая2026 01:13:55.261] [main/DEBUG] [net.minecraftforge.fml.loading.FMLServiceProvider/CORE]: Setting up basic FML game directories
-[17мая2026 01:13:55.262] [main/DEBUG] [net.minecraftforge.fml.loading.FMLPaths/CORE]: Path GAMEDIR is C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\run
-[17мая2026 01:13:55.262] [main/DEBUG] [net.minecraftforge.fml.loading.FMLPaths/CORE]: Path MODSDIR is C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\run\mods
-[17мая2026 01:13:55.262] [main/DEBUG] [net.minecraftforge.fml.loading.FMLPaths/CORE]: Path CONFIGDIR is C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\run\config
-[17мая2026 01:13:55.264] [main/DEBUG] [net.minecraftforge.fml.loading.FMLPaths/CORE]: Path FMLCONFIG is C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\run\config\fml.toml
-[17мая2026 01:13:55.264] [main/DEBUG] [net.minecraftforge.fml.loading.FMLServiceProvider/CORE]: Loading configuration
-[17мая2026 01:13:55.269] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: Loaded FML config from C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\run\config\fml.toml
-[17мая2026 01:13:55.269] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig earlyWindowControl is true
-[17мая2026 01:13:55.269] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig maxThreads is 16
-[17мая2026 01:13:55.269] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig versionCheck is true
-[17мая2026 01:13:55.270] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig defaultConfigPath is defaultconfigs
-[17мая2026 01:13:55.270] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig disableOptimizedDFU is true
-[17мая2026 01:13:55.270] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig earlyWindowProvider is fmlearlywindow
-[17мая2026 01:13:55.270] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig earlyWindowWidth is 854
-[17мая2026 01:13:55.270] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig earlyWindowHeight is 480
-[17мая2026 01:13:55.272] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig earlyWindowFBScale is 1
-[17мая2026 01:13:55.272] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig earlyWindowMaximized is false
-[17мая2026 01:13:55.272] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig earlyWindowSkipGLVersions is []
-[17мая2026 01:13:55.272] [main/TRACE] [net.minecraftforge.fml.loading.FMLConfig/CORE]: FMLConfig earlyWindowSquir is false
-[17мая2026 01:13:55.273] [main/DEBUG] [net.minecraftforge.fml.loading.FMLServiceProvider/CORE]: Preparing ModFile
-[17мая2026 01:13:55.279] [main/DEBUG] [net.minecraftforge.fml.loading.FMLServiceProvider/CORE]: Preparing launch handler
-[17мая2026 01:13:55.280] [main/DEBUG] [net.minecraftforge.fml.loading.FMLLoader/CORE]: Using forgeserveruserdev as launch service
-[17мая2026 01:13:55.291] [main/DEBUG] [AXFORM/AXFORM]: Set name handler Service NameHandler from mcp to srg
-[17мая2026 01:13:55.310] [main/DEBUG] [net.minecraftforge.fml.loading.FMLLoader/CORE]: Received command line version data  : VersionInfo[forgeVersion=47.1.79, fmlVersion=47.1.47, mcVersion=1.20.1, mcpVersion=20230612.114412]
-[17мая2026 01:13:55.312] [main/DEBUG] [net.minecraftforge.fml.loading.RuntimeDistCleaner/DISTXFORM]: Configuring for Dist DEDICATED_SERVER
-[17мая2026 01:13:55.317] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: Initialized transformation service fml
-[17мая2026 01:13:55.318] [main/DEBUG] [cpw.mods.modlauncher.NameMappingServiceHandler/MODLAUNCHER]: Current naming domain is 'mcp'
-[17мая2026 01:13:55.321] [main/DEBUG] [cpw.mods.modlauncher.NameMappingServiceHandler/MODLAUNCHER]: Identified name mapping providers {srg=srgtomcp:1234}
-[17мая2026 01:13:55.322] [main/DEBUG] [cpw.mods.modlauncher.TransformationServicesHandler/MODLAUNCHER]: Transformation services begin scanning
-[17мая2026 01:13:55.323] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: Beginning scan trigger - transformation service mixin
-[17мая2026 01:13:55.324] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: End scan trigger - transformation service mixin
-[17мая2026 01:13:55.325] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: Beginning scan trigger - transformation service fml
-[17мая2026 01:13:55.325] [main/DEBUG] [net.minecraftforge.fml.loading.FMLServiceProvider/CORE]: Initiating mod scan
-[17мая2026 01:13:55.325] [main/DEBUG] [net.minecraftforge.fml.loading.FMLLoader/SCAN]: Scanning for Mod Locators
-[17мая2026 01:13:55.371] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModListHandler/CORE]: Found mod coordinates from lists: []
-[17мая2026 01:13:55.388] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/CORE]: Found Mod Locators : (mods folder:47.1),(maven libs:47.1),(exploded directory:47.1),(minecraft:47.1),(userdev classpath:47.1),(builtin game layer libraries:47.1)
-[17мая2026 01:13:55.390] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/CORE]: Found Dependency Locators : (JarInJar:47.1)
-[17мая2026 01:13:55.391] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Scanning for mods and other resources to load. We know 6 ways to find mods
-[17мая2026 01:13:55.392] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Trying locator {mods folder locator at C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\run\mods}
-[17мая2026 01:13:55.392] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModsFolderLocator/SCAN]: Scanning mods dir C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\run\mods for mods
-[17мая2026 01:13:55.405] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator {mods folder locator at C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\run\mods} found 0 candidates or errors
-[17мая2026 01:13:55.410] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator {mods folder locator at C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\run\mods} found 0 valid mod files
-[17мая2026 01:13:55.413] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Trying locator {Maven Directory locator for mods []}
-[17мая2026 01:13:55.413] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator {Maven Directory locator for mods []} found 0 candidates or errors
-[17мая2026 01:13:55.413] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator {Maven Directory locator for mods []} found 0 valid mod files
-[17мая2026 01:13:55.413] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Trying locator {ExplodedDir locator}
-[17мая2026 01:13:55.415] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator {ExplodedDir locator} found 0 candidates or errors
-[17мая2026 01:13:55.415] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator {ExplodedDir locator} found 0 valid mod files
-[17мая2026 01:13:55.416] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Trying locator net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.423] [main/DEBUG] [net.minecraftforge.fml.loading.targets.CommonLaunchHandler/CORE]: Got mod coordinates teamsystem%%C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main;teamsystem%%C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\classes\java\main from env
-[17мая2026 01:13:55.427] [main/DEBUG] [net.minecraftforge.fml.loading.targets.CommonLaunchHandler/CORE]: Found supplied mod coordinates [{teamsystem=[C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main, C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\classes\java\main]}]
-[17мая2026 01:13:55.735] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileInfo/LOADING]: Found valid mod file forge-1.20.1-47.1.79.jar with {minecraft} mods - versions {1.20.1}
-[17мая2026 01:13:55.742] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Considering mod file candidate C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-lowcode\47.1.47\b9cb4bc84722dc99e902883f8ea5a952c0415d5c\language-lowcode-47.1.47.jar
-[17мая2026 01:13:55.743] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-lowcode\47.1.47\b9cb4bc84722dc99e902883f8ea5a952c0415d5c\language-lowcode-47.1.47.jar is missing mods.toml file
-[17мая2026 01:13:55.749] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Considering mod file candidate C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\core\47.1.47\915a0dc36418f3c3bf74e56015d1cb79ef5430f0\core-47.1.47.jar
-[17мая2026 01:13:55.749] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\core\47.1.47\915a0dc36418f3c3bf74e56015d1cb79ef5430f0\core-47.1.47.jar is missing mods.toml file
-[17мая2026 01:13:55.755] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Considering mod file candidate C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-minecraft\47.1.47\70c137579710b203f0220b80a90eff3db19b32a2\language-minecraft-47.1.47.jar
-[17мая2026 01:13:55.756] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-minecraft\47.1.47\70c137579710b203f0220b80a90eff3db19b32a2\language-minecraft-47.1.47.jar is missing mods.toml file
-[17мая2026 01:13:55.762] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Considering mod file candidate C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-java\47.1.47\9f5f057de5fea5106fca0df2b0faea12a85bc283\language-java-47.1.47.jar
-[17мая2026 01:13:55.762] [main/WARN] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\language-java\47.1.47\9f5f057de5fea5106fca0df2b0faea12a85bc283\language-java-47.1.47.jar is missing mods.toml file
-[17мая2026 01:13:55.771] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider/SCAN]: Found META-INF/mods.toml mod of type null: [C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main, C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\classes\java\main]
-[17мая2026 01:13:55.772] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Considering mod file candidate C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main
-[17мая2026 01:13:55.784] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileInfo/LOADING]: Found valid mod file main with {teamsystem} mods - versions {1.0.0}
-[17мая2026 01:13:55.789] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider/SCAN]: Found META-INF/mods.toml mod of type null: []
-[17мая2026 01:13:55.790] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Considering mod file candidate /
-[17мая2026 01:13:55.795] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileInfo/LOADING]: Found valid mod file  with {forge} mods - versions {47.1.79}
-[17мая2026 01:13:55.795] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117 found 7 candidates or errors
-[17мая2026 01:13:55.795] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117 found 7 valid mod files
-[17мая2026 01:13:55.796] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-lowcode-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.796] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "core-47.1.47.jar" of type LIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.797] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-minecraft-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.798] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "language-java-47.1.47.jar" of type LANGPROVIDER with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.798] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "forge-1.20.1-47.1.79.jar" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.799] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "main" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.803] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "" of type MOD with provider net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator@3122b117
-[17мая2026 01:13:55.805] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Trying locator net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@a50ae65
-[17мая2026 01:13:55.839] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@a50ae65 found 1 candidates or errors
-[17мая2026 01:13:55.839] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@a50ae65 found 1 invalid mod files
-[17мая2026 01:13:55.841] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator net.minecraftforge.fml.loading.moddiscovery.ClasspathLocator@a50ae65 found 0 valid mod files
-[17мая2026 01:13:55.842] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Trying locator net.minecraftforge.fml.loading.moddiscovery.BuiltinGameLibraryLocator@6ef81f31
-[17мая2026 01:13:55.850] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider/SCAN]: Found META-INF/MANIFEST.MF mod of type GAMELIBRARY: [C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\events\47.1.47\d6bf266eabb0c7e353d3a2e47a47e6ba6392ab96\events-47.1.47.jar]
-[17мая2026 01:13:55.852] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator net.minecraftforge.fml.loading.moddiscovery.BuiltinGameLibraryLocator@6ef81f31 found 1 candidates or errors
-[17мая2026 01:13:55.852] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Locator net.minecraftforge.fml.loading.moddiscovery.BuiltinGameLibraryLocator@6ef81f31 found 1 valid mod files
-[17мая2026 01:13:55.852] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Found mod file "events-47.1.47.jar" of type GAMELIBRARY with provider net.minecraftforge.fml.loading.moddiscovery.BuiltinGameLibraryLocator@6ef81f31
-[17мая2026 01:13:55.865] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Successfully Loaded 8 mods. Attempting to load dependencies...
-[17мая2026 01:13:55.866] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModDiscoverer/SCAN]: Trying locator net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator@783efb48
-[17мая2026 01:13:55.873] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileDependencyLocator/]: Failed to load resource META-INF\jarjar\metadata.json from main, it does not contain dependency information.
-[17мая2026 01:13:55.874] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileDependencyLocator/]: Failed to load resource META-INF\jarjar\metadata.json from forge-1.20.1-47.1.79.jar, it does not contain dependency information.
-[17мая2026 01:13:55.875] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileDependencyLocator/]: Failed to load resource META-INF\jarjar\metadata.json from , it does not contain dependency information.
-[17мая2026 01:13:55.875] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileDependencyLocator/]: Failed to load resource META-INF\jarjar\metadata.json from events-47.1.47.jar, it does not contain dependency information.
-[17мая2026 01:13:55.875] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileDependencyLocator/]: Failed to load resource META-INF\jarjar\metadata.json from language-lowcode-47.1.47.jar, it does not contain dependency information.
-[17мая2026 01:13:55.875] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileDependencyLocator/]: Failed to load resource META-INF\jarjar\metadata.json from core-47.1.47.jar, it does not contain dependency information.
-[17мая2026 01:13:55.875] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileDependencyLocator/]: Failed to load resource META-INF\jarjar\metadata.json from language-minecraft-47.1.47.jar, it does not contain dependency information.
-[17мая2026 01:13:55.875] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileDependencyLocator/]: Failed to load resource META-INF\jarjar\metadata.json from language-java-47.1.47.jar, it does not contain dependency information.
-[17мая2026 01:13:55.918] [main/INFO] [net.minecraftforge.fml.loading.moddiscovery.JarInJarDependencyLocator/]: No dependencies to load found. Skipping!
-[17мая2026 01:13:55.921] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileInfo/LOADING]: Found valid mod file forge-1.20.1-47.1.79.jar with {minecraft} mods - versions {1.20.1}
-[17мая2026 01:13:55.924] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFile/LOADING]: Loading mod file C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar with languages [LanguageSpec[languageName=minecraft, acceptedVersions=1]]
-[17мая2026 01:13:55.925] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Considering mod file candidate C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main
-[17мая2026 01:13:55.928] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileInfo/LOADING]: Found valid mod file main with {teamsystem} mods - versions {1.0.0}
-[17мая2026 01:13:55.928] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFile/LOADING]: Loading mod file C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main with languages [LanguageSpec[languageName=javafml, acceptedVersions=[47,)]]
-[17мая2026 01:13:55.929] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Considering mod file candidate /
-[17мая2026 01:13:55.930] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileInfo/LOADING]: Found valid mod file  with {forge} mods - versions {47.1.79}
-[17мая2026 01:13:55.930] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFile/LOADING]: Loading mod file / with languages [LanguageSpec[languageName=javafml, acceptedVersions=[24,]]]
-[17мая2026 01:13:55.971] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Found coremod field_to_method with Javascript path coremods/field_to_method.js
-[17мая2026 01:13:55.973] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Found coremod field_to_instanceof with Javascript path coremods/field_to_instanceof.js
-[17мая2026 01:13:55.973] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Found coremod add_bouncer_method with Javascript path coremods/add_bouncer_method.js
-[17мая2026 01:13:55.973] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFileParser/LOADING]: Found coremod method_redirector with Javascript path coremods/method_redirector.js
-[17мая2026 01:13:55.973] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFile/LOADING]: Found coremod coremods/field_to_method.js
-[17мая2026 01:13:55.973] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFile/LOADING]: Found coremod coremods/field_to_instanceof.js
-[17мая2026 01:13:55.974] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFile/LOADING]: Found coremod coremods/add_bouncer_method.js
-[17мая2026 01:13:55.974] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFile/LOADING]: Found coremod coremods/method_redirector.js
-[17мая2026 01:13:55.974] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModFile/LOADING]: Loading mod file C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.neoforged.fancymodloader\events\47.1.47\d6bf266eabb0c7e353d3a2e47a47e6ba6392ab96\events-47.1.47.jar with languages []
-[17мая2026 01:13:55.975] [main/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.ModValidator/SCAN]: Found 4 mod files with 3 mods
-[17мая2026 01:13:55.977] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: End scan trigger - transformation service fml
-[17мая2026 01:13:55.992] [main/DEBUG] [net.minecraftforge.fml.loading.LanguageLoadingProvider/CORE]: Found 3 language providers
-[17мая2026 01:13:55.994] [main/DEBUG] [net.minecraftforge.fml.loading.LanguageLoadingProvider/CORE]: Found language provider lowcodefml, version 47.1
-[17мая2026 01:13:55.997] [main/DEBUG] [net.minecraftforge.fml.loading.LanguageLoadingProvider/CORE]: Found language provider minecraft, version 47.1
-[17мая2026 01:13:55.997] [main/DEBUG] [net.minecraftforge.fml.loading.LanguageLoadingProvider/CORE]: Found language provider javafml, version 47.1
-[17мая2026 01:13:56.003] [main/DEBUG] [net.minecraftforge.fml.loading.ModSorter/]: Configured system mods: [minecraft, forge]
-[17мая2026 01:13:56.003] [main/DEBUG] [net.minecraftforge.fml.loading.ModSorter/]: Found system mod: minecraft
-[17мая2026 01:13:56.004] [main/DEBUG] [net.minecraftforge.fml.loading.ModSorter/]: Found system mod: forge
-[17мая2026 01:13:56.007] [main/DEBUG] [net.minecraftforge.fml.loading.ModSorter/LOADING]: Found 2 mod requirements (2 mandatory, 0 optional)
-[17мая2026 01:13:56.007] [main/DEBUG] [net.minecraftforge.fml.loading.ModSorter/LOADING]: Found 0 mod requirements missing (0 mandatory, 0 optional)
-[17мая2026 01:13:56.565] [main/DEBUG] [net.minecraftforge.fml.loading.FMLLoader/SCAN]: Adding Access Transformer in C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar
-[17мая2026 01:13:56.565] [main/DEBUG] [AXFORM/AXFORM]: Loading access transformer forge-1.20.1-47.1.79.jar from path META-INF/accesstransformer.cfg
-[17мая2026 01:13:56.683] [main/DEBUG] [net.minecraftforge.fml.loading.MCPNamingService/CORE]: Loaded 0 method mappings from methods.csv
-[17мая2026 01:13:56.690] [main/DEBUG] [net.minecraftforge.fml.loading.MCPNamingService/CORE]: Loaded 0 field mappings from fields.csv
-[17мая2026 01:13:56.721] [main/DEBUG] [AXFORM/AXFORM]: Loaded access transformer forge-1.20.1-47.1.79.jar from path META-INF/accesstransformer.cfg
-[17мая2026 01:13:56.722] [main/DEBUG] [net.minecraftforge.fml.loading.FMLLoader/SCAN]: Adding Access Transformer in /
-[17мая2026 01:13:56.722] [main/DEBUG] [AXFORM/AXFORM]: Loading access transformer  from path META-INF/accesstransformer.cfg
-[17мая2026 01:13:56.760] [main/DEBUG] [AXFORM/AXFORM]: Loaded access transformer  from path META-INF/accesstransformer.cfg
-[17мая2026 01:13:56.780] [main/DEBUG] [cpw.mods.modlauncher.TransformationServicesHandler/MODLAUNCHER]: Transformation services loading transformers
-[17мая2026 01:13:56.780] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator/SCAN]: Scan started: Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main
-[17мая2026 01:13:56.781] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: Initializing transformers for transformation service mixin
-[17мая2026 01:13:56.782] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: Initialized transformers for transformation service mixin
-[17мая2026 01:13:56.782] [main/DEBUG] [cpw.mods.modlauncher.TransformationServiceDecorator/MODLAUNCHER]: Initializing transformers for transformation service fml
-[17мая2026 01:13:56.782] [main/DEBUG] [net.minecraftforge.fml.loading.FMLServiceProvider/CORE]: Loading coremod transformers
-[17мая2026 01:13:56.784] [main/DEBUG] [net.minecraftforge.coremod.CoreModEngine/COREMOD]: Loading CoreMod from coremods/field_to_method.js
-[17мая2026 01:13:56.801] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main path com/yourmod/teamsystem/client/ClientTeamData.class
-[17мая2026 01:13:56.828] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main path com/yourmod/teamsystem/commands/TeamCommand.class
-[17мая2026 01:13:56.836] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main path com/yourmod/teamsystem/core/PlayerCombatData.class
-[17мая2026 01:13:56.837] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main path com/yourmod/teamsystem/core/Team.class
-[17мая2026 01:13:56.840] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main path com/yourmod/teamsystem/core/TeamManager.class
-[17мая2026 01:13:56.843] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main path com/yourmod/teamsystem/events/CombatEventHandler.class
-[17мая2026 01:13:56.855] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main path com/yourmod/teamsystem/events/PlayerEventHandler.class
-[17мая2026 01:13:56.858] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main path com/yourmod/teamsystem/network/CombatDataSyncPacket.class
-[17мая2026 01:13:56.859] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main path com/yourmod/teamsystem/network/PacketHandler.class
-[17мая2026 01:13:56.861] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main path com/yourmod/teamsystem/network/TeamSyncPacket.class
-[17мая2026 01:13:56.863] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main path com/yourmod/teamsystem/TeamSystem.class
-[17мая2026 01:13:56.866] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator/SCAN]: Scan finished: Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main
-[17мая2026 01:13:56.868] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\resources\main with language loader javafml
-[17мая2026 01:13:56.879] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.javafmlmod.FMLJavaModLanguageProvider/SCAN]: Found @Mod class com.yourmod.teamsystem.TeamSystem with id teamsystem
-[17мая2026 01:13:56.879] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.MinecraftLocator/SCAN]: Scan started: Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar
-[17мая2026 01:13:57.104] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/WorldVersion.class
-[17мая2026 01:13:57.105] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/WorldlyContainerHolder.class
-[17мая2026 01:13:57.105] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/WorldlyContainer.class
-[17мая2026 01:13:57.108] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/WorldGenTickAccess.class
-[17мая2026 01:13:57.109] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/TickPriority.class
-[17мая2026 01:13:57.110] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/TickContainerAccess.class
-[17мая2026 01:13:57.111] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/TickAccess.class
-[17мая2026 01:13:57.111] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/SerializableTickContainer.class
-[17мая2026 01:13:57.112] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/ScheduledTick.class
-[17мая2026 01:13:57.114] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/ScheduledTick$1.class
-[17мая2026 01:13:57.116] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/SavedTick.class
-[17мая2026 01:13:57.117] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/SavedTick$1.class
-[17мая2026 01:13:57.118] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/ProtoChunkTicks.class
-[17мая2026 01:13:57.121] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/package-info.class
-[17мая2026 01:13:57.121] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/LevelTicks.class
-[17мая2026 01:13:57.124] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/LevelTicks$PosAndContainerConsumer.class
-[17мая2026 01:13:57.126] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/LevelTickAccess.class
-[17мая2026 01:13:57.127] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/LevelChunkTicks.class
-[17мая2026 01:13:57.128] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/ContainerSingleItem.class
-[17мая2026 01:13:57.129] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/BlackholeTickAccess.class
-[17мая2026 01:13:57.130] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/BlackholeTickAccess$2.class
-[17мая2026 01:13:57.132] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/ticks/BlackholeTickAccess$1.class
-[17мая2026 01:13:57.133] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/SimpleMenuProvider.class
-[17мая2026 01:13:57.134] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/SimpleContainer.class
-[17мая2026 01:13:57.135] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/Team.class
-[17мая2026 01:13:57.136] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/Team$Visibility.class
-[17мая2026 01:13:57.138] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/Team$CollisionRule.class
-[17мая2026 01:13:57.139] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/ScoreboardSaveData.class
-[17мая2026 01:13:57.140] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/Scoreboard.class
-[17мая2026 01:13:57.144] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/Score.class
-[17мая2026 01:13:57.145] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/PlayerTeam.class
-[17мая2026 01:13:57.146] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/package-info.class
-[17мая2026 01:13:57.147] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/Objective.class
-[17мая2026 01:13:57.148] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/criteria/package-info.class
-[17мая2026 01:13:57.149] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/criteria/ObjectiveCriteria.class
-[17мая2026 01:13:57.150] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/scores/criteria/ObjectiveCriteria$RenderType.class
-[17мая2026 01:13:57.151] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/RandomSequences.class
-[17мая2026 01:13:57.151] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/RandomSequences$1.class
-[17мая2026 01:13:57.152] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/RandomSequence.class
-[17мая2026 01:13:57.154] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/Vec3.class
-[17мая2026 01:13:57.155] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/Vec2.class
-[17мая2026 01:13:57.156] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/VoxelShape.class
-[17мая2026 01:13:57.157] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/SubShape.class
-[17мая2026 01:13:57.158] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/SliceShape.class
-[17мая2026 01:13:57.159] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/Shapes.class
-[17мая2026 01:13:57.161] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/Shapes$DoubleLineConsumer.class
-[17мая2026 01:13:57.162] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/package-info.class
-[17мая2026 01:13:57.162] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/OffsetDoubleList.class
-[17мая2026 01:13:57.163] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/NonOverlappingMerger.class
-[17мая2026 01:13:57.163] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/IndirectMerger.class
-[17мая2026 01:13:57.164] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/IndexMerger.class
-[17мая2026 01:13:57.165] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/IndexMerger$IndexConsumer.class
-[17мая2026 01:13:57.165] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/IdenticalMerger.class
+[17мая2026 01:15:35.083] [Netty Client IO #7/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Starting new vanilla impl connection.
+[17мая2026 01:15:35.084] [Netty Client IO #8/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Starting new vanilla impl connection.
+[17мая2026 01:15:35.092] [Netty Client IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Starting new vanilla impl connection.
+[17мая2026 01:15:35.240] [Netty Client IO #9/DEBUG] [io.netty.util.Recycler/]: -Dio.netty.recycler.maxCapacityPerThread: 4096
+[17мая2026 01:15:35.240] [Netty Client IO #9/DEBUG] [io.netty.util.Recycler/]: -Dio.netty.recycler.ratio: 8
+[17мая2026 01:15:35.240] [Netty Client IO #9/DEBUG] [io.netty.util.Recycler/]: -Dio.netty.recycler.chunkSize: 32
+[17мая2026 01:15:35.240] [Netty Client IO #9/DEBUG] [io.netty.util.Recycler/]: -Dio.netty.recycler.blocking: false
+[17мая2026 01:15:35.248] [Netty Client IO #9/DEBUG] [io.netty.buffer.AbstractByteBuf/]: -Dio.netty.buffer.checkAccessible: true
+[17мая2026 01:15:35.248] [Netty Client IO #9/DEBUG] [io.netty.buffer.AbstractByteBuf/]: -Dio.netty.buffer.checkBounds: true
+[17мая2026 01:15:35.249] [Netty Client IO #9/DEBUG] [io.netty.util.ResourceLeakDetectorFactory/]: Loaded default ResourceLeakDetector: io.netty.util.ResourceLeakDetector@4264e4ba
+[17мая2026 01:15:35.369] [Netty Client IO #7/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'teamsystem:main' : Version test of 'ChannelData[res=teamsystem:main, version=1, required=false]' during listping : ACCEPTED
+[17мая2026 01:15:35.369] [Netty Client IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'teamsystem:main' : Version test of 'ChannelData[res=teamsystem:main, version=1, required=false]' during listping : ACCEPTED
+[17мая2026 01:15:35.369] [Netty Client IO #8/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'teamsystem:main' : Version test of 'ChannelData[res=teamsystem:main, version=1, required=false]' during listping : ACCEPTED
+[17мая2026 01:15:35.369] [Netty Client IO #7/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:tier_sorting' : Version test of 'ChannelData[res=forge:tier_sorting, version=1.0, required=false]' during listping : ACCEPTED
+[17мая2026 01:15:35.369] [Netty Client IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:tier_sorting' : Version test of 'ChannelData[res=forge:tier_sorting, version=1.0, required=false]' during listping : ACCEPTED
+[17мая2026 01:15:35.369] [Netty Client IO #7/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:unregister' : Version test of 'ChannelData[res=minecraft:unregister, version=FML3, required=true]' during listping : ACCEPTED
+[17мая2026 01:15:35.369] [Netty Client IO #8/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:tier_sorting' : Version test of 'ChannelData[res=forge:tier_sorting, version=1.0, required=false]' during listping : ACCEPTED
+[17мая2026 01:15:35.369] [Netty Client IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:unregister' : Version test of 'ChannelData[res=minecraft:unregister, version=FML3, required=true]' during listping : ACCEPTED
+[17мая2026 01:15:35.369] [Netty Client IO #8/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:unregister' : Version test of 'ChannelData[res=minecraft:unregister, version=FML3, required=true]' during listping : ACCEPTED
+[17мая2026 01:15:35.369] [Netty Client IO #7/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:register' : Version test of 'ChannelData[res=minecraft:register, version=FML3, required=true]' during listping : ACCEPTED
+[17мая2026 01:15:35.370] [Netty Client IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:register' : Version test of 'ChannelData[res=minecraft:register, version=FML3, required=true]' during listping : ACCEPTED
+[17мая2026 01:15:35.370] [Netty Client IO #8/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:register' : Version test of 'ChannelData[res=minecraft:register, version=FML3, required=true]' during listping : ACCEPTED
+[17мая2026 01:15:35.370] [Netty Client IO #7/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:split' : Version test of 'ChannelData[res=forge:split, version=1.1, required=true]' during listping : ACCEPTED
+[17мая2026 01:15:35.370] [Netty Client IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:split' : Version test of 'ChannelData[res=forge:split, version=1.1, required=true]' during listping : ACCEPTED
+[17мая2026 01:15:35.370] [Netty Client IO #8/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:split' : Version test of 'ChannelData[res=forge:split, version=1.1, required=true]' during listping : ACCEPTED
+[17мая2026 01:15:35.371] [Netty Client IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Accepting channel list during listping
+[17мая2026 01:15:35.371] [Netty Client IO #7/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Accepting channel list during listping
+[17мая2026 01:15:35.371] [Netty Client IO #8/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Accepting channel list during listping
+[17мая2026 01:15:35.373] [Netty Client IO #9/DEBUG] [net.minecraftforge.client.ForgeHooksClient/CLIENTHOOKS]: Received FML ping data from server at localhost: FMLNETVER=3, mod list is compatible : true, channel list is compatible: true, extra server mods: {}
+[17мая2026 01:15:35.373] [Netty Client IO #8/DEBUG] [net.minecraftforge.client.ForgeHooksClient/CLIENTHOOKS]: Received FML ping data from server at 127.0.0.1: FMLNETVER=3, mod list is compatible : true, channel list is compatible: true, extra server mods: {}
+[17мая2026 01:15:35.373] [Netty Client IO #7/DEBUG] [net.minecraftforge.client.ForgeHooksClient/CLIENTHOOKS]: Received FML ping data from server at LOCALHOST: FMLNETVER=3, mod list is compatible : true, channel list is compatible: true, extra server mods: {}
+[17мая2026 01:20:03.490] [Render thread/INFO] [net.minecraft.client.gui.screens.ConnectScreen/]: Connecting to localhost, 25565
+[17мая2026 01:20:03.514] [Server Connector #2/DEBUG] [net.minecraftforge.network.DualStackUtils/]: Detected IPv6 address: "0:0:0:0:0:0:0:1"
+[17мая2026 01:20:03.518] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Starting new vanilla impl connection.
+[17мая2026 01:20:03.572] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 0
+[17мая2026 01:20:03.620] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 1
+[17мая2026 01:20:03.621] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Logging into server with mod list [teamsystem, minecraft, forge]
+[17мая2026 01:20:03.624] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'teamsystem:main' : Version test of '1' from server : ACCEPTED
+[17мая2026 01:20:03.624] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'fml:loginwrapper' : Version test of 'FML3' from server : ACCEPTED
+[17мая2026 01:20:03.624] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:tier_sorting' : Version test of '1.0' from server : ACCEPTED
+[17мая2026 01:20:03.624] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'fml:handshake' : Version test of 'FML3' from server : ACCEPTED
+[17мая2026 01:20:03.624] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:unregister' : Version test of 'FML3' from server : ACCEPTED
+[17мая2026 01:20:03.624] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'fml:play' : Version test of 'FML3' from server : ACCEPTED
+[17мая2026 01:20:03.624] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:register' : Version test of 'FML3' from server : ACCEPTED
+[17мая2026 01:20:03.624] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:split' : Version test of '1.1' from server : ACCEPTED
+[17мая2026 01:20:03.624] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Accepting channel list from server
+[17мая2026 01:20:03.627] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 1
+[17мая2026 01:20:03.629] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Accepted server connection
+[17мая2026 01:20:03.631] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/REGISTRIES]: Expecting 19 registries: [minecraft:command_argument_type, minecraft:recipe_serializer, minecraft:sound_event, minecraft:particle_type, minecraft:villager_profession, minecraft:item, minecraft:potion, minecraft:painting_variant, forge:fluid_type, minecraft:block_entity_type, forge:display_contexts, minecraft:block, forge:entity_data_serializers, minecraft:mob_effect, minecraft:stat_type, minecraft:menu, minecraft:enchantment, minecraft:fluid, minecraft:entity_type]
+[17мая2026 01:20:03.732] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 2
+[17мая2026 01:20:03.736] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:command_argument_type
+[17мая2026 01:20:03.737] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 2
+[17мая2026 01:20:03.758] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 3
+[17мая2026 01:20:03.758] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:recipe_serializer
+[17мая2026 01:20:03.759] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 3
+[17мая2026 01:20:03.784] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 4
+[17мая2026 01:20:03.790] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:sound_event
+[17мая2026 01:20:03.791] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 4
+[17мая2026 01:20:03.813] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 5
+[17мая2026 01:20:03.813] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:particle_type
+[17мая2026 01:20:03.814] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 5
+[17мая2026 01:20:03.867] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 6
+[17мая2026 01:20:03.867] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:villager_profession
+[17мая2026 01:20:03.867] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 6
+[17мая2026 01:20:03.943] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 7
+[17мая2026 01:20:03.946] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:item
+[17мая2026 01:20:03.946] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 7
+[17мая2026 01:20:03.959] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 8
+[17мая2026 01:20:03.960] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:potion
+[17мая2026 01:20:03.960] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 8
+[17мая2026 01:20:04.024] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 9
+[17мая2026 01:20:04.024] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:painting_variant
+[17мая2026 01:20:04.024] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 9
+[17мая2026 01:20:04.066] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 10
+[17мая2026 01:20:04.068] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for forge:fluid_type
+[17мая2026 01:20:04.068] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 10
+[17мая2026 01:20:04.137] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 11
+[17мая2026 01:20:04.138] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:block_entity_type
+[17мая2026 01:20:04.138] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 11
+[17мая2026 01:20:04.207] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 12
+[17мая2026 01:20:04.207] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for forge:display_contexts
+[17мая2026 01:20:04.207] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 12
+[17мая2026 01:20:04.222] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 13
+[17мая2026 01:20:04.224] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:block
+[17мая2026 01:20:04.224] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 13
+[17мая2026 01:20:04.265] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 14
+[17мая2026 01:20:04.265] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for forge:entity_data_serializers
+[17мая2026 01:20:04.265] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 14
+[17мая2026 01:20:04.397] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 15
+[17мая2026 01:20:04.398] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:mob_effect
+[17мая2026 01:20:04.398] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 15
+[17мая2026 01:20:04.406] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 16
+[17мая2026 01:20:04.408] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:stat_type
+[17мая2026 01:20:04.408] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 16
+[17мая2026 01:20:04.435] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 17
+[17мая2026 01:20:04.435] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:menu
+[17мая2026 01:20:04.435] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 17
+[17мая2026 01:20:04.470] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 18
+[17мая2026 01:20:04.470] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:enchantment
+[17мая2026 01:20:04.470] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 18
+[17мая2026 01:20:04.525] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 19
+[17мая2026 01:20:04.526] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:fluid
+[17мая2026 01:20:04.526] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 19
+[17мая2026 01:20:04.558] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 20
+[17мая2026 01:20:04.558] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received registry packet for minecraft:entity_type
+[17мая2026 01:20:04.560] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Waiting for registries to load.
+[17мая2026 01:20:04.568] [Render thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Injecting registry snapshot from server.
+[17мая2026 01:20:04.568] [Render thread/INFO] [net.minecraftforge.registries.GameData/REGISTRIES]: Injecting existing registry data into this CLIENT instance
+[17мая2026 01:20:04.671] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:block Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.681] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:fluid Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.681] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:item Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.690] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:mob_effect Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.690] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:sound_event Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.701] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:potion Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.701] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:enchantment Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.702] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:entity_type Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.702] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:block_entity_type Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.703] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:particle_type Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.703] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:menu Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.704] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:painting_variant Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.704] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:recipe_serializer Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.704] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:stat_type Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.704] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:command_argument_type Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.705] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:villager_profession Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.705] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry forge:entity_data_serializers Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.706] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry forge:fluid_type Sync: ACTIVE -> STAGING
+[17мая2026 01:20:04.706] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry forge:display_contexts Sync: ACTIVE -> STAGING
+[17мая2026 01:20:05.659] [Render thread/DEBUG] [net.minecraftforge.registries.ObjectHolderRegistry/REGISTRIES]: Applying holder lookups
+[17мая2026 01:20:05.671] [Render thread/DEBUG] [net.minecraftforge.registries.ObjectHolderRegistry/REGISTRIES]: Holder lookups applied
+[17мая2026 01:20:05.671] [Render thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Snapshot injected.
+[17мая2026 01:20:05.673] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Registry load complete, continuing handshake.
+[17мая2026 01:20:05.673] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 20
+[17мая2026 01:20:05.675] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 21
+[17мая2026 01:20:05.676] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received config sync from server
+[17мая2026 01:20:05.680] [Netty Client IO #10/DEBUG] [net.minecraftforge.common.ForgeConfig/FORGEMOD]: NeoForge config just got changed on the file system!
+[17мая2026 01:20:05.680] [Netty Client IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 21
+[17мая2026 01:20:05.773] [Netty Client IO #10/INFO] [net.minecraftforge.network.NetworkHooks/]: Connected to a modded server.
+[17мая2026 01:20:06.686] [Render thread/DEBUG] [net.minecraftforge.network.filters.NetworkFilters/]: Injected net.minecraftforge.network.filters.ForgeConnectionNetworkFilter@391e2a into net.minecraft.network.Connection@641cea11
+[17мая2026 01:20:08.203] [Render thread/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 2 advancements
+[17мая2026 01:20:17.191] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev телепортирован к AnquineNFT
+[17мая2026 01:20:22.664] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Установлена ясная погода
+[17мая2026 01:20:26.330] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Установлено время: 1000
+[17мая2026 01:20:43.355] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT получил достижение «[Охотник на монстров]»
+[17мая2026 01:21:00.896] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный аргумент для команды
+[17мая2026 01:21:00.896] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team NATO<--[ЗДЕСЬ]
+[17мая2026 01:21:03.055] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный аргумент для команды
+[17мая2026 01:21:03.055] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team NATO<--[ЗДЕСЬ]
+[17мая2026 01:21:11.293] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный компонент строки чата: Use JsonReader.setLenient(true) to accept malformed JSON at line 1 column 1 path $
+[17мая2026 01:21:11.293] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ... add NATO NATO<--[ЗДЕСЬ]
+[17мая2026 01:21:12.881] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Создана команда [NATO]
+[17мая2026 01:21:18.057] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [NATO]
+[17мая2026 01:21:23.409] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT добавлен в команду [NATO]
+[17мая2026 01:21:35.419] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Ваш режим игры изменён на Режим выживания
+[17мая2026 01:21:45.337] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [Not Secure] [CHAT] [NATO] <AnquineNFT> 1
+[17мая2026 01:21:47.914] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [Not Secure] [CHAT] [NATO] <AnquineNFT> 1213123
+[17мая2026 01:21:58.359] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Создана команда [RUSSIA]
+[17мая2026 01:21:59.242] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Команда с таким названием уже существует
+[17мая2026 01:22:04.363] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [RUSSIA]
+[17мая2026 01:22:17.456] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [Not Secure] [CHAT] -> [RUSSIA] <Dev> 13213
+[17мая2026 01:22:30.711] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Исключено 1 участников из команды [NATO]
+[17мая2026 01:23:13.196] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неизвестная или неполная команда; см. ниже, чтобы найти ошибку
+[17мая2026 01:23:13.196] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] teamstat<--[ЗДЕСЬ]
+[17мая2026 01:23:18.330] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный аргумент для команды
+[17мая2026 01:23:18.330] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team stats<--[ЗДЕСЬ]
+[17мая2026 01:23:27.513] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Задан постфикс команды: 1
+[17мая2026 01:23:55.670] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT добавлен в команду [NATO]
+[17мая2026 01:24:10.971] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [NATO] теперь «ни с кем не могут сталкиваться»
+[17мая2026 01:24:26.859] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Исключено 1 участников из команды [RUSSIA]
+[17мая2026 01:24:34.670] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [NATO]
+[17мая2026 01:24:41.406] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [NATO] теперь «могут толкать только участников своей команды»
+[17мая2026 01:24:46.656] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [NATO] теперь «могут толкать только участников других команд»
+[17мая2026 01:24:55.471] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Цвет команды [NATO] изменён на aqua
+[17мая2026 01:25:09.789] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Команда [1] переименована
+[17мая2026 01:25:17.062] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] У команды [1] отключён огонь по своим
+[17мая2026 01:25:28.472] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Ничего не изменилось. Эта команда уже может видеть невидимых союзников
+[17мая2026 01:25:38.102] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «не показываются участникам других команд»
+[17мая2026 01:25:42.066] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «не показываются участникам этой команды»
+[17мая2026 01:25:43.888] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «не показываются участникам других команд»
+[17мая2026 01:25:53.362] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неизвестная или неполная команда; см. ниже, чтобы найти ошибку
+[17мая2026 01:25:53.362] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team leave<--[ЗДЕСЬ]
+[17мая2026 01:25:57.866] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev исключён из своей команды
+[17мая2026 01:26:01.395] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неизвестная или неполная команда; см. ниже, чтобы найти ошибку
+[17мая2026 01:26:01.395] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team<--[ЗДЕСЬ]
+[17мая2026 01:26:07.868] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «не показываются участникам этой команды»
+[17мая2026 01:26:11.933] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «никому не показываются»
+[17мая2026 01:26:15.229] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Имена участников команды [1] теперь «не показываются участникам других команд»
+[17мая2026 01:26:22.171] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [RUSSIA]
+[17мая2026 01:26:39.263] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Цвет команды [RUSSIA] изменён на black
+[17мая2026 01:28:55.744] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неизвестная или неполная команда; см. ниже, чтобы найти ошибку
+[17мая2026 01:28:55.745] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] team leave<--[ЗДЕСЬ]
+[17мая2026 01:28:57.918] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev исключён из своей команды
+[17мая2026 01:29:01.883] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [1]
+[17мая2026 01:29:18.264] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный компонент строки чата: Use JsonReader.setLenient(true) to accept malformed JSON at line 1 column 1 path $
+[17мая2026 01:29:18.265] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ...TO prefix NAt<--[ЗДЕСЬ]
+[17мая2026 01:29:23.061] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неверный компонент строки чата: Use JsonReader.setLenient(true) to accept malformed JSON at line 1 column 1 path $
+[17мая2026 01:29:23.061] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ...TO suffix AASD<--[ЗДЕСЬ]
+[17мая2026 01:29:25.185] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Задан постфикс команды: 123
+[17мая2026 01:29:29.234] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Задан префикс команды: 2313
+[17мая2026 01:29:35.218] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [1] теперь «могут сталкиваться со всеми»
+[17мая2026 01:29:40.961] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [1] теперь «могут толкать только участников своей команды»
+[17мая2026 01:29:51.428] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [1] теперь «могут толкать только участников других команд»
+[17мая2026 01:29:56.255] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [1] теперь «могут толкать только участников своей команды»
+[17мая2026 01:30:00.065] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Неизвестная или неполная команда; см. ниже, чтобы найти ошибку
+[17мая2026 01:30:00.065] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] ...iendlyFire<--[ЗДЕСЬ]
+[17мая2026 01:30:01.554] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Ничего не изменилось. Огонь по своим уже отключён у этой команды
+[17мая2026 01:30:05.535] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Включён огонь по своим у команды [1]
+[17мая2026 01:30:10.081] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] У команды [1] отключён огонь по своим
+[17мая2026 01:30:20.857] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Команда [12312] переименована
+[17мая2026 01:30:29.715] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Сообщения о смерти участников команды [12312] теперь «не показываются участникам других команд»
+[17мая2026 01:30:32.473] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] 2313Dev123 убит
+[17мая2026 01:30:41.697] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT исключён из своей команды
+[17мая2026 01:30:48.415] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT добавлен в команду [RUSSIA]
+[17мая2026 01:30:51.467] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] 2313Dev123 убит
+[17мая2026 01:31:06.763] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] 2313Dev123 телепортирован к AnquineNFT
+[17мая2026 01:31:32.743] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Ничего не изменилось. Правило столкновения уже имеет указанное значение
+[17мая2026 01:31:40.879] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [12312] теперь «могут толкать только участников других команд»
+[17мая2026 01:32:14.668] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [RUSSIA] теперь «могут толкать только участников других команд»
+[17мая2026 01:32:24.759] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [RUSSIA] теперь «могут толкать только участников своей команды»
+[17мая2026 01:32:33.121] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Участники команды [12312] теперь «могут сталкиваться со всеми»
+[17мая2026 01:34:32.764] [Render thread/INFO] [net.minecraft.advancements.AdvancementList/]: Loaded 30 advancements
+[17мая2026 01:34:49.605] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [12312]
+[17мая2026 01:34:52.332] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [RUSSIA]
+[17мая2026 01:35:03.114] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] У команды [RUSSIA] отключён огонь по своим
+[17мая2026 01:35:09.837] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [12312]
+[17мая2026 01:35:23.865] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Включён огонь по своим у команды [RUSSIA]
+[17мая2026 01:35:30.055] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev добавлен в команду [RUSSIA]
+[17мая2026 01:35:31.733] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT был убит Dev
+[17мая2026 01:37:24.662] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] AnquineNFT покинул игру
+[17мая2026 01:37:27.372] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!
+[17мая2026 01:37:27.401] [Render thread/DEBUG] [net.minecraftforge.registries.GameData/REGISTRIES]: Reverting to FROZEN data state.
+[17мая2026 01:37:27.402] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:block Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.413] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:fluid Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.416] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:item Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.426] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:mob_effect Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.427] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:sound_event Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.434] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:potion Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.435] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:enchantment Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.437] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:entity_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.438] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:block_entity_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.438] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:particle_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.440] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:menu Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.440] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:painting_variant Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.440] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:recipe_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.441] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:recipe_serializer Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.441] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:attribute Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.442] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:stat_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.442] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:command_argument_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.443] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:villager_profession Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.443] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:point_of_interest_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.447] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:memory_module_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.448] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:sensor_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.448] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:schedule Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.448] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:activity Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.449] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:worldgen/carver Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.449] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:worldgen/feature Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.449] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:chunk_status Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.450] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:worldgen/block_state_provider_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.450] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:worldgen/foliage_placer_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.450] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:worldgen/tree_decorator_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.450] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry minecraft:worldgen/biome Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.451] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry forge:entity_data_serializers Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.451] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry forge:global_loot_modifier_serializers Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.451] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry forge:biome_modifier_serializers Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.453] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry forge:fluid_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.453] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry forge:structure_modifier_serializers Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.453] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry forge:holder_set_type Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:27.453] [Render thread/DEBUG] [net.minecraftforge.registries.ForgeRegistry/REGISTRIES]: Registry forge:display_contexts Sync: ACTIVE -> FROZEN
+[17мая2026 01:37:28.118] [Render thread/DEBUG] [net.minecraftforge.registries.ObjectHolderRegistry/REGISTRIES]: Applying holder lookups
+[17мая2026 01:37:28.124] [Render thread/DEBUG] [net.minecraftforge.registries.ObjectHolderRegistry/REGISTRIES]: Holder lookups applied
+[17мая2026 01:37:28.124] [Render thread/DEBUG] [net.minecraftforge.registries.GameData/REGISTRIES]: FROZEN state restored.
+ing.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/IdenticalMerger.class
 [17мая2026 01:13:57.165] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/EntityCollisionContext.class
 [17мая2026 01:13:57.166] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/EntityCollisionContext$1.class
 [17мая2026 01:13:57.167] [pool-2-thread-1/DEBUG] [net.minecraftforge.fml.loading.moddiscovery.Scanner/SCAN]: Scanning Mod File: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\.gradle\repositories\ng_dummy_ng\net\neoforged\forge\1.20.1-47.1.79\forge-1.20.1-47.1.79.jar path net/minecraft/world/phys/shapes/DiscreteVoxelShape.class
@@ -9590,3 +9639,305 @@ Caused by: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING
 [17мая2026 01:14:40.925] [Netty Server IO #2/ERROR] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Terminating connection with client, mismatched mod list
 [17мая2026 01:14:40.925] [Netty Server IO #2/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Dispatching wrapped packet reply for channel fml:handshake with index 1
 [17мая2026 01:14:40.970] [Server thread/INFO] [net.minecraft.server.network.ServerLoginPacketListenerImpl/]: com.mojang.authlib.GameProfile@2cb6e610[id=<null>,name=AnquineNFT,properties={},legacy=false] (/[::1]:53860) lost connection: Connection closed - mismatched mod channel list
+[17мая2026 01:19:04.315] [Netty Server IO #6/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Starting new modded impl connection. Found 22 messages to dispatch.
+[17мая2026 01:19:04.345] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'net.minecraftforge.network.HandshakeMessages$S2CModData' to 'fml:handshake' sequence 0
+[17мая2026 01:19:04.407] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'net.minecraftforge.network.HandshakeMessages$S2CModList' to 'fml:handshake' sequence 1
+[17мая2026 01:19:04.454] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:command_argument_type' to 'fml:handshake' sequence 2
+[17мая2026 01:19:04.501] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:recipe_serializer' to 'fml:handshake' sequence 3
+[17мая2026 01:19:04.547] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:sound_event' to 'fml:handshake' sequence 4
+[17мая2026 01:19:04.609] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:particle_type' to 'fml:handshake' sequence 5
+[17мая2026 01:19:04.657] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:villager_profession' to 'fml:handshake' sequence 6
+[17мая2026 01:19:04.702] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:item' to 'fml:handshake' sequence 7
+[17мая2026 01:19:04.749] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:potion' to 'fml:handshake' sequence 8
+[17мая2026 01:19:04.797] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:painting_variant' to 'fml:handshake' sequence 9
+[17мая2026 01:19:04.858] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry forge:fluid_type' to 'fml:handshake' sequence 10
+[17мая2026 01:19:04.905] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:block_entity_type' to 'fml:handshake' sequence 11
+[17мая2026 01:19:04.953] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry forge:display_contexts' to 'fml:handshake' sequence 12
+[17мая2026 01:19:04.999] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:block' to 'fml:handshake' sequence 13
+[17мая2026 01:19:05.046] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry forge:entity_data_serializers' to 'fml:handshake' sequence 14
+[17мая2026 01:19:05.109] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:mob_effect' to 'fml:handshake' sequence 15
+[17мая2026 01:19:05.154] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:stat_type' to 'fml:handshake' sequence 16
+[17мая2026 01:19:05.201] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:menu' to 'fml:handshake' sequence 17
+[17мая2026 01:19:05.247] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:enchantment' to 'fml:handshake' sequence 18
+[17мая2026 01:19:05.295] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:fluid' to 'fml:handshake' sequence 19
+[17мая2026 01:19:05.358] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:entity_type' to 'fml:handshake' sequence 20
+[17мая2026 01:19:05.403] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Config forge-server.toml' to 'fml:handshake' sequence 21
+[17мая2026 01:19:28.837] [Server thread/DEBUG] [net.minecraftforge.common.ForgeHooks/WP]: Gathering id map for writing to world save world
+[17мая2026 01:19:28.843] [Server thread/DEBUG] [net.minecraftforge.common.ForgeHooks/WP]: ID Map collection complete world
+[17мая2026 01:19:34.056] [Server thread/INFO] [net.minecraft.server.network.ServerLoginPacketListenerImpl/]: com.mojang.authlib.GameProfile@4fd4c05a[id=<null>,name=AnquineNFT,properties={},legacy=false] (/[::1]:60029) lost connection: Disconnected
+[17мая2026 01:19:53.700] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Starting new modded impl connection. Found 22 messages to dispatch.
+[17мая2026 01:19:53.704] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'net.minecraftforge.network.HandshakeMessages$S2CModData' to 'fml:handshake' sequence 0
+[17мая2026 01:19:53.750] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'net.minecraftforge.network.HandshakeMessages$S2CModList' to 'fml:handshake' sequence 1
+[17мая2026 01:19:53.756] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 1
+[17мая2026 01:19:53.756] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 1 of type net.minecraftforge.network.HandshakeMessages$C2SModListReply
+[17мая2026 01:19:53.756] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client connection with modlist [minecraft, teamsystem, forge]
+[17мая2026 01:19:53.756] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'teamsystem:main' : Version test of '1' from client : ACCEPTED
+[17мая2026 01:19:53.757] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'fml:loginwrapper' : Version test of 'FML3' from client : ACCEPTED
+[17мая2026 01:19:53.757] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:tier_sorting' : Version test of '1.0' from client : ACCEPTED
+[17мая2026 01:19:53.757] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'fml:handshake' : Version test of 'FML3' from client : ACCEPTED
+[17мая2026 01:19:53.757] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:unregister' : Version test of 'FML3' from client : ACCEPTED
+[17мая2026 01:19:53.757] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'fml:play' : Version test of 'FML3' from client : ACCEPTED
+[17мая2026 01:19:53.757] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:register' : Version test of 'FML3' from client : ACCEPTED
+[17мая2026 01:19:53.757] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:split' : Version test of '1.1' from client : ACCEPTED
+[17мая2026 01:19:53.757] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Accepting channel list from client
+[17мая2026 01:19:53.757] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Accepted client connection mod list
+[17мая2026 01:19:53.797] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:command_argument_type' to 'fml:handshake' sequence 2
+[17мая2026 01:19:53.800] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 2
+[17мая2026 01:19:53.800] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 2 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:53.801] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:53.844] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:recipe_serializer' to 'fml:handshake' sequence 3
+[17мая2026 01:19:53.847] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 3
+[17мая2026 01:19:53.847] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 3 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:53.847] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:53.905] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:sound_event' to 'fml:handshake' sequence 4
+[17мая2026 01:19:53.912] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 4
+[17мая2026 01:19:53.912] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 4 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:53.912] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:53.951] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:particle_type' to 'fml:handshake' sequence 5
+[17мая2026 01:19:53.953] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 5
+[17мая2026 01:19:53.953] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 5 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:53.953] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:53.998] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:villager_profession' to 'fml:handshake' sequence 6
+[17мая2026 01:19:54.000] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 6
+[17мая2026 01:19:54.000] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 6 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.000] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.045] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:item' to 'fml:handshake' sequence 7
+[17мая2026 01:19:54.048] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 7
+[17мая2026 01:19:54.048] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 7 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.049] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.107] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:potion' to 'fml:handshake' sequence 8
+[17мая2026 01:19:54.109] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 8
+[17мая2026 01:19:54.109] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 8 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.109] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.155] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:painting_variant' to 'fml:handshake' sequence 9
+[17мая2026 01:19:54.170] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 9
+[17мая2026 01:19:54.170] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 9 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.170] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.202] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry forge:fluid_type' to 'fml:handshake' sequence 10
+[17мая2026 01:19:54.204] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 10
+[17мая2026 01:19:54.204] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 10 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.204] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.249] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:block_entity_type' to 'fml:handshake' sequence 11
+[17мая2026 01:19:54.251] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 11
+[17мая2026 01:19:54.251] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 11 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.251] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.297] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry forge:display_contexts' to 'fml:handshake' sequence 12
+[17мая2026 01:19:54.299] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 12
+[17мая2026 01:19:54.299] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 12 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.300] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.344] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:block' to 'fml:handshake' sequence 13
+[17мая2026 01:19:54.347] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 13
+[17мая2026 01:19:54.348] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 13 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.348] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.407] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry forge:entity_data_serializers' to 'fml:handshake' sequence 14
+[17мая2026 01:19:54.409] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 14
+[17мая2026 01:19:54.409] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 14 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.409] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.452] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:mob_effect' to 'fml:handshake' sequence 15
+[17мая2026 01:19:54.455] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 15
+[17мая2026 01:19:54.455] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 15 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.455] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.499] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:stat_type' to 'fml:handshake' sequence 16
+[17мая2026 01:19:54.501] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 16
+[17мая2026 01:19:54.501] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 16 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.501] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.547] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:menu' to 'fml:handshake' sequence 17
+[17мая2026 01:19:54.548] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 17
+[17мая2026 01:19:54.549] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 17 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.549] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.608] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:enchantment' to 'fml:handshake' sequence 18
+[17мая2026 01:19:54.610] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 18
+[17мая2026 01:19:54.610] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 18 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.610] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.655] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:fluid' to 'fml:handshake' sequence 19
+[17мая2026 01:19:54.657] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 19
+[17мая2026 01:19:54.657] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 19 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:54.657] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:54.701] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:entity_type' to 'fml:handshake' sequence 20
+[17мая2026 01:19:54.748] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Config forge-server.toml' to 'fml:handshake' sequence 21
+[17мая2026 01:19:55.174] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 20
+[17мая2026 01:19:55.174] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 20 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:55.174] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:55.177] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 21
+[17мая2026 01:19:55.177] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 21 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:19:55.177] [Netty Server IO #9/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:19:55.202] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Handshake complete!
+[17мая2026 01:19:55.311] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: AnquineNFT[/[::1]:50562] logged in with entity id 184 at (5.5, 70.0, 38.5)
+[17мая2026 01:19:55.324] [Server thread/DEBUG] [net.minecraftforge.network.filters.NetworkFilters/]: Injected net.minecraftforge.network.filters.ForgeConnectionNetworkFilter@1fc9f177 into net.minecraft.network.Connection@361294b7
+[17мая2026 01:19:55.365] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: AnquineNFT joined the game
+[17мая2026 01:19:55.542] [Server thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Synced team data for player: AnquineNFT
+[17мая2026 01:19:55.710] [Server thread/DEBUG] [io.netty.util.internal.ThreadLocalRandom/]: -Dio.netty.initialSeedUniquifier: 0x0cd018087c200252
+[17мая2026 01:20:01.172] [Server thread/WARN] [net.minecraft.server.level.ServerPlayerGameMode/]: Mismatch in destroy block pos: BlockPos{x=0, y=0, z=0} BlockPos{x=5, y=70, z=39}
+[17мая2026 01:20:01.175] [Server thread/WARN] [net.minecraft.server.level.ServerPlayerGameMode/]: Mismatch in destroy block pos: BlockPos{x=0, y=0, z=0} BlockPos{x=5, y=70, z=39}
+[17мая2026 01:20:01.708] [Server thread/WARN] [net.minecraft.server.MinecraftServer/]: Can't keep up! Is the server overloaded? Running 2115ms or 42 ticks behind
+[17мая2026 01:20:03.543] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Starting new modded impl connection. Found 22 messages to dispatch.
+[17мая2026 01:20:03.563] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'net.minecraftforge.network.HandshakeMessages$S2CModData' to 'fml:handshake' sequence 0
+[17мая2026 01:20:03.618] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'net.minecraftforge.network.HandshakeMessages$S2CModList' to 'fml:handshake' sequence 1
+[17мая2026 01:20:03.630] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 1
+[17мая2026 01:20:03.630] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 1 of type net.minecraftforge.network.HandshakeMessages$C2SModListReply
+[17мая2026 01:20:03.630] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client connection with modlist [teamsystem, minecraft, forge]
+[17мая2026 01:20:03.630] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'teamsystem:main' : Version test of '1' from client : ACCEPTED
+[17мая2026 01:20:03.630] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'fml:loginwrapper' : Version test of 'FML3' from client : ACCEPTED
+[17мая2026 01:20:03.630] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:tier_sorting' : Version test of '1.0' from client : ACCEPTED
+[17мая2026 01:20:03.630] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'fml:handshake' : Version test of 'FML3' from client : ACCEPTED
+[17мая2026 01:20:03.630] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:unregister' : Version test of 'FML3' from client : ACCEPTED
+[17мая2026 01:20:03.630] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'fml:play' : Version test of 'FML3' from client : ACCEPTED
+[17мая2026 01:20:03.630] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'minecraft:register' : Version test of 'FML3' from client : ACCEPTED
+[17мая2026 01:20:03.631] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Channel 'forge:split' : Version test of '1.1' from client : ACCEPTED
+[17мая2026 01:20:03.631] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.NetworkRegistry/NETREGISTRY]: Accepting channel list from client
+[17мая2026 01:20:03.631] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Accepted client connection mod list
+[17мая2026 01:20:03.731] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:command_argument_type' to 'fml:handshake' sequence 2
+[17мая2026 01:20:03.738] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 2
+[17мая2026 01:20:03.738] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 2 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:03.739] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:03.756] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:recipe_serializer' to 'fml:handshake' sequence 3
+[17мая2026 01:20:03.760] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 3
+[17мая2026 01:20:03.760] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 3 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:03.760] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:03.781] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:sound_event' to 'fml:handshake' sequence 4
+[17мая2026 01:20:03.792] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 4
+[17мая2026 01:20:03.793] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 4 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:03.793] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:03.812] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:particle_type' to 'fml:handshake' sequence 5
+[17мая2026 01:20:03.814] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 5
+[17мая2026 01:20:03.815] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 5 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:03.815] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:03.865] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:villager_profession' to 'fml:handshake' sequence 6
+[17мая2026 01:20:03.868] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 6
+[17мая2026 01:20:03.868] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 6 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:03.868] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:03.941] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:item' to 'fml:handshake' sequence 7
+[17мая2026 01:20:03.947] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 7
+[17мая2026 01:20:03.947] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 7 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:03.947] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:03.958] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:potion' to 'fml:handshake' sequence 8
+[17мая2026 01:20:03.961] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 8
+[17мая2026 01:20:03.961] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 8 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:03.961] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.023] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:painting_variant' to 'fml:handshake' sequence 9
+[17мая2026 01:20:04.025] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 9
+[17мая2026 01:20:04.026] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 9 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:04.026] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.065] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry forge:fluid_type' to 'fml:handshake' sequence 10
+[17мая2026 01:20:04.069] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 10
+[17мая2026 01:20:04.069] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 10 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:04.069] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.136] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:block_entity_type' to 'fml:handshake' sequence 11
+[17мая2026 01:20:04.139] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 11
+[17мая2026 01:20:04.139] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 11 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:04.139] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.206] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry forge:display_contexts' to 'fml:handshake' sequence 12
+[17мая2026 01:20:04.208] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 12
+[17мая2026 01:20:04.209] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 12 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:04.209] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.220] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:block' to 'fml:handshake' sequence 13
+[17мая2026 01:20:04.226] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 13
+[17мая2026 01:20:04.226] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 13 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:04.226] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.263] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry forge:entity_data_serializers' to 'fml:handshake' sequence 14
+[17мая2026 01:20:04.265] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 14
+[17мая2026 01:20:04.266] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 14 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:04.266] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.393] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:mob_effect' to 'fml:handshake' sequence 15
+[17мая2026 01:20:04.399] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 15
+[17мая2026 01:20:04.400] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 15 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:04.400] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.406] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:stat_type' to 'fml:handshake' sequence 16
+[17мая2026 01:20:04.410] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 16
+[17мая2026 01:20:04.410] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 16 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:04.410] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.433] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:menu' to 'fml:handshake' sequence 17
+[17мая2026 01:20:04.436] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 17
+[17мая2026 01:20:04.436] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 17 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:04.436] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.468] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:enchantment' to 'fml:handshake' sequence 18
+[17мая2026 01:20:04.472] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 18
+[17мая2026 01:20:04.472] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 18 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:04.472] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.524] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:fluid' to 'fml:handshake' sequence 19
+[17мая2026 01:20:04.527] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 19
+[17мая2026 01:20:04.527] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 19 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:04.527] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:04.556] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Registry minecraft:entity_type' to 'fml:handshake' sequence 20
+[17мая2026 01:20:04.612] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Sending ticking packet info 'Config forge-server.toml' to 'fml:handshake' sequence 21
+[17мая2026 01:20:05.675] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 20
+[17мая2026 01:20:05.675] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 20 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:05.675] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:05.682] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.LoginWrapper/FMLHANDSHAKE]: Recieved login wrapper packet event for channel fml:handshake with index 21
+[17мая2026 01:20:05.682] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received client indexed reply 21 of type net.minecraftforge.network.HandshakeMessages$C2SAcknowledge
+[17мая2026 01:20:05.682] [Netty Server IO #10/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Received acknowledgement from client
+[17мая2026 01:20:05.713] [Server thread/DEBUG] [net.minecraftforge.network.HandshakeHandler/FMLHANDSHAKE]: Handshake complete!
+[17мая2026 01:20:05.798] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[/[::1]:55746] logged in with entity id 212 at (-3.0588724598053583, 75.90156321536142, 56.290809069535975)
+[17мая2026 01:20:05.799] [Server thread/DEBUG] [net.minecraftforge.network.filters.NetworkFilters/]: Injected net.minecraftforge.network.filters.ForgeConnectionNetworkFilter@278e723d into net.minecraft.network.Connection@65c11f60
+[17мая2026 01:20:05.851] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
+[17мая2026 01:20:05.926] [Server thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Synced team data for player: Dev
+[17мая2026 01:20:17.171] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Teleported Dev to AnquineNFT]
+[17мая2026 01:20:17.172] [Server thread/WARN] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev moved too quickly! -6.642517439416229,-9.11318538480289,-9.725645437299647
+[17мая2026 01:20:22.664] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set the weather to clear]
+[17мая2026 01:20:26.329] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set the time to 1000]
+[17мая2026 01:20:43.351] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: AnquineNFT has made the advancement [Monster Hunter]
+[17мая2026 01:21:12.875] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Created team [NATO]]
+[17мая2026 01:21:18.056] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [NATO]]
+[17мая2026 01:21:23.406] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added AnquineNFT to team [NATO]]
+[17мая2026 01:21:35.418] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set own game mode to Survival Mode]
+[17мая2026 01:21:58.358] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Created team [RUSSIA]]
+[17мая2026 01:22:04.360] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [RUSSIA]]
+[17мая2026 01:22:30.705] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Removed 1 member(s) from team [NATO]]
+[17мая2026 01:23:55.663] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added AnquineNFT to team [NATO]]
+[17мая2026 01:24:10.970] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Collision rule for team [NATO] is now "Never"]
+[17мая2026 01:24:26.853] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Removed 1 member(s) from team [RUSSIA]]
+[17мая2026 01:24:30.949] [Server thread/DEBUG] [net.minecraftforge.common.ForgeHooks/WP]: Gathering id map for writing to world save world
+[17мая2026 01:24:30.954] [Server thread/DEBUG] [net.minecraftforge.common.ForgeHooks/WP]: ID Map collection complete world
+[17мая2026 01:24:34.667] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [NATO]]
+[17мая2026 01:24:41.404] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Collision rule for team [NATO] is now "Push own team"]
+[17мая2026 01:24:46.651] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Collision rule for team [NATO] is now "Push other teams"]
+[17мая2026 01:24:55.470] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Updated the color for team [NATO] to aqua]
+[17мая2026 01:25:09.787] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Updated the name of team [1]]
+[17мая2026 01:25:17.056] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Disabled friendly fire for team [1]]
+[17мая2026 01:25:38.093] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Nametag visibility for team [1] is now "Hide for other teams"]
+[17мая2026 01:25:42.063] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Nametag visibility for team [1] is now "Hide for own team"]
+[17мая2026 01:25:43.886] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Nametag visibility for team [1] is now "Hide for other teams"]
+[17мая2026 01:25:57.863] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev1: Removed Dev from any team]
+[17мая2026 01:26:07.867] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Nametag visibility for team [1] is now "Hide for own team"]
+[17мая2026 01:26:11.931] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Nametag visibility for team [1] is now "Never"]
+[17мая2026 01:26:15.225] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Nametag visibility for team [1] is now "Hide for other teams"]
+[17мая2026 01:26:22.168] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [RUSSIA]]
+[17мая2026 01:26:39.255] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Updated the color for team [RUSSIA] to black]
+[17мая2026 01:28:57.918] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Removed Dev from any team]
+[17мая2026 01:29:01.882] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [1]]
+[17мая2026 01:29:30.934] [Server thread/DEBUG] [net.minecraftforge.common.ForgeHooks/WP]: Gathering id map for writing to world save world
+[17мая2026 01:29:30.938] [Server thread/DEBUG] [net.minecraftforge.common.ForgeHooks/WP]: ID Map collection complete world
+[17мая2026 01:29:35.216] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [1] is now "Always"]
+[17мая2026 01:29:40.960] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [1] is now "Push own team"]
+[17мая2026 01:29:51.422] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [1] is now "Push other teams"]
+[17мая2026 01:29:56.254] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [1] is now "Push own team"]
+[17мая2026 01:30:05.533] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Enabled friendly fire for team [1]]
+[17мая2026 01:30:10.079] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Disabled friendly fire for team [1]]
+[17мая2026 01:30:20.852] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Updated the name of team [12312]]
+[17мая2026 01:30:29.710] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Death message visibility for team [12312] is now "Hide for other teams"]
+[17мая2026 01:30:32.458] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Killed 2313Dev123]
+[17мая2026 01:30:41.692] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Removed AnquineNFT from any team]
+[17мая2026 01:30:48.411] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Added AnquineNFT to team [RUSSIA]]
+[17мая2026 01:30:51.465] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Killed 2313Dev123]
+[17мая2026 01:31:06.762] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Teleported 2313Dev123 to AnquineNFT]
+[17мая2026 01:31:06.763] [Server thread/WARN] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev moved too quickly! 8.800000011920929,-1.0,5.585736645371757
+[17мая2026 01:31:40.878] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [12312] is now "Push other teams"]
+[17мая2026 01:32:14.667] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [RUSSIA] is now "Push other teams"]
+[17мая2026 01:32:24.756] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [RUSSIA] is now "Push own team"]
+[17мая2026 01:32:33.120] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Collision rule for team [12312] is now "Always"]
+[17мая2026 01:33:55.901] [Server thread/WARN] [net.minecraft.server.level.ServerPlayerGameMode/]: Mismatch in destroy block pos: BlockPos{x=0, y=0, z=0} BlockPos{x=-1, y=71, z=16}
+[17мая2026 01:34:30.935] [Server thread/DEBUG] [net.minecraftforge.common.ForgeHooks/WP]: Gathering id map for writing to world save world
+[17мая2026 01:34:30.940] [Server thread/DEBUG] [net.minecraftforge.common.ForgeHooks/WP]: ID Map collection complete world
+[17мая2026 01:34:32.703] [Server thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Player AnquineNFT killed Dev (K/D: 1/0)
+[17мая2026 01:34:49.599] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Added Dev to team [12312]]
+[17мая2026 01:34:52.331] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Added Dev to team [RUSSIA]]
+[17мая2026 01:35:03.109] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Disabled friendly fire for team [RUSSIA]]
+[17мая2026 01:35:09.835] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Added Dev to team [12312]]
+[17мая2026 01:35:23.861] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Enabled friendly fire for team [RUSSIA]]
+[17мая2026 01:35:30.049] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [2313Dev123: Added Dev to team [RUSSIA]]
+[17мая2026 01:35:31.726] [Server thread/INFO] [com.yourmod.teamsystem.TeamSystem/]: Player Dev killed AnquineNFT (K/D: 1/3)
+[17мая2026 01:35:31.726] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: AnquineNFT was slain by Dev
+[17мая2026 01:37:24.653] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: AnquineNFT lost connection: Disconnected
+[17мая2026 01:37:24.653] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: AnquineNFT left the game
+[17мая2026 01:37:27.409] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: Disconnected
+[17мая2026 01:37:27.410] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev left the game

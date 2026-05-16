@@ -9,8 +9,8 @@ public class PacketHandler {
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
         new ResourceLocation("teamsystem", "main"),
         () -> PROTOCOL_VERSION,
-        PROTOCOL_VERSION::equals,
-        PROTOCOL_VERSION::equals
+        NetworkRegistry.acceptMissingOr(PROTOCOL_VERSION::equals),
+        NetworkRegistry.acceptMissingOr(PROTOCOL_VERSION::equals)
     );
 
     private static int nextId = 0;
