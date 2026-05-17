@@ -48,8 +48,8 @@ public class LobbyCommand {
             return 0;
         }
 
-        game.setLobbyRespawn(player);
-        player.sendSystemMessage(Component.literal("Respawn point set to lobby!")
+        game.setLobbyRespawnAtPlayer(player);
+        player.sendSystemMessage(Component.literal("Respawn point set to your current location!")
             .withStyle(ChatFormatting.GREEN));
 
         return 1;

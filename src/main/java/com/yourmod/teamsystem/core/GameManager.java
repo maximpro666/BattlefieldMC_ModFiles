@@ -4,14 +4,17 @@ import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.network.GameStateSyncPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.event.TickEvent;
@@ -21,6 +24,7 @@ import net.minecraftforge.network.PacketDistributor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 public class GameManager {
@@ -40,6 +44,7 @@ public class GameManager {
     private int lobbyWaitTimer;
     private boolean countdownActive;
     private boolean lobbyLoaded;
+    private MapConfig currentMap;
 
     public GameManager(MinecraftServer server) {
         this.server = server;
@@ -49,6 +54,7 @@ public class GameManager {
         this.lobbyWaitTimer = 0;
         this.countdownActive = false;
         this.lobbyLoaded = false;
+        this.currentMap = null;
     }
 
     public GamePhase getCurrentPhase() {
@@ -72,8 +78,7 @@ public class GameManager {
         MapPoolManager mapPool = TeamSystem.getMapPoolManager();
 
         if (mapPool.getMaps().isEmpty()) {
-            broadcastToAll(Component.literal("No maps configured! Add maps to teamsystem_maps.json")
-                .withStyle(ChatFormatting.RED));
+            broadcastToAll(Component.literal("No maps configured!").withStyle(ChatFormatting.RED));
             return;
         }
 
@@ -85,12 +90,15 @@ public class GameManager {
 
         currentPhase = GamePhase.PLAYING;
         winningTeam = null;
+        currentMap = map;
         teamManager.resetTickets();
         teamManager.setTickets(Team.NATO, map.getTickets());
         teamManager.setTickets(Team.RUSSIA, map.getTickets());
 
+        precleanMapWorld(map);
         applyMapConfig(map);
         teleportAllPlayersToMap(map);
+
         broadcastToAll(Component.literal("Game started on map: ")
             .withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD)
             .append(Component.literal(map.getName()).withStyle(ChatFormatting.YELLOW)));
@@ -123,7 +131,7 @@ public class GameManager {
         if (currentPhase == GamePhase.ENDING) {
             endingTimer--;
             if (endingTimer <= 0) {
-                regenerateAndReturnToLobby();
+                resetAndReturnToLobby();
             }
         }
 
@@ -158,77 +166,121 @@ public class GameManager {
             .withStyle(ChatFormatting.RED));
     }
 
-    private void regenerateAndReturnToLobby() {
-        MapPoolManager mapPool = TeamSystem.getMapPoolManager();
-        mapPool.getCurrentMap().ifPresent(map -> {
-            if (!map.getWorldFolder().equals("overworld")) {
-                regenerateMapWorld(map);
-            }
-        });
+    private void resetAndReturnToLobby() {
+        if (currentMap != null && !currentMap.getWorldFolder().equals("overworld")) {
+            hardResetMapWorld(currentMap);
+        }
         returnToLobby();
     }
 
-    private void regenerateMapWorld(MapConfig map) {
-        String worldFolder = map.getWorldFolder();
-        if (worldFolder == null || worldFolder.isEmpty()) return;
+    private void hardResetMapWorld(MapConfig map) {
+        ServerLevel level = getMapWorldNoFallback(map);
+        if (level == null) return;
 
-        Path dimDir = server.getWorldPath(LevelResource.ROOT)
-            .resolve("dimensions").resolve("teamsystem").resolve(worldFolder);
-        Path backupDir = dimDir.resolveSibling(worldFolder + "_backup");
+        TeamSystem.LOGGER.info("Hard-resetting map world: {}", map.getName());
 
         try {
-            if (Files.exists(backupDir)) {
-                deleteDirectory(dimDir);
-                copyDirectory(backupDir, dimDir);
-                TeamSystem.LOGGER.info("Restored map world from backup: {}", map.getName());
+            Path dimDir = server.getWorldPath(LevelResource.ROOT)
+                .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
+            Path regionDir = dimDir.resolve("region");
+
+            if (!Files.isDirectory(regionDir)) {
+                TeamSystem.LOGGER.warn("Region dir not found for map: {}", map.getName());
+                return;
             }
-        } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to regenerate map world {}: {}", map.getName(), e.getMessage());
-        }
-    }
 
-    public static void backupMapWorld(MinecraftServer server, MapConfig map) {
-        String worldFolder = map.getWorldFolder();
-        if (worldFolder == null || worldFolder.isEmpty()) return;
-
-        Path dimDir = server.getWorldPath(LevelResource.ROOT)
-            .resolve("dimensions").resolve("teamsystem").resolve(worldFolder);
-        Path backupDir = dimDir.resolveSibling(worldFolder + "_backup");
-
-        try {
-            deleteDirectory(backupDir);
-            if (Files.exists(dimDir)) {
-                copyDirectory(dimDir, backupDir);
-                TeamSystem.LOGGER.info("Backed up map world: {}", map.getName());
+            List<Path> regionFiles;
+            try (var files = Files.list(regionDir)) {
+                regionFiles = files.filter(f -> f.toString().endsWith(".mca")).toList();
+            } catch (IOException e) {
+                TeamSystem.LOGGER.error("Failed to list region files: {}", e.getMessage());
+                return;
             }
-        } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to backup map world {}: {}", map.getName(), e.getMessage());
-        }
-    }
 
-    private static void deleteDirectory(Path path) throws IOException {
-        if (Files.exists(path)) {
-            try (var stream = Files.walk(path)) {
-                stream.sorted((a, b) -> b.compareTo(a))
-                    .forEach(p -> {
-                        try { Files.deleteIfExists(p); } catch (IOException ignored) {}
-                    });
+            clearWorldEntities(level);
+
+            level.save(null, false, false);
+
+            try (var files = Files.list(regionDir)) {
+                for (Path file : (Iterable<Path>) files::iterator) {
+                    Files.deleteIfExists(file);
+                }
             }
-        }
-    }
 
-    private static void copyDirectory(Path source, Path target) throws IOException {
-        try (var stream = Files.walk(source)) {
-            stream.forEach(sourcePath -> {
-                try {
-                    Path targetPath = target.resolve(source.relativize(sourcePath));
-                    if (Files.isDirectory(sourcePath)) {
-                        Files.createDirectories(targetPath);
-                    } else {
-                        Files.copy(sourcePath, targetPath);
+            Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
+            Path backupRegionDir = backupDir.resolve("region");
+            if (Files.isDirectory(backupRegionDir)) {
+                try (var files = Files.list(backupRegionDir)) {
+                    for (Path src : (Iterable<Path>) files::iterator) {
+                        Path dst = regionDir.resolve(src.getFileName());
+                        Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
                     }
-                } catch (IOException ignored) {}
-            });
+                }
+                TeamSystem.LOGGER.info("Restored {} region files from backup", map.getName());
+            } else {
+                TeamSystem.LOGGER.warn("No backup found for map: {}", map.getName());
+            }
+
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to hard-reset map {}: {}", map.getName(), e.getMessage());
+        }
+    }
+
+    private ChunkPos getChunkPosFromRegionFileName(Path regionFile) {
+        String name = regionFile.getFileName().toString();
+        try {
+            String[] parts = name.replace("r.", "").replace(".mca", "").split("\\.");
+            if (parts.length >= 2) {
+                int x = Integer.parseInt(parts[0]);
+                int z = Integer.parseInt(parts[1]);
+                return new ChunkPos(x * 32, z * 32);
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    private void precleanMapWorld(MapConfig map) {
+        ServerLevel level = getMapWorldNoFallback(map);
+        if (level == null) return;
+
+        TeamSystem.LOGGER.info("Pre-cleaning map world: {}", map.getName());
+        clearWorldEntities(level);
+
+        Path dimDir = server.getWorldPath(LevelResource.ROOT)
+            .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
+        Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
+
+        try {
+            if (!Files.exists(backupDir)) {
+                level.save(null, false, false);
+                Files.createDirectories(backupDir.resolve("region"));
+                Path regionDir = dimDir.resolve("region");
+                if (Files.isDirectory(regionDir)) {
+                    try (var files = Files.list(regionDir)) {
+                        for (Path src : (Iterable<Path>) files::iterator) {
+                            Path dst = backupDir.resolve("region").resolve(src.getFileName());
+                            Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+                        }
+                    }
+                    TeamSystem.LOGGER.info("Backed up region files for map: {}", map.getName());
+                }
+            }
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to preclean/backup map {}: {}", map.getName(), e.getMessage());
+        }
+    }
+
+    private void clearWorldEntities(ServerLevel level) {
+        int removed = 0;
+        for (Entity entity : level.getEntities().getAll()) {
+            if (entity == null) continue;
+            if (!(entity instanceof ServerPlayer) && !(entity instanceof Player)) {
+                entity.discard();
+                removed++;
+            }
+        }
+        if (removed > 0) {
+            TeamSystem.LOGGER.info("Removed {} entities", removed);
         }
     }
 
@@ -236,6 +288,7 @@ public class GameManager {
         currentPhase = GamePhase.LOBBY;
         winningTeam = null;
         endingTimer = 0;
+        currentMap = null;
 
         MapPoolManager mapPool = TeamSystem.getMapPoolManager();
         MapConfig nextMap = mapPool.nextMap();
@@ -251,10 +304,6 @@ public class GameManager {
 
         int waitTime = nextMap != null ? nextMap.getLobbyWaitTime() : 30;
         startCountdown(waitTime);
-
-        if (nextMap != null) {
-            backupMapWorld(server, nextMap);
-        }
 
         TeamSystem.LOGGER.info("Returned to lobby");
     }
@@ -276,16 +325,13 @@ public class GameManager {
     private void setGameRule(ServerLevel level, String rule, String value) {
         server.getCommands().performPrefixedCommand(
             server.createCommandSourceStack(),
-            "gamerule " + rule + " " + value + " " + level.dimension().location()
+            "gamerule " + rule + " " + value
         );
     }
 
     public void teleportAllPlayersToMap(MapConfig map) {
         ServerLevel targetWorld = getMapWorld(map);
-        if (targetWorld == null) {
-            TeamSystem.LOGGER.error("Cannot find world for map: {}", map.getName());
-            return;
-        }
+        if (targetWorld == null) return;
 
         List<ServerPlayer> players = server.getPlayerList().getPlayers();
         TeamManager tm = TeamSystem.getTeamManager();
@@ -294,17 +340,13 @@ public class GameManager {
         for (ServerPlayer player : players) {
             Team team = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
             if (team == Team.SPECTATOR) continue;
-
             safeTeleport(player, targetWorld, spawnPos.getX() + 0.5, spawnPos.getY() + 1, spawnPos.getZ() + 0.5);
         }
     }
 
     public void teleportAllToLobby() {
         ServerLevel lobbyWorld = getOrCreateLobbyWorld();
-        if (lobbyWorld == null) {
-            TeamSystem.LOGGER.error("Lobby world not found!");
-            return;
-        }
+        if (lobbyWorld == null) return;
 
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             safeTeleport(player, lobbyWorld, LOBBY_SPAWN.getX() + 0.5, LOBBY_SPAWN.getY(), LOBBY_SPAWN.getZ() + 0.5);
@@ -314,15 +356,20 @@ public class GameManager {
     public void teleportPlayerToLobby(ServerPlayer player) {
         ServerLevel lobbyWorld = getOrCreateLobbyWorld();
         if (lobbyWorld == null) return;
-
         safeTeleport(player, lobbyWorld, LOBBY_SPAWN.getX() + 0.5, LOBBY_SPAWN.getY(), LOBBY_SPAWN.getZ() + 0.5);
     }
 
     public void setLobbyRespawn(ServerPlayer player) {
         ServerLevel lobbyWorld = getOrCreateLobbyWorld();
         if (lobbyWorld == null) return;
-
         player.setRespawnPosition(lobbyWorld.dimension(), LOBBY_SPAWN, 0, false, false);
+    }
+
+    public void setLobbyRespawnAtPlayer(ServerPlayer player) {
+        ServerLevel lobbyWorld = getOrCreateLobbyWorld();
+        if (lobbyWorld == null) return;
+        BlockPos pos = player.blockPosition();
+        player.setRespawnPosition(lobbyWorld.dimension(), pos, player.getYRot(), false, false);
     }
 
     private void safeTeleport(ServerPlayer player, ServerLevel targetWorld, double x, double y, double z) {
@@ -345,19 +392,24 @@ public class GameManager {
             world = server.getLevel(lobbyKey);
         }
 
-        if (world == null) {
-            world = server.overworld();
-        }
+        if (world == null) world = server.overworld();
         return world;
     }
 
-    private ServerLevel getMapWorld(MapConfig map) {
-        if (map.getWorldFolder() == null || map.getWorldFolder().isEmpty() || map.getWorldFolder().equals("overworld")) {
-            return server.overworld();
-        }
-
+    private ServerLevel getMapWorldNoFallback(MapConfig map) {
+        if (map.getWorldFolder() == null || map.getWorldFolder().isEmpty() || map.getWorldFolder().equals("overworld"))
+            return null;
         ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION,
             new ResourceLocation("teamsystem", map.getWorldFolder()));
+        return server.getLevel(worldKey);
+    }
+
+    private ServerLevel getMapWorld(MapConfig map) {
+        if (map.getWorldFolder() == null || map.getWorldFolder().isEmpty() || map.getWorldFolder().equals("overworld"))
+            return server.overworld();
+
+        ResourceLocation dimId = new ResourceLocation("teamsystem", map.getWorldFolder());
+        ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION, dimId);
         ServerLevel world = server.getLevel(worldKey);
         return world != null ? world : server.overworld();
     }
@@ -395,7 +447,7 @@ public class GameManager {
     public void syncPhaseToAll() {
         GameStateSyncPacket packet = new GameStateSyncPacket(
             currentPhase.ordinal(),
-            TeamSystem.getMapPoolManager().getCurrentMap().map(MapConfig::getName).orElse(""),
+            currentMap != null ? currentMap.getName() : "",
             winningTeam != null ? winningTeam.ordinal() : -1
         );
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -406,7 +458,7 @@ public class GameManager {
     public void syncPhaseToPlayer(ServerPlayer player) {
         GameStateSyncPacket packet = new GameStateSyncPacket(
             currentPhase.ordinal(),
-            TeamSystem.getMapPoolManager().getCurrentMap().map(MapConfig::getName).orElse(""),
+            currentMap != null ? currentMap.getName() : "",
             winningTeam != null ? winningTeam.ordinal() : -1
         );
         PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);

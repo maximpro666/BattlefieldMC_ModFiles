@@ -133,6 +133,7 @@ public class MapDimensionGenerator {
 
     private static void generateMapDimensions(Path datapacksDir) {
         MapPoolManager pool = TeamSystem.getMapPoolManager();
+        MinecraftServer server = pool.getServer();
         if (pool == null) return;
 
         List<MapConfig> maps = pool.getMaps();
@@ -164,6 +165,16 @@ public class MapDimensionGenerator {
                 TeamSystem.LOGGER.error("Failed to generate dimension for map {}: {}",
                     map.getName(), e.getMessage());
             }
+        }
+
+        try {
+            server.getCommands().performPrefixedCommand(
+                server.createCommandSourceStack(),
+                "reload"
+            );
+            TeamSystem.LOGGER.info("Server datapacks reloaded");
+        } catch (Exception e) {
+            TeamSystem.LOGGER.warn("Could not auto-reload datapacks: {}", e.getMessage());
         }
 
         TeamSystem.LOGGER.info("Map dimension datapacks generated for {} maps", maps.size());
