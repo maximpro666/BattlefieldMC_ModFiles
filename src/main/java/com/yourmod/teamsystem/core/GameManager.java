@@ -14,8 +14,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GameManager {
@@ -179,6 +182,9 @@ public class GameManager {
 
         TeamSystem.LOGGER.info("Hard-resetting map world: {}", map.getName());
 
+        clearWorldEntities(level);
+        level.save(null, false, false);
+
         try {
             Path dimDir = server.getWorldPath(LevelResource.ROOT)
                 .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
@@ -189,22 +195,17 @@ public class GameManager {
                 return;
             }
 
-            List<Path> regionFiles;
-            try (var files = Files.list(regionDir)) {
-                regionFiles = files.filter(f -> f.toString().endsWith(".mca")).toList();
-            } catch (IOException e) {
-                TeamSystem.LOGGER.error("Failed to list region files: {}", e.getMessage());
-                return;
-            }
-
-            clearWorldEntities(level);
-
-            level.save(null, false, false);
-
+            List<Path> regionFiles = new ArrayList<>();
             try (var files = Files.list(regionDir)) {
                 for (Path file : (Iterable<Path>) files::iterator) {
-                    Files.deleteIfExists(file);
+                    if (file.toString().endsWith(".mca")) {
+                        regionFiles.add(file);
+                    }
                 }
+            }
+
+            for (Path file : regionFiles) {
+                Files.deleteIfExists(file);
             }
 
             Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
@@ -219,6 +220,19 @@ public class GameManager {
                 TeamSystem.LOGGER.info("Restored {} region files from backup", map.getName());
             } else {
                 TeamSystem.LOGGER.warn("No backup found for map: {}", map.getName());
+            }
+
+            for (Path rf : regionFiles) {
+                ChunkPos rcp = getChunkPosFromRegionFileName(rf);
+                if (rcp == null) continue;
+                for (int dx = 0; dx < 32; dx++) {
+                    for (int dz = 0; dz < 32; dz++) {
+                        ChunkPos pos = new ChunkPos(rcp.x + dx, rcp.z + dz);
+                        level.getChunkSource().removeRegionTicket(
+                            TicketType.POST_TELEPORT, pos, 0, 0, true
+                        );
+                    }
+                }
             }
 
         } catch (IOException e) {
