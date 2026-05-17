@@ -4,16 +4,21 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.Kit;
 import com.yourmod.teamsystem.core.KitManager;
+import com.yourmod.teamsystem.core.MapConfig;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
@@ -182,6 +187,26 @@ public class KitCommand {
     private static int claimKit(CommandSourceStack source, String name) {
         ServerPlayer player = source.getPlayer();
         if (player == null) return 0;
+
+        GameManager game = TeamSystem.getGameManager();
+        if (game != null && game.isPlaying()) {
+            TeamManager tm = TeamSystem.getTeamManager();
+            Team playerTeam = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
+            if (playerTeam.isPlayable()) {
+                MapConfig map = game.getCurrentMap();
+                if (map != null && map.hasTeamSpawns()) {
+                    int[] spawn = playerTeam == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
+                    if (spawn != null && spawn.length >= 3) {
+                        int dist = (int) Math.sqrt(player.distanceToSqr(new Vec3(spawn[0] + 0.5, spawn[1], spawn[2] + 0.5)));
+                        int radius = TeamSystem.getConfig() != null ? TeamSystem.getConfig().getBaseRadius() : 30;
+                        if (dist > radius) {
+                            player.sendSystemMessage(Component.literal("§cВы можете сменить обвес только на своей базе!"));
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
 
         KitManager km = TeamSystem.getTeamManager().getKitManager();
         if (km.claimKit(player, name, TeamSystem.getTeamManager())) {

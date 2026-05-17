@@ -2,14 +2,15 @@ package com.yourmod.teamsystem.events;
 
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.ContributionManager;
-import com.yourmod.teamsystem.core.DownedManager;
 import com.yourmod.teamsystem.core.EconomyManager;
 import com.yourmod.teamsystem.core.GameManager;
+import com.yourmod.teamsystem.core.MapConfig;
 import com.yourmod.teamsystem.core.Rank;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
 import com.yourmod.teamsystem.core.TeamSystemConfig;
 import com.yourmod.teamsystem.core.TicketManager;
+import com.yourmod.teamsystem.core.VehicleManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
@@ -17,13 +18,22 @@ import net.minecraft.world.entity.Entity;
 
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,6 +46,18 @@ public class CombatEventHandler {
 
     private net.minecraft.server.MinecraftServer getServer(ServerLevel level) {
         return level.getServer();
+    }
+
+    private void logKill(String killerName, String victimName, String type) {
+        try {
+            Path logDir = Paths.get("world/teamsystem/logs");
+            Files.createDirectories(logDir);
+            String line = String.format("[%s] %s -> %s (%s)%n",
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                killerName, victimName, type);
+            Files.writeString(logDir.resolve("kills.log"), line,
+                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (Exception ignored) {}
     }
 
     /**
@@ -75,6 +97,27 @@ public class CombatEventHandler {
             if (owner != null) {
                 TeamSystem.LOGGER.debug("resolveAttacker: found owner via reflection from {}", direct.getClass().getName());
                 return owner;
+            }
+        }
+
+        // 5. Try source entity as owned entity (vehicle explosions, etc.)
+        if (srcEntity != null) {
+            ServerPlayer owner = tryCommonOwnerGetters(srcEntity, level);
+            if (owner != null) return owner;
+            owner = tryReflectionOwnerDetection(srcEntity, level);
+            if (owner != null) return owner;
+        }
+
+        // 6. Try VehicleManager owner lookup for registered vehicle entities
+        Entity vehEntity = srcEntity != null ? srcEntity : direct;
+        if (vehEntity != null) {
+            VehicleManager vm = TeamSystem.getVehicleManager();
+            if (vm != null && vm.isSpawnedVehicle(vehEntity.getUUID())) {
+                UUID ownerUUID = vm.getVehicleOwner(vehEntity.getUUID());
+                if (ownerUUID != null) {
+                    ServerPlayer owner = level.getServer().getPlayerList().getPlayer(ownerUUID);
+                    if (owner != null) return owner;
+                }
             }
         }
 
@@ -148,7 +191,7 @@ public class CombatEventHandler {
         ServerPlayer attacker = resolveAttacker(source, level);
 
         if (attacker != null) {
-            if (teamManager.isFriendly(attacker, victim)) {
+            if (attacker != victim && teamManager.isFriendly(attacker, victim)) {
                 event.setCanceled(true);
                 TeamSystem.LOGGER.debug("Blocked friendly fire from {} to {}",
                     attacker.getName().getString(),
@@ -169,29 +212,6 @@ public class CombatEventHandler {
 
         GameManager game = TeamSystem.getGameManager();
         boolean isPlaying = game != null && game.isPlaying();
-
-        if (isPlaying) {
-            DownedManager dm = TeamSystem.getDownedManager();
-            boolean isBleedoutKill = dm != null && dm.isBleedoutKill(victim.getUUID());
-            if (dm != null && !dm.isDowned(victim.getUUID()) && !isBleedoutKill) {
-                event.setCanceled(true);
-                dm.setDowned(victim, killer);
-                victim.setHealth(1.0F);
-                victim.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal("§cYou are downed! Wait for revive or bleed out."),
-                    false);
-                if (killer != null && !killer.getUUID().equals(victim.getUUID())) {
-                    killer.displayClientMessage(
-                        net.minecraft.network.chat.Component.literal("§aEnemy downed: " + victim.getName().getString()),
-                        false);
-                }
-                TeamSystem.LOGGER.info("Player {} downed by {}", victim.getName().getString(),
-                    killer != null ? killer.getName().getString() : "environment");
-                teamManager.syncPlayerData(victim);
-                return;
-            }
-            if (isBleedoutKill) dm.clearBleedoutKill(victim.getUUID());
-        }
 
         teamManager.incrementDeaths(victim.getUUID());
 
@@ -231,10 +251,9 @@ public class CombatEventHandler {
             placeholders.put("bc", String.valueOf(bcReward));
             placeholders.put("sp", String.valueOf(spReward));
 
-            getServer(level).getPlayerList().broadcastSystemMessage(
-                Component.literal(cfg != null
-                    ? cfg.getMessage("kill_feed_player", placeholders)
-                    : "§6" + victim.getName().getString() + " §eубит §6" + killer.getName().getString()), false);
+            victim.sendSystemMessage(Component.literal("§cВас убил §6" + killer.getName().getString()
+                + " §cс дистанции §6" + (int) victim.distanceTo(killer) + "§cм"), false);
+            logKill(killer.getName().getString(), victim.getName().getString(), "player");
             killer.sendSystemMessage(
                 Component.literal(cfg != null
                     ? cfg.getMessage("kill_reward", placeholders)
@@ -253,31 +272,37 @@ public class CombatEventHandler {
             }
         }
 
-        if (victim != null && killer != null && !(victim instanceof ServerPlayer)) {
-            TeamSystemConfig vcfg = TeamSystem.getConfig();
-            int vSpReward = vcfg != null ? vcfg.getVehicleKillRewardSP() : 20;
-            int vBcReward = vcfg != null ? vcfg.getVehicleKillRewardBC() : 10;
-            EconomyManager econ = TeamSystem.getEconomyManager();
-            if (econ != null && isPlaying) {
-                econ.addSP(killer.getUUID(), vSpReward);
-                econ.addBC(killer.getUUID(), vBcReward);
-                econ.syncAll(killer);
-            }
-            Map<String, String> vPl = new HashMap<>();
-            vPl.put("killer", killer.getName().getString());
-            vPl.put("vehicle", victim.getName().getString());
-            vPl.put("bc", String.valueOf(vBcReward));
-            vPl.put("sp", String.valueOf(vSpReward));
-            getServer(level).getPlayerList().broadcastSystemMessage(
-                Component.literal(vcfg != null
-                    ? vcfg.getMessage("kill_feed_vehicle", vPl)
-                    : "§cТехника " + victim.getName().getString() + " §cуничтожена §6" + killer.getName().getString()), false);
-            killer.sendSystemMessage(
-                Component.literal(vcfg != null
-                    ? vcfg.getMessage("kill_reward", vPl)
-                    : "§a+" + vBcReward + " BC §7+" + vSpReward + " SP"), false);
+        if (isPlaying) {
+            event.setCanceled(true);
+            onPlayerDeath(victim, killer);
+            instantRespawn(victim);
         }
         teamManager.syncPlayerData(victim);
+    }
+
+    /** Hook for future death GUI — sound, concussion effect, kill cam, etc. */
+    private void onPlayerDeath(ServerPlayer victim, ServerPlayer killer) {
+    }
+
+    private void instantRespawn(ServerPlayer player) {
+        GameManager game = TeamSystem.getGameManager();
+        if (game == null) {
+            player.setHealth(player.getMaxHealth());
+            return;
+        }
+        MapConfig map = game.getCurrentMap();
+        if (map == null) {
+            player.setHealth(player.getMaxHealth());
+            return;
+        }
+        Team team = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
+        player.setHealth(player.getMaxHealth());
+        if (team != null && team.isPlayable()) {
+            game.teleportPlayerToMapAtTeamSpawn(player, map, team);
+            game.setMapRespawn(player, map, team);
+        } else {
+            game.teleportPlayerToLobby(player);
+        }
     }
 
     @SubscribeEvent
@@ -289,6 +314,10 @@ public class CombatEventHandler {
 
         GameManager game = TeamSystem.getGameManager();
         if (game == null || !game.isPlaying()) return;
+
+        VehicleManager vm = TeamSystem.getVehicleManager();
+        if (vm == null) return;
+        if (!vm.isVehicleEntityType(ent)) return;
 
         ServerLevel level = (ServerLevel) le.level();
         ServerPlayer killer = resolveAttacker(event.getSource(), level);
@@ -315,9 +344,25 @@ public class CombatEventHandler {
             Component.literal(cfg != null
                 ? cfg.getMessage("kill_feed_vehicle", vPl)
                 : "§cТехника " + name + " §cуничтожена §6" + killer.getName().getString()), false);
+        logKill(killer.getName().getString(), name, "vehicle");
         killer.sendSystemMessage(
             Component.literal(cfg != null
                 ? cfg.getMessage("kill_reward", vPl)
                 : "§a+" + vBcReward + " BC §7+" + vSpReward + " SP"), false);
+        if (vm != null) vm.unregisterSpawnedVehicle(ent.getUUID());
+    }
+
+    @SubscribeEvent
+    public void onExplosion(ExplosionEvent.Detonate event) {
+        GameManager game = TeamSystem.getGameManager();
+        if (game == null || !game.isPlaying()) return;
+        Level level = event.getLevel();
+        if (level.isClientSide) return;
+        // Copy and clear so vanilla won't re-destroy, then destroy blocks without drops
+        List<net.minecraft.core.BlockPos> blocks = List.copyOf(event.getExplosion().getToBlow());
+        event.getExplosion().clearToBlow();
+        for (net.minecraft.core.BlockPos pos : blocks) {
+            level.destroyBlock(pos, false);
+        }
     }
 }

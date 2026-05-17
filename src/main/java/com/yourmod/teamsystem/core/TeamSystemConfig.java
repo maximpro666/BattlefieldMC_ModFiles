@@ -90,12 +90,16 @@ public class TeamSystemConfig {
     public boolean isTeamBalancing() { return teamBalancing; }
     public int getMaxTeamDifference() { return maxTeamDifference; }
 
-    public String getMessage(String key) { return messages.getOrDefault(key, "&f" + key); }
+    public String getMessage(String key) { return translateColors(messages.getOrDefault(key, "&f" + key)); }
     public String getMessage(String key, Map<String, String> placeholders) {
         String msg = messages.getOrDefault(key, "&f" + key);
         for (Map.Entry<String, String> e : placeholders.entrySet())
             msg = msg.replace("{" + e.getKey() + "}", e.getValue());
-        return msg;
+        return translateColors(msg);
+    }
+
+    private static String translateColors(String input) {
+        return input.replace('&', '\u00a7');
     }
 
     public static TeamSystemConfig load(MinecraftServer server) {

@@ -23,10 +23,11 @@ public class MapConfig {
     private int lobbyWaitTime;
     private int[] natoSpawn;
     private int[] russiaSpawn;
+    private int[] natoVehicleSpawn;
+    private int[] russiaVehicleSpawn;
     private int baseRadius;
     private MapState state;
     private List<CapturePointEntry> capturePoints;
-    private transient String liveWorldFolder;
 
     public static class CapturePointEntry {
         public String name;
@@ -64,6 +65,8 @@ public class MapConfig {
         this.lobbyWaitTime = 30;
         this.natoSpawn = new int[]{0, 64, 0};
         this.russiaSpawn = new int[]{0, 64, 0};
+        this.natoVehicleSpawn = new int[]{0, 64, 0};
+        this.russiaVehicleSpawn = new int[]{0, 64, 0};
         this.baseRadius = 30;
         this.state = MapState.AVAILABLE;
         this.capturePoints = new ArrayList<>();
@@ -73,7 +76,7 @@ public class MapConfig {
                      boolean hasCapturePoints, boolean hasRegen, boolean hasWorldBorder,
                      int worldBorderCenterX, int worldBorderCenterZ, int worldBorderSize,
                      int tickets, int lobbyWaitTime,
-                     int[] natoSpawn, int[] russiaSpawn, int baseRadius) {
+                     int[] natoSpawn, int[] russiaSpawn, int[] natoVehicleSpawn, int[] russiaVehicleSpawn, int baseRadius) {
         this.name = name;
         this.worldFolder = worldFolder;
         this.enabled = enabled;
@@ -88,6 +91,8 @@ public class MapConfig {
         this.lobbyWaitTime = lobbyWaitTime;
         this.natoSpawn = natoSpawn != null ? natoSpawn : new int[]{0, 64, 0};
         this.russiaSpawn = russiaSpawn != null ? russiaSpawn : new int[]{0, 64, 0};
+        this.natoVehicleSpawn = natoVehicleSpawn != null ? natoVehicleSpawn : new int[]{0, 64, 0};
+        this.russiaVehicleSpawn = russiaVehicleSpawn != null ? russiaVehicleSpawn : new int[]{0, 64, 0};
         this.baseRadius = baseRadius > 0 ? baseRadius : 30;
         this.state = MapState.AVAILABLE;
         this.capturePoints = new ArrayList<>();
@@ -103,9 +108,6 @@ public class MapConfig {
     public void setWorldFolder(String worldFolder) {
         this.worldFolder = worldFolder != null ? worldFolder : "";
     }
-
-    public String getLiveWorldFolder() { return liveWorldFolder; }
-    public void setLiveWorldFolder(String liveWorldFolder) { this.liveWorldFolder = liveWorldFolder; }
 
     public String getWorldFolderSanitized() {
         if (worldFolder == null || worldFolder.isEmpty()) return "";
@@ -149,6 +151,10 @@ public class MapConfig {
     public void setNatoSpawn(int[] pos) { this.natoSpawn = pos; }
     public int[] getRussiaSpawn() { return russiaSpawn; }
     public void setRussiaSpawn(int[] pos) { this.russiaSpawn = pos; }
+    public int[] getNatoVehicleSpawn() { return natoVehicleSpawn; }
+    public void setNatoVehicleSpawn(int[] pos) { this.natoVehicleSpawn = pos; }
+    public int[] getRussiaVehicleSpawn() { return russiaVehicleSpawn; }
+    public void setRussiaVehicleSpawn(int[] pos) { this.russiaVehicleSpawn = pos; }
     public int getBaseRadius() { return baseRadius; }
     public void setBaseRadius(int radius) { this.baseRadius = Math.max(1, radius); }
 
@@ -194,6 +200,12 @@ public class MapConfig {
         tag.putInt("RussiaSpawnX", russiaSpawn[0]);
         tag.putInt("RussiaSpawnY", russiaSpawn[1]);
         tag.putInt("RussiaSpawnZ", russiaSpawn[2]);
+        tag.putInt("NatoVehicleSpawnX", natoVehicleSpawn[0]);
+        tag.putInt("NatoVehicleSpawnY", natoVehicleSpawn[1]);
+        tag.putInt("NatoVehicleSpawnZ", natoVehicleSpawn[2]);
+        tag.putInt("RussiaVehicleSpawnX", russiaVehicleSpawn[0]);
+        tag.putInt("RussiaVehicleSpawnY", russiaVehicleSpawn[1]);
+        tag.putInt("RussiaVehicleSpawnZ", russiaVehicleSpawn[2]);
         tag.putInt("BaseRadius", baseRadius);
         tag.putString("State", state.name());
         return tag;
@@ -222,6 +234,8 @@ public class MapConfig {
         config.lobbyWaitTime = tag.getInt("LobbyWaitTime");
         config.natoSpawn = new int[]{tag.getInt("NatoSpawnX"), tag.getInt("NatoSpawnY"), tag.getInt("NatoSpawnZ")};
         config.russiaSpawn = new int[]{tag.getInt("RussiaSpawnX"), tag.getInt("RussiaSpawnY"), tag.getInt("RussiaSpawnZ")};
+        config.natoVehicleSpawn = new int[]{tag.getInt("NatoVehicleSpawnX"), tag.getInt("NatoVehicleSpawnY"), tag.getInt("NatoVehicleSpawnZ")};
+        config.russiaVehicleSpawn = new int[]{tag.getInt("RussiaVehicleSpawnX"), tag.getInt("RussiaVehicleSpawnY"), tag.getInt("RussiaVehicleSpawnZ")};
         config.baseRadius = tag.getInt("BaseRadius");
         config.state = MapState.valueOf(tag.getString("State"));
         return config;

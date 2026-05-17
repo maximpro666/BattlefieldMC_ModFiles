@@ -7,12 +7,15 @@ import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class VehicleCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -24,6 +27,12 @@ public class VehicleCommand {
                         .executes(ctx -> spawnVehicle(ctx.getSource(),
                             StringArgumentType.getString(ctx, "vehicleId"),
                             IntegerArgumentType.getInteger(ctx, "count"))))))
+            .then(Commands.literal("setspawn")
+                .requires(src -> src.hasPermission(2))
+                .then(Commands.literal("nato")
+                    .executes(ctx -> setVehicleSpawn(ctx.getSource(), Team.NATO)))
+                .then(Commands.literal("russia")
+                    .executes(ctx -> setVehicleSpawn(ctx.getSource(), Team.RUSSIA))))
             .then(Commands.literal("list")
                 .executes(ctx -> listVehicles(ctx.getSource())))
             .then(Commands.literal("info")
@@ -36,6 +45,8 @@ public class VehicleCommand {
                 .requires(src -> src.hasPermission(2))
                 .then(Commands.argument("name", StringArgumentType.word())
                     .executes(ctx -> saveVehicleKit(ctx.getSource(), StringArgumentType.getString(ctx, "name")))))
+            .then(Commands.literal("hideplaque")
+                .executes(ctx -> toggleHidePlaque(ctx.getSource())))
         );
     }
 
@@ -99,11 +110,38 @@ public class VehicleCommand {
             if (nbt != null) ent.load(nbt);
             ent.setPos(player.getX() + i * 2, player.getY(), player.getZ() + i * 2);
             level.addFreshEntity(ent);
+            vm.registerSpawnedVehicle(ent, player.getUUID());
             if (i == 0) player.startRiding(ent, true);
         }
 
         source.sendSuccess(() -> Component.literal(
             String.format("§aSpawned %d x %s", count, vehicle.getDisplayName())), true);
+        return 1;
+    }
+
+    private static int setVehicleSpawn(CommandSourceStack source, Team team) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) return 0;
+        GameManager game = TeamSystem.getGameManager();
+        if (game == null || !game.isPlaying()) {
+            source.sendFailure(Component.literal("§cИгра не активна"));
+            return 0;
+        }
+        MapConfig map = game.getCurrentMap();
+        if (map == null) {
+            source.sendFailure(Component.literal("§cНет активной карты"));
+            return 0;
+        }
+        BlockPos pos = player.blockPosition();
+        if (team == Team.NATO) {
+            map.setNatoVehicleSpawn(new int[]{pos.getX(), pos.getY(), pos.getZ()});
+        } else {
+            map.setRussiaVehicleSpawn(new int[]{pos.getX(), pos.getY(), pos.getZ()});
+        }
+        TeamSystem.getMapPoolManager().saveConfig();
+        player.sendSystemMessage(Component.literal(String.format(
+            "§aСпавн техники для %s установлен на %d %d %d",
+            team.getColoredName().getString(), pos.getX(), pos.getY(), pos.getZ())));
         return 1;
     }
 
@@ -155,5 +193,16 @@ public class VehicleCommand {
             source.sendFailure(Component.literal("§cCannot purchase vehicle: check rank/team/tickets"));
             return 0;
         }
+    }
+
+    private static int toggleHidePlaque(CommandSourceStack source) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) return 0;
+        VehicleManager vm = TeamSystem.getVehicleManager();
+        if (vm == null) return 0;
+        boolean nowHidden = vm.toggleHidePlaque(player.getUUID());
+        player.sendSystemMessage(Component.literal(
+            nowHidden ? "§aПлажка вражеской техники скрыта" : "§eПлажка вражеской техники видна"));
+        return 1;
     }
 }

@@ -37,7 +37,6 @@ public class MapPoolManager {
     private int currentMapIndex;
     private final Random random;
     private final Map<String, String> votes;
-    private int nextInstanceId;
     private boolean maintenanceRunning;
     private int maintenanceCooldown;
     private boolean restartAfterMaintenance;
@@ -48,7 +47,6 @@ public class MapPoolManager {
         this.currentMapIndex = -1;
         this.random = new Random();
         this.votes = new HashMap<>();
-        this.nextInstanceId = 0;
         this.maintenanceRunning = false;
         this.maintenanceCooldown = 0;
         this.restartAfterMaintenance = true;
@@ -67,23 +65,13 @@ public class MapPoolManager {
         return getServerRoot().resolve(SOURCES_DIR_NAME);
     }
 
-    private Path getLivePath(String liveKey) {
-        return getServerRoot().resolve("dimensions").resolve("teamsystem").resolve(liveKey);
-    }
-
-    public Path getLivePathForMap(MapConfig map) {
-        String liveKey = map.getLiveWorldFolder();
-        if (liveKey == null || liveKey.isEmpty()) return null;
-        return getLivePath(liveKey);
+    private Path getLivePath(String worldKey) {
+        return getServerRoot().resolve("dimensions").resolve("teamsystem").resolve(worldKey);
     }
 
     private String sanitize(String name) {
         return MapConfig.sanitizeToResourcePath(name);
     }
-
-    public int getNextInstanceId() { return nextInstanceId; }
-    public void setNextInstanceId(int id) { this.nextInstanceId = id; }
-    public int allocateInstanceId() { return nextInstanceId++; }
 
     // ========== Loading / Persistence ==========
 
@@ -198,21 +186,16 @@ public class MapPoolManager {
         String worldKey = sanitize(map.getWorldFolder());
         if (worldKey.isEmpty()) return false;
 
-        int instanceId = allocateInstanceId();
-        String liveKey = worldKey + "_i" + instanceId;
-        map.setLiveWorldFolder(liveKey);
-
         Path sourceDir = getSourcesPath().resolve(worldKey);
-        Path liveDir = getLivePath(liveKey);
+        Path liveDir = getLivePath(worldKey);
 
         if (!Files.isDirectory(sourceDir.resolve("region"))) {
             TeamSystem.LOGGER.warn("No source data for map {}", map.getName());
-            map.setLiveWorldFolder(null);
             return false;
         }
 
         try {
-            ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", liveKey));
+            ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey));
             ServerLevel level = server.getLevel(dimKey);
             if (level != null) {
                 level.save(null, true, false);
@@ -226,29 +209,23 @@ public class MapPoolManager {
             Files.createDirectories(liveDir.getParent());
             copyDirectory(sourceDir, liveDir);
 
-            MapDimensionGenerator.generateSingleDimensionDatapack(server, liveKey);
-
-            TeamSystem.LOGGER.info("Copied map {} from source to live instance {}", map.getName(), liveKey);
+            TeamSystem.LOGGER.info("Copied map {} from source to live", map.getName());
             return true;
         } catch (IOException e) {
             TeamSystem.LOGGER.error("Failed to copy map {} to live: {}", map.getName(), e.getMessage());
-            map.setLiveWorldFolder(null);
             return false;
         }
     }
 
     public boolean deleteLive(MapConfig map) {
-        String liveKey = map.getLiveWorldFolder();
-        if (liveKey == null || liveKey.isEmpty()) return true;
+        String worldKey = sanitize(map.getWorldFolder());
+        if (worldKey.isEmpty()) return false;
 
-        Path liveDir = getLivePath(liveKey);
-        if (!Files.isDirectory(liveDir)) {
-            map.setLiveWorldFolder(null);
-            return true;
-        }
+        Path liveDir = getLivePath(worldKey);
+        if (!Files.isDirectory(liveDir)) return true;
 
         try {
-            ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", liveKey));
+            ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey));
             ServerLevel level = server.getLevel(dimKey);
             if (level != null) {
                 level.save(null, true, false);
@@ -256,9 +233,7 @@ public class MapPoolManager {
             }
 
             deleteDirectory(liveDir);
-            MapDimensionGenerator.removeSingleDimensionDatapack(server, liveKey);
-            map.setLiveWorldFolder(null);
-            TeamSystem.LOGGER.info("Deleted live instance {} for map {}", liveKey, map.getName());
+            TeamSystem.LOGGER.info("Deleted live data for map {}", map.getName());
             return true;
         } catch (IOException e) {
             TeamSystem.LOGGER.error("Failed to delete live data for map {}: {}", map.getName(), e.getMessage());

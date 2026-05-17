@@ -33,6 +33,12 @@ public class MapCommand {
                 )
                 .then(Commands.literal("vote")
                     .then(Commands.argument("name", StringArgumentType.greedyString())
+                        .suggests((ctx, builder) -> {
+                            MapPoolManager pool = TeamSystem.getMapPoolManager();
+                            return net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                pool.getMapsByState(MapState.AVAILABLE).stream().map(MapConfig::getName),
+                                builder);
+                        })
                         .executes(context -> voteMap(context))
                     )
                 )
@@ -45,6 +51,12 @@ public class MapCommand {
                         .executes(context -> selectByIndex(context))
                     )
                     .then(Commands.argument("name", StringArgumentType.greedyString())
+                        .suggests((ctx, builder) -> {
+                            MapPoolManager pool = TeamSystem.getMapPoolManager();
+                            return net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                pool.getMapsByState(MapState.AVAILABLE).stream().map(MapConfig::getName),
+                                builder);
+                        })
                         .executes(context -> selectByName(context))
                     )
                 )

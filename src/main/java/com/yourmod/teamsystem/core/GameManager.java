@@ -47,6 +47,7 @@ public class GameManager {
     private boolean overtime;
     private int overtimeTicks;
     private int captureTicks;
+    private boolean lastLiberateAttachment;
 
     public GameManager(MinecraftServer server) {
         this.server = server;
@@ -58,6 +59,7 @@ public class GameManager {
         this.overtime = false;
         this.overtimeTicks = 0;
         this.captureTicks = 0;
+        this.lastLiberateAttachment = false;
     }
 
     public GamePhase getCurrentPhase() { return currentPhase; }
@@ -261,6 +263,13 @@ public class GameManager {
         MapConfig map = currentMap;
         teleportAllToLobby();
 
+        TeamManager tm = TeamSystem.getTeamManager();
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            tm.setPlayerTeam(p, Team.SPECTATOR);
+            tm.getOrCreatePlayerData(p.getUUID()).setDisplayName("");
+            tm.updatePlayerDisplayName(p);
+        }
+
         MapPoolManager pool = TeamSystem.getMapPoolManager();
 
         if (map != null) {
@@ -451,12 +460,12 @@ public class GameManager {
                 if (nearBeacon) break;
             }
         }
-        ServerLevel mapLevel = getMapWorld(currentMap);
-        if (mapLevel != null) {
-            gamerule(mapLevel, "liberateAttachment", nearBeacon ? "true" : "false");
-        } else {
-            gamerule(server.overworld(), "liberateAttachment", "false");
-        }
+        ServerLevel mapLevel = getMapWorldNoFallback(currentMap);
+        if (mapLevel == null) return;
+        if (nearBeacon == lastLiberateAttachment) return;
+        lastLiberateAttachment = nearBeacon;
+        server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
+            "gamerule liberateAttachment " + (nearBeacon ? "true" : "false"));
     }
 
     // ========== Teleport ==========
@@ -501,6 +510,32 @@ public class GameManager {
         if (l != null) p.setRespawnPosition(l.dimension(), p.blockPosition(), p.getYRot(), false, false);
     }
 
+    public void teleportPlayerToMapAtTeamSpawn(ServerPlayer p, MapConfig map, Team team) {
+        ServerLevel target = getMapWorld(map);
+        if (target == null) return;
+        double x = 0.5, y = 65, z = 0.5;
+        if (map.hasTeamSpawns()) {
+            int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
+            if (spawn != null && spawn.length >= 3) {
+                x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5;
+            }
+        }
+        safeTeleport(p, target, x, y, z);
+    }
+
+    public void setMapRespawn(ServerPlayer p, MapConfig map, Team team) {
+        ServerLevel target = getMapWorld(map);
+        if (target == null) return;
+        int x = 0, y = 65, z = 0;
+        if (map.hasTeamSpawns()) {
+            int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
+            if (spawn != null && spawn.length >= 3) {
+                x = spawn[0]; y = spawn[1]; z = spawn[2];
+            }
+        }
+        p.setRespawnPosition(target.dimension(), new BlockPos(x, y, z), 0, false, false);
+    }
+
     private void safeTeleport(ServerPlayer p, ServerLevel target, double x, double y, double z) {
         p.teleportTo(target, x, y, z, 0, 0);
         p.fallDistance = 0;
@@ -524,14 +559,14 @@ public class GameManager {
     private boolean forceLoading = false;
 
     private ServerLevel getMapWorldNoFallback(MapConfig map) {
-        String liveKey = map != null ? map.getLiveWorldFolder() : null;
-        if (liveKey == null || liveKey.isEmpty()) return null;
-        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", liveKey));
+        String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+        if (worldKey.isEmpty() || worldKey.equals("overworld")) return null;
+        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey));
         ServerLevel w = server.getLevel(key);
         if (w == null && !forceLoading) {
             forceLoading = true;
             server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
-                "execute in teamsystem:" + liveKey + " run say Loading dimension " + liveKey);
+                "execute in teamsystem:" + worldKey + " run say Loading dimension " + worldKey);
             w = server.getLevel(key);
             forceLoading = false;
         }

@@ -74,6 +74,7 @@ public class TeamSystem {
     private static CapturePointManager capturePointManager;
     private static TicketManager ticketManager;
     private static DownedManager downedManager;
+    private static PlayerEventHandler playerEventHandler;
     private static ContributionManager contributionManager;
     private static FOBManager fobManager;
     private static TeamSystemConfig config;
@@ -123,7 +124,8 @@ public class TeamSystem {
         squadManager = teamManager.getSquadManager();
         vehicleManager = teamManager.getVehicleManager();
 
-        MinecraftForge.EVENT_BUS.register(new PlayerEventHandler(teamManager));
+        playerEventHandler = new PlayerEventHandler(teamManager);
+        MinecraftForge.EVENT_BUS.register(playerEventHandler);
         MinecraftForge.EVENT_BUS.register(new CombatEventHandler(teamManager));
         MinecraftForge.EVENT_BUS.register(new com.yourmod.teamsystem.events.AttachmentEventHandler());
 
@@ -158,6 +160,7 @@ public class TeamSystem {
         PingCommand.register(event.getDispatcher());
         com.yourmod.teamsystem.commands.CapturePointCommand.register(event.getDispatcher());
         EconomyCommand.register(event.getDispatcher());
+        CallsignCommand.register(event.getDispatcher());
     }
 
     public static TeamManager getTeamManager() { return teamManager; }
@@ -174,5 +177,7 @@ public class TeamSystem {
     public static DownedManager getDownedManager() { return downedManager; }
     public static ContributionManager getContributionManager() { return contributionManager; }
     public static FOBManager getFOBManager() { return fobManager; }
+    public static PlayerEventHandler getPlayerEventHandler() { return playerEventHandler; }
+
     public static TeamSystemConfig getConfig() { return config; }
 }

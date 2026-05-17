@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.GameManager;
+import com.yourmod.teamsystem.core.MapConfig;
 import com.yourmod.teamsystem.core.MapPoolManager;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TicketManager;
@@ -34,6 +35,12 @@ public class GameCommand {
                 .then(Commands.literal("setmap")
                     .requires(source -> source.hasPermission(2))
                     .then(Commands.argument("name", StringArgumentType.greedyString())
+                        .suggests((ctx, builder) -> {
+                            MapPoolManager pool = TeamSystem.getMapPoolManager();
+                            return net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                pool.getMaps().stream().map(MapConfig::getName),
+                                builder);
+                        })
                         .executes(context -> setMap(context))
                     )
                 )

@@ -15,6 +15,8 @@ public class VehicleData {
     private Team team;
     private int minRankOrdinal;
     private int ticketCost;
+    private int cooldownSeconds;
+    private int maxActive;
     private String entityType;
     private String nbtData;
 
@@ -24,6 +26,8 @@ public class VehicleData {
         this.team = team;
         this.minRankOrdinal = Math.max(0, minRankOrdinal);
         this.ticketCost = Math.max(1, ticketCost);
+        this.cooldownSeconds = 60;
+        this.maxActive = 3;
         this.entityType = "";
         this.nbtData = "";
     }
@@ -33,6 +37,10 @@ public class VehicleData {
     public Team getTeam() { return team; }
     public int getMinRankOrdinal() { return minRankOrdinal; }
     public int getTicketCost() { return ticketCost; }
+    public int getCooldownSeconds() { return cooldownSeconds; }
+    public void setCooldownSeconds(int s) { this.cooldownSeconds = s; }
+    public int getMaxActive() { return maxActive; }
+    public void setMaxActive(int m) { this.maxActive = m; }
     public String getEntityType() { return entityType; }
     public String getNbtData() { return nbtData; }
 
@@ -59,6 +67,8 @@ public class VehicleData {
         obj.addProperty("team", team.getName());
         obj.addProperty("minRankOrdinal", minRankOrdinal);
         obj.addProperty("ticketCost", ticketCost);
+        obj.addProperty("cooldownSeconds", cooldownSeconds);
+        obj.addProperty("maxActive", maxActive);
         if (entityType != null && !entityType.isEmpty()) obj.addProperty("entityType", entityType);
         if (nbtData != null && !nbtData.isEmpty()) obj.addProperty("nbt", nbtData);
         return obj;
@@ -71,6 +81,8 @@ public class VehicleData {
         int minRankOrdinal = obj.get("minRankOrdinal").getAsInt();
         int ticketCost = obj.get("ticketCost").getAsInt();
         VehicleData data = new VehicleData(vehicleId, displayName, team, minRankOrdinal, ticketCost);
+        if (obj.has("cooldownSeconds")) data.cooldownSeconds = obj.get("cooldownSeconds").getAsInt();
+        if (obj.has("maxActive")) data.maxActive = obj.get("maxActive").getAsInt();
         if (obj.has("entityType")) data.entityType = obj.get("entityType").getAsString();
         if (obj.has("nbt")) data.nbtData = obj.get("nbt").getAsString();
         return data;

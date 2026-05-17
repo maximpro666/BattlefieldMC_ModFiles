@@ -168,6 +168,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/client/ClientMarkerData.class
   com/yourmod/teamsystem/client/ClientTeamData.class
   com/yourmod/teamsystem/commands/
+  com/yourmod/teamsystem/commands/CallsignCommand.class
   com/yourmod/teamsystem/commands/CapturePointCommand.class
   com/yourmod/teamsystem/commands/EconomyCommand.class
   com/yourmod/teamsystem/commands/GameCommand$1.class

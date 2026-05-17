@@ -82,93 +82,12 @@ public class MapDimensionGenerator {
 
         generatePackMeta(datapacksDir);
         generateLobbyDimension(datapacksDir);
+        generateMapDimensions(server, datapacksDir);
     }
 
-    public static void generateSingleDimensionDatapack(MinecraftServer server, String liveKey) {
-        if (liveKey == null || liveKey.isEmpty()) return;
-        Path datapacksDir = server.getWorldPath(LevelResource.ROOT).resolve("datapacks").resolve("teamsystem_maps");
-        Path dimDir = datapacksDir.resolve("data").resolve("teamsystem").resolve("dimension");
-
-        try {
-            Files.createDirectories(dimDir);
-            Path dimFile = dimDir.resolve(liveKey + ".json");
-            Files.writeString(dimFile, DIMENSION_TEMPLATE, StandardCharsets.UTF_8);
-            TeamSystem.LOGGER.info("Generated dimension datapack for instance: {}", liveKey);
-
-            server.getCommands().performPrefixedCommand(
-                server.createCommandSourceStack(), "reload");
-        } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to generate dimension for instance {}: {}", liveKey, e.getMessage());
-        }
-    }
-
-    public static void removeSingleDimensionDatapack(MinecraftServer server, String liveKey) {
-        if (liveKey == null || liveKey.isEmpty()) return;
-        Path datapacksDir = server.getWorldPath(LevelResource.ROOT).resolve("datapacks").resolve("teamsystem_maps");
-        Path dimFile = datapacksDir.resolve("data").resolve("teamsystem").resolve("dimension").resolve(liveKey + ".json");
-
-        try {
-            Files.deleteIfExists(dimFile);
-            server.getCommands().performPrefixedCommand(
-                server.createCommandSourceStack(), "reload");
-            TeamSystem.LOGGER.info("Removed dimension datapack for instance: {}", liveKey);
-        } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to remove dimension for instance {}: {}", liveKey, e.getMessage());
-        }
-    }
-
-    private static void generatePackMeta(Path datapacksDir) {
-        Path packMcmeta = datapacksDir.resolve("pack.mcmeta");
-        if (!Files.exists(packMcmeta)) {
-            try {
-                Files.createDirectories(packMcmeta.getParent());
-                Files.writeString(packMcmeta, PACK_MCMETA, StandardCharsets.UTF_8);
-                TeamSystem.LOGGER.info("Generated datapack mcmeta");
-            } catch (IOException e) {
-                TeamSystem.LOGGER.error("Failed to generate pack.mcmeta: {}", e.getMessage());
-            }
-        }
-    }
-
-    private static void generateLobbyDimension(Path datapacksDir) {
-        Path dimTypeDir = datapacksDir.resolve("data").resolve("teamsystem").resolve("dimension_type");
-        Path dimDir = datapacksDir.resolve("data").resolve("teamsystem").resolve("dimension");
-
-        try {
-            Files.createDirectories(dimTypeDir);
-            Files.createDirectories(dimDir);
-        } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to create dimension directories: {}", e.getMessage());
-            return;
-        }
-
-        Path dimTypeFile = dimTypeDir.resolve("lobby.json");
-        if (!Files.exists(dimTypeFile)) {
-            try {
-                Files.writeString(dimTypeFile, LOBBY_DIMENSION_TYPE, StandardCharsets.UTF_8);
-                TeamSystem.LOGGER.info("Generated lobby dimension type datapack");
-            } catch (IOException e) {
-                TeamSystem.LOGGER.error("Failed to generate lobby dimension type: {}", e.getMessage());
-            }
-        }
-
-        Path dimFile = dimDir.resolve("lobby.json");
-        if (!Files.exists(dimFile)) {
-            try {
-                Files.writeString(dimFile, LOBBY_DIMENSION, StandardCharsets.UTF_8);
-                TeamSystem.LOGGER.info("Generated lobby dimension datapack");
-            } catch (IOException e) {
-                TeamSystem.LOGGER.error("Failed to generate lobby dimension: {}", e.getMessage());
-            }
-        }
-    }
-
-    private static void generateMapDimensions(Path datapacksDir) {
+    private static void generateMapDimensions(MinecraftServer server, Path datapacksDir) {
         MapPoolManager pool = TeamSystem.getMapPoolManager();
         if (pool == null) return;
-
-        MinecraftServer server = pool.getServer();
-        if (server == null) return;
 
         List<MapConfig> maps = pool.getMaps();
 
@@ -226,5 +145,51 @@ public class MapDimensionGenerator {
         }
 
         TeamSystem.LOGGER.info("Map dimension datapacks generated for {} maps", maps.size());
+    }
+
+    private static void generatePackMeta(Path datapacksDir) {
+        Path packMcmeta = datapacksDir.resolve("pack.mcmeta");
+        if (!Files.exists(packMcmeta)) {
+            try {
+                Files.createDirectories(packMcmeta.getParent());
+                Files.writeString(packMcmeta, PACK_MCMETA, StandardCharsets.UTF_8);
+                TeamSystem.LOGGER.info("Generated datapack mcmeta");
+            } catch (IOException e) {
+                TeamSystem.LOGGER.error("Failed to generate pack.mcmeta: {}", e.getMessage());
+            }
+        }
+    }
+
+    private static void generateLobbyDimension(Path datapacksDir) {
+        Path dimTypeDir = datapacksDir.resolve("data").resolve("teamsystem").resolve("dimension_type");
+        Path dimDir = datapacksDir.resolve("data").resolve("teamsystem").resolve("dimension");
+
+        try {
+            Files.createDirectories(dimTypeDir);
+            Files.createDirectories(dimDir);
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to create dimension directories: {}", e.getMessage());
+            return;
+        }
+
+        Path dimTypeFile = dimTypeDir.resolve("lobby.json");
+        if (!Files.exists(dimTypeFile)) {
+            try {
+                Files.writeString(dimTypeFile, LOBBY_DIMENSION_TYPE, StandardCharsets.UTF_8);
+                TeamSystem.LOGGER.info("Generated lobby dimension type datapack");
+            } catch (IOException e) {
+                TeamSystem.LOGGER.error("Failed to generate lobby dimension type: {}", e.getMessage());
+            }
+        }
+
+        Path dimFile = dimDir.resolve("lobby.json");
+        if (!Files.exists(dimFile)) {
+            try {
+                Files.writeString(dimFile, LOBBY_DIMENSION, StandardCharsets.UTF_8);
+                TeamSystem.LOGGER.info("Generated lobby dimension datapack");
+            } catch (IOException e) {
+                TeamSystem.LOGGER.error("Failed to generate lobby dimension: {}", e.getMessage());
+            }
+        }
     }
 }

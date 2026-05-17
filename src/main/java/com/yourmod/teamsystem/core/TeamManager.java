@@ -88,8 +88,22 @@ public class TeamManager extends SavedData {
         return new HashMap<>(playerData);
     }
 
+    public List<ServerPlayer> getPlayersByTeam(Team team) {
+        MinecraftServer server = getServer();
+        if (server == null) return List.of();
+        List<ServerPlayer> result = new ArrayList<>();
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            PlayerCombatData data = playerData.get(p.getUUID());
+            if (data != null && data.getTeam() == team) {
+                result.add(p);
+            }
+        }
+        return result;
+    }
+
     public void setPlayerTeam(ServerPlayer player, Team team) {
         PlayerCombatData data = getOrCreatePlayerData(player.getUUID());
+        Team oldTeam = data.getTeam();
         data.setTeam(team);
 
         // Remove player from all other vanilla scoreboard teams before adding to new one
@@ -101,6 +115,11 @@ public class TeamManager extends SavedData {
         syncPlayerData(player);
         updatePlayerDisplayName(player);
 
+        // Clear inventory on team change
+        if (oldTeam != null && oldTeam != team) {
+            player.getInventory().clearContent();
+        }
+
         setDirty();
         TeamSystem.LOGGER.info("Player {} assigned to team {}", player.getName().getString(), team.name());
 
@@ -109,10 +128,10 @@ public class TeamManager extends SavedData {
             if (team.isPlayable() && game.isPlaying()) {
                 MapConfig map = game.getCurrentMap();
                 if (map != null) {
-                    String liveKey = map.getLiveWorldFolder();
-                    if (liveKey != null && !liveKey.isEmpty()) {
+                    String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+                    if (!worldKey.isEmpty()) {
                         ServerLevel target = server.getLevel(
-                            ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", liveKey)));
+                            ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey)));
                         if (target != null) {
                             double x = 0.5, y = 65, z = 0.5;
                             if (map.hasTeamSpawns()) {

@@ -9,6 +9,7 @@ import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.PlayerCombatData;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
+import com.yourmod.teamsystem.core.TeamSystemConfig;
 import com.yourmod.teamsystem.core.TicketManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -155,6 +156,20 @@ public class TeamCommand {
             player.sendSystemMessage(Component.literal("You are already in team ")
                 .append(team.getColoredName()));
             return 0;
+        }
+
+        TeamSystemConfig cfg = TeamSystem.getConfig();
+        if (team.isPlayable() && cfg != null && cfg.isTeamBalancing()) {
+            int maxDiff = cfg.getMaxTeamDifference();
+            int natoCount = manager.getPlayersByTeam(Team.NATO).size();
+            int russiaCount = manager.getPlayersByTeam(Team.RUSSIA).size();
+            int targetCount = team == Team.NATO ? natoCount : russiaCount;
+            int otherCount = team == Team.NATO ? russiaCount : natoCount;
+            if (targetCount >= otherCount + maxDiff + 1) {
+                player.sendSystemMessage(Component.literal("Команда переполнена! Выберите другую сторону.")
+                    .withStyle(ChatFormatting.RED));
+                return 0;
+            }
         }
 
         manager.setPlayerTeam(player, team);
