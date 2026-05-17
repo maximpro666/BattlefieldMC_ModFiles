@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.MapConfig;
 import com.yourmod.teamsystem.core.MapPoolManager;
 import com.yourmod.teamsystem.core.MapState;
@@ -147,21 +148,13 @@ public class MapCommand {
         ServerPlayer player = context.getSource().getPlayer();
         if (player == null) return 0;
 
-        MapPoolManager pool = TeamSystem.getMapPoolManager();
+        GameManager game = TeamSystem.getGameManager();
         String name = StringArgumentType.getString(context, "name");
 
-        boolean found = pool.getMapsByState(MapState.AVAILABLE).stream()
-            .anyMatch(m -> m.getName().equalsIgnoreCase(name));
-        if (!found) {
-            context.getSource().sendFailure(
-                Component.literal("Map not available for voting: " + name)
-                    .withStyle(ChatFormatting.RED));
-            return 0;
+        if (game.voteMap(player, name)) {
+            context.getSource().sendSuccess(() ->
+                Component.literal("Voted for map: " + name).withStyle(ChatFormatting.GREEN), false);
         }
-
-        pool.castVote(player, name);
-        context.getSource().sendSuccess(() ->
-            Component.literal("Voted for map: " + name).withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 

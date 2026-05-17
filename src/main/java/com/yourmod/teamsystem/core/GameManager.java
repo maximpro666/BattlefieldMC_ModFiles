@@ -23,34 +23,34 @@ import net.minecraftforge.network.PacketDistributor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public class GameManager {
     public enum GamePhase {
         LOBBY,
+        VOTING,
         PLAYING,
         ENDING
     }
 
     private static final ResourceLocation LOBBY_DIMENSION_ID = new ResourceLocation("teamsystem:lobby");
     private static final BlockPos LOBBY_SPAWN = new BlockPos(0, 64, 0);
+    private static final int VOTE_SECONDS = 20;
+    private static final int COUNTDOWN_SECONDS = 15;
 
     private final MinecraftServer server;
     private GamePhase currentPhase;
-    private int endingTimer;
+    private int phaseTimer;
     private Team winningTeam;
-    private int lobbyWaitTimer;
-    private boolean countdownActive;
     private boolean lobbyLoaded;
     private MapConfig currentMap;
 
     public GameManager(MinecraftServer server) {
         this.server = server;
         this.currentPhase = GamePhase.LOBBY;
-        this.endingTimer = 0;
+        this.phaseTimer = 0;
         this.winningTeam = null;
-        this.lobbyWaitTimer = 0;
-        this.countdownActive = false;
         this.lobbyLoaded = false;
         this.currentMap = null;
     }
@@ -59,6 +59,7 @@ public class GameManager {
     public MinecraftServer getServer() { return server; }
     public Team getWinningTeam() { return winningTeam; }
     public boolean isPlaying() { return currentPhase == GamePhase.PLAYING; }
+    public boolean isVoting() { return currentPhase == GamePhase.VOTING; }
     public boolean isLobby() { return currentPhase == GamePhase.LOBBY; }
 
     // ========== Match Flow ==========
@@ -68,8 +69,7 @@ public class GameManager {
         MapPoolManager mapPool = TeamSystem.getMapPoolManager();
 
         if (!mapPool.hasAvailableMaps()) {
-            broadcastToAll(Component.literal("No available maps! Use /map maintenance or wait for maintenance cycle.")
-                .withStyle(ChatFormatting.RED));
+            broadcast("No available maps! Use /map maintenance or wait for maintenance cycle.", ChatFormatting.RED);
             return;
         }
 
@@ -80,6 +80,7 @@ public class GameManager {
         }
 
         currentPhase = GamePhase.PLAYING;
+        phaseTimer = 0;
         winningTeam = null;
         currentMap = map;
 
@@ -92,10 +93,7 @@ public class GameManager {
         applyMapConfig(map);
         teleportAllPlayersToMap(map);
 
-        broadcastToAll(Component.literal("Game started on map: ")
-            .withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD)
-            .append(Component.literal(map.getName()).withStyle(ChatFormatting.YELLOW)));
-
+        broadcast("Game started on map: " + map.getName(), ChatFormatting.GREEN, ChatFormatting.BOLD);
         syncPhaseToAll();
         TeamSystem.LOGGER.info("Game started on map: {}", map.getName());
     }
@@ -105,13 +103,13 @@ public class GameManager {
 
         currentPhase = GamePhase.ENDING;
         winningTeam = winner;
-        endingTimer = 100;
+        phaseTimer = 80;
 
-        broadcastToAll(Component.literal("=== GAME OVER ===")
-            .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
-        broadcastToAll(Component.literal("Team ").withStyle(ChatFormatting.WHITE)
-            .append(winner.getColoredName())
-            .append(Component.literal(" wins!").withStyle(ChatFormatting.WHITE)));
+        broadcast("=== GAME OVER ===", ChatFormatting.GOLD, ChatFormatting.BOLD);
+        server.getPlayerList().broadcastSystemMessage(
+            Component.literal("Team ").withStyle(ChatFormatting.WHITE)
+                .append(winner.getColoredName())
+                .append(Component.literal(" wins!").withStyle(ChatFormatting.WHITE)), false);
 
         syncPhaseToAll();
         TeamSystem.LOGGER.info("Game ended. Winner: {}", winner.getName());
@@ -122,25 +120,31 @@ public class GameManager {
         if (event.phase != TickEvent.Phase.END) return;
 
         if (currentPhase == GamePhase.ENDING) {
-            endingTimer--;
-            if (endingTimer <= 0) {
-                finishMatchCycle();
+            phaseTimer--;
+            if (phaseTimer <= 0) finishMatchCycle();
+        }
+
+        if (currentPhase == GamePhase.VOTING) {
+            phaseTimer--;
+            if (phaseTimer <= 0) resolveVoting();
+
+            if (phaseTimer % 20 == 0 && phaseTimer > 0) {
+                int sec = phaseTimer / 20;
+                if (sec <= 5 || sec % 5 == 0) {
+                    broadcast("Voting ends in " + sec + "s. Vote: /map vote <name>", ChatFormatting.AQUA);
+                }
             }
         }
 
-        if (currentPhase == GamePhase.LOBBY && countdownActive) {
-            lobbyWaitTimer--;
-            if (lobbyWaitTimer % 20 == 0 && lobbyWaitTimer > 0) {
-                int seconds = lobbyWaitTimer / 20;
-                if (seconds <= 5 || seconds % 10 == 0) {
-                    broadcastToAll(Component.literal("Next round in " + seconds + " seconds...")
-                        .withStyle(ChatFormatting.AQUA));
+        if (currentPhase == GamePhase.LOBBY && phaseTimer > 0) {
+            phaseTimer--;
+            if (phaseTimer % 20 == 0 && phaseTimer > 0) {
+                int sec = phaseTimer / 20;
+                if (sec <= 5 || sec % 10 == 0) {
+                    broadcast("Game starts in " + sec + "s", ChatFormatting.AQUA);
                 }
             }
-            if (lobbyWaitTimer <= 0) {
-                countdownActive = false;
-                startGame();
-            }
+            if (phaseTimer <= 0) startGame();
         }
     }
 
@@ -149,75 +153,118 @@ public class GameManager {
     private void finishMatchCycle() {
         MapConfig map = currentMap;
 
-        // 1. Teleport all players to lobby
         teleportAllToLobby();
 
-        // 2. Mark map DIRTY — removed from rotation, NOT regenerated
         if (map != null) {
             TeamSystem.getMapPoolManager().markDirty(map);
-            broadcastToAll(Component.literal("Map '" + map.getName() + "' marked dirty (will be restored during maintenance)")
-                .withStyle(ChatFormatting.GRAY));
+            broadcast("Map '" + map.getName() + "' used. Vote for next map!", ChatFormatting.GRAY);
         }
 
-        // 3. Return to lobby with next available map
-        returnToLobby();
+        startVoting();
+    }
+
+    private void startVoting() {
+        currentPhase = GamePhase.VOTING;
+        phaseTimer = VOTE_SECONDS * 20;
+        winningTeam = null;
+        currentMap = null;
+
+        MapPoolManager pool = TeamSystem.getMapPoolManager();
+        pool.clearVotes();
+
+        List<MapConfig> available = pool.getMapsByState(MapState.AVAILABLE);
+        if (available.isEmpty()) {
+            broadcast("No available maps! Use /map maintenance", ChatFormatting.RED);
+            currentPhase = GamePhase.LOBBY;
+            phaseTimer = 0;
+            returnToLobby();
+            return;
+        }
+
+        broadcast("=== VOTE FOR NEXT MAP ===", ChatFormatting.GOLD, ChatFormatting.BOLD);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < available.size(); i++) {
+            sb.append("\n").append(i + 1).append(". ").append(available.get(i).getName());
+        }
+        broadcast(sb.toString(), ChatFormatting.YELLOW);
+        broadcast("Use /map vote <name> to vote!", ChatFormatting.GREEN);
+
+        applyLobbyRules();
+        syncPhaseToAll();
+        TeamSystem.LOGGER.info("Voting started. {} maps available", available.size());
+    }
+
+    private void resolveVoting() {
+        MapPoolManager pool = TeamSystem.getMapPoolManager();
+
+        String winner = pool.resolveVoteWinner();
+        if (winner != null && pool.selectMap(winner)) {
+            broadcast("Map '" + winner + "' won the vote!", ChatFormatting.GOLD);
+        } else {
+            MapConfig picked = pool.pickNextAvailable();
+            if (picked == null) {
+                broadcast("No available maps!", ChatFormatting.RED);
+                startVoting();
+                return;
+            }
+            broadcast("Auto-selected map: " + picked.getName(), ChatFormatting.YELLOW);
+        }
+
+        pool.clearVotes();
+        currentPhase = GamePhase.LOBBY;
+        phaseTimer = COUNTDOWN_SECONDS * 20;
+        broadcast("Game starts in " + COUNTDOWN_SECONDS + "s on " + pool.getCurrentMap().map(MapConfig::getName).orElse("?") + "!", ChatFormatting.GREEN);
     }
 
     private void returnToLobby() {
-        MapPoolManager mapPool = TeamSystem.getMapPoolManager();
-
-        // Use vote winner if available, otherwise auto-pick
-        String voted = mapPool.resolveVoteWinner();
-        if (voted != null) {
-            mapPool.selectMap(voted);
-            broadcastToAll(Component.literal("Map '" + voted + "' won the vote!").withStyle(ChatFormatting.GOLD));
-        } else if (mapPool.hasAvailableMaps()) {
-            MapConfig next = mapPool.pickNextAvailable();
-            if (next != null) {
-                broadcastToAll(Component.literal("Next map: ")
-                    .withStyle(ChatFormatting.GOLD)
-                    .append(Component.literal(next.getName()).withStyle(ChatFormatting.YELLOW)));
-            }
-        } else {
-            broadcastToAll(Component.literal("No available maps! Maintenance may be required.")
-                .withStyle(ChatFormatting.RED));
-        }
-        mapPool.clearVotes();
-
         currentPhase = GamePhase.LOBBY;
+        phaseTimer = COUNTDOWN_SECONDS * 20;
         winningTeam = null;
-        endingTimer = 0;
         currentMap = null;
-
         teleportAllToLobby();
         applyLobbyRules();
         syncPhaseToAll();
 
-        int waitTime = 30;
-        startCountdown(waitTime);
+        MapPoolManager pool = TeamSystem.getMapPoolManager();
+        if (pool.hasAvailableMaps()) {
+            pool.pickNextAvailable();
+        }
+        broadcast("Game starts in " + COUNTDOWN_SECONDS + "s", ChatFormatting.GREEN);
         TeamSystem.LOGGER.info("Returned to lobby");
     }
 
-    // ========== Voting ==========
+    // ========== Voting API ==========
 
-    public void voteMap(ServerPlayer player, String mapName) {
-        TeamSystem.getMapPoolManager().castVote(player, mapName);
+    public boolean voteMap(ServerPlayer player, String mapName) {
+        if (currentPhase != GamePhase.VOTING) {
+            player.sendSystemMessage(Component.literal("Not in voting phase!").withStyle(ChatFormatting.RED));
+            return false;
+        }
+        MapPoolManager pool = TeamSystem.getMapPoolManager();
+
+        boolean found = pool.getMapsByState(MapState.AVAILABLE).stream()
+            .anyMatch(m -> m.getName().equalsIgnoreCase(mapName));
+        if (!found) {
+            player.sendSystemMessage(Component.literal("Map not available: " + mapName).withStyle(ChatFormatting.RED));
+            return false;
+        }
+
+        pool.castVote(player, mapName);
+        player.sendSystemMessage(Component.literal("Voted for: " + mapName).withStyle(ChatFormatting.GREEN));
+        return true;
     }
 
-    // ========== Timer ==========
+    // ========== Timer Overrides ==========
 
     public void startCountdown(int seconds) {
-        if (currentPhase != GamePhase.LOBBY) return;
-        lobbyWaitTimer = seconds * 20;
-        countdownActive = true;
-        broadcastToAll(Component.literal("Game starting in " + seconds + " seconds...")
-            .withStyle(ChatFormatting.GREEN));
+        if (currentPhase != GamePhase.VOTING && currentPhase != GamePhase.LOBBY) return;
+        phaseTimer = seconds * 20;
+        broadcast("Countdown set to " + seconds + "s", ChatFormatting.GREEN);
     }
 
     public void cancelCountdown() {
-        countdownActive = false;
-        lobbyWaitTimer = 0;
-        broadcastToAll(Component.literal("Countdown cancelled.").withStyle(ChatFormatting.RED));
+        phaseTimer = 0;
+        broadcast("Countdown cancelled.", ChatFormatting.RED);
     }
 
     // ========== Backup ==========
@@ -233,27 +280,17 @@ public class GameManager {
         if (level == null) return;
 
         TeamSystem.LOGGER.info("Backing up map world: {}", map.getName());
-        level.save(null, false, false);
+        level.save(null, true, false);
 
         try {
             Path dimDir = server.getWorldPath(LevelResource.ROOT)
                 .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
             Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
-            Path regionDir = dimDir.resolve("region");
 
-            if (!Files.isDirectory(regionDir)) return;
-
-            Files.createDirectories(backupDir.resolve("region"));
-            try (var files = Files.list(regionDir)) {
-                for (Path src : (Iterable<Path>) files::iterator) {
-                    Files.copy(src, backupDir.resolve("region").resolve(src.getFileName()),
-                        StandardCopyOption.REPLACE_EXISTING);
-                }
-            }
-
-            backupSubDir(backupDir, dimDir, "poi");
-            backupSubDir(backupDir, dimDir, "entities");
-            backupSubDir(backupDir, dimDir, "data");
+            backupCopyDir(dimDir.resolve("region"), backupDir.resolve("region"));
+            backupCopyDir(dimDir.resolve("poi"), backupDir.resolve("poi"));
+            backupCopyDir(dimDir.resolve("entities"), backupDir.resolve("entities"));
+            backupCopyDir(dimDir.resolve("data"), backupDir.resolve("data"));
 
             TeamSystem.LOGGER.info("Backup created for map: {}", map.getName());
         } catch (java.io.IOException e) {
@@ -261,10 +298,8 @@ public class GameManager {
         }
     }
 
-    private void backupSubDir(Path backupDir, Path dimDir, String sub) throws java.io.IOException {
-        Path src = dimDir.resolve(sub);
+    private void backupCopyDir(Path src, Path dst) throws java.io.IOException {
         if (!Files.isDirectory(src)) return;
-        Path dst = backupDir.resolve(sub);
         Files.createDirectories(dst);
         try (var files = Files.list(src)) {
             for (Path f : (Iterable<Path>) files::iterator) {
@@ -274,12 +309,12 @@ public class GameManager {
     }
 
     private Path getBackupRegionDir(MapConfig map) {
-        Path dimDir = server.getWorldPath(LevelResource.ROOT)
-            .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
-        return dimDir.resolveSibling(map.getWorldFolder() + "_backup").resolve("region");
+        return server.getWorldPath(LevelResource.ROOT)
+            .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder())
+            .resolveSibling(map.getWorldFolder() + "_backup").resolve("region");
     }
 
-    // ========== World Management ==========
+    // ========== World ==========
 
     private void useMapWorld(MapConfig map) {
         ServerLevel level = getMapWorldNoFallback(map);
@@ -287,9 +322,8 @@ public class GameManager {
     }
 
     private void clearWorldEntities(ServerLevel level) {
-        List<Entity> all = new ArrayList<>();
+        List<Entity> all = new java.util.ArrayList<>();
         for (Entity e : level.getEntities().getAll()) all.add(e);
-
         int removed = 0;
         for (Entity e : all) {
             if (e != null && !(e instanceof ServerPlayer) && !(e instanceof Player)) {
@@ -303,41 +337,38 @@ public class GameManager {
     // ========== Rules ==========
 
     private void applyLobbyRules() {
-        ServerLevel lobby = getLobbyWorld();
-        if (lobby == null) return;
-        setGameRule(lobby, "doMobSpawning", "false");
-        setGameRule(lobby, "doDaylightCycle", "false");
-        setGameRule(lobby, "doWeatherCycle", "false");
-        setGameRule(lobby, "mobGriefing", "false");
-        setGameRule(lobby, "doFireTick", "false");
-        setGameRule(lobby, "keepInventory", "true");
-        setGameRule(lobby, "naturalRegeneration", "true");
-        setGameRule(lobby, "fallDamage", "false");
+        ServerLevel l = getLobbyWorld();
+        if (l == null) return;
+        gamerule(l, "doMobSpawning", "false");
+        gamerule(l, "doDaylightCycle", "false");
+        gamerule(l, "doWeatherCycle", "false");
+        gamerule(l, "mobGriefing", "false");
+        gamerule(l, "doFireTick", "false");
+        gamerule(l, "keepInventory", "true");
+        gamerule(l, "naturalRegeneration", "true");
+        gamerule(l, "fallDamage", "false");
     }
 
     private void applyMapConfig(MapConfig map) {
-        ServerLevel level = getMapWorld(map);
-        if (level == null) return;
-
-        setGameRule(level, "naturalRegeneration", map.hasRegen() ? "true" : "false");
-        setGameRule(level, "doImmediateRespawn", map.hasRespawn() ? "false" : "true");
-        setGameRule(level, "doMobSpawning", "true");
-        setGameRule(level, "mobGriefing", "false");
-        setGameRule(level, "doFireTick", "true");
-        setGameRule(level, "keepInventory", "false");
-        setGameRule(level, "fallDamage", "true");
-
+        ServerLevel l = getMapWorld(map);
+        if (l == null) return;
+        gamerule(l, "naturalRegeneration", map.hasRegen() ? "true" : "false");
+        gamerule(l, "doImmediateRespawn", map.hasRespawn() ? "false" : "true");
+        gamerule(l, "doMobSpawning", "true");
+        gamerule(l, "mobGriefing", "false");
+        gamerule(l, "doFireTick", "true");
+        gamerule(l, "keepInventory", "false");
+        gamerule(l, "fallDamage", "true");
         if (map.hasWorldBorder()) {
-            level.getWorldBorder().setCenter(map.getWorldBorderCenterX(), map.getWorldBorderCenterZ());
-            level.getWorldBorder().setSize(map.getWorldBorderSize());
+            l.getWorldBorder().setCenter(map.getWorldBorderCenterX(), map.getWorldBorderCenterZ());
+            l.getWorldBorder().setSize(map.getWorldBorderSize());
         } else {
-            level.getWorldBorder().setSize(6.0E7);
+            l.getWorldBorder().setSize(6.0E7);
         }
     }
 
-    private void setGameRule(ServerLevel level, String rule, String value) {
-        server.getCommands().performPrefixedCommand(
-            server.createCommandSourceStack(), "gamerule " + rule + " " + value);
+    private void gamerule(ServerLevel l, String rule, String val) {
+        server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "gamerule " + rule + " " + val);
     }
 
     // ========== Teleport ==========
@@ -345,108 +376,97 @@ public class GameManager {
     public void teleportAllPlayersToMap(MapConfig map) {
         ServerLevel target = getMapWorld(map);
         if (target == null) return;
-
         TeamManager tm = TeamSystem.getTeamManager();
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            Team team = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
-            if (team == Team.SPECTATOR) continue;
-            safeTeleport(player, target, 0.5, 65, 0.5);
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == Team.SPECTATOR) continue;
+            safeTeleport(p, target, 0.5, 65, 0.5);
         }
     }
 
     public void teleportAllToLobby() {
-        ServerLevel lobby = getOrCreateLobbyWorld();
-        if (lobby == null) return;
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            safeTeleport(player, lobby, LOBBY_SPAWN.getX() + 0.5, LOBBY_SPAWN.getY(), LOBBY_SPAWN.getZ() + 0.5);
-        }
+        ServerLevel l = getOrCreateLobbyWorld();
+        if (l != null)
+            for (ServerPlayer p : server.getPlayerList().getPlayers())
+                safeTeleport(p, l, LOBBY_SPAWN.getX() + 0.5, LOBBY_SPAWN.getY(), LOBBY_SPAWN.getZ() + 0.5);
     }
 
-    public void teleportPlayerToLobby(ServerPlayer player) {
-        ServerLevel lobby = getOrCreateLobbyWorld();
-        if (lobby == null) return;
-        safeTeleport(player, lobby, LOBBY_SPAWN.getX() + 0.5, LOBBY_SPAWN.getY(), LOBBY_SPAWN.getZ() + 0.5);
+    public void teleportPlayerToLobby(ServerPlayer p) {
+        ServerLevel l = getOrCreateLobbyWorld();
+        if (l != null) safeTeleport(p, l, LOBBY_SPAWN.getX() + 0.5, LOBBY_SPAWN.getY(), LOBBY_SPAWN.getZ() + 0.5);
     }
 
-    public void setLobbyRespawn(ServerPlayer player) {
-        ServerLevel lobby = getOrCreateLobbyWorld();
-        if (lobby != null)
-            player.setRespawnPosition(lobby.dimension(), LOBBY_SPAWN, 0, false, false);
+    public void setLobbyRespawn(ServerPlayer p) {
+        ServerLevel l = getOrCreateLobbyWorld();
+        if (l != null) p.setRespawnPosition(l.dimension(), LOBBY_SPAWN, 0, false, false);
     }
 
-    public void setLobbyRespawnAtPlayer(ServerPlayer player) {
-        ServerLevel lobby = getOrCreateLobbyWorld();
-        if (lobby != null)
-            player.setRespawnPosition(lobby.dimension(), player.blockPosition(), player.getYRot(), false, false);
+    public void setLobbyRespawnAtPlayer(ServerPlayer p) {
+        ServerLevel l = getOrCreateLobbyWorld();
+        if (l != null) p.setRespawnPosition(l.dimension(), p.blockPosition(), p.getYRot(), false, false);
     }
 
-    private void safeTeleport(ServerPlayer player, ServerLevel target, double x, double y, double z) {
-        player.teleportTo(target, x, y, z, 0, 0);
-        player.fallDistance = 0;
-        player.setNoGravity(false);
-        player.hurtMarked = true;
+    private void safeTeleport(ServerPlayer p, ServerLevel target, double x, double y, double z) {
+        p.teleportTo(target, x, y, z, 0, 0);
+        p.fallDistance = 0;
+        p.setNoGravity(false);
+        p.hurtMarked = true;
     }
 
     // ========== World Resolution ==========
 
     private ServerLevel getOrCreateLobbyWorld() {
-        ResourceKey<Level> lobbyKey = ResourceKey.create(Registries.DIMENSION, LOBBY_DIMENSION_ID);
-        ServerLevel world = server.getLevel(lobbyKey);
-        if (world == null && !lobbyLoaded) {
+        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, LOBBY_DIMENSION_ID);
+        ServerLevel w = server.getLevel(key);
+        if (w == null && !lobbyLoaded) {
             lobbyLoaded = true;
-            server.getCommands().performPrefixedCommand(
-                server.createCommandSourceStack(), "execute in teamsystem:lobby run say Lobby loaded");
-            world = server.getLevel(lobbyKey);
+            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "execute in teamsystem:lobby run say Lobby loaded");
+            w = server.getLevel(key);
         }
-        return world != null ? world : server.overworld();
+        return w != null ? w : server.overworld();
     }
 
     private ServerLevel getMapWorldNoFallback(MapConfig map) {
-        if (map.getWorldFolder() == null || map.getWorldFolder().isEmpty() || map.getWorldFolder().equals("overworld"))
-            return null;
-        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION,
-            new ResourceLocation("teamsystem", map.getWorldFolder()));
-        return server.getLevel(key);
+        if (map.getWorldFolder() == null || map.getWorldFolder().isEmpty() || map.getWorldFolder().equals("overworld")) return null;
+        return server.getLevel(ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", map.getWorldFolder())));
     }
 
     private ServerLevel getMapWorld(MapConfig map) {
-        ServerLevel level = getMapWorldNoFallback(map);
-        return level != null ? level : server.overworld();
+        ServerLevel l = getMapWorldNoFallback(map);
+        return l != null ? l : server.overworld();
     }
 
     private ServerLevel getLobbyWorld() {
-        ResourceKey<Level> lobbyKey = ResourceKey.create(Registries.DIMENSION, LOBBY_DIMENSION_ID);
-        ServerLevel world = server.getLevel(lobbyKey);
-        return world != null ? world : server.overworld();
+        ServerLevel w = server.getLevel(ResourceKey.create(Registries.DIMENSION, LOBBY_DIMENSION_ID));
+        return w != null ? w : server.overworld();
+    }
+
+    // ========== Broadcast ==========
+
+    private void broadcast(String msg, ChatFormatting... styles) {
+        net.minecraft.network.chat.MutableComponent c = Component.literal(msg);
+        c.withStyle(styles);
+        server.getPlayerList().broadcastSystemMessage(c, false);
     }
 
     // ========== Networking ==========
 
-    private void broadcastToAll(Component msg) {
-        server.getPlayerList().broadcastSystemMessage(msg, false);
-    }
-
     public void syncPhaseToAll() {
-        GameStateSyncPacket packet = new GameStateSyncPacket(
+        GameStateSyncPacket pkt = new GameStateSyncPacket(
             currentPhase.ordinal(),
             currentMap != null ? currentMap.getName() : "",
-            winningTeam != null ? winningTeam.ordinal() : -1
-        );
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
-        }
+            winningTeam != null ? winningTeam.ordinal() : -1);
+        for (ServerPlayer p : server.getPlayerList().getPlayers())
+            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p), pkt);
     }
 
-    public void syncPhaseToPlayer(ServerPlayer player) {
-        GameStateSyncPacket packet = new GameStateSyncPacket(
-            currentPhase.ordinal(),
-            currentMap != null ? currentMap.getName() : "",
-            winningTeam != null ? winningTeam.ordinal() : -1
-        );
-        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    public void syncPhaseToPlayer(ServerPlayer p) {
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
+            new GameStateSyncPacket(currentPhase.ordinal(),
+                currentMap != null ? currentMap.getName() : "",
+                winningTeam != null ? winningTeam.ordinal() : -1));
     }
 
-    // ========== Legacy compat ==========
+    // ========== Legacy ==========
 
     public void reBackupCurrentMap() {
         if (currentMap != null) forceBackup(currentMap);

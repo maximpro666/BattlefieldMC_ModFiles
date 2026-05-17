@@ -36,6 +36,7 @@ public class MapPoolManager {
     private final Map<String, String> votes;
     private boolean maintenanceRunning;
     private int maintenanceCooldown;
+    private boolean restartAfterMaintenance;
 
     public MapPoolManager(MinecraftServer server) {
         this.server = server;
@@ -45,7 +46,11 @@ public class MapPoolManager {
         this.votes = new HashMap<>();
         this.maintenanceRunning = false;
         this.maintenanceCooldown = 0;
+        this.restartAfterMaintenance = false;
     }
+
+    public boolean isRestartAfterMaintenance() { return restartAfterMaintenance; }
+    public void setRestartAfterMaintenance(boolean v) { this.restartAfterMaintenance = v; }
 
     // ========== Loading / Persistence ==========
 
@@ -289,6 +294,17 @@ public class MapPoolManager {
             }
         }
         saveConfig();
+
+        if (restartAfterMaintenance) {
+            TeamSystem.LOGGER.info("Restarting server after maintenance...");
+            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
+                "say Server restarting in 5 seconds for maintenance...");
+            server.execute(() -> {
+                try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
+                server.halt(false);
+            });
+        }
+
         maintenanceRunning = false;
         maintenanceCooldown = MAINTENANCE_INTERVAL_TICKS;
         TeamSystem.LOGGER.info("Maintenance cycle finished. Available maps: {}", getAvailableCount());
