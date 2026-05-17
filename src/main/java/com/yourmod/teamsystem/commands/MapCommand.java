@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.MapConfig;
 import com.yourmod.teamsystem.core.MapPoolManager;
 import net.minecraft.ChatFormatting;
@@ -39,6 +40,9 @@ public class MapCommand {
                 )
                 .then(Commands.literal("info")
                     .executes(context -> infoMap(context))
+                )
+                .then(Commands.literal("backup")
+                    .executes(context -> backupMap(context))
                 )
         );
     }
@@ -111,6 +115,21 @@ public class MapCommand {
             Component.literal("Map config reloaded! " + pool.getMaps().size() + " maps loaded.")
                 .withStyle(ChatFormatting.GREEN), true);
 
+        return 1;
+    }
+
+    private static int backupMap(CommandContext<CommandSourceStack> context) {
+        GameManager game = TeamSystem.getGameManager();
+        if (game == null) {
+            context.getSource().sendFailure(
+                Component.literal("Game manager not initialized.")
+                    .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        game.reBackupCurrentMap();
+        context.getSource().sendSuccess(() ->
+            Component.literal("Map backup updated.")
+                .withStyle(ChatFormatting.GREEN), true);
         return 1;
     }
 

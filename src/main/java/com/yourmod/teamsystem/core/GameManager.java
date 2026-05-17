@@ -14,7 +14,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -23,12 +22,15 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 
+import net.minecraftforge.event.level.ChunkEvent;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.chunk.ChunkAccess;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class GameManager {
     public enum GamePhase {
@@ -48,6 +50,7 @@ public class GameManager {
     private boolean countdownActive;
     private boolean lobbyLoaded;
     private MapConfig currentMap;
+    private final Map<ResourceKey<Level>, Set<ChunkPos>> trackedChunks = new HashMap<>();
 
     public GameManager(MinecraftServer server) {
         this.server = server;
@@ -62,6 +65,10 @@ public class GameManager {
 
     public GamePhase getCurrentPhase() {
         return currentPhase;
+    }
+
+    public MinecraftServer getServer() {
+        return server;
     }
 
     public Team getWinningTeam() {
@@ -173,6 +180,30 @@ public class GameManager {
             .withStyle(ChatFormatting.RED));
     }
 
+    @SubscribeEvent
+    public void onChunkLoad(ChunkEvent.Load event) {
+        ChunkAccess chunk = event.getChunk();
+        LevelAccessor levelAccessor = event.getLevel();
+        if (levelAccessor instanceof ServerLevel serverLevel) {
+            ResourceKey<Level> dimKey = serverLevel.dimension();
+            if (dimKey.location().getNamespace().equals("teamsystem") && !dimKey.location().getPath().equals("lobby")) {
+                trackedChunks.computeIfAbsent(dimKey, k -> new HashSet<>()).add(chunk.getPos());
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onChunkUnload(ChunkEvent.Unload event) {
+        LevelAccessor levelAccessor = event.getLevel();
+        if (levelAccessor instanceof ServerLevel serverLevel) {
+            ResourceKey<Level> dimKey = serverLevel.dimension();
+            Set<ChunkPos> chunks = trackedChunks.get(dimKey);
+            if (chunks != null) {
+                chunks.remove(event.getChunk().getPos());
+            }
+        }
+    }
+
     private void resetAndReturnToLobby() {
         if (currentMap != null && !currentMap.getWorldFolder().equals("overworld")) {
             MapConfig map = currentMap;
@@ -197,71 +228,87 @@ public class GameManager {
             Path dimDir = server.getWorldPath(LevelResource.ROOT)
                 .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
             Path regionDir = dimDir.resolve("region");
+            Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
+            Path backupRegionDir = backupDir.resolve("region");
 
-            if (!Files.isDirectory(regionDir)) {
-                TeamSystem.LOGGER.warn("Region dir not found for map: {}", map.getName());
+            if (!Files.isDirectory(backupRegionDir)) {
+                TeamSystem.LOGGER.warn("No backup found for map: {}", map.getName());
                 return;
             }
 
-            List<Path> regionFiles = new ArrayList<>();
-            try (var files = Files.list(regionDir)) {
-                for (Path file : (Iterable<Path>) files::iterator) {
-                    if (file.toString().endsWith(".mca")) {
-                        regionFiles.add(file);
-                    }
+            // Disable random ticks so chunks stay clean after save
+            setGameRule(level, "randomTickSpeed", "0");
+
+            // Force-save all dirty chunks to disk (they become clean)
+            level.save(null, true, false);
+
+            // Delete current region files and restore from backup (first pass)
+            deleteAllMcaFiles(regionDir);
+            copyAllMcaFiles(backupRegionDir, regionDir);
+            TeamSystem.LOGGER.info("First restore of region files from backup");
+
+            // Unload ALL loaded chunks from this dimension using tracking map
+            ResourceKey<Level> dimKey = level.dimension();
+            Set<ChunkPos> chunks = trackedChunks.getOrDefault(dimKey, Collections.emptySet());
+            List<ChunkPos> chunkSnapshot = new ArrayList<>(chunks);
+            TeamSystem.LOGGER.info("Unloading {} tracked chunks from {}", chunkSnapshot.size(), map.getName());
+
+            int unloaded = 0;
+            for (ChunkPos pos : chunkSnapshot) {
+                LevelChunk chunk = level.getChunkSource().getChunk(pos.x, pos.z, false);
+                if (chunk != null) {
+                    chunk.setUnsaved(false);
+                    level.unload(chunk);
+                    unloaded++;
                 }
             }
+            trackedChunks.remove(dimKey);
+            TeamSystem.LOGGER.info("Unloaded {} chunks from {}", unloaded, map.getName());
 
-            for (Path file : regionFiles) {
-                Files.deleteIfExists(file);
-            }
-
-            Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
-            Path backupRegionDir = backupDir.resolve("region");
-            if (Files.isDirectory(backupRegionDir)) {
-                try (var files = Files.list(backupRegionDir)) {
-                    for (Path src : (Iterable<Path>) files::iterator) {
-                        Path dst = regionDir.resolve(src.getFileName());
-                        Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
-                    }
-                }
-                TeamSystem.LOGGER.info("Restored {} region files from backup", map.getName());
-            } else {
-                TeamSystem.LOGGER.warn("No backup found for map: {}", map.getName());
-            }
-
-            for (Path rf : regionFiles) {
-                ChunkPos rcp = getChunkPosFromRegionFileName(rf);
-                if (rcp == null) continue;
-                for (int dx = 0; dx < 32; dx++) {
-                    for (int dz = 0; dz < 32; dz++) {
-                        ChunkPos pos = new ChunkPos(rcp.x + dx, rcp.z + dz);
-                        level.getChunkSource().removeRegionTicket(
-                            TicketType.POST_TELEPORT, pos, 0, 0, true
-                        );
-                    }
-                }
-            }
+            // Second restore: overwrite any files that might have been saved during unload
+            deleteAllMcaFiles(regionDir);
+            copyAllMcaFiles(backupRegionDir, regionDir);
+            TeamSystem.LOGGER.info("Second (safety) restore of region files from backup");
 
         } catch (IOException e) {
             TeamSystem.LOGGER.error("Failed to hard-reset map {}: {}", map.getName(), e.getMessage());
         }
     }
 
-    private ChunkPos getChunkPosFromRegionFileName(Path regionFile) {
-        String name = regionFile.getFileName().toString();
-        try {
-            String[] parts = name.replace("r.", "").replace(".mca", "").split("\\.");
-            if (parts.length >= 2) {
-                int x = Integer.parseInt(parts[0]);
-                int z = Integer.parseInt(parts[1]);
-                return new ChunkPos(x * 32, z * 32);
+    private void deleteAllMcaFiles(Path dir) throws IOException {
+        if (!Files.isDirectory(dir)) return;
+        try (var files = Files.list(dir)) {
+            for (Path file : (Iterable<Path>) files::iterator) {
+                if (file.toString().endsWith(".mca")) {
+                    Files.deleteIfExists(file);
+                }
             }
-        } catch (Exception ignored) {}
-        return null;
+        }
+    }
+
+    private void copyAllMcaFiles(Path srcDir, Path dstDir) throws IOException {
+        if (!Files.isDirectory(srcDir)) return;
+        Files.createDirectories(dstDir);
+        try (var files = Files.list(srcDir)) {
+            for (Path src : (Iterable<Path>) files::iterator) {
+                if (src.toString().endsWith(".mca")) {
+                    Path dst = dstDir.resolve(src.getFileName());
+                    Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+        }
     }
 
     private void backupMapWorld(MapConfig map) {
+        Path backupRegionDir = getBackupRegionDir(map);
+        if (Files.isDirectory(backupRegionDir)) {
+            TeamSystem.LOGGER.info("Backup already exists for map: {}", map.getName());
+            return;
+        }
+        forceBackupMapWorld(map);
+    }
+
+    public void forceBackupMapWorld(MapConfig map) {
         ServerLevel level = getMapWorldNoFallback(map);
         if (level == null) return;
 
@@ -291,6 +338,18 @@ public class GameManager {
         } catch (IOException e) {
             TeamSystem.LOGGER.error("Failed to backup map {}: {}", map.getName(), e.getMessage());
         }
+    }
+
+    public void reBackupCurrentMap() {
+        if (currentMap != null) {
+            forceBackupMapWorld(currentMap);
+        }
+    }
+
+    private Path getBackupRegionDir(MapConfig map) {
+        Path dimDir = server.getWorldPath(LevelResource.ROOT)
+            .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
+        return dimDir.resolveSibling(map.getWorldFolder() + "_backup").resolve("region");
     }
 
     private void clearWorldEntities(ServerLevel level) {
