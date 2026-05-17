@@ -98,7 +98,11 @@ public class GameManager {
         teamManager.setTickets(Team.NATO, map.getTickets());
         teamManager.setTickets(Team.RUSSIA, map.getTickets());
 
-        precleanMapWorld(map);
+        backupMapWorld(map);
+        ServerLevel gameLevel = getMapWorldNoFallback(map);
+        if (gameLevel != null) {
+            clearWorldEntities(gameLevel);
+        }
         applyMapConfig(map);
         teleportAllPlayersToMap(map);
 
@@ -171,7 +175,9 @@ public class GameManager {
 
     private void resetAndReturnToLobby() {
         if (currentMap != null && !currentMap.getWorldFolder().equals("overworld")) {
-            hardResetMapWorld(currentMap);
+            MapConfig map = currentMap;
+            teleportAllToLobby();
+            hardResetMapWorld(map);
         }
         returnToLobby();
     }
@@ -182,8 +188,10 @@ public class GameManager {
 
         TeamSystem.LOGGER.info("Hard-resetting map world: {}", map.getName());
 
+        for (ServerPlayer player : level.players()) {
+            teleportPlayerToLobby(player);
+        }
         clearWorldEntities(level);
-        level.save(null, false, false);
 
         try {
             Path dimDir = server.getWorldPath(LevelResource.ROOT)
@@ -253,40 +261,46 @@ public class GameManager {
         return null;
     }
 
-    private void precleanMapWorld(MapConfig map) {
+    private void backupMapWorld(MapConfig map) {
         ServerLevel level = getMapWorldNoFallback(map);
         if (level == null) return;
 
-        TeamSystem.LOGGER.info("Pre-cleaning map world: {}", map.getName());
-        clearWorldEntities(level);
-
-        Path dimDir = server.getWorldPath(LevelResource.ROOT)
-            .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
-        Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
+        TeamSystem.LOGGER.info("Backing up map world: {}", map.getName());
+        level.save(null, false, false);
 
         try {
-            if (!Files.exists(backupDir)) {
-                level.save(null, false, false);
-                Files.createDirectories(backupDir.resolve("region"));
-                Path regionDir = dimDir.resolve("region");
-                if (Files.isDirectory(regionDir)) {
-                    try (var files = Files.list(regionDir)) {
-                        for (Path src : (Iterable<Path>) files::iterator) {
-                            Path dst = backupDir.resolve("region").resolve(src.getFileName());
-                            Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
-                        }
-                    }
-                    TeamSystem.LOGGER.info("Backed up region files for map: {}", map.getName());
+            Path dimDir = server.getWorldPath(LevelResource.ROOT)
+                .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
+            Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
+            Path regionDir = dimDir.resolve("region");
+
+            if (!Files.isDirectory(regionDir)) {
+                TeamSystem.LOGGER.warn("Region dir not found for map: {}", map.getName());
+                return;
+            }
+
+            Files.createDirectories(backupDir.resolve("region"));
+
+            try (var files = Files.list(regionDir)) {
+                for (Path src : (Iterable<Path>) files::iterator) {
+                    Path dst = backupDir.resolve("region").resolve(src.getFileName());
+                    Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
                 }
             }
+            TeamSystem.LOGGER.info("Backed up region files for map: {}", map.getName());
         } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to preclean/backup map {}: {}", map.getName(), e.getMessage());
+            TeamSystem.LOGGER.error("Failed to backup map {}: {}", map.getName(), e.getMessage());
         }
     }
 
     private void clearWorldEntities(ServerLevel level) {
+        List<Entity> allEntities = new ArrayList<>();
+        for (Entity e : level.getEntities().getAll()) {
+            allEntities.add(e);
+        }
+
         int removed = 0;
-        for (Entity entity : level.getEntities().getAll()) {
+        for (Entity entity : allEntities) {
             if (entity == null) continue;
             if (!(entity instanceof ServerPlayer) && !(entity instanceof Player)) {
                 entity.discard();
