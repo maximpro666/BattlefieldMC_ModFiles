@@ -6,6 +6,7 @@ import com.yourmod.teamsystem.core.TeamManager;
 import com.yourmod.teamsystem.events.CombatEventHandler;
 import com.yourmod.teamsystem.events.PlayerEventHandler;
 import com.yourmod.teamsystem.network.PacketHandler;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
@@ -36,7 +37,7 @@ public class TeamSystem {
 
     @SubscribeEvent
     public void onServerStarted(ServerStartedEvent event) {
-        teamManager = event.getServer().overworld()
+        teamManager = event.getServer().getLevel(Level.OVERWORLD)
             .getDataStorage()
             .computeIfAbsent(
                 nbt -> TeamManager.load(event.getServer(), nbt),
