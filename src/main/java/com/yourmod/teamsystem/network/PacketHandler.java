@@ -168,5 +168,36 @@ public class PacketHandler {
             .encoder(FOBPlacePacket::toBytes)
             .consumerMainThread(FOBPlacePacket::handle)
             .add();
+
+        // ===== GUI bridge C2S packets =====
+        CHANNEL.messageBuilder(TeamSelectPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(TeamSelectPacket::new)
+            .encoder(TeamSelectPacket::toBytes)
+            .consumerMainThread(TeamSelectPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(VehicleSpawnPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(VehicleSpawnPacket::new)
+            .encoder(VehicleSpawnPacket::toBytes)
+            .consumerMainThread(VehicleSpawnPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(MapVotePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(MapVotePacket::new)
+            .encoder(MapVotePacket::toBytes)
+            .consumerMainThread(MapVotePacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(SquadActionPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(SquadActionPacket::new)
+            .encoder(SquadActionPacket::toBytes)
+            .consumerMainThread(SquadActionPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(KitSavePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(KitSavePacket::new)
+            .encoder(KitSavePacket::toBytes)
+            .consumerMainThread(KitSavePacket::handle)
+            .add();
     }
 }

@@ -41,22 +41,14 @@ public class ClientVoiceHandler {
             rankPrefix = Rank.fromOrdinal(ClientTeamData.localPlayerRank).getPrefix(russian);
         }
 
-        // Remove existing entry for this player
-        ClientTeamData.speakingPlayers.removeIf(sp -> sp.getName().equals(playerName));
-
-        // Add new speaking indicator
-        ClientTeamData.speakingPlayers.add(new SpeakingPlayer(playerName, rankPrefix));
-
-        // Keep list clean
-        ClientTeamData.speakingPlayers.removeIf(SpeakingPlayer::isExpired);
+        ClientTeamData.speakingPlayerDisplay.removeIf(sp -> sp.getName().equals(playerName));
+        ClientTeamData.speakingPlayerDisplay.add(new SpeakingPlayer(playerName, rankPrefix));
+        ClientTeamData.speakingPlayerDisplay.removeIf(SpeakingPlayer::isExpired);
     }
 
-    /**
-     * Called every tick to clean up expired speaking indicators.
-     */
     public static void tick() {
-        if (!ClientTeamData.speakingPlayers.isEmpty()) {
-            ClientTeamData.speakingPlayers.removeIf(SpeakingPlayer::isExpired);
+        if (!ClientTeamData.speakingPlayerDisplay.isEmpty()) {
+            ClientTeamData.speakingPlayerDisplay.removeIf(SpeakingPlayer::isExpired);
         }
     }
 }

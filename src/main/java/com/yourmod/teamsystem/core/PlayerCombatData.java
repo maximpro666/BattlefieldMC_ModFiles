@@ -26,6 +26,7 @@ public class PlayerCombatData {
     private boolean isAdmin = false;
     private int donatTier = 0;
     private String playerTitle = "";
+    private String loadoutConfig = "";
 
     public PlayerCombatData() {
         this.team = Team.SPECTATOR;
@@ -156,6 +157,8 @@ public class PlayerCombatData {
     public void setDonatTier(int donatTier) { this.donatTier = Math.max(0, Math.min(3, donatTier)); }
     public String getPlayerTitle() { return playerTitle; }
     public void setPlayerTitle(String playerTitle) { this.playerTitle = playerTitle != null ? playerTitle : ""; }
+    public String getLoadoutConfig() { return loadoutConfig; }
+    public void setLoadoutConfig(String loadoutConfig) { this.loadoutConfig = loadoutConfig != null ? loadoutConfig : ""; }
 
     public void reset() {
         this.team = Team.SPECTATOR;
@@ -171,6 +174,7 @@ public class PlayerCombatData {
         this.isAdmin = false;
         this.donatTier = 0;
         this.playerTitle = "";
+        this.loadoutConfig = "";
     }
 
     // ===== NBT Serialization =====
@@ -191,6 +195,7 @@ public class PlayerCombatData {
         tag.putBoolean("IsAdmin", isAdmin);
         tag.putInt("DonatTier", donatTier);
         tag.putString("PlayerTitle", playerTitle);
+        tag.putString("LoadoutConfig", loadoutConfig);
         {
             CompoundTag attTag = new CompoundTag();
             for (Map.Entry<String, CompoundTag> e : savedAttachments.entrySet()) {
@@ -223,6 +228,7 @@ public class PlayerCombatData {
         this.isAdmin = tag.getBoolean("IsAdmin");
         this.donatTier = tag.getInt("DonatTier");
         this.playerTitle = tag.getString("PlayerTitle");
+        this.loadoutConfig = tag.contains("LoadoutConfig") ? tag.getString("LoadoutConfig") : "";
         if (tag.contains("SavedAttachments")) {
             CompoundTag attTag = tag.getCompound("SavedAttachments");
             savedAttachments.clear();

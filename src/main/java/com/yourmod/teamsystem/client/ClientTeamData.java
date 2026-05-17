@@ -5,6 +5,10 @@ import com.yourmod.teamsystem.core.DownedData;
 import com.yourmod.teamsystem.client.VehicleData;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.Collections;
 
 public class ClientTeamData {
     private static Team localPlayerTeam = Team.SPECTATOR;
@@ -29,8 +33,18 @@ public class ClientTeamData {
     public static List<FOBData> fobs = new ArrayList<>();
     public static List<CapturePointData> capturePoints = new ArrayList<>();
     public static String language = "ru";
-    public static List<SpeakingPlayer> speakingPlayers = new ArrayList<>();
+    public static List<SpeakingPlayer> speakingPlayerDisplay = new ArrayList<>();
     public static KitData selectedKit = null;
+
+    public static final Map<UUID, PlayerListEntry> playerDataMap = new HashMap<>();
+    public static final Map<UUID, Integer> playerTeamMap = new HashMap<>();
+    public static final List<KitEntry> availableKits = new ArrayList<>();
+    public static final List<VehicleEntry> availableVehicles = new ArrayList<>();
+    public static int matchTimeSeconds = 0;
+    public static final List<String> speakingPlayers = new ArrayList<>();
+
+    public static PlayerListEntry getPlayerData(UUID uuid) { return playerDataMap.get(uuid); }
+    public static List<String> getSpeakingPlayers() { return Collections.unmodifiableList(speakingPlayers); }
 
     public static void setLocalPlayerTeam(Team team) {
         localPlayerTeam = team;
