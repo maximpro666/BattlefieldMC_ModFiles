@@ -217,84 +217,166 @@ public class GameManager {
         ServerLevel level = getMapWorldNoFallback(map);
         if (level == null) return;
 
+        ResourceKey<Level> dimKey = level.dimension();
         TeamSystem.LOGGER.info("Hard-resetting map world: {}", map.getName());
 
+        Path dimDir = server.getWorldPath(LevelResource.ROOT)
+            .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
+        Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
+
+        // === Validate backup ===
+        Path backupRegionDir = backupDir.resolve("region");
+        if (!Files.isDirectory(backupRegionDir)) {
+            TeamSystem.LOGGER.warn("No backup found for map: {}", map.getName());
+            return;
+        }
+
+        // === 1. Teleport all players out of this dimension ===
         for (ServerPlayer player : level.players()) {
             teleportPlayerToLobby(player);
         }
         clearWorldEntities(level);
 
+        // === 2. Disable random ticks so chunks stay clean ===
+        setGameRule(level, "randomTickSpeed", "0");
+
+        // === 3. Save all chunks with flush ===
+        level.save(null, true, false);
+
+        // === 4. Unload ALL loaded chunks ===
+        Set<ChunkPos> chunkPositions = trackedChunks.getOrDefault(dimKey, Collections.emptySet());
+        List<ChunkPos> chunkSnapshot = new ArrayList<>(chunkPositions);
+        int unloaded = 0;
+        for (ChunkPos pos : chunkSnapshot) {
+            LevelChunk chunk = level.getChunkSource().getChunk(pos.x, pos.z, false);
+            if (chunk != null) {
+                chunk.setUnsaved(false);
+                level.unload(chunk);
+                unloaded++;
+            }
+        }
+        trackedChunks.remove(dimKey);
+        TeamSystem.LOGGER.info("Unloaded {} chunks from {}", unloaded, map.getName());
+
+        // === 5. Purge ChunkMap state ===
+        // Closes storage, clears chunk holders, visible/updating chunk maps,
+        // distance manager tickets, and pending unloads.
+        // Ensures next chunk load comes from disk, NOT from memory.
+        purgeChunkState(level);
+
+        // === 6. Restore ALL dimension files from backup ===
+        // region/, poi/, entity/, data/ — anything the backup contains
         try {
-            Path dimDir = server.getWorldPath(LevelResource.ROOT)
-                .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
-            Path regionDir = dimDir.resolve("region");
-            Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
-            Path backupRegionDir = backupDir.resolve("region");
-
-            if (!Files.isDirectory(backupRegionDir)) {
-                TeamSystem.LOGGER.warn("No backup found for map: {}", map.getName());
-                return;
-            }
-
-            // Disable random ticks so chunks stay clean after save
-            setGameRule(level, "randomTickSpeed", "0");
-
-            // Force-save all dirty chunks to disk (they become clean)
-            level.save(null, true, false);
-
-            // Delete current region files and restore from backup (first pass)
-            deleteAllMcaFiles(regionDir);
-            copyAllMcaFiles(backupRegionDir, regionDir);
-            TeamSystem.LOGGER.info("First restore of region files from backup");
-
-            // Unload ALL loaded chunks from this dimension using tracking map
-            ResourceKey<Level> dimKey = level.dimension();
-            Set<ChunkPos> chunks = trackedChunks.getOrDefault(dimKey, Collections.emptySet());
-            List<ChunkPos> chunkSnapshot = new ArrayList<>(chunks);
-            TeamSystem.LOGGER.info("Unloading {} tracked chunks from {}", chunkSnapshot.size(), map.getName());
-
-            int unloaded = 0;
-            for (ChunkPos pos : chunkSnapshot) {
-                LevelChunk chunk = level.getChunkSource().getChunk(pos.x, pos.z, false);
-                if (chunk != null) {
-                    chunk.setUnsaved(false);
-                    level.unload(chunk);
-                    unloaded++;
+            restoreDirectoryFromBackup(dimDir.resolve("region"), backupDir.resolve("region"));
+            restoreDirectoryFromBackup(dimDir.resolve("poi"), backupDir.resolve("poi"));
+            restoreDirectoryFromBackup(dimDir.resolve("entities"), backupDir.resolve("entities"));
+            // data/ folder (scoreboard, raid data, etc) — skip unless backup has it
+            Path backupDataDir = backupDir.resolve("data");
+            if (Files.isDirectory(backupDataDir)) {
+                Path dataDir = dimDir.resolve("data");
+                Files.createDirectories(dataDir);
+                try (var files = Files.list(backupDataDir)) {
+                    for (Path src : (Iterable<Path>) files::iterator) {
+                        Path dst = dataDir.resolve(src.getFileName());
+                        Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
+                    }
                 }
             }
-            trackedChunks.remove(dimKey);
-            TeamSystem.LOGGER.info("Unloaded {} chunks from {}", unloaded, map.getName());
-
-            // Second restore: overwrite any files that might have been saved during unload
-            deleteAllMcaFiles(regionDir);
-            copyAllMcaFiles(backupRegionDir, regionDir);
-            TeamSystem.LOGGER.info("Second (safety) restore of region files from backup");
-
+            TeamSystem.LOGGER.info("Restored dimension files from backup for map: {}", map.getName());
         } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to hard-reset map {}: {}", map.getName(), e.getMessage());
+            TeamSystem.LOGGER.error("Failed to restore map files: {}", e.getMessage());
+        }
+
+        TeamSystem.LOGGER.info("Hard reset complete for map: {}", map.getName());
+    }
+
+    private void purgeChunkState(ServerLevel level) {
+        try {
+            Object chunkMap = level.getChunkSource().chunkMap;
+            Class<?> cmc = chunkMap.getClass();
+
+            String[] visibleMapNames = {"visibleChunkMap"};
+            String[] updatingMapNames = {"updatingChunkMap"};
+            String[] pendingUnloadNames = {"pendingUnloads"};
+            String[] distMgrNames = {"distanceManager"};
+            String[] storageNames = {"storage"};
+            String[] poiMgrNames = {"poiManager"};
+
+            // 1. Close storage (RegionFileStorage) — releases .mca file handles
+            Object storage = findFieldValue(cmc, chunkMap, storageNames);
+            if (storage instanceof AutoCloseable c) { c.close(); }
+
+            // 2. Close POI storage
+            Object poiMgr = findFieldValue(cmc, chunkMap, poiMgrNames);
+            if (poiMgr instanceof AutoCloseable c) { c.close(); }
+
+            // 3. Clear visibleChunkMap — removes ALL ChunkHolder references
+            Object visibleMap = findFieldValue(cmc, chunkMap, visibleMapNames);
+            if (visibleMap instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> map) {
+                int before = map.size();
+                map.clear();
+                TeamSystem.LOGGER.info("Cleared visibleChunkMap ({} holders removed)", before);
+            }
+
+            // 4. Clear updatingChunkMap — removes pending update references
+            Object updatingMap = findFieldValue(cmc, chunkMap, updatingMapNames);
+            if (updatingMap instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> map) {
+                int before = map.size();
+                map.clear();
+                TeamSystem.LOGGER.info("Cleared updatingChunkMap ({} holders removed)", before);
+            }
+
+            // 5. Clear pendingUnloads
+            Object pendingSet = findFieldValue(cmc, chunkMap, pendingUnloadNames);
+            if (pendingSet instanceof it.unimi.dsi.fastutil.longs.LongSet set) {
+                set.clear();
+            }
+
+            // 6. Clear DistanceManager tickets — prevents chunk reload from old state
+            Object distMgr = findFieldValue(cmc, chunkMap, distMgrNames);
+            if (distMgr != null) {
+                String[] ticketNames = {"tickets"};
+                Object ticketsMap = findFieldValue(distMgr.getClass(), distMgr, ticketNames);
+                if (ticketsMap instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> map) {
+                    map.clear();
+                }
+            }
+
+            TeamSystem.LOGGER.info("Purged ChunkMap state for dimension: {}", level.dimension().location());
+        } catch (Exception e) {
+            TeamSystem.LOGGER.error("Failed to purge ChunkMap state: {}", e.getMessage());
         }
     }
 
-    private void deleteAllMcaFiles(Path dir) throws IOException {
-        if (!Files.isDirectory(dir)) return;
-        try (var files = Files.list(dir)) {
-            for (Path file : (Iterable<Path>) files::iterator) {
-                if (file.toString().endsWith(".mca")) {
-                    Files.deleteIfExists(file);
+    private Object findFieldValue(Class<?> clazz, Object instance, String... candidates) throws Exception {
+        for (String name : candidates) {
+            try {
+                java.lang.reflect.Field f = clazz.getDeclaredField(name);
+                f.setAccessible(true);
+                return f.get(instance);
+            } catch (NoSuchFieldException ignored) {}
+        }
+        return null;
+    }
+
+    private void restoreDirectoryFromBackup(Path targetDir, Path backupDir) throws IOException {
+        if (!Files.isDirectory(backupDir)) return;
+        Files.createDirectories(targetDir);
+        // Delete existing .mca files
+        if (Files.isDirectory(targetDir)) {
+            try (var files = Files.list(targetDir)) {
+                for (Path file : (Iterable<Path>) files::iterator) {
+                    if (file.toString().endsWith(".mca")) {
+                        Files.deleteIfExists(file);
+                    }
                 }
             }
         }
-    }
-
-    private void copyAllMcaFiles(Path srcDir, Path dstDir) throws IOException {
-        if (!Files.isDirectory(srcDir)) return;
-        Files.createDirectories(dstDir);
-        try (var files = Files.list(srcDir)) {
+        // Copy backup .mca files
+        try (var files = Files.list(backupDir)) {
             for (Path src : (Iterable<Path>) files::iterator) {
-                if (src.toString().endsWith(".mca")) {
-                    Path dst = dstDir.resolve(src.getFileName());
-                    Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
-                }
+                Path dst = targetDir.resolve(src.getFileName());
+                Files.copy(src, dst, StandardCopyOption.REPLACE_EXISTING);
             }
         }
     }
