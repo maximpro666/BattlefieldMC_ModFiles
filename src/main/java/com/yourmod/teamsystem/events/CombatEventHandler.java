@@ -33,12 +33,18 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class CombatEventHandler {
     private final TeamManager teamManager;
+
+    // Dedup kill credit across both handlers within the same tick
+    private final Set<String> killsThisTick = new HashSet<>();
+    private int killsTickGameTime;
 
     public CombatEventHandler(TeamManager teamManager) {
         this.teamManager = teamManager;
@@ -227,6 +233,7 @@ public class CombatEventHandler {
         }
 
         if (killer != null && !killer.getUUID().equals(victim.getUUID())) {
+            if (!isDedupKill(killer, victim)) return;
             teamManager.incrementKills(killer.getUUID());
             teamManager.syncPlayerData(killer);
 
@@ -255,9 +262,9 @@ public class CombatEventHandler {
                 + " §cс дистанции §6" + (int) victim.distanceTo(killer) + "§cм"), false);
             logKill(killer.getName().getString(), victim.getName().getString(), "player");
             killer.sendSystemMessage(
-                Component.literal(cfg != null
-                    ? cfg.getMessage("kill_reward", placeholders)
-                    : "§a+" + bcReward + " BC §7+" + spReward + " SP"), false);
+                Component.literal("§6" + victim.getName().getString() + " §a"
+                    + (cfg != null ? cfg.getMessage("kill_reward", placeholders)
+                    : "+" + bcReward + " BC +" + spReward + " SP")), false);
 
             Rank oldRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills() - 1);
             Rank newRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills());
@@ -282,6 +289,21 @@ public class CombatEventHandler {
 
     /** Hook for future death GUI — sound, concussion effect, kill cam, etc. */
     private void onPlayerDeath(ServerPlayer victim, ServerPlayer killer) {
+    }
+
+    private boolean isDedupKill(ServerPlayer killer, net.minecraft.world.entity.Entity victim) {
+        int gameTime = 0;
+        if (killer != null && killer.serverLevel() != null) {
+            gameTime = (int) killer.serverLevel().getGameTime();
+        }
+        if (gameTime != killsTickGameTime) {
+            killsThisTick.clear();
+            killsTickGameTime = gameTime;
+        }
+        String key = killer.getUUID().toString() + ":" + victim.getUUID().toString();
+        if (killsThisTick.contains(key)) return false;
+        killsThisTick.add(key);
+        return true;
     }
 
     private void instantRespawn(ServerPlayer player) {
@@ -322,6 +344,7 @@ public class CombatEventHandler {
         ServerLevel level = (ServerLevel) le.level();
         ServerPlayer killer = resolveAttacker(event.getSource(), level);
         if (killer == null) return;
+        if (!isDedupKill(killer, le)) return;
 
         TeamSystemConfig cfg = TeamSystem.getConfig();
         int vSpReward = cfg != null ? cfg.getVehicleKillRewardSP() : 20;

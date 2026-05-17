@@ -1,5 +1,6 @@
 package com.yourmod.teamsystem.core;
 
+import com.yourmod.teamsystem.events.AttachmentEventHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -70,6 +71,26 @@ public class Kit {
 
     public void applyToPlayer(ServerPlayer player) {
         Inventory inv = player.getInventory();
+
+        // Save gun attachments before clearing inventory
+        Map<String, ItemStack> gunsToRestore = new LinkedHashMap<>();
+        for (int i = 0; i < 36; i++) {
+            ItemStack stack = inv.getItem(i);
+            if (isTaczGun(stack)) {
+                AttachmentEventHandler.saveGunAttachments(player, name, stack);
+            }
+        }
+        ItemStack offhand = inv.offhand.get(0);
+        if (isTaczGun(offhand)) {
+            AttachmentEventHandler.saveGunAttachments(player, name, offhand);
+        }
+        for (int i = 0; i < 4; i++) {
+            ItemStack armor = inv.armor.get(i);
+            if (isTaczGun(armor)) {
+                AttachmentEventHandler.saveGunAttachments(player, name, armor);
+            }
+        }
+
         inv.clearContent();
         player.getInventory().armor.set(0, ItemStack.EMPTY);
         player.getInventory().armor.set(1, ItemStack.EMPTY);
@@ -95,7 +116,32 @@ public class Kit {
                 player.addItem(copy);
             }
         }
+
+        // Restore gun attachments after placing kit items
+        for (int i = 0; i < 36; i++) {
+            ItemStack stack = inv.getItem(i);
+            if (isTaczGun(stack)) {
+                AttachmentEventHandler.restoreGunAttachments(player, name, stack);
+            }
+        }
+        ItemStack restoredOffhand = inv.offhand.get(0);
+        if (isTaczGun(restoredOffhand)) {
+            AttachmentEventHandler.restoreGunAttachments(player, name, restoredOffhand);
+        }
+        for (int i = 0; i < 4; i++) {
+            ItemStack armor = inv.armor.get(i);
+            if (isTaczGun(armor)) {
+                AttachmentEventHandler.restoreGunAttachments(player, name, armor);
+            }
+        }
+
         player.inventoryMenu.broadcastChanges();
+    }
+
+    private static boolean isTaczGun(ItemStack stack) {
+        if (stack.isEmpty() || !stack.hasTag()) return false;
+        CompoundTag tag = stack.getTag();
+        return tag != null && (tag.contains("GunCurrentAmmoCount") || tag.contains("AttachmentData"));
     }
 
     public static Kit fromPlayerInventory(String name, String displayName, Team team, int minRankOrdinal, ServerPlayer player) {

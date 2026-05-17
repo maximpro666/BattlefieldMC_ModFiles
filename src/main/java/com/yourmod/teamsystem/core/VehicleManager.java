@@ -125,31 +125,34 @@ public class VehicleManager {
         }
     }
 
-    public boolean buyVehicle(ServerPlayer player, String vehicleId, TeamManager teamManager) {
+    public String buyVehicle(ServerPlayer player, String vehicleId, TeamManager teamManager) {
         VehicleData vehicle = getVehicle(vehicleId);
-        if (vehicle == null) return false;
+        if (vehicle == null) return "§cТехника не найдена: " + vehicleId;
 
         Team playerTeam = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
-        if (!playerTeam.isPlayable()) return false;
+        if (!playerTeam.isPlayable()) return "§cВы не в команде";
 
         int playerRank = teamManager.getOrCreatePlayerData(player.getUUID()).getRankOrdinal();
-        if (vehicle.getTeam() != Team.SPECTATOR && vehicle.getTeam() != playerTeam) return false;
-        if (playerRank < vehicle.getMinRankOrdinal()) return false;
+        if (vehicle.getTeam() != Team.SPECTATOR && vehicle.getTeam() != playerTeam) return "§cТехника недоступна для вашей команды";
+        if (playerRank < vehicle.getMinRankOrdinal()) return "§cТребуется ранг " + vehicle.getMinRankOrdinal();
 
-        if (isOnCooldown(playerTeam, vehicleId)) return false;
+        if (isOnCooldown(playerTeam, vehicleId)) {
+            long remaining = (cooldowns.get(playerTeam.getName() + ":" + vehicleId) - System.currentTimeMillis()) / 1000;
+            return "§cКд " + remaining + " сек";
+        }
 
         int activeCount = countActiveVehicles(playerTeam);
-        if (activeCount >= vehicle.getMaxActive()) return false;
+        if (activeCount >= vehicle.getMaxActive()) return "§cЛимит техники: " + vehicle.getMaxActive();
 
         TicketManager ticketMgr = TeamSystem.getTicketManager();
         if (ticketMgr != null) {
             int teamTickets = ticketMgr.getTickets(playerTeam);
-            if (teamTickets < vehicle.getTicketCost()) return false;
+            if (teamTickets < vehicle.getTicketCost()) return "§cНе хватает билетов (нужно " + vehicle.getTicketCost() + ")";
             ticketMgr.setTickets(playerTeam, teamTickets - vehicle.getTicketCost());
         }
 
         EntityType<?> type = vehicle.resolveEntityType();
-        if (type == null) return false;
+        if (type == null) return "§cНеверный тип сущности";
 
         GameManager game = TeamSystem.getGameManager();
         MapConfig map = game != null ? game.getCurrentMap() : null;
@@ -170,15 +173,16 @@ public class VehicleManager {
         double ox = Math.cos(angle) * dist;
         double oz = Math.sin(angle) * dist;
         Entity ent = type.create(level);
-        if (ent == null) return false;
+        if (ent == null) return "§cОшибка создания техники";
         if (nbt != null) ent.load(nbt);
         ent.setPos(spawnPos[0] + 0.5 + ox, spawnPos[1], spawnPos[2] + 0.5 + oz);
         level.addFreshEntity(ent);
+        player.startRiding(ent, true);
         registerSpawnedVehicle(ent, player.getUUID());
         setCooldown(playerTeam, vehicleId, vehicle.getCooldownSeconds());
 
         TeamSystem.LOGGER.info("Player {} bought vehicle {} for team {}", player.getName().getString(), vehicleId, playerTeam);
-        return true;
+        return null; // success
     }
 
     public void loadVehicles() {

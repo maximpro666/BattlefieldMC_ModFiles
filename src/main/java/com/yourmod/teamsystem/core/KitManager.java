@@ -179,21 +179,24 @@ public class KitManager {
         return available;
     }
 
-    public boolean claimKit(ServerPlayer player, String kitName, TeamManager teamManager) {
+    public String claimKit(ServerPlayer player, String kitName, TeamManager teamManager) {
         Kit kit = getKit(kitName);
-        if (kit == null) return false;
-        if (!player.isAlive()) return false;
+        if (kit == null) return "§cКит не найден: " + kitName;
+        if (!player.isAlive()) return "§cВы мертвы";
         Team playerTeam = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
         int playerRank = teamManager.getOrCreatePlayerData(player.getUUID()).getRankOrdinal();
-        if (kit.getTeam() != Team.SPECTATOR && kit.getTeam() != playerTeam) return false;
-        if (playerRank < kit.getMinRankOrdinal()) return false;
+        if (kit.getTeam() != Team.SPECTATOR && kit.getTeam() != playerTeam) return "§cКит недоступен для вашей команды";
+        if (playerRank < kit.getMinRankOrdinal()) return "§cТребуется ранг " + kit.getMinRankOrdinal();
         if (kit.getCooldownSeconds() > 0) {
-            if (isOnCooldown(player.getUUID(), kitName)) return false;
+            if (isOnCooldown(player.getUUID(), kitName)) {
+                long remaining = (cooldowns.getOrDefault(player.getUUID(), Collections.emptyMap()).getOrDefault(kitName, 0L) - System.currentTimeMillis()) / 1000;
+                return "§cКд " + remaining + " сек";
+            }
             setCooldown(player.getUUID(), kitName, kit.getCooldownSeconds());
         }
 
         kit.applyToPlayer(player);
-        return true;
+        return null; // success
     }
 
     private boolean isOnCooldown(UUID playerId, String kitName) {

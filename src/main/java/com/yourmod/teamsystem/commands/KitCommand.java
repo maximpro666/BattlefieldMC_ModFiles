@@ -209,11 +209,12 @@ public class KitCommand {
         }
 
         KitManager km = TeamSystem.getTeamManager().getKitManager();
-        if (km.claimKit(player, name, TeamSystem.getTeamManager())) {
-            source.sendSuccess(() -> Component.literal("§aKit claimed: " + name), false);
+        String error = km.claimKit(player, name, TeamSystem.getTeamManager());
+        if (error == null) {
+            source.sendSuccess(() -> Component.literal("§aКит получен: " + name), false);
             return 1;
         } else {
-            source.sendFailure(Component.literal("§cCannot claim kit: check rank/team/cooldown"));
+            source.sendFailure(Component.literal(error));
             return 0;
         }
     }
