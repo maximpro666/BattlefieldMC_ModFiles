@@ -8,10 +8,13 @@ import com.yourmod.teamsystem.events.CombatEventHandler;
 import com.yourmod.teamsystem.events.PlayerEventHandler;
 import com.yourmod.teamsystem.network.PacketHandler;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -38,12 +41,22 @@ public class TeamSystem {
     private static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, MODID);
+    private static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public static final RegistryObject<Block> RESPAWN_BEACON_BLOCK = BLOCKS.register("respawn_beacon",
         () -> new RespawnBeaconBlock(Block.Properties.copy(Blocks.BEACON).noOcclusion()));
 
     public static final RegistryObject<Item> RESPAWN_BEACON_ITEM = ITEMS.register("respawn_beacon",
         () -> new BlockItem(RESPAWN_BEACON_BLOCK.get(), new Item.Properties()));
+
+    public static final RegistryObject<CreativeModeTab> TEAM_TAB = TABS.register("team_tab",
+        () -> CreativeModeTab.builder()
+            .icon(() -> new ItemStack(RESPAWN_BEACON_ITEM.get()))
+            .title(Component.translatable("itemGroup.teamsystem"))
+            .displayItems((params, output) -> {
+                output.accept(RESPAWN_BEACON_ITEM.get());
+            })
+            .build());
 
     public static final RegistryObject<BlockEntityType<RespawnBeaconBlockEntity>> RESPAWN_BEACON_BLOCK_ENTITY =
         BLOCK_ENTITIES.register("respawn_beacon",
@@ -60,6 +73,7 @@ public class TeamSystem {
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
+        TABS.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
     }

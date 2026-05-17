@@ -150,6 +150,10 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   META-INF/
   META-INF/MANIFEST.MF
   META-INF/mods.toml
+  assets/
+  assets/teamsystem/
+  assets/teamsystem/lang/
+  assets/teamsystem/lang/en_us.json
   com/
   com/yourmod/
   com/yourmod/teamsystem/
