@@ -76,6 +76,13 @@ public class CapturePointManager {
         syncToAll();
     }
 
+    /**
+     * This manager may be disabled when using Warborn Capture Points mod.
+     */
+    public boolean isActive() {
+        return !com.yourmod.teamsystem.integration.WarbornCaptureAdapter.isEnabled();
+    }
+
     public void addPointFromConfig(MapConfig map, String name) {
         for (var entry : map.getCapturePoints()) {
             if (entry.name.equals(name)) {

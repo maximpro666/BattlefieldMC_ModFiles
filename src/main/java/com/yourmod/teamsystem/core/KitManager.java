@@ -21,24 +21,27 @@ public class KitManager {
 
     private static boolean curiosDetected = false;
     private static Method curiosGetCurios;
-    private static Method curiosGetStacks;
-    private static Method curiosSetStack;
+    private static Method curiosGetStacksFromType;
+    private static Method curiosGetStackInSlot;
+    private static Method curiosSetStackInSlot;
     private static Method curiosGetInventory;
 
     static {
         try {
             Class<?> apiClass = Class.forName("top.theillusivec4.curios.api.CuriosApi");
-            Method apiMethod = apiClass.getMethod("getCuriosInventory", Class.forName("net.minecraft.world.entity.LivingEntity"));
+            curiosGetInventory = apiClass.getMethod("getCuriosInventory", Class.forName("net.minecraft.world.entity.LivingEntity"));
             Class<?> handlerClass = Class.forName("top.theillusivec4.curios.api.type.inventory.ICuriosItemHandler");
             curiosGetCurios = handlerClass.getMethod("getCurios");
+            Class<?> curioTypeClass = Class.forName("top.theillusivec4.curios.api.type.ICurioType");
+            curiosGetStacksFromType = curioTypeClass.getMethod("getStacks");
             Class<?> invClass = Class.forName("top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler");
-            curiosGetStacks = invClass.getMethod("getStackInSlot", int.class);
-            curiosSetStack = invClass.getMethod("setStackInSlot", int.class, ItemStack.class);
-            curiosGetInventory = apiMethod;
+            curiosGetStackInSlot = invClass.getMethod("getStackInSlot", int.class);
+            curiosSetStackInSlot = invClass.getMethod("setStackInSlot", int.class, ItemStack.class);
             curiosDetected = true;
             TeamSystem.LOGGER.info("Curios API detected for kit integration");
         } catch (Exception e) {
             curiosDetected = false;
+            TeamSystem.LOGGER.warn("Curios API not available: {}", e.getMessage());
         }
     }
 
@@ -68,16 +71,29 @@ public class KitManager {
         return Collections.emptyMap();
     }
 
+    private static List<Object> getAllCuriosStacks(ServerPlayer player) {
+        List<Object> stackHandlers = new ArrayList<>();
+        if (!curiosDetected) return stackHandlers;
+        Map<String, ?> curios = getCuriosMap(player);
+        for (Object curioType : curios.values()) {
+            try {
+                Object stacks = curiosGetStacksFromType.invoke(curioType);
+                if (stacks != null) stackHandlers.add(stacks);
+            } catch (Exception e) {
+                TeamSystem.LOGGER.warn("Failed to get stacks from curio type: {}", e.getMessage());
+            }
+        }
+        return stackHandlers;
+    }
+
     public KitManager() { loadKits(); }
 
     public static List<ItemStack> getCuriosSlots(ServerPlayer player) {
         List<ItemStack> result = new ArrayList<>();
-        Map<String, ?> curios = getCuriosMap(player);
-        for (Object slot : curios.values()) {
-            Object stacks = slot; // ICurioType.getStacks() is the IDynamicStackHandler
+        for (Object stacks : getAllCuriosStacks(player)) {
             for (int i = 0; i < 100; i++) {
                 try {
-                    ItemStack stack = (ItemStack) curiosGetStacks.invoke(stacks, i);
+                    ItemStack stack = (ItemStack) curiosGetStackInSlot.invoke(stacks, i);
                     if (stack == null || stack.isEmpty()) break;
                     result.add(stack);
                 } catch (Exception e) { break; }
@@ -87,30 +103,26 @@ public class KitManager {
     }
 
     public static void clearCuriosSlots(ServerPlayer player) {
-        Map<String, ?> curios = getCuriosMap(player);
-        for (Object slot : curios.values()) {
-            Object stacks = slot;
+        for (Object stacks : getAllCuriosStacks(player)) {
             for (int i = 0; i < 100; i++) {
                 try {
-                    ItemStack s = (ItemStack) curiosGetStacks.invoke(stacks, i);
+                    ItemStack s = (ItemStack) curiosGetStackInSlot.invoke(stacks, i);
                     if (s == null || s.isEmpty()) break;
-                    curiosSetStack.invoke(stacks, i, ItemStack.EMPTY);
+                    curiosSetStackInSlot.invoke(stacks, i, ItemStack.EMPTY);
                 } catch (Exception e) { break; }
             }
         }
     }
 
     public static void setCuriosSlot(ServerPlayer player, int index, ItemStack stack) {
-        Map<String, ?> curios = getCuriosMap(player);
         int slotIdx = 0;
-        for (Object slot : curios.values()) {
-            Object stacks = slot;
+        for (Object stacks : getAllCuriosStacks(player)) {
             for (int i = 0; i < 100; i++) {
                 try {
-                    ItemStack s = (ItemStack) curiosGetStacks.invoke(stacks, i);
+                    ItemStack s = (ItemStack) curiosGetStackInSlot.invoke(stacks, i);
                     if (s == null) break;
                     if (slotIdx == index) {
-                        curiosSetStack.invoke(stacks, i, stack);
+                        curiosSetStackInSlot.invoke(stacks, i, stack);
                         return;
                     }
                     slotIdx++;

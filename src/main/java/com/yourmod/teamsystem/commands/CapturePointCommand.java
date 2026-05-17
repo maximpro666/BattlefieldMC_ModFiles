@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.yourmod.teamsystem.TeamSystem;
-import com.yourmod.teamsystem.core.CapturePointManager;
+// Removed unused import
 import com.yourmod.teamsystem.core.MapConfig;
 import com.yourmod.teamsystem.core.MapPoolManager;
 import net.minecraft.ChatFormatting;

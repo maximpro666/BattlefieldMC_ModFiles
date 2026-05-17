@@ -133,6 +133,8 @@ public class TeamSystem {
         downedManager = new DownedManager();
         contributionManager = new ContributionManager();
         fobManager = new FOBManager();
+        // Initialize Warborn integration if available
+        com.yourmod.teamsystem.integration.WarbornCaptureAdapter.init();
 
         LOGGER.info("Team System initialized");
     }

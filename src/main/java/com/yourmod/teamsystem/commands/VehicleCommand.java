@@ -99,6 +99,7 @@ public class VehicleCommand {
             if (nbt != null) ent.load(nbt);
             ent.setPos(player.getX() + i * 2, player.getY(), player.getZ() + i * 2);
             level.addFreshEntity(ent);
+            if (i == 0) player.startRiding(ent, true);
         }
 
         source.sendSuccess(() -> Component.literal(

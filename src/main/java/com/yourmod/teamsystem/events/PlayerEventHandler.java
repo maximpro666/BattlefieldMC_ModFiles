@@ -30,9 +30,16 @@ public class PlayerEventHandler {
             GameManager game = TeamSystem.getGameManager();
             if (game != null) {
                 game.syncPhaseToPlayer(player);
-                if (game.isLobby()) {
-                    game.teleportPlayerToLobby(player);
-                    game.setLobbyRespawn(player);
+                game.teleportPlayerToLobby(player);
+                game.setLobbyRespawn(player);
+
+                if (game.isPlaying() || game.isVoting()) {
+                    player.sendSystemMessage(Component.literal("§6=== Game in progress ===")
+                        .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+                    player.sendSystemMessage(Component.literal("§eUse §a/team nato§e or §a/team russia§e to join a team!")
+                        .withStyle(ChatFormatting.YELLOW));
+                    player.sendSystemMessage(Component.literal("§7After choosing a team, use §a/squad create <name>§7 or §a/squad join <name>§7 to squad up.")
+                        .withStyle(ChatFormatting.GRAY));
                 }
             }
             MarkerManager mm = TeamSystem.getMarkerManager();

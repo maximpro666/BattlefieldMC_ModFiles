@@ -58,9 +58,13 @@ public class Kit {
 
     public String getName() { return name; }
     public String getDisplayName() { return displayName; }
+    public void setDisplayName(String displayName) { this.displayName = displayName; }
     public Team getTeam() { return team; }
+    public void setTeam(Team team) { this.team = team; }
     public int getMinRankOrdinal() { return minRankOrdinal; }
+    public void setMinRankOrdinal(int minRankOrdinal) { this.minRankOrdinal = Math.max(0, minRankOrdinal); }
     public int getCooldownSeconds() { return cooldownSeconds; }
+    public void setCooldownSeconds(int cooldownSeconds) { this.cooldownSeconds = Math.max(0, cooldownSeconds); }
     public List<IndexedItem> getItems() { return items; }
     public void setItems(List<IndexedItem> items) { this.items = items != null ? items : new ArrayList<>(); }
 

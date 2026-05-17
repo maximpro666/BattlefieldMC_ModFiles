@@ -73,6 +73,7 @@ public class SquadCommand {
         ServerPlayer sender = source.getPlayer();
         if (sender == null) return 0;
 
+        TeamManager tm = TeamSystem.getTeamManager();
         SquadManager sm = TeamSystem.getSquadManager();
         Squad squad = sm.getPlayerSquad(sender.getUUID());
 
@@ -88,6 +89,12 @@ public class SquadCommand {
 
         if (squad.isFull()) {
             source.sendFailure(Component.literal("§cSquad is full"));
+            return 0;
+        }
+
+        Team targetTeam = tm.getOrCreatePlayerData(target.getUUID()).getTeam();
+        if (targetTeam != squad.getTeam()) {
+            source.sendFailure(Component.literal("§cThat player is on a different team"));
             return 0;
         }
 
@@ -112,8 +119,15 @@ public class SquadCommand {
             return 0;
         }
 
+        TeamManager tm = TeamSystem.getTeamManager();
+        Team playerTeam = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
+
         for (Squad squad : sm.getAllSquads()) {
             if (squad.getName().equalsIgnoreCase(squadName)) {
+                if (squad.getTeam() != playerTeam) {
+                    source.sendFailure(Component.literal("§cThis squad is for " + squad.getTeam().getName() + " only"));
+                    return 0;
+                }
                 SquadManager.Invitation inv = sm.getInvitation(player.getUUID(), squad.getSquadId());
                 if (inv == null) {
                     source.sendFailure(Component.literal("§cNo invitation for this squad"));
@@ -121,7 +135,7 @@ public class SquadCommand {
                 }
 
                 sm.acceptInvitation(player.getUUID(), squad.getSquadId());
-                TeamSystem.getTeamManager().assignSquad(player.getUUID(), squad.getSquadId());
+                tm.assignSquad(player.getUUID(), squad.getSquadId());
 
                 source.sendSuccess(() -> Component.literal("§aJoined squad: §b" + squadName), true);
                 return 1;

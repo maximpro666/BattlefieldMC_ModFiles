@@ -25,9 +25,9 @@ public class MapConfig {
     private int[] russiaSpawn;
     private int baseRadius;
     private MapState state;
-    private List<CapturePointEntry> capturePoints;
+    
 
-    public static class CapturePointEntry {
+    // Removed CapturePointEntry class
         public String name;
         public int x, y, z;
         public double radius;
@@ -116,7 +116,7 @@ public class MapConfig {
     public boolean hasRespawn() { return hasRespawn; }
     public void setHasRespawn(boolean hasRespawn) { this.hasRespawn = hasRespawn; }
 
-    public boolean hasCapturePoints() { return hasCapturePoints; }
+    // Removed capture points functionality
     public void setHasCapturePoints(boolean hasCapturePoints) { this.hasCapturePoints = hasCapturePoints; }
 
     public boolean hasRegen() { return hasRegen; }

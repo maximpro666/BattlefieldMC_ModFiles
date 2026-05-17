@@ -103,12 +103,17 @@ public class GameManager {
             econ.syncSPToAll();
         }
 
-        CapturePointManager cp = TeamSystem.getCapturePointManager();
-        if (cp != null && map.hasCapturePoints()) {
-            cp.loadFromMapConfig(map);
-        } else if (cp != null) {
-            cp.clearPoints();
-        }
+                CapturePointManager cp = TeamSystem.getCapturePointManager();
+                if (cp != null) {
+                    if (com.yourmod.teamsystem.integration.WarbornCaptureAdapter.isEnabled()) {
+                        // Warborn handles capture zones; clear internal points as fallback
+                        cp.clearPoints();
+                    } else if (map.hasCapturePoints()) {
+                        cp.loadFromMapConfig(map);
+                    } else {
+                        cp.clearPoints();
+                    }
+                }
 
         ContributionManager contrib = TeamSystem.getContributionManager();
         if (contrib != null) contrib.resetMatch();
@@ -208,10 +213,13 @@ public class GameManager {
             if (captureTicks % 20 == 0) {
                 CapturePointManager cp = TeamSystem.getCapturePointManager();
                 if (cp != null) {
-                    MapConfig map = currentMap;
-                    if (map != null) {
-                        ServerLevel level = getMapWorld(map);
-                        if (level != null) cp.tickCapturePoints(level);
+                    // If Warborn is enabled it owns ticking; otherwise perform internal tick
+                    if (!com.yourmod.teamsystem.integration.WarbornCaptureAdapter.isEnabled()) {
+                        MapConfig map = currentMap;
+                        if (map != null) {
+                            ServerLevel level = getMapWorld(map);
+                            if (level != null) cp.tickCapturePoints(level);
+                        }
                     }
                 }
                 TicketManager tm = TeamSystem.getTicketManager();

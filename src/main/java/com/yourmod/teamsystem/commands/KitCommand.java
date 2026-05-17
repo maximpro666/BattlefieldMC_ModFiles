@@ -144,7 +144,14 @@ public class KitCommand {
             source.sendFailure(Component.literal("§cKit not found"));
             return 0;
         }
-        source.sendSuccess(() -> Component.literal("§aKit team updated"), true);
+        Team team = Team.fromString(teamStr);
+        if (team == null) {
+            source.sendFailure(Component.literal("§cInvalid team: " + teamStr));
+            return 0;
+        }
+        kit.setTeam(team);
+        TeamSystem.getTeamManager().getKitManager().saveKits();
+        source.sendSuccess(() -> Component.literal("§aKit " + name + " team set to " + team.getName()), true);
         return 1;
     }
 
@@ -154,7 +161,9 @@ public class KitCommand {
             source.sendFailure(Component.literal("§cKit not found"));
             return 0;
         }
-        source.sendSuccess(() -> Component.literal("§aKit min rank updated to " + rank), true);
+        kit.setMinRankOrdinal(rank);
+        TeamSystem.getTeamManager().getKitManager().saveKits();
+        source.sendSuccess(() -> Component.literal("§aKit " + name + " min rank set to " + rank), true);
         return 1;
     }
 
@@ -164,7 +173,9 @@ public class KitCommand {
             source.sendFailure(Component.literal("§cKit not found"));
             return 0;
         }
-        source.sendSuccess(() -> Component.literal("§aKit cooldown updated to " + seconds + "s"), true);
+        kit.setCooldownSeconds(seconds);
+        TeamSystem.getTeamManager().getKitManager().saveKits();
+        source.sendSuccess(() -> Component.literal("§aKit " + name + " cooldown set to " + seconds + "s"), true);
         return 1;
     }
 

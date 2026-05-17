@@ -127,6 +127,7 @@ public class SquadManager {
     }
 
     public void promoteLeader(UUID playerUUID, UUID newLeaderUUID) {
+        if (playerUUID.equals(newLeaderUUID)) return;
         Squad squad = getPlayerSquad(playerUUID);
         if (squad != null && squad.isLeader(playerUUID)) {
             squad.setLeaderUUID(newLeaderUUID);
