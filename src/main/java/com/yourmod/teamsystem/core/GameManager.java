@@ -107,15 +107,20 @@ public class GameManager {
         }
 
         CapturePointManager cp = TeamSystem.getCapturePointManager();
-        if (cp != null) {
+        if (cp != null && map.hasCapturePoints()) {
+            cp.loadFromMapConfig(map);
+        } else if (cp != null) {
             cp.clearPoints();
-            cp.resetAllPoints();
         }
 
         ContributionManager contrib = TeamSystem.getContributionManager();
         if (contrib != null) contrib.resetMatch();
 
-        backupOnce(map);
+        try {
+            backupOnce(map);
+        } catch (Exception e) {
+            TeamSystem.LOGGER.error("Backup failed for map {}: {}", map.getName(), e.getMessage());
+        }
         useMapWorld(map);
         applyMapConfig(map);
         teleportAllPlayersToMap(map);
@@ -380,10 +385,13 @@ public class GameManager {
         TeamSystem.LOGGER.info("Backing up map world: {}", map.getName());
         level.save(null, true, false);
 
+        String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+        if (worldKey.isEmpty()) return;
+
         try {
             Path dimDir = server.getWorldPath(LevelResource.ROOT)
-                .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
-            Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
+                .resolve("dimensions").resolve("teamsystem").resolve(worldKey);
+            Path backupDir = dimDir.resolveSibling(worldKey + "_backup");
 
             backupCopyDir(dimDir.resolve("region"), backupDir.resolve("region"));
             backupCopyDir(dimDir.resolve("poi"), backupDir.resolve("poi"));
@@ -407,9 +415,10 @@ public class GameManager {
     }
 
     private Path getBackupRegionDir(MapConfig map) {
+        String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
         return server.getWorldPath(LevelResource.ROOT)
-            .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder())
-            .resolveSibling(map.getWorldFolder() + "_backup").resolve("region");
+            .resolve("dimensions").resolve("teamsystem").resolve(worldKey)
+            .resolveSibling(worldKey + "_backup").resolve("region");
     }
 
     // ========== World ==========
@@ -524,8 +533,9 @@ public class GameManager {
     }
 
     private ServerLevel getMapWorldNoFallback(MapConfig map) {
-        if (map.getWorldFolder() == null || map.getWorldFolder().isEmpty() || map.getWorldFolder().equals("overworld")) return null;
-        return server.getLevel(ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", map.getWorldFolder())));
+        String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+        if (worldKey.isEmpty() || worldKey.equals("overworld")) return null;
+        return server.getLevel(ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey)));
     }
 
     private ServerLevel getMapWorld(MapConfig map) {

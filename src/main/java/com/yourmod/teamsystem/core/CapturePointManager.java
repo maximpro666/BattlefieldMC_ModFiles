@@ -5,6 +5,7 @@ import com.yourmod.teamsystem.network.CapturePointSyncPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;
@@ -59,6 +60,38 @@ public class CapturePointManager {
 
     public void resetAllPoints() {
         points.forEach(CapturePointData::reset);
+    }
+
+    public void loadFromMapConfig(MapConfig map) {
+        clearPoints();
+        for (var entry : map.getCapturePoints()) {
+            CapturePointData data = new CapturePointData(
+                entry.hashCode(), entry.name,
+                new BlockPos(entry.x, entry.y, entry.z),
+                entry.radius, entry.captureSpeed
+            );
+            points.add(data);
+        }
+        TeamSystem.LOGGER.info("Loaded {} capture points from map config", points.size());
+        syncToAll();
+    }
+
+    public void addPointFromConfig(MapConfig map, String name) {
+        for (var entry : map.getCapturePoints()) {
+            if (entry.name.equals(name)) {
+                CapturePointData existing = getPoint(entry.hashCode());
+                if (existing == null) {
+                    CapturePointData data = new CapturePointData(
+                        entry.hashCode(), entry.name,
+                        new BlockPos(entry.x, entry.y, entry.z),
+                        entry.radius, entry.captureSpeed
+                    );
+                    points.add(data);
+                    syncToAll();
+                }
+                return;
+            }
+        }
     }
 
     public void tickCapturePoints(ServerLevel level) {
@@ -182,7 +215,7 @@ public class CapturePointManager {
     private ResourceLocation getCurrentMapDimension() {
         MapConfig map = TeamSystem.getMapPoolManager().getCurrentMap().orElse(null);
         if (map != null && map.getWorldFolder() != null && !map.getWorldFolder().isEmpty()) {
-            return new ResourceLocation("teamsystem", map.getWorldFolder());
+            return new ResourceLocation("teamsystem", MapConfig.sanitizeToResourcePath(map.getWorldFolder()));
         }
         return null;
     }

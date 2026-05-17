@@ -164,6 +164,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/client/ClientMarkerData.class
   com/yourmod/teamsystem/client/ClientTeamData.class
   com/yourmod/teamsystem/commands/
+  com/yourmod/teamsystem/commands/CapturePointCommand.class
   com/yourmod/teamsystem/commands/GameCommand$1.class
   com/yourmod/teamsystem/commands/GameCommand.class
   com/yourmod/teamsystem/commands/KitCommand.class
@@ -177,11 +178,20 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/commands/TeamCommand.class
   com/yourmod/teamsystem/commands/VehicleCommand.class
   com/yourmod/teamsystem/core/
+  com/yourmod/teamsystem/core/CapturePointData$CaptureState.class
+  com/yourmod/teamsystem/core/CapturePointData.class
   com/yourmod/teamsystem/core/CapturePointManager.class
+  com/yourmod/teamsystem/core/ContributionData.class
+  com/yourmod/teamsystem/core/ContributionManager.class
+  com/yourmod/teamsystem/core/DownedData.class
+  com/yourmod/teamsystem/core/DownedManager.class
+  com/yourmod/teamsystem/core/EconomyManager.class
+  com/yourmod/teamsystem/core/FOBManager.class
   com/yourmod/teamsystem/core/GameManager$GamePhase.class
   com/yourmod/teamsystem/core/GameManager.class
   com/yourmod/teamsystem/core/Kit.class
   com/yourmod/teamsystem/core/KitManager.class
+  com/yourmod/teamsystem/core/MapConfig$CapturePointEntry.class
   com/yourmod/teamsystem/core/MapConfig.class
   com/yourmod/teamsystem/core/MapDimensionGenerator.class
   com/yourmod/teamsystem/core/MapPoolManager$1.class
@@ -207,16 +217,20 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/core/VehicleData.class
   com/yourmod/teamsystem/core/VehicleManager.class
   com/yourmod/teamsystem/events/
+  com/yourmod/teamsystem/events/AttachmentEventHandler.class
   com/yourmod/teamsystem/events/CombatEventHandler.class
   com/yourmod/teamsystem/events/PlayerEventHandler.class
   com/yourmod/teamsystem/network/
+  com/yourmod/teamsystem/network/BCSyncPacket.class
   com/yourmod/teamsystem/network/CapturePointSyncPacket.class
   com/yourmod/teamsystem/network/CombatDataSyncPacket.class
+  com/yourmod/teamsystem/network/DownedSyncPacket.class
   com/yourmod/teamsystem/network/GameStateSyncPacket.class
   com/yourmod/teamsystem/network/KitSyncPacket.class
   com/yourmod/teamsystem/network/MarkerSyncPacket.class
   com/yourmod/teamsystem/network/PacketHandler.class
   com/yourmod/teamsystem/network/RankSyncPacket.class
+  com/yourmod/teamsystem/network/SPSyncPacket.class
   com/yourmod/teamsystem/network/SquadSyncPacket.class
   com/yourmod/teamsystem/network/TeamSyncPacket.class
   com/yourmod/teamsystem/network/TeamTicketSyncPacket.class

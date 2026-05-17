@@ -152,6 +152,7 @@ public class TeamSystem {
         SquadCommand.register(event.getDispatcher());
         VehicleCommand.register(event.getDispatcher());
         PingCommand.register(event.getDispatcher());
+        com.yourmod.teamsystem.commands.CapturePointCommand.register(event.getDispatcher());
     }
 
     public static TeamManager getTeamManager() { return teamManager; }

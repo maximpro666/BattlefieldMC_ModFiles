@@ -16,7 +16,12 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraftforge.network.PacketDistributor;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import java.util.*;
 
 public class TeamManager extends SavedData {
@@ -165,6 +170,27 @@ public class TeamManager extends SavedData {
 
         setDirty();
         TeamSystem.LOGGER.info("Player {} assigned to team {}", player.getName().getString(), team.name());
+
+        GameManager game = TeamSystem.getGameManager();
+        if (game != null) {
+            if (team.isPlayable() && game.isPlaying()) {
+                MapConfig map = game.getCurrentMap();
+                if (map != null) {
+                    String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+                    if (!worldKey.isEmpty()) {
+                        ServerLevel target = server.getLevel(
+                            ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey)));
+                        if (target != null) {
+                            player.teleportTo(target, 0.5, 65, 0.5, 0, 0);
+                            player.fallDistance = 0;
+                        }
+                    }
+                }
+            } else {
+                game.teleportPlayerToLobby(player);
+                game.setLobbyRespawn(player);
+            }
+        }
     }
 
     /**

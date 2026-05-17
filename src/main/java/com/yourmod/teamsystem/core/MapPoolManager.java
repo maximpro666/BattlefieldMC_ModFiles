@@ -47,6 +47,7 @@ public class MapPoolManager {
         this.maintenanceRunning = false;
         this.maintenanceCooldown = 0;
         this.restartAfterMaintenance = true;
+        TeamSystem.LOGGER.info("restartAfterMaintenance = {}", restartAfterMaintenance);
     }
 
     public boolean isRestartAfterMaintenance() { return restartAfterMaintenance; }
@@ -75,8 +76,9 @@ public class MapPoolManager {
                 for (MapConfig map : loaded) {
                     if (!map.isEnabled()) continue;
                     if (map.getState() == null) map.setState(MapState.AVAILABLE);
+                    String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
                     Path mapDir = server.getWorldPath(LevelResource.ROOT)
-                        .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
+                        .resolve("dimensions").resolve("teamsystem").resolve(worldKey);
                     if (Files.isDirectory(mapDir.resolve("region"))) {
                         maps.add(map);
                     }
@@ -84,7 +86,10 @@ public class MapPoolManager {
             }
 
             for (MapConfig folderMap : scanDimensionsFolder()) {
-                if (maps.stream().noneMatch(m -> m.getWorldFolder().equalsIgnoreCase(folderMap.getWorldFolder()))) {
+                String folderKey = MapConfig.sanitizeToResourcePath(folderMap.getWorldFolder());
+                boolean exists = maps.stream().anyMatch(m ->
+                    MapConfig.sanitizeToResourcePath(m.getWorldFolder()).equals(folderKey));
+                if (!exists) {
                     folderMap.setState(MapState.AVAILABLE);
                     maps.add(folderMap);
                 }
@@ -134,7 +139,7 @@ public class MapPoolManager {
         return found;
     }
 
-    private void saveConfig() {
+    public void saveConfig() {
         Path configPath = getConfigPath();
         try {
             Files.createDirectories(configPath.getParent());
@@ -282,31 +287,65 @@ public class MapPoolManager {
         maintenanceRunning = true;
         TeamSystem.LOGGER.info("Maintenance cycle started");
 
+        try {
+            server.getPlayerList().saveAll();
+            for (ServerLevel level : server.getAllLevels()) {
+                try { level.save(null, true, level.noSave()); } catch (Exception ignored) {}
+            }
+        } catch (Exception e) {
+            TeamSystem.LOGGER.error("Failed to save before maintenance: {}", e.getMessage());
+        }
+
+        int restored = 0;
+        int failed = 0;
         List<MapConfig> dirty = getMapsByState(MapState.DIRTY);
         for (MapConfig map : dirty) {
-            if (!canRegenerateSafety(map)) {
-                TeamSystem.LOGGER.info("Skipping map {} (dimension still active)", map.getName());
-                continue;
-            }
-            if (regenerateFromBackup(map)) {
-                map.setState(MapState.AVAILABLE);
-                TeamSystem.LOGGER.info("Restored map {}", map.getName());
+            try {
+                if (!canRegenerateSafety(map)) {
+                    TeamSystem.LOGGER.info("Skipping map {} (dimension still active)", map.getName());
+                    continue;
+                }
+                if (regenerateFromBackup(map)) {
+                    map.setState(MapState.AVAILABLE);
+                    restored++;
+                    TeamSystem.LOGGER.info("Restored map {}", map.getName());
+                } else {
+                    failed++;
+                }
+            } catch (Exception e) {
+                failed++;
+                TeamSystem.LOGGER.error("Failed to restore map {}: {}", map.getName(), e.getMessage());
             }
         }
         saveConfig();
 
-        if (restartAfterMaintenance) {
-            TeamSystem.LOGGER.info("Restarting server after maintenance...");
-            server.execute(() -> server.halt(false));
-        }
-
         maintenanceRunning = false;
         maintenanceCooldown = MAINTENANCE_INTERVAL_TICKS;
-        TeamSystem.LOGGER.info("Maintenance cycle finished. Available maps: {}", getAvailableCount());
+
+        if (restartAfterMaintenance) {
+            TeamSystem.LOGGER.info("Maintenance finished. Restored: {}, Failed: {}. Server will now restart.", restored, failed);
+            server.getPlayerList().broadcastSystemMessage(
+                net.minecraft.network.chat.Component.literal("§6[Maintenance] Maps restored. Server restarting..."), false);
+            try {
+                server.getPlayerList().saveAll();
+                for (ServerLevel level : server.getAllLevels()) {
+                    try { level.save(null, true, level.noSave()); } catch (Exception ignored) {}
+                }
+            } catch (Exception e) {
+                TeamSystem.LOGGER.error("Error during final save: {}", e.getMessage());
+            }
+            server.halt(false);
+            return;
+        }
+
+        TeamSystem.LOGGER.info("Maintenance finished. Restored: {}, Failed: {}, Available: {}",
+            restored, failed, getAvailableCount());
     }
 
     private boolean canRegenerateSafety(MapConfig map) {
-        ResourceLocation dimId = new ResourceLocation("teamsystem", map.getWorldFolder());
+        String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+        if (worldKey.isEmpty()) return true;
+        ResourceLocation dimId = new ResourceLocation("teamsystem", worldKey);
         ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, dimId);
         ServerLevel level = server.getLevel(dimKey);
         if (level == null) return true;
@@ -314,10 +353,12 @@ public class MapPoolManager {
     }
 
     private boolean regenerateFromBackup(MapConfig map) {
+        String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+        if (worldKey.isEmpty()) return false;
         try {
             Path dimDir = server.getWorldPath(LevelResource.ROOT)
-                .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
-            Path backupDir = dimDir.resolveSibling(map.getWorldFolder() + "_backup");
+                .resolve("dimensions").resolve("teamsystem").resolve(worldKey);
+            Path backupDir = dimDir.resolveSibling(worldKey + "_backup");
 
             if (!Files.isDirectory(backupDir.resolve("region"))) {
                 TeamSystem.LOGGER.warn("No backup for map {}", map.getName());
@@ -429,7 +470,9 @@ public class MapPoolManager {
     }
 
     private ServerLevel getMapLevel(MapConfig map) {
-        ResourceLocation dimId = new ResourceLocation("teamsystem", map.getWorldFolder());
+        String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+        if (worldKey.isEmpty()) return null;
+        ResourceLocation dimId = new ResourceLocation("teamsystem", worldKey);
         ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, dimId);
         return server.getLevel(dimKey);
     }

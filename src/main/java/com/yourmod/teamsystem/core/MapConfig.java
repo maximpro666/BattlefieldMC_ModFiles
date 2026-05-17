@@ -1,6 +1,12 @@
 package com.yourmod.teamsystem.core;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapConfig {
     private String name;
@@ -19,6 +25,28 @@ public class MapConfig {
     private int[] russiaSpawn;
     private int baseRadius;
     private MapState state;
+    private List<CapturePointEntry> capturePoints;
+
+    public static class CapturePointEntry {
+        public String name;
+        public int x, y, z;
+        public double radius;
+        public double captureSpeed;
+
+        public CapturePointEntry() {
+            this.radius = 5.0;
+            this.captureSpeed = 1.0;
+        }
+
+        public CapturePointEntry(String name, int x, int y, int z, double radius, double captureSpeed) {
+            this.name = name;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.radius = radius;
+            this.captureSpeed = captureSpeed;
+        }
+    }
 
     public MapConfig() {
         this.name = "";
@@ -37,6 +65,7 @@ public class MapConfig {
         this.russiaSpawn = new int[]{0, 64, 0};
         this.baseRadius = 30;
         this.state = MapState.AVAILABLE;
+        this.capturePoints = new ArrayList<>();
     }
 
     public MapConfig(String name, String worldFolder, boolean enabled, boolean hasRespawn,
@@ -60,6 +89,7 @@ public class MapConfig {
         this.russiaSpawn = russiaSpawn != null ? russiaSpawn : new int[]{0, 64, 0};
         this.baseRadius = baseRadius > 0 ? baseRadius : 30;
         this.state = MapState.AVAILABLE;
+        this.capturePoints = new ArrayList<>();
     }
 
     public MapState getState() { return state; }
@@ -69,7 +99,16 @@ public class MapConfig {
     public void setName(String name) { this.name = name; }
 
     public String getWorldFolder() { return worldFolder; }
-    public void setWorldFolder(String worldFolder) { this.worldFolder = worldFolder; }
+    public void setWorldFolder(String worldFolder) {
+        this.worldFolder = worldFolder != null ? worldFolder : "";
+    }
+
+    public String getWorldFolderSanitized() {
+        if (worldFolder == null || worldFolder.isEmpty()) return "";
+        return worldFolder.toLowerCase()
+            .replaceAll("\\s+", "_")
+            .replaceAll("[^a-z0-9/._-]", "");
+    }
 
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
@@ -109,6 +148,28 @@ public class MapConfig {
     public int getBaseRadius() { return baseRadius; }
     public void setBaseRadius(int radius) { this.baseRadius = Math.max(1, radius); }
 
+    public List<CapturePointEntry> getCapturePoints() {
+        return capturePoints != null ? capturePoints : new ArrayList<>();
+    }
+
+    public void setCapturePoints(List<CapturePointEntry> capturePoints) {
+        this.capturePoints = capturePoints != null ? capturePoints : new ArrayList<>();
+    }
+
+    public void addCapturePoint(String name, int x, int y, int z, double radius, double captureSpeed) {
+        if (capturePoints == null) capturePoints = new ArrayList<>();
+        capturePoints.add(new CapturePointEntry(name, x, y, z, radius, captureSpeed));
+    }
+
+    public void removeCapturePoint(String name) {
+        if (capturePoints == null) return;
+        capturePoints.removeIf(cp -> cp.name.equals(name));
+    }
+
+    public void clearCapturePoints() {
+        if (capturePoints != null) capturePoints.clear();
+    }
+
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putString("Name", name);
@@ -132,6 +193,13 @@ public class MapConfig {
         tag.putInt("BaseRadius", baseRadius);
         tag.putString("State", state.name());
         return tag;
+    }
+
+    public static String sanitizeToResourcePath(String name) {
+        if (name == null || name.isEmpty()) return "";
+        return name.toLowerCase()
+            .replaceAll("\\s+", "_")
+            .replaceAll("[^a-z0-9/._-]", "");
     }
 
     public static MapConfig fromNBT(CompoundTag tag) {

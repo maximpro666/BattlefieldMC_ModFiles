@@ -153,10 +153,10 @@ public class MapDimensionGenerator {
             for (Path file : (Iterable<Path>) files::iterator) {
                 if (!file.toString().endsWith(".json")) continue;
                 String fileName = file.getFileName().toString();
-                String mapFolder = fileName.substring(0, fileName.length() - 5);
-                if (mapFolder.equals("lobby")) continue;
+                String keyName = fileName.substring(0, fileName.length() - 5);
+                if (keyName.equals("lobby")) continue;
                 boolean mapExists = maps.stream()
-                    .anyMatch(m -> m.getWorldFolder().equals(mapFolder));
+                    .anyMatch(m -> MapConfig.sanitizeToResourcePath(m.getWorldFolder()).equals(keyName));
                 if (!mapExists) {
                     Files.deleteIfExists(file);
                     TeamSystem.LOGGER.info("Deleted stale dimension datapack: {}", fileName);
@@ -167,10 +167,10 @@ public class MapDimensionGenerator {
         }
 
         for (MapConfig map : maps) {
-            if (map.getWorldFolder() == null || map.getWorldFolder().isEmpty()) continue;
-            if (map.getWorldFolder().equals("overworld")) continue;
+            String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+            if (worldKey.isEmpty() || worldKey.equals("overworld")) continue;
 
-            Path dimensionFile = dimDir.resolve(map.getWorldFolder() + ".json");
+            Path dimensionFile = dimDir.resolve(worldKey + ".json");
             if (Files.exists(dimensionFile)) continue;
 
             try {
