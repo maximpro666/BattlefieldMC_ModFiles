@@ -1,24 +1,32 @@
 package com.yourmod.teamsystem.core;
 
 import com.yourmod.teamsystem.TeamSystem;
-import com.yourmod.teamsystem.network.CapturePointSyncPacket;
-import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.capture.CaptureProcessor;
+import com.yourmod.teamsystem.capture.CaptureZone;
+import com.yourmod.teamsystem.capture.ZoneDataManager;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class CapturePointManager {
-    private final List<CapturePointData> points;
-    private static final double CAPTURE_SPEED_BASE = 1.0;
-    private static final double CONTEST_THRESHOLD = 1.0;
+    private final ZoneDataManager zoneData;
 
     public CapturePointManager() {
-        this.points = new ArrayList<>();
+        this.zoneData = new ZoneDataManager();
+    }
+
+    public ZoneDataManager getZoneData() { return zoneData; }
+
+    public boolean isActive() {
+        return zoneData.isActive();
+    }
+
+    public void setActive(boolean a) {
+        zoneData.setActive(a);
     }
 
     public boolean isCaptureEnabled() {
@@ -27,199 +35,64 @@ public class CapturePointManager {
     }
 
     public void clearPoints() {
-        points.clear();
-    }
-
-    public void addPoint(CapturePointData point) {
-        points.add(point);
-    }
-
-    public void removePoint(int id) {
-        points.removeIf(p -> p.getId() == id);
-    }
-
-    public CapturePointData getPoint(int id) {
-        return points.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
-    }
-
-    public List<CapturePointData> getAllPoints() {
-        return Collections.unmodifiableList(points);
-    }
-
-    public List<CapturePointData> getPointsOwnedBy(Team team) {
-        return points.stream()
-            .filter(p -> p.getOwnerTeam() == team && p.isCaptured())
-            .collect(Collectors.toList());
-    }
-
-    public List<CapturePointData> getPointsNotOwnedBy(Team team) {
-        return points.stream()
-            .filter(p -> p.getOwnerTeam() != team || !p.isCaptured())
-            .collect(Collectors.toList());
+        zoneData.clearAll();
     }
 
     public void resetAllPoints() {
-        points.forEach(CapturePointData::reset);
+        zoneData.resetAll();
+    }
+
+    public List<CaptureZone> getActiveZones() {
+        ResourceLocation dimId = getCurrentMapDimension();
+        if (dimId == null) return Collections.emptyList();
+        return zoneData.getZones(dimId.toString());
     }
 
     public void loadFromMapConfig(MapConfig map) {
-        clearPoints();
-        for (var entry : map.getCapturePoints()) {
-            CapturePointData data = new CapturePointData(
-                entry.hashCode(), entry.name,
-                new BlockPos(entry.x, entry.y, entry.z),
-                entry.radius, entry.captureSpeed
-            );
-            points.add(data);
+        ResourceLocation dimId = getCurrentMapDimension();
+        if (dimId != null) {
+            zoneData.loadFromMapConfig(map, dimId.toString());
         }
-        TeamSystem.LOGGER.info("Loaded {} capture points from map config", points.size());
-        syncToAll();
-    }
-
-    /**
-     * This manager may be disabled when using Warborn Capture Points mod.
-     */
-    public boolean isActive() {
-        return !com.yourmod.teamsystem.integration.WarbornCaptureAdapter.isEnabled();
     }
 
     public void addPointFromConfig(MapConfig map, String name) {
+        ResourceLocation dimId = getCurrentMapDimension();
+        if (dimId == null) return;
+        String dimension = dimId.toString();
         for (var entry : map.getCapturePoints()) {
             if (entry.name.equals(name)) {
-                CapturePointData existing = getPoint(entry.hashCode());
-                if (existing == null) {
-                    CapturePointData data = new CapturePointData(
-                        entry.hashCode(), entry.name,
-                        new BlockPos(entry.x, entry.y, entry.z),
-                        entry.radius, entry.captureSpeed
-                    );
-                    points.add(data);
-                    syncToAll();
-                }
+                BlockPos center = new BlockPos(entry.x, entry.y, entry.z);
+                int radius = (int) Math.ceil(entry.radius);
+                int captureSec = (int) Math.ceil(entry.captureSpeed * 10);
+                String id = "map_" + entry.hashCode();
+                if (zoneData.getZone(id, dimension) != null) return;
+                zoneData.addZone(new CaptureZone(id, name, dimension,
+                    center.offset(-radius, -radius, -radius),
+                    center.offset(radius, radius, radius),
+                    Math.max(5, captureSec)));
                 return;
             }
         }
     }
 
     public void tickCapturePoints(ServerLevel level) {
-        if (!isCaptureEnabled() || points.isEmpty()) return;
-
+        if (!isCaptureEnabled() || !zoneData.isActive()) return;
         ResourceLocation currentDim = level.dimension().location();
         ResourceLocation mapDim = getCurrentMapDimension();
         if (mapDim != null && !mapDim.equals(currentDim)) return;
-
-        boolean changed = false;
-
-        for (CapturePointData point : points) {
-            List<ServerPlayer> nearby = getPlayersInRadius(level, point.getPos(), point.getCaptureRadius());
-            if (nearby.isEmpty()) {
-                if (point.getState() == CapturePointData.CaptureState.CAPTURING ||
-                    point.getState() == CapturePointData.CaptureState.CONTESTED) {
-                    if (point.getProgress() > 0) {
-                        point.addProgress(-CAPTURE_SPEED_BASE * 0.5);
-                    }
-                    if (point.getProgress() <= 0) {
-                        point.setState(CapturePointData.CaptureState.NEUTRAL);
-                        point.setCapturingTeam(Team.SPECTATOR);
-                    }
-                    changed = true;
-                }
-                continue;
-            }
-
-            Map<Team, Integer> teamCounts = new HashMap<>();
-            for (ServerPlayer p : nearby) {
-                Team t = TeamSystem.getTeamManager().getOrCreatePlayerData(p.getUUID()).getTeam();
-                if (t.isPlayable()) teamCounts.merge(t, 1, Integer::sum);
-            }
-
-            if (teamCounts.isEmpty()) continue;
-
-            Team dominantTeam = teamCounts.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .get().getKey();
-            int dominantCount = teamCounts.get(dominantTeam);
-
-            boolean contested = teamCounts.size() > 1;
-            boolean hasOtherTeam = teamCounts.entrySet().stream()
-                .anyMatch(e -> e.getKey() != dominantTeam && e.getValue() > 0);
-
-            if (point.getState() == CapturePointData.CaptureState.CAPTURED && point.getOwnerTeam() == dominantTeam) {
-                continue;
-            }
-
-            if (contested && hasOtherTeam) {
-                point.setState(CapturePointData.CaptureState.CONTESTED);
-                changed = true;
-                continue;
-            }
-
-            if (point.getOwnerTeam() == dominantTeam && point.isCaptured()) {
-                continue;
-            }
-
-            double captureSpeed = point.getCaptureSpeed() * dominantCount;
-            point.setState(CapturePointData.CaptureState.CAPTURING);
-            point.setCapturingTeam(dominantTeam);
-            point.addProgress(captureSpeed);
-            changed = true;
-
-            if (point.getProgress() >= 100.0) {
-                point.setState(CapturePointData.CaptureState.CAPTURED);
-                point.setOwnerTeam(dominantTeam);
-                point.setCapturingTeam(Team.SPECTATOR);
-                point.setProgress(100.0);
-                onPointCaptured(point, level);
-            }
-        }
-
-        if (changed) {
-            updateBleedRates();
-            syncToAll();
-        }
+        CaptureProcessor.tick(level, zoneData);
     }
 
-    private void onPointCaptured(CapturePointData point, ServerLevel level) {
-        TeamSystem.LOGGER.info("Capture point '{}' captured by {}", point.getName(), point.getOwnerTeam().getName());
-        for (ServerPlayer p : level.players()) {
-            p.displayClientMessage(
-                net.minecraft.network.chat.Component.literal(
-                    "§6[CAPTURED] " + point.getName() + " captured by " + point.getOwnerTeam().getName()),
-                false);
-        }
-        ContributionManager cm = TeamSystem.getContributionManager();
-        if (cm != null) {
-            for (ServerPlayer p : getPlayersInRadius(level, point.getPos(), point.getCaptureRadius() * 2)) {
-                Team t = TeamSystem.getTeamManager().getOrCreatePlayerData(p.getUUID()).getTeam();
-                if (t == point.getOwnerTeam()) {
-                    cm.addCapture(p.getUUID(), p.getName().getString());
-                }
-            }
-        }
+    public void syncToAll() {
+        ResourceLocation dimId = getCurrentMapDimension();
+        if (dimId == null) return;
+        List<CaptureZone> zones = zoneData.getZones(dimId.toString());
+        if (zones.isEmpty()) return;
+        ServerLevel level = getCurrentMapLevel();
+        if (level != null) CaptureProcessor.syncToAll(level, zones);
     }
 
-    private List<ServerPlayer> getPlayersInRadius(ServerLevel level, BlockPos center, double radius) {
-        double radiusSq = radius * radius;
-        return level.players().stream()
-            .filter(p -> p.distanceToSqr(center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5) <= radiusSq)
-            .collect(Collectors.toList());
-    }
-
-    private void updateBleedRates() {
-        TicketManager tm = TeamSystem.getTicketManager();
-        if (tm == null) return;
-
-        int natoPoints = getPointsOwnedBy(Team.NATO).size();
-        int russiaPoints = getPointsOwnedBy(Team.RUSSIA).size();
-
-        int natoBleed = Math.max(0, russiaPoints - natoPoints);
-        int russiaBleed = Math.max(0, natoPoints - russiaPoints);
-
-        tm.setBleedRate(Team.NATO, natoBleed);
-        tm.setBleedRate(Team.RUSSIA, russiaBleed);
-    }
-
-    private ResourceLocation getCurrentMapDimension() {
+    ResourceLocation getCurrentMapDimension() {
         MapConfig map = TeamSystem.getMapPoolManager().getCurrentMap().orElse(null);
         if (map != null && map.getWorldFolder() != null && !map.getWorldFolder().isEmpty()) {
             return new ResourceLocation("teamsystem", MapConfig.sanitizeToResourcePath(map.getWorldFolder()));
@@ -227,22 +100,10 @@ public class CapturePointManager {
         return null;
     }
 
-    public void syncToAll() {
-        List<Integer> ids = new ArrayList<>();
-        List<Double> progress = new ArrayList<>();
-        List<Integer> owners = new ArrayList<>();
-        List<String> names = new ArrayList<>();
-
-        for (CapturePointData p : points) {
-            ids.add(p.getId());
-            progress.add(p.getProgress());
-            owners.add(p.getOwnerTeam().ordinal());
-            names.add(p.getName());
-        }
-
-        CapturePointSyncPacket packet = new CapturePointSyncPacket(ids, progress, owners, names);
-        for (ServerPlayer player : TeamSystem.getGameManager().getServer().getPlayerList().getPlayers()) {
-            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
-        }
+    private ServerLevel getCurrentMapLevel() {
+        ResourceLocation dimId = getCurrentMapDimension();
+        if (dimId == null) return null;
+        return TeamSystem.getGameManager().getServer().getLevel(
+            ResourceKey.create(Registries.DIMENSION, dimId));
     }
 }

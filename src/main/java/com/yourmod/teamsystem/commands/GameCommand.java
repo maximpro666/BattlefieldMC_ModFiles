@@ -7,6 +7,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.MapPoolManager;
+import com.yourmod.teamsystem.core.Team;
+import com.yourmod.teamsystem.core.TicketManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -70,7 +72,14 @@ public class GameCommand {
             return 0;
         }
 
-        game.endGame(TeamSystem.getTeamManager().getTeamWithMostTickets());
+        TicketManager tm = TeamSystem.getTicketManager();
+        Team winner = Team.NATO;
+        if (tm != null) {
+            int nt = tm.getTickets(Team.NATO);
+            int rt = tm.getTickets(Team.RUSSIA);
+            winner = nt >= rt ? Team.NATO : Team.RUSSIA;
+        }
+        game.endGame(winner);
         return 1;
     }
 

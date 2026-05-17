@@ -69,6 +69,12 @@ public class GameManager {
     public boolean isOvertime() { return overtime; }
     public MapConfig getCurrentMap() { return currentMap; }
 
+    public void startInitialCountdown() {
+        if (currentPhase == GamePhase.LOBBY && phaseTimer <= 0) {
+            phaseTimer = COUNTDOWN_SECONDS * 20;
+        }
+    }
+
     // ========== Match Flow ==========
 
     public void startGame() {
@@ -76,12 +82,12 @@ public class GameManager {
         MapPoolManager mapPool = TeamSystem.getMapPoolManager();
 
         if (!mapPool.hasAvailableMaps()) {
-            broadcast("No available maps! Use /map maintenance or wait for maintenance cycle.", ChatFormatting.RED);
+            broadcast("No available maps!", ChatFormatting.RED);
             return;
         }
 
         MapConfig map = mapPool.getCurrentMap().orElse(null);
-        if (map == null || map.getState() != MapState.IN_MATCH) {
+        if (map == null) {
             map = mapPool.pickNextAvailable();
             if (map == null) return;
         }
@@ -93,9 +99,8 @@ public class GameManager {
         overtime = false;
         overtimeTicks = 0;
 
-        teamManager.resetTickets();
-        teamManager.setTickets(Team.NATO, map.getTickets());
-        teamManager.setTickets(Team.RUSSIA, map.getTickets());
+        TicketManager ticketMgr = TeamSystem.getTicketManager();
+        if (ticketMgr != null) ticketMgr.resetTickets(map.getTickets());
 
         EconomyManager econ = TeamSystem.getEconomyManager();
         if (econ != null) {
@@ -105,13 +110,12 @@ public class GameManager {
 
                 CapturePointManager cp = TeamSystem.getCapturePointManager();
                 if (cp != null) {
-                    if (com.yourmod.teamsystem.integration.WarbornCaptureAdapter.isEnabled()) {
-                        // Warborn handles capture zones; clear internal points as fallback
-                        cp.clearPoints();
-                    } else if (map.hasCapturePoints()) {
+                    if (map.hasCapturePoints()) {
                         cp.loadFromMapConfig(map);
+                        cp.setActive(true);
                     } else {
                         cp.clearPoints();
+                        cp.setActive(false);
                     }
                 }
 
@@ -127,7 +131,7 @@ public class GameManager {
         applyMapConfig(map);
         teleportAllPlayersToMap(map);
 
-        gamerule(server.overworld(), "liberateAttachment", "true");
+        gamerule(server.overworld(), "liberateAttachment", "false");
 
         broadcast("Game started on map: " + map.getName(), ChatFormatting.GREEN, ChatFormatting.BOLD);
         syncPhaseToAll();
@@ -167,6 +171,9 @@ public class GameManager {
             }
             tm.setDirty();
         }
+
+        CapturePointManager cp = TeamSystem.getCapturePointManager();
+        if (cp != null) cp.setActive(false);
 
         captureTicks = 0;
         overtime = false;
@@ -213,15 +220,15 @@ public class GameManager {
             if (captureTicks % 20 == 0) {
                 CapturePointManager cp = TeamSystem.getCapturePointManager();
                 if (cp != null) {
-                    // If Warborn is enabled it owns ticking; otherwise perform internal tick
-                    if (!com.yourmod.teamsystem.integration.WarbornCaptureAdapter.isEnabled()) {
-                        MapConfig map = currentMap;
-                        if (map != null) {
-                            ServerLevel level = getMapWorld(map);
-                            if (level != null) cp.tickCapturePoints(level);
-                        }
+                    MapConfig map = currentMap;
+                    if (map != null) {
+                        ServerLevel level = getMapWorld(map);
+                        if (level != null) cp.tickCapturePoints(level);
                     }
                 }
+
+                updateLiberateAttachment();
+
                 TicketManager tm = TeamSystem.getTicketManager();
                 if (tm != null) tm.tick();
 
@@ -257,15 +264,8 @@ public class GameManager {
         MapPoolManager pool = TeamSystem.getMapPoolManager();
 
         if (map != null) {
-            pool.markDirty(map);
-            broadcast("Map '" + map.getName() + "' marked dirty", ChatFormatting.GRAY);
-        }
-
-        // If all maps are dirty → run maintenance with restart
-        if (!pool.hasAvailableMaps() && pool.getDirtyCount() > 0) {
-            broadcast("All maps used! Running maintenance... server will restart.", ChatFormatting.YELLOW);
-            pool.runMaintenance();
-            return;
+            pool.deleteLive(map);
+            broadcast("Map '" + map.getName() + "' instance cleaned up", ChatFormatting.GRAY);
         }
 
         startVoting();
@@ -282,7 +282,7 @@ public class GameManager {
 
         List<MapConfig> available = pool.getMapsByState(MapState.AVAILABLE);
         if (available.isEmpty()) {
-            broadcast("No available maps! Use /map maintenance", ChatFormatting.RED);
+            broadcast("No available maps!", ChatFormatting.RED);
             currentPhase = GamePhase.LOBBY;
             phaseTimer = 0;
             returnToLobby();
@@ -430,6 +430,35 @@ public class GameManager {
         server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "gamerule " + rule + " " + val);
     }
 
+    private void updateLiberateAttachment() {
+        boolean nearBeacon = false;
+        int radiusSq = 15 * 15;
+        RespawnManager rm = TeamSystem.getRespawnManager();
+        TeamManager tm = TeamSystem.getTeamManager();
+        if (rm != null && tm != null) {
+            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                Team team = tm.getOrCreatePlayerData(p.getUUID()).getTeam();
+                if (!team.isPlayable()) continue;
+                for (var b : rm.getBeaconsInDimension(p.level().dimension().location().toString())) {
+                    if (b.teamOrdinal != team.ordinal()) continue;
+                    double dx = p.getX() - b.x;
+                    double dz = p.getZ() - b.z;
+                    if (dx * dx + dz * dz <= radiusSq) {
+                        nearBeacon = true;
+                        break;
+                    }
+                }
+                if (nearBeacon) break;
+            }
+        }
+        ServerLevel mapLevel = getMapWorld(currentMap);
+        if (mapLevel != null) {
+            gamerule(mapLevel, "liberateAttachment", nearBeacon ? "true" : "false");
+        } else {
+            gamerule(server.overworld(), "liberateAttachment", "false");
+        }
+    }
+
     // ========== Teleport ==========
 
     public void teleportAllPlayersToMap(MapConfig map) {
@@ -438,7 +467,15 @@ public class GameManager {
         TeamManager tm = TeamSystem.getTeamManager();
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == Team.SPECTATOR) continue;
-            safeTeleport(p, target, 0.5, 65, 0.5);
+            Team team = tm.getOrCreatePlayerData(p.getUUID()).getTeam();
+            double x = 0.5, y = 65, z = 0.5;
+            if (map.hasTeamSpawns()) {
+                int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
+                if (spawn != null && spawn.length >= 3) {
+                    x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5;
+                }
+            }
+            safeTeleport(p, target, x, y, z);
         }
     }
 
@@ -487,14 +524,14 @@ public class GameManager {
     private boolean forceLoading = false;
 
     private ServerLevel getMapWorldNoFallback(MapConfig map) {
-        String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
-        if (worldKey.isEmpty() || worldKey.equals("overworld")) return null;
-        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey));
+        String liveKey = map != null ? map.getLiveWorldFolder() : null;
+        if (liveKey == null || liveKey.isEmpty()) return null;
+        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", liveKey));
         ServerLevel w = server.getLevel(key);
         if (w == null && !forceLoading) {
             forceLoading = true;
             server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
-                "execute in teamsystem:" + worldKey + " run say Loading dimension " + worldKey);
+                "execute in teamsystem:" + liveKey + " run say Loading dimension " + liveKey);
             w = server.getLevel(key);
             forceLoading = false;
         }

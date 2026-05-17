@@ -179,6 +179,12 @@ public class RespawnManager {
         save();
     }
 
+    public List<SavedBeacon> getBeaconsInDimension(String dimension) {
+        return beacons.stream()
+            .filter(b -> b.dimension.equals(dimension))
+            .collect(Collectors.toList());
+    }
+
     public List<SavedBeacon> getBeaconsForPlayer(UUID uuid) {
         return beacons.stream()
             .filter(b -> b.uuid.equals(uuid.toString()))
@@ -199,13 +205,11 @@ public class RespawnManager {
         SavedBeacon beacon = getBeaconByName(player.getUUID(), beaconName);
         if (beacon == null) return;
 
-        TeamManager tm = TeamSystem.getTeamManager();
-        if (tm != null) {
-            Team team = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
-            if (team.isPlayable()) {
-                tm.deductTicket(team);
-                player.sendSystemMessage(Component.literal("§c-1 ticket for respawn"));
-            }
+        Team team = TeamSystem.getTeamManager().getOrCreatePlayerData(player.getUUID()).getTeam();
+        if (team.isPlayable()) {
+            TicketManager tm = TeamSystem.getTicketManager();
+            if (tm != null) tm.deductTicket(team);
+            player.sendSystemMessage(Component.literal("§c-1 ticket for respawn"));
         }
 
         ServerLevel dest = server.getLevel(net.minecraft.resources.ResourceKey.create(

@@ -82,7 +82,39 @@ public class MapDimensionGenerator {
 
         generatePackMeta(datapacksDir);
         generateLobbyDimension(datapacksDir);
-        generateMapDimensions(datapacksDir);
+    }
+
+    public static void generateSingleDimensionDatapack(MinecraftServer server, String liveKey) {
+        if (liveKey == null || liveKey.isEmpty()) return;
+        Path datapacksDir = server.getWorldPath(LevelResource.ROOT).resolve("datapacks").resolve("teamsystem_maps");
+        Path dimDir = datapacksDir.resolve("data").resolve("teamsystem").resolve("dimension");
+
+        try {
+            Files.createDirectories(dimDir);
+            Path dimFile = dimDir.resolve(liveKey + ".json");
+            Files.writeString(dimFile, DIMENSION_TEMPLATE, StandardCharsets.UTF_8);
+            TeamSystem.LOGGER.info("Generated dimension datapack for instance: {}", liveKey);
+
+            server.getCommands().performPrefixedCommand(
+                server.createCommandSourceStack(), "reload");
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to generate dimension for instance {}: {}", liveKey, e.getMessage());
+        }
+    }
+
+    public static void removeSingleDimensionDatapack(MinecraftServer server, String liveKey) {
+        if (liveKey == null || liveKey.isEmpty()) return;
+        Path datapacksDir = server.getWorldPath(LevelResource.ROOT).resolve("datapacks").resolve("teamsystem_maps");
+        Path dimFile = datapacksDir.resolve("data").resolve("teamsystem").resolve("dimension").resolve(liveKey + ".json");
+
+        try {
+            Files.deleteIfExists(dimFile);
+            server.getCommands().performPrefixedCommand(
+                server.createCommandSourceStack(), "reload");
+            TeamSystem.LOGGER.info("Removed dimension datapack for instance: {}", liveKey);
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to remove dimension for instance {}: {}", liveKey, e.getMessage());
+        }
     }
 
     private static void generatePackMeta(Path datapacksDir) {

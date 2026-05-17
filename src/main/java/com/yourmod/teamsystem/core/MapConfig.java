@@ -25,9 +25,10 @@ public class MapConfig {
     private int[] russiaSpawn;
     private int baseRadius;
     private MapState state;
-    
+    private List<CapturePointEntry> capturePoints;
+    private transient String liveWorldFolder;
 
-    // Removed CapturePointEntry class
+    public static class CapturePointEntry {
         public String name;
         public int x, y, z;
         public double radius;
@@ -103,6 +104,9 @@ public class MapConfig {
         this.worldFolder = worldFolder != null ? worldFolder : "";
     }
 
+    public String getLiveWorldFolder() { return liveWorldFolder; }
+    public void setLiveWorldFolder(String liveWorldFolder) { this.liveWorldFolder = liveWorldFolder; }
+
     public String getWorldFolderSanitized() {
         if (worldFolder == null || worldFolder.isEmpty()) return "";
         return worldFolder.toLowerCase()
@@ -116,7 +120,7 @@ public class MapConfig {
     public boolean hasRespawn() { return hasRespawn; }
     public void setHasRespawn(boolean hasRespawn) { this.hasRespawn = hasRespawn; }
 
-    // Removed capture points functionality
+    public boolean hasCapturePoints() { return hasCapturePoints; }
     public void setHasCapturePoints(boolean hasCapturePoints) { this.hasCapturePoints = hasCapturePoints; }
 
     public boolean hasRegen() { return hasRegen; }

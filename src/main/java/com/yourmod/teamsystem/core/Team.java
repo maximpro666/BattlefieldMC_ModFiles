@@ -5,9 +5,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 public enum Team {
-    NATO("NATO", ChatFormatting.BLUE, 0x5555FF),
-    RUSSIA("RUSSIA", ChatFormatting.RED, 0xFF5555),
-    SPECTATOR("SPECTATOR", ChatFormatting.GRAY, 0x888888);
+    NATO("Nato", ChatFormatting.BLUE, 0x5555FF),
+    RUSSIA("Russia", ChatFormatting.RED, 0xFF5555),
+    SPECTATOR("Spectator", ChatFormatting.GRAY, 0x888888);
 
     private final String name;
     private final ChatFormatting chatColor;
@@ -32,7 +32,7 @@ public enum Team {
     }
 
     public String getScoreboardName() {
-        return "ts_" + name.toLowerCase();
+        return name;
     }
 
     public MutableComponent getColoredName() {

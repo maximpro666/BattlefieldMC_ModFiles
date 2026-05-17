@@ -13,13 +13,16 @@ public class CapturePointSyncPacket {
     private List<Double> progressPercentages;
     private List<Integer> ownerTeamOrdinals;
     private List<String> pointNames;
+    private List<Integer> capturingTeamOrdinals;
 
     public CapturePointSyncPacket(List<Integer> pointIds, List<Double> progressPercentages,
-                                 List<Integer> ownerTeamOrdinals, List<String> pointNames) {
+                                  List<Integer> ownerTeamOrdinals, List<String> pointNames,
+                                  List<Integer> capturingTeamOrdinals) {
         this.pointIds = pointIds;
         this.progressPercentages = progressPercentages;
         this.ownerTeamOrdinals = ownerTeamOrdinals;
         this.pointNames = pointNames;
+        this.capturingTeamOrdinals = capturingTeamOrdinals;
     }
 
     public CapturePointSyncPacket(FriendlyByteBuf buf) {
@@ -28,12 +31,14 @@ public class CapturePointSyncPacket {
         this.progressPercentages = new ArrayList<>();
         this.ownerTeamOrdinals = new ArrayList<>();
         this.pointNames = new ArrayList<>();
+        this.capturingTeamOrdinals = new ArrayList<>();
 
         for (int i = 0; i < pointCount; i++) {
             pointIds.add(buf.readInt());
             progressPercentages.add(buf.readDouble());
             ownerTeamOrdinals.add(buf.readInt());
             pointNames.add(buf.readUtf(256));
+            capturingTeamOrdinals.add(buf.readInt());
         }
     }
 
@@ -44,6 +49,7 @@ public class CapturePointSyncPacket {
             buf.writeDouble(progressPercentages.get(i));
             buf.writeInt(ownerTeamOrdinals.get(i));
             buf.writeUtf(pointNames.get(i));
+            buf.writeInt(capturingTeamOrdinals.get(i));
         }
     }
 
@@ -51,18 +57,19 @@ public class CapturePointSyncPacket {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                handleClientSide(pointIds, progressPercentages, ownerTeamOrdinals, pointNames));
+                handleClientSide(pointIds, progressPercentages, ownerTeamOrdinals, pointNames, capturingTeamOrdinals));
         });
         return true;
     }
 
     private static void handleClientSide(List<Integer> pointIds, List<Double> progressPercentages,
-                                        List<Integer> ownerTeamOrdinals, List<String> pointNames) {
-        // Client-side capture point update
+                                         List<Integer> ownerTeamOrdinals, List<String> pointNames,
+                                         List<Integer> capturingTeamOrdinals) {
     }
 
     public List<Integer> getPointIds() { return pointIds; }
     public List<Double> getProgressPercentages() { return progressPercentages; }
     public List<Integer> getOwnerTeamOrdinals() { return ownerTeamOrdinals; }
     public List<String> getPointNames() { return pointNames; }
+    public List<Integer> getCapturingTeamOrdinals() { return capturingTeamOrdinals; }
 }

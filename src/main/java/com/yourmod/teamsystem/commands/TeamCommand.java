@@ -9,6 +9,7 @@ import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.PlayerCombatData;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
+import com.yourmod.teamsystem.core.TicketManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -270,31 +271,29 @@ public class TeamCommand {
     }
 
     private static int showTickets(CommandContext<CommandSourceStack> context) {
-        TeamManager manager = getManager();
         if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
             context.getSource().sendFailure(Component.literal("Only players can use this command"));
             return 0;
         }
 
-        int nato = manager.getTickets(Team.NATO);
-        int russia = manager.getTickets(Team.RUSSIA);
+        TicketManager tm = TeamSystem.getTicketManager();
+        if (tm == null) return 0;
 
         player.sendSystemMessage(Component.literal("=== Team Tickets ===")
             .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
 
         player.sendSystemMessage(Team.NATO.getColoredName()
-            .append(Component.literal(String.format(": %d tickets", nato))
+            .append(Component.literal(String.format(": %d tickets", tm.getTickets(Team.NATO)))
                 .withStyle(ChatFormatting.WHITE)));
 
         player.sendSystemMessage(Team.RUSSIA.getColoredName()
-            .append(Component.literal(String.format(": %d tickets", russia))
+            .append(Component.literal(String.format(": %d tickets", tm.getTickets(Team.RUSSIA)))
                 .withStyle(ChatFormatting.WHITE)));
 
         return 1;
     }
 
     private static int setTickets(CommandContext<CommandSourceStack> context) {
-        TeamManager manager = getManager();
         String teamName = StringArgumentType.getString(context, "team");
         Team team = Team.fromString(teamName);
         if (team == null || !team.isPlayable()) {
@@ -304,7 +303,9 @@ public class TeamCommand {
         }
 
         int amount = IntegerArgumentType.getInteger(context, "amount");
-        manager.setTickets(team, amount);
+        TicketManager tm = TeamSystem.getTicketManager();
+        if (tm == null) return 0;
+        tm.setTickets(team, amount);
 
         context.getSource().sendSuccess(() ->
             Component.literal(String.format("Set %s tickets to %d", team.getName(), amount))

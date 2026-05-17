@@ -203,11 +203,7 @@ public class CombatEventHandler {
         Team victimTeam = teamManager.getOrCreatePlayerData(victim.getUUID()).getTeam();
         if (victimTeam.isPlayable() && isPlaying) {
             TicketManager ticketMgr = TeamSystem.getTicketManager();
-            if (ticketMgr != null) {
-                ticketMgr.deductTicket(victimTeam);
-            } else {
-                teamManager.deductTicket(victimTeam);
-            }
+            if (ticketMgr != null) ticketMgr.deductTicket(victimTeam);
         }
 
         if (killer != null && !killer.getUUID().equals(victim.getUUID())) {

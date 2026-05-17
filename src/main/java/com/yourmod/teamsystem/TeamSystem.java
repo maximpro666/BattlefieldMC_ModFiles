@@ -114,6 +114,7 @@ public class TeamSystem {
 
         gameManager = new GameManager(event.getServer());
         MinecraftForge.EVENT_BUS.register(gameManager);
+        gameManager.startInitialCountdown();
 
         markerManager = new MarkerManager();
         respawnManager = new RespawnManager(event.getServer());
@@ -133,8 +134,6 @@ public class TeamSystem {
         downedManager = new DownedManager();
         contributionManager = new ContributionManager();
         fobManager = new FOBManager();
-        // Initialize Warborn integration if available
-        com.yourmod.teamsystem.integration.WarbornCaptureAdapter.init();
 
         LOGGER.info("Team System initialized");
     }

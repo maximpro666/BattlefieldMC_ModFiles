@@ -100,12 +100,14 @@ public class VehicleManager {
             return false;
         }
 
-        int teamTickets = teamManager.getTickets(playerTeam);
-        if (teamTickets < vehicle.getTicketCost()) {
-            return false;
+        TicketManager ticketMgr = TeamSystem.getTicketManager();
+        if (ticketMgr != null) {
+            int teamTickets = ticketMgr.getTickets(playerTeam);
+            if (teamTickets < vehicle.getTicketCost()) {
+                return false;
+            }
+            ticketMgr.setTickets(playerTeam, teamTickets - vehicle.getTicketCost());
         }
-
-        teamManager.setTickets(playerTeam, teamTickets - vehicle.getTicketCost());
 
         HitResult hit = player.pick(500, 0, false);
         if (hit.getType() == HitResult.Type.BLOCK) {

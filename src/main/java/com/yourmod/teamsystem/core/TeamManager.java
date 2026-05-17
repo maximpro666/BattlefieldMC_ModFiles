@@ -4,8 +4,6 @@ import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.network.CombatDataSyncPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.TeamSyncPacket;
-import com.yourmod.teamsystem.network.TeamTicketSyncPacket;
-import com.yourmod.teamsystem.core.GameManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -26,9 +24,7 @@ import java.util.*;
 
 public class TeamManager extends SavedData {
     private static final String DATA_NAME = "teamsystem_data";
-    private static final int DEFAULT_TICKETS = 100;
     private final Map<UUID, PlayerCombatData> playerData = new HashMap<>();
-    private final Map<Team, Integer> teamTickets = new EnumMap<>(Team.class);
     private KitManager kitManager;
     private SquadManager squadManager;
     private VehicleManager vehicleManager;
@@ -39,7 +35,6 @@ public class TeamManager extends SavedData {
         this.kitManager = new KitManager();
         this.squadManager = new SquadManager();
         this.vehicleManager = new VehicleManager();
-        resetTickets();
     }
 
     public static TeamManager load(MinecraftServer server, CompoundTag nbt) {
@@ -50,13 +45,6 @@ public class TeamManager extends SavedData {
             UUID uuid = playerTag.getUUID("UUID");
             PlayerCombatData data = PlayerCombatData.fromNBT(playerTag.getCompound("Data"));
             manager.playerData.put(uuid, data);
-        }
-        // Load ticket data if present
-        if (nbt.contains("NatoTickets")) {
-            manager.teamTickets.put(Team.NATO, nbt.getInt("NatoTickets"));
-            manager.teamTickets.put(Team.RUSSIA, nbt.getInt("RussiaTickets"));
-        } else {
-            manager.resetTickets();
         }
         return manager;
     }
@@ -71,62 +59,7 @@ public class TeamManager extends SavedData {
             playerList.add(playerTag);
         }
         nbt.put("Players", playerList);
-        nbt.putInt("NatoTickets", teamTickets.getOrDefault(Team.NATO, DEFAULT_TICKETS));
-        nbt.putInt("RussiaTickets", teamTickets.getOrDefault(Team.RUSSIA, DEFAULT_TICKETS));
         return nbt;
-    }
-
-    // ===== Ticket System =====
-
-    public void resetTickets() {
-        teamTickets.put(Team.NATO, DEFAULT_TICKETS);
-        teamTickets.put(Team.RUSSIA, DEFAULT_TICKETS);
-        setDirty();
-    }
-
-    public int getTickets(Team team) {
-        return teamTickets.getOrDefault(team, DEFAULT_TICKETS);
-    }
-
-    public void setTickets(Team team, int amount) {
-        teamTickets.put(team, Math.max(0, amount));
-        setDirty();
-        syncTicketsToAll();
-    }
-
-    public void deductTicket(Team team) {
-        int current = getTickets(team);
-        if (current > 0) {
-            teamTickets.put(team, current - 1);
-            setDirty();
-            syncTicketsToAll();
-            TeamSystem.LOGGER.info("{} tickets: {} (team {})", team.getName(), current - 1, team.getName());
-
-            if (current - 1 <= 0) {
-                Team winner = team == Team.NATO ? Team.RUSSIA : Team.NATO;
-                GameManager game = TeamSystem.getGameManager();
-                if (game != null) {
-                    game.endGame(winner);
-                }
-            }
-        }
-    }
-
-    public Team getTeamWithMostTickets() {
-        int nato = getTickets(Team.NATO);
-        int russia = getTickets(Team.RUSSIA);
-        if (nato > russia) return Team.NATO;
-        if (russia > nato) return Team.RUSSIA;
-        return Team.NATO;
-    }
-
-    public void syncTicketsToAll() {
-        int nato = getTickets(Team.NATO);
-        int russia = getTickets(Team.RUSSIA);
-        TeamTicketSyncPacket packet = new TeamTicketSyncPacket(nato, russia);
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
-        }
     }
 
     // ===== Player Name Display =====
@@ -176,12 +109,19 @@ public class TeamManager extends SavedData {
             if (team.isPlayable() && game.isPlaying()) {
                 MapConfig map = game.getCurrentMap();
                 if (map != null) {
-                    String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
-                    if (!worldKey.isEmpty()) {
+                    String liveKey = map.getLiveWorldFolder();
+                    if (liveKey != null && !liveKey.isEmpty()) {
                         ServerLevel target = server.getLevel(
-                            ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey)));
+                            ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", liveKey)));
                         if (target != null) {
-                            player.teleportTo(target, 0.5, 65, 0.5, 0, 0);
+                            double x = 0.5, y = 65, z = 0.5;
+                            if (map.hasTeamSpawns()) {
+                                int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
+                                if (spawn != null && spawn.length >= 3) {
+                                    x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5;
+                                }
+                            }
+                            player.teleportTo(target, x, y, z, 0, 0);
                             player.fallDistance = 0;
                         }
                     }

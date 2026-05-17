@@ -160,6 +160,10 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/TeamSystem.class
   com/yourmod/teamsystem/blockentity/
   com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity.class
+  com/yourmod/teamsystem/capture/
+  com/yourmod/teamsystem/capture/CaptureProcessor.class
+  com/yourmod/teamsystem/capture/CaptureZone.class
+  com/yourmod/teamsystem/capture/ZoneDataManager.class
   com/yourmod/teamsystem/client/
   com/yourmod/teamsystem/client/ClientMarkerData.class
   com/yourmod/teamsystem/client/ClientTeamData.class
@@ -179,8 +183,6 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/commands/TeamCommand.class
   com/yourmod/teamsystem/commands/VehicleCommand.class
   com/yourmod/teamsystem/core/
-  com/yourmod/teamsystem/core/CapturePointData$CaptureState.class
-  com/yourmod/teamsystem/core/CapturePointData.class
   com/yourmod/teamsystem/core/CapturePointManager.class
   com/yourmod/teamsystem/core/ContributionData.class
   com/yourmod/teamsystem/core/ContributionManager.class
