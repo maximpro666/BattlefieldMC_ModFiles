@@ -6,6 +6,7 @@ import com.yourmod.teamsystem.commands.LobbyCommand;
 import com.yourmod.teamsystem.commands.MapCommand;
 import com.yourmod.teamsystem.commands.TeamCommand;
 import com.yourmod.teamsystem.core.GameManager;
+import com.yourmod.teamsystem.core.MapDimensionGenerator;
 import com.yourmod.teamsystem.core.MapPoolManager;
 import com.yourmod.teamsystem.core.TeamManager;
 import com.yourmod.teamsystem.events.CombatEventHandler;
@@ -65,6 +66,8 @@ public class TeamSystem {
                 "teamsystem_mappool"
             );
         mapPoolManager.loadConfig();
+
+        MapDimensionGenerator.generateDimensionDatapacks(event.getServer());
 
         gameManager = new GameManager(event.getServer());
         MinecraftForge.EVENT_BUS.register(gameManager);

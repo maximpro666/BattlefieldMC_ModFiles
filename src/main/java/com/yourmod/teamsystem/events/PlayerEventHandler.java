@@ -7,7 +7,10 @@ import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -27,6 +30,7 @@ public class PlayerEventHandler {
                 game.syncPhaseToPlayer(player);
                 if (game.isLobby()) {
                     game.teleportPlayerToLobby(player);
+                    game.setLobbyRespawn(player);
                 }
             }
             TeamSystem.LOGGER.info("Synced team data for player: {}", player.getName().getString());
@@ -37,13 +41,27 @@ public class PlayerEventHandler {
     public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             GameManager game = TeamSystem.getGameManager();
-            MapConfig map = TeamSystem.getMapPoolManager().getCurrentMap().orElse(null);
 
-            if (map != null && !map.hasRespawn() && game != null && game.isPlaying()) {
-                teamManager.setPlayerTeam(player, Team.SPECTATOR);
+            if (game == null) {
+                teamManager.fullSyncPlayer(player);
+                return;
+            }
+
+            if (game.isPlaying()) {
+                MapConfig map = TeamSystem.getMapPoolManager().getCurrentMap().orElse(null);
+                if (map != null && !map.hasRespawn()) {
+                    teamManager.setPlayerTeam(player, Team.SPECTATOR);
+                    game.teleportPlayerToLobby(player);
+                    game.setLobbyRespawn(player);
+                    player.sendSystemMessage(Component.literal("Respawn is disabled on this map. You are now spectating.")
+                        .withStyle(ChatFormatting.RED));
+                    return;
+                }
+            }
+
+            if (game.isLobby()) {
                 game.teleportPlayerToLobby(player);
-                player.sendSystemMessage(Component.literal("Respawn is disabled on this map. You are now spectating.")
-                    .withStyle(ChatFormatting.RED));
+                game.setLobbyRespawn(player);
                 return;
             }
 

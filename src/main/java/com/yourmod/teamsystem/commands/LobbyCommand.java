@@ -17,6 +17,10 @@ public class LobbyCommand {
             Commands.literal("lobby")
                 .requires(source -> source.hasPermission(0))
                 .executes(context -> teleportToLobby(context))
+                .then(Commands.literal("setspawn")
+                    .requires(source -> source.hasPermission(0))
+                    .executes(context -> setLobbyRespawn(context))
+                )
         );
     }
 
@@ -29,7 +33,23 @@ public class LobbyCommand {
         }
 
         game.teleportPlayerToLobby(player);
-        player.sendSystemMessage(Component.literal("Teleported to lobby!")
+        game.setLobbyRespawn(player);
+        player.sendSystemMessage(Component.literal("Teleported to lobby! Respawn point set.")
+            .withStyle(ChatFormatting.GREEN));
+
+        return 1;
+    }
+
+    private static int setLobbyRespawn(CommandContext<CommandSourceStack> context) {
+        GameManager game = TeamSystem.getGameManager();
+
+        if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
+            context.getSource().sendFailure(Component.literal("Only players can use this command"));
+            return 0;
+        }
+
+        game.setLobbyRespawn(player);
+        player.sendSystemMessage(Component.literal("Respawn point set to lobby!")
             .withStyle(ChatFormatting.GREEN));
 
         return 1;

@@ -104,6 +104,7 @@ public class MapPoolManager extends SavedData {
 
     public void reloadConfig() {
         loadConfig();
+        MapDimensionGenerator.generateDimensionDatapacks(server);
     }
 
     public List<MapConfig> getMaps() {

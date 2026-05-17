@@ -3,8 +3,13 @@
   "generator": {
     "type": "minecraft:flat",
     "settings": {
-      "biome": "minecraft:the_void",
-      "layers": [],
+      "biome": "minecraft:plains",
+      "layers": [
+        {"block": "minecraft:stone", "height": 60},
+        {"block": "minecraft:dirt", "height": 3},
+        {"block": "minecraft:grass_block", "height": 1}
+      ],
+      "features": false,
       "structure_overrides": []
     }
   }

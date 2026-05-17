@@ -7,17 +7,20 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 public class GameManager {
@@ -28,6 +31,7 @@ public class GameManager {
     }
 
     private static final ResourceLocation LOBBY_DIMENSION_ID = new ResourceLocation("teamsystem:lobby");
+    private static final BlockPos LOBBY_SPAWN = new BlockPos(0, 64, 0);
 
     private final MinecraftServer server;
     private GamePhase currentPhase;
@@ -35,6 +39,7 @@ public class GameManager {
     private Team winningTeam;
     private int lobbyWaitTimer;
     private boolean countdownActive;
+    private boolean lobbyLoaded;
 
     public GameManager(MinecraftServer server) {
         this.server = server;
@@ -43,6 +48,7 @@ public class GameManager {
         this.winningTeam = null;
         this.lobbyWaitTimer = 0;
         this.countdownActive = false;
+        this.lobbyLoaded = false;
     }
 
     public GamePhase getCurrentPhase() {
@@ -66,9 +72,8 @@ public class GameManager {
         MapPoolManager mapPool = TeamSystem.getMapPoolManager();
 
         if (mapPool.getMaps().isEmpty()) {
-            server.getPlayerList().broadcastSystemMessage(
-                Component.literal("No maps configured! Add maps to teamsystem_maps.json")
-                    .withStyle(ChatFormatting.RED), false);
+            broadcastToAll(Component.literal("No maps configured! Add maps to teamsystem_maps.json")
+                .withStyle(ChatFormatting.RED));
             return;
         }
 
@@ -118,7 +123,7 @@ public class GameManager {
         if (currentPhase == GamePhase.ENDING) {
             endingTimer--;
             if (endingTimer <= 0) {
-                returnToLobby();
+                regenerateAndReturnToLobby();
             }
         }
 
@@ -126,8 +131,10 @@ public class GameManager {
             lobbyWaitTimer--;
             if (lobbyWaitTimer % 20 == 0 && lobbyWaitTimer > 0) {
                 int seconds = lobbyWaitTimer / 20;
-                broadcastToAll(Component.literal("Next round in " + seconds + " seconds...")
-                    .withStyle(ChatFormatting.AQUA));
+                if (seconds <= 5 || seconds % 10 == 0) {
+                    broadcastToAll(Component.literal("Next round in " + seconds + " seconds...")
+                        .withStyle(ChatFormatting.AQUA));
+                }
             }
             if (lobbyWaitTimer <= 0) {
                 countdownActive = false;
@@ -151,14 +158,86 @@ public class GameManager {
             .withStyle(ChatFormatting.RED));
     }
 
+    private void regenerateAndReturnToLobby() {
+        MapPoolManager mapPool = TeamSystem.getMapPoolManager();
+        mapPool.getCurrentMap().ifPresent(map -> {
+            if (!map.getWorldFolder().equals("overworld")) {
+                regenerateMapWorld(map);
+            }
+        });
+        returnToLobby();
+    }
+
+    private void regenerateMapWorld(MapConfig map) {
+        String worldFolder = map.getWorldFolder();
+        if (worldFolder == null || worldFolder.isEmpty()) return;
+
+        Path dimDir = server.getWorldPath(LevelResource.ROOT)
+            .resolve("dimensions").resolve("teamsystem").resolve(worldFolder);
+        Path backupDir = dimDir.resolveSibling(worldFolder + "_backup");
+
+        try {
+            if (Files.exists(backupDir)) {
+                deleteDirectory(dimDir);
+                copyDirectory(backupDir, dimDir);
+                TeamSystem.LOGGER.info("Restored map world from backup: {}", map.getName());
+            }
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to regenerate map world {}: {}", map.getName(), e.getMessage());
+        }
+    }
+
+    public static void backupMapWorld(MinecraftServer server, MapConfig map) {
+        String worldFolder = map.getWorldFolder();
+        if (worldFolder == null || worldFolder.isEmpty()) return;
+
+        Path dimDir = server.getWorldPath(LevelResource.ROOT)
+            .resolve("dimensions").resolve("teamsystem").resolve(worldFolder);
+        Path backupDir = dimDir.resolveSibling(worldFolder + "_backup");
+
+        try {
+            deleteDirectory(backupDir);
+            if (Files.exists(dimDir)) {
+                copyDirectory(dimDir, backupDir);
+                TeamSystem.LOGGER.info("Backed up map world: {}", map.getName());
+            }
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to backup map world {}: {}", map.getName(), e.getMessage());
+        }
+    }
+
+    private static void deleteDirectory(Path path) throws IOException {
+        if (Files.exists(path)) {
+            try (var stream = Files.walk(path)) {
+                stream.sorted((a, b) -> b.compareTo(a))
+                    .forEach(p -> {
+                        try { Files.deleteIfExists(p); } catch (IOException ignored) {}
+                    });
+            }
+        }
+    }
+
+    private static void copyDirectory(Path source, Path target) throws IOException {
+        try (var stream = Files.walk(source)) {
+            stream.forEach(sourcePath -> {
+                try {
+                    Path targetPath = target.resolve(source.relativize(sourcePath));
+                    if (Files.isDirectory(sourcePath)) {
+                        Files.createDirectories(targetPath);
+                    } else {
+                        Files.copy(sourcePath, targetPath);
+                    }
+                } catch (IOException ignored) {}
+            });
+        }
+    }
+
     private void returnToLobby() {
         currentPhase = GamePhase.LOBBY;
         winningTeam = null;
         endingTimer = 0;
 
-        TeamManager teamManager = TeamSystem.getTeamManager();
         MapPoolManager mapPool = TeamSystem.getMapPoolManager();
-
         MapConfig nextMap = mapPool.nextMap();
         if (nextMap != null) {
             broadcastToAll(Component.literal("Next map: ")
@@ -167,12 +246,38 @@ public class GameManager {
         }
 
         teleportAllToLobby();
+        applyLobbyRules();
         syncPhaseToAll();
 
         int waitTime = nextMap != null ? nextMap.getLobbyWaitTime() : 30;
         startCountdown(waitTime);
 
+        if (nextMap != null) {
+            backupMapWorld(server, nextMap);
+        }
+
         TeamSystem.LOGGER.info("Returned to lobby");
+    }
+
+    private void applyLobbyRules() {
+        ServerLevel lobbyWorld = getLobbyWorld();
+        if (lobbyWorld == null) return;
+
+        setGameRule(lobbyWorld, "doMobSpawning", "false");
+        setGameRule(lobbyWorld, "doDaylightCycle", "false");
+        setGameRule(lobbyWorld, "doWeatherCycle", "false");
+        setGameRule(lobbyWorld, "mobGriefing", "false");
+        setGameRule(lobbyWorld, "doFireTick", "false");
+        setGameRule(lobbyWorld, "keepInventory", "true");
+        setGameRule(lobbyWorld, "naturalRegeneration", "true");
+        setGameRule(lobbyWorld, "fallDamage", "false");
+    }
+
+    private void setGameRule(ServerLevel level, String rule, String value) {
+        server.getCommands().performPrefixedCommand(
+            server.createCommandSourceStack(),
+            "gamerule " + rule + " " + value + " " + level.dimension().location()
+        );
     }
 
     public void teleportAllPlayersToMap(MapConfig map) {
@@ -184,59 +289,96 @@ public class GameManager {
 
         List<ServerPlayer> players = server.getPlayerList().getPlayers();
         TeamManager tm = TeamSystem.getTeamManager();
+        BlockPos spawnPos = targetWorld.getSharedSpawnPos();
 
         for (ServerPlayer player : players) {
             Team team = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
             if (team == Team.SPECTATOR) continue;
 
-            player.teleportTo(targetWorld, 0, 64, 0, 0, 0);
+            safeTeleport(player, targetWorld, spawnPos.getX() + 0.5, spawnPos.getY() + 1, spawnPos.getZ() + 0.5);
         }
     }
 
     public void teleportAllToLobby() {
-        ServerLevel lobbyWorld = getLobbyWorld();
+        ServerLevel lobbyWorld = getOrCreateLobbyWorld();
         if (lobbyWorld == null) {
             TeamSystem.LOGGER.error("Lobby world not found!");
             return;
         }
 
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            player.teleportTo(lobbyWorld, 0, 64, 0, 0, 0);
+            safeTeleport(player, lobbyWorld, LOBBY_SPAWN.getX() + 0.5, LOBBY_SPAWN.getY(), LOBBY_SPAWN.getZ() + 0.5);
         }
     }
 
     public void teleportPlayerToLobby(ServerPlayer player) {
-        ServerLevel lobbyWorld = getLobbyWorld();
+        ServerLevel lobbyWorld = getOrCreateLobbyWorld();
         if (lobbyWorld == null) return;
-        player.teleportTo(lobbyWorld, 0, 64, 0, 0, 0);
+
+        safeTeleport(player, lobbyWorld, LOBBY_SPAWN.getX() + 0.5, LOBBY_SPAWN.getY(), LOBBY_SPAWN.getZ() + 0.5);
     }
 
-    private ServerLevel getMapWorld(MapConfig map) {
-        ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION,
-            new ResourceLocation("teamsystem", map.getWorldFolder()));
-        ServerLevel world = server.getLevel(worldKey);
+    public void setLobbyRespawn(ServerPlayer player) {
+        ServerLevel lobbyWorld = getOrCreateLobbyWorld();
+        if (lobbyWorld == null) return;
+
+        player.setRespawnPosition(lobbyWorld.dimension(), LOBBY_SPAWN, 0, false, false);
+    }
+
+    private void safeTeleport(ServerPlayer player, ServerLevel targetWorld, double x, double y, double z) {
+        player.teleportTo(targetWorld, x, y, z, 0, 0);
+        player.fallDistance = 0;
+        player.setNoGravity(false);
+        player.hurtMarked = true;
+    }
+
+    private ServerLevel getOrCreateLobbyWorld() {
+        ResourceKey<Level> lobbyKey = ResourceKey.create(Registries.DIMENSION, LOBBY_DIMENSION_ID);
+        ServerLevel world = server.getLevel(lobbyKey);
+
+        if (world == null && !lobbyLoaded) {
+            lobbyLoaded = true;
+            server.getCommands().performPrefixedCommand(
+                server.createCommandSourceStack(),
+                "execute in teamsystem:lobby run say Lobby loaded"
+            );
+            world = server.getLevel(lobbyKey);
+        }
+
         if (world == null) {
             world = server.overworld();
         }
         return world;
+    }
+
+    private ServerLevel getMapWorld(MapConfig map) {
+        if (map.getWorldFolder() == null || map.getWorldFolder().isEmpty() || map.getWorldFolder().equals("overworld")) {
+            return server.overworld();
+        }
+
+        ResourceKey<Level> worldKey = ResourceKey.create(Registries.DIMENSION,
+            new ResourceLocation("teamsystem", map.getWorldFolder()));
+        ServerLevel world = server.getLevel(worldKey);
+        return world != null ? world : server.overworld();
     }
 
     private ServerLevel getLobbyWorld() {
         ResourceKey<Level> lobbyKey = ResourceKey.create(Registries.DIMENSION, LOBBY_DIMENSION_ID);
         ServerLevel world = server.getLevel(lobbyKey);
-        if (world == null) {
-            world = server.overworld();
-        }
-        return world;
+        return world != null ? world : server.overworld();
     }
 
     private void applyMapConfig(MapConfig map) {
         ServerLevel mapWorld = getMapWorld(map);
         if (mapWorld == null) return;
 
-        GameRules gameRules = mapWorld.getGameRules();
-        gameRules.getRule(GameRules.RULE_NATURAL_REGENERATION).set(map.hasRegen(), server);
-        gameRules.getRule(GameRules.RULE_DO_IMMEDIATE_RESPAWN).set(!map.hasRespawn(), server);
+        setGameRule(mapWorld, "naturalRegeneration", map.hasRegen() ? "true" : "false");
+        setGameRule(mapWorld, "doImmediateRespawn", map.hasRespawn() ? "false" : "true");
+        setGameRule(mapWorld, "doMobSpawning", "true");
+        setGameRule(mapWorld, "mobGriefing", "false");
+        setGameRule(mapWorld, "doFireTick", "true");
+        setGameRule(mapWorld, "keepInventory", "false");
+        setGameRule(mapWorld, "fallDamage", "true");
 
         if (map.hasWorldBorder()) {
             mapWorld.getWorldBorder().setCenter(map.getWorldBorderCenterX(), map.getWorldBorderCenterZ());
