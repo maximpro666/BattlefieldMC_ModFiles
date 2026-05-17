@@ -1,9 +1,11 @@
 package com.yourmod.teamsystem.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.PlayerCombatData;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
@@ -11,6 +13,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -25,62 +28,112 @@ public class TeamCommand {
         );
     };
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, TeamManager manager) {
+    private static TeamManager getManager() {
+        return TeamSystem.getTeamManager();
+    }
+
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             Commands.literal("team")
                 .requires(source -> source.hasPermission(0))
                 .then(Commands.argument("teamname", StringArgumentType.word())
                     .suggests(TEAM_SUGGESTIONS)
-                    .executes(context -> joinTeam(context, manager))
+                    .executes(context -> joinTeam(context))
                 )
-                .executes(context -> showCurrentTeam(context, manager))
-        );
-
-        // Literal subcommands for convenience: /team nato, /team russia, /team spectator
-        dispatcher.register(
-            Commands.literal("team")
-                .requires(source -> source.hasPermission(0))
-                .then(Commands.literal("nato")
-                    .executes(context -> joinTeamLiteral(context, manager, Team.NATO))
+                .then(Commands.literal("modify")
+                    .requires(source -> source.hasPermission(2))
+                    .then(Commands.argument("target", EntityArgument.player())
+                        .then(Commands.literal("setprefix")
+                            .then(Commands.argument("prefix", StringArgumentType.greedyString())
+                                .executes(context -> modifySetPrefix(context))
+                            )
+                        )
+                        .then(Commands.literal("setsuffix")
+                            .then(Commands.argument("suffix", StringArgumentType.greedyString())
+                                .executes(context -> modifySetSuffix(context))
+                            )
+                        )
+                        .then(Commands.literal("setdisplayname")
+                            .then(Commands.argument("name", StringArgumentType.greedyString())
+                                .executes(context -> modifySetDisplayName(context))
+                            )
+                        )
+                        .then(Commands.literal("reset")
+                            .executes(context -> modifyReset(context))
+                        )
+                    )
                 )
-        );
-
-        dispatcher.register(
-            Commands.literal("team")
-                .requires(source -> source.hasPermission(0))
-                .then(Commands.literal("russia")
-                    .executes(context -> joinTeamLiteral(context, manager, Team.RUSSIA))
-                )
-        );
-
-        dispatcher.register(
-            Commands.literal("team")
-                .requires(source -> source.hasPermission(0))
-                .then(Commands.literal("spectator")
-                    .executes(context -> joinTeamLiteral(context, manager, Team.SPECTATOR))
-                )
+                .executes(context -> showCurrentTeam(context))
         );
 
         dispatcher.register(
             Commands.literal("teamstats")
                 .requires(source -> source.hasPermission(0))
-                .executes(context -> showStats(context, manager))
+                .executes(context -> showStats(context))
         );
 
         dispatcher.register(
             Commands.literal("teambalance")
                 .requires(source -> source.hasPermission(0))
-                .executes(context -> showBalance(context, manager))
+                .executes(context -> showBalance(context))
         );
 
         dispatcher.register(
             Commands.literal("resetstats")
                 .requires(source -> source.hasPermission(2))
-                .executes(context -> resetStats(context, manager))
+                .executes(context -> resetStats(context))
+        );
+
+        dispatcher.register(
+            Commands.literal("teamtickets")
+                .requires(source -> source.hasPermission(0))
+                .executes(context -> showTickets(context))
+        );
+
+        dispatcher.register(
+            Commands.literal("settickets")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.argument("team", StringArgumentType.word())
+                    .suggests(TEAM_SUGGESTIONS)
+                    .then(Commands.argument("amount", IntegerArgumentType.integer(0))
+                        .executes(context -> setTickets(context))
+                    )
+                )
+        );
+
+        dispatcher.register(
+            Commands.literal("setprefix")
+                .requires(source -> source.hasPermission(0))
+                .then(Commands.argument("prefix", StringArgumentType.greedyString())
+                    .executes(context -> setPrefix(context))
+                )
+        );
+
+        dispatcher.register(
+            Commands.literal("setsuffix")
+                .requires(source -> source.hasPermission(0))
+                .then(Commands.argument("suffix", StringArgumentType.greedyString())
+                    .executes(context -> setSuffix(context))
+                )
+        );
+
+        dispatcher.register(
+            Commands.literal("setdisplayname")
+                .requires(source -> source.hasPermission(0))
+                .then(Commands.argument("name", StringArgumentType.greedyString())
+                    .executes(context -> setDisplayName(context))
+                )
+        );
+
+        dispatcher.register(
+            Commands.literal("clearname")
+                .requires(source -> source.hasPermission(0))
+                .executes(context -> clearName(context))
         );
     }
 
-    private static int joinTeam(CommandContext<CommandSourceStack> context, TeamManager manager) {
+    private static int joinTeam(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
         if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
             context.getSource().sendFailure(Component.literal("Only players can use this command"));
             return 0;
@@ -119,30 +172,8 @@ public class TeamCommand {
         return 1;
     }
 
-    /**
-     * Helper method to join team via literal subcommand (/team nato, /team russia, /team spectator).
-     * Executes the same logic as joinTeam but with pre-resolved Team enum.
-     */
-    private static int joinTeamLiteral(CommandContext<CommandSourceStack> context, TeamManager manager, Team team) {
-        if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
-            context.getSource().sendFailure(Component.literal("Only players can use this command"));
-            return 0;
-        }
-
-        Team currentTeam = manager.getOrCreatePlayerData(player.getUUID()).getTeam();
-
-        if (currentTeam == team) {
-            player.sendSystemMessage(Component.literal("You are already in team ")
-                .append(team.getColoredName()));
-            return 0;
-        }
-
-        manager.setPlayerTeam(player, team);
-        // Broadcast handled by setPlayerTeam, which calls info log and broadcastSystemMessage
-        return 1;
-    }
-
-    private static int showCurrentTeam(CommandContext<CommandSourceStack> context, TeamManager manager) {
+    private static int showCurrentTeam(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
         if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
             context.getSource().sendFailure(Component.literal("Only players can use this command"));
             return 0;
@@ -161,7 +192,8 @@ public class TeamCommand {
         return 1;
     }
 
-    private static int showStats(CommandContext<CommandSourceStack> context, TeamManager manager) {
+    private static int showStats(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
         if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
             context.getSource().sendFailure(Component.literal("Only players can use this command"));
             return 0;
@@ -188,7 +220,8 @@ public class TeamCommand {
         return 1;
     }
 
-    private static int showBalance(CommandContext<CommandSourceStack> context, TeamManager manager) {
+    private static int showBalance(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
         if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
             context.getSource().sendFailure(Component.literal("Only players can use this command"));
             return 0;
@@ -222,7 +255,8 @@ public class TeamCommand {
         return 1;
     }
 
-    private static int resetStats(CommandContext<CommandSourceStack> context, TeamManager manager) {
+    private static int resetStats(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
         if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
             context.getSource().sendFailure(Component.literal("Only players can use this command"));
             return 0;
@@ -232,6 +266,176 @@ public class TeamCommand {
         player.sendSystemMessage(Component.literal("Your stats have been reset!")
             .withStyle(ChatFormatting.GREEN));
 
+        return 1;
+    }
+
+    private static int showTickets(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
+        if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
+            context.getSource().sendFailure(Component.literal("Only players can use this command"));
+            return 0;
+        }
+
+        int nato = manager.getTickets(Team.NATO);
+        int russia = manager.getTickets(Team.RUSSIA);
+
+        player.sendSystemMessage(Component.literal("=== Team Tickets ===")
+            .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+
+        player.sendSystemMessage(Team.NATO.getColoredName()
+            .append(Component.literal(String.format(": %d tickets", nato))
+                .withStyle(ChatFormatting.WHITE)));
+
+        player.sendSystemMessage(Team.RUSSIA.getColoredName()
+            .append(Component.literal(String.format(": %d tickets", russia))
+                .withStyle(ChatFormatting.WHITE)));
+
+        return 1;
+    }
+
+    private static int setTickets(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
+        String teamName = StringArgumentType.getString(context, "team");
+        Team team = Team.fromString(teamName);
+        if (team == null || !team.isPlayable()) {
+            context.getSource().sendFailure(Component.literal("Invalid team! Use NATO or RUSSIA.")
+                .withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        int amount = IntegerArgumentType.getInteger(context, "amount");
+        manager.setTickets(team, amount);
+
+        context.getSource().sendSuccess(() ->
+            Component.literal(String.format("Set %s tickets to %d", team.getName(), amount))
+                .withStyle(ChatFormatting.GREEN), true);
+
+        return 1;
+    }
+
+    private static int setPrefix(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
+        if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
+            context.getSource().sendFailure(Component.literal("Only players can use this command"));
+            return 0;
+        }
+
+        String prefix = StringArgumentType.getString(context, "prefix");
+        manager.setPlayerPrefix(player, prefix);
+
+        player.sendSystemMessage(Component.literal(String.format("Prefix set to: %s", prefix))
+            .withStyle(ChatFormatting.GREEN));
+
+        return 1;
+    }
+
+    private static int setSuffix(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
+        if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
+            context.getSource().sendFailure(Component.literal("Only players can use this command"));
+            return 0;
+        }
+
+        String suffix = StringArgumentType.getString(context, "suffix");
+        manager.setPlayerSuffix(player, suffix);
+
+        player.sendSystemMessage(Component.literal(String.format("Suffix set to: %s", suffix))
+            .withStyle(ChatFormatting.GREEN));
+
+        return 1;
+    }
+
+    private static int setDisplayName(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
+        if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
+            context.getSource().sendFailure(Component.literal("Only players can use this command"));
+            return 0;
+        }
+
+        String name = StringArgumentType.getString(context, "name");
+        manager.setPlayerDisplayName(player, name);
+
+        player.sendSystemMessage(Component.literal(String.format("Display name set to: %s", name))
+            .withStyle(ChatFormatting.GREEN));
+
+        return 1;
+    }
+
+    private static int clearName(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
+        if (!(context.getSource().getEntity() instanceof ServerPlayer player)) {
+            context.getSource().sendFailure(Component.literal("Only players can use this command"));
+            return 0;
+        }
+
+        manager.setPlayerPrefix(player, "");
+        manager.setPlayerSuffix(player, "");
+        manager.setPlayerDisplayName(player, "");
+
+        player.sendSystemMessage(Component.literal("Name customization cleared!")
+            .withStyle(ChatFormatting.GREEN));
+
+        return 1;
+    }
+
+    private static int modifySetPrefix(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
+        try {
+            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+            String prefix = StringArgumentType.getString(context, "prefix");
+            manager.setPlayerPrefix(target, prefix);
+            context.getSource().sendSuccess(() ->
+                Component.literal("Set prefix of " + target.getName().getString() + " to: " + prefix)
+                    .withStyle(ChatFormatting.GREEN), true);
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Player not found"));
+        }
+        return 1;
+    }
+
+    private static int modifySetSuffix(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
+        try {
+            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+            String suffix = StringArgumentType.getString(context, "suffix");
+            manager.setPlayerSuffix(target, suffix);
+            context.getSource().sendSuccess(() ->
+                Component.literal("Set suffix of " + target.getName().getString() + " to: " + suffix)
+                    .withStyle(ChatFormatting.GREEN), true);
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Player not found"));
+        }
+        return 1;
+    }
+
+    private static int modifySetDisplayName(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
+        try {
+            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+            String name = StringArgumentType.getString(context, "name");
+            manager.setPlayerDisplayName(target, name);
+            context.getSource().sendSuccess(() ->
+                Component.literal("Set display name of " + target.getName().getString() + " to: " + name)
+                    .withStyle(ChatFormatting.GREEN), true);
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Player not found"));
+        }
+        return 1;
+    }
+
+    private static int modifyReset(CommandContext<CommandSourceStack> context) {
+        TeamManager manager = getManager();
+        try {
+            ServerPlayer target = EntityArgument.getPlayer(context, "target");
+            manager.setPlayerPrefix(target, "");
+            manager.setPlayerSuffix(target, "");
+            manager.setPlayerDisplayName(target, "");
+            context.getSource().sendSuccess(() ->
+                Component.literal("Reset name customization for " + target.getName().getString())
+                    .withStyle(ChatFormatting.GREEN), true);
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Player not found"));
+        }
         return 1;
     }
 

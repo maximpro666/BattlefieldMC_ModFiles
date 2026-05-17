@@ -7,12 +7,18 @@ public class PlayerCombatData {
     private int kills;
     private int deaths;
     private int squadId;
+    private String prefix;
+    private String suffix;
+    private String displayName;
 
     public PlayerCombatData() {
         this.team = Team.SPECTATOR;
         this.kills = 0;
         this.deaths = 0;
         this.squadId = -1;
+        this.prefix = "";
+        this.suffix = "";
+        this.displayName = "";
     }
 
     public Team getTeam() {
@@ -59,6 +65,30 @@ public class PlayerCombatData {
         return squadId >= 0;
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix != null ? prefix : "";
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public void setSuffix(String suffix) {
+        this.suffix = suffix != null ? suffix : "";
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName != null ? displayName : "";
+    }
+
     public double getKDRatio() {
         if (deaths == 0) {
             return kills;
@@ -76,6 +106,9 @@ public class PlayerCombatData {
         this.kills = 0;
         this.deaths = 0;
         this.squadId = -1;
+        this.prefix = "";
+        this.suffix = "";
+        this.displayName = "";
     }
 
     // ===== NBT Serialization =====
@@ -86,6 +119,9 @@ public class PlayerCombatData {
         tag.putInt("Kills", kills);
         tag.putInt("Deaths", deaths);
         tag.putInt("SquadId", squadId);
+        tag.putString("Prefix", prefix);
+        tag.putString("Suffix", suffix);
+        tag.putString("DisplayName", displayName);
         return tag;
     }
 
@@ -94,6 +130,9 @@ public class PlayerCombatData {
         this.kills = tag.getInt("Kills");
         this.deaths = tag.getInt("Deaths");
         this.squadId = tag.getInt("SquadId");
+        this.prefix = tag.getString("Prefix");
+        this.suffix = tag.getString("Suffix");
+        this.displayName = tag.getString("DisplayName");
     }
 
     public static PlayerCombatData fromNBT(CompoundTag tag) {
@@ -104,7 +143,7 @@ public class PlayerCombatData {
 
     @Override
     public String toString() {
-        return String.format("PlayerCombatData{team=%s, kills=%d, deaths=%d, kd=%.2f, squad=%d}",
-                team.getName(), kills, deaths, getKDRatio(), squadId);
+        return String.format("PlayerCombatData{team=%s, kills=%d, deaths=%d, kd=%.2f, squad=%d, prefix='%s', suffix='%s', displayName='%s'}",
+                team.getName(), kills, deaths, getKDRatio(), squadId, prefix, suffix, displayName);
     }
 }

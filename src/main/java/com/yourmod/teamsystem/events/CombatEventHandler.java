@@ -1,6 +1,8 @@
 package com.yourmod.teamsystem.events;
 
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.GameManager;
+import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
@@ -120,6 +122,12 @@ public class CombatEventHandler {
             return;
         }
 
+        GameManager game = TeamSystem.getGameManager();
+        if (game != null && !game.isPlaying()) {
+            event.setCanceled(true);
+            return;
+        }
+
         DamageSource source = event.getSource();
         ServerLevel level = (ServerLevel) victim.level();
         ServerPlayer attacker = resolveAttacker(source, level);
@@ -141,6 +149,13 @@ public class CombatEventHandler {
         }
 
         teamManager.incrementDeaths(victim.getUUID());
+
+        // Deduct ticket from victim's team
+        Team victimTeam = teamManager.getOrCreatePlayerData(victim.getUUID()).getTeam();
+        if (victimTeam.isPlayable()) {
+            teamManager.deductTicket(victimTeam);
+            TeamSystem.LOGGER.info("{} lost a ticket (remaining: {})", victimTeam.getName(), teamManager.getTickets(victimTeam));
+        }
 
         DamageSource source = event.getSource();
         ServerLevel level = (ServerLevel) victim.level();

@@ -134,6 +134,7 @@ Adding Libraries to Inheritance
 Reading Input: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\libs\teamsystem-1.0.0.jar
 Adding input to inheritance map
 Processing entries
+Conflicting propagated mapping for com/yourmod/teamsystem/core/MapPoolManager/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag; from net/minecraft/world/level/saveddata/SavedData/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;: save -> m_7176_
 Conflicting propagated mapping for com/yourmod/teamsystem/core/TeamManager/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag; from net/minecraft/world/level/saveddata/SavedData/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;: save -> m_7176_
 Conflicting propagated mapping for net/minecraft/world/entity/LivingEntity/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V from net/minecraft/world/entity/player/Player/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V: lambda$addAdditionalSaveData$3 -> m_219754_
 Adding extras
@@ -149,9 +150,18 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/client/
   com/yourmod/teamsystem/client/ClientTeamData.class
   com/yourmod/teamsystem/commands/
+  com/yourmod/teamsystem/commands/GameCommand$1.class
+  com/yourmod/teamsystem/commands/GameCommand.class
+  com/yourmod/teamsystem/commands/LobbyCommand.class
+  com/yourmod/teamsystem/commands/MapCommand.class
   com/yourmod/teamsystem/commands/TeamCommand.class
   com/yourmod/teamsystem/core/
   com/yourmod/teamsystem/core/CapturePointManager.class
+  com/yourmod/teamsystem/core/GameManager$GamePhase.class
+  com/yourmod/teamsystem/core/GameManager.class
+  com/yourmod/teamsystem/core/MapConfig.class
+  com/yourmod/teamsystem/core/MapPoolManager$1.class
+  com/yourmod/teamsystem/core/MapPoolManager.class
   com/yourmod/teamsystem/core/PlayerCombatData.class
   com/yourmod/teamsystem/core/Team.class
   com/yourmod/teamsystem/core/TeamManager.class
@@ -161,6 +171,15 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/events/PlayerEventHandler.class
   com/yourmod/teamsystem/network/
   com/yourmod/teamsystem/network/CombatDataSyncPacket.class
+  com/yourmod/teamsystem/network/GameStateSyncPacket.class
   com/yourmod/teamsystem/network/PacketHandler.class
   com/yourmod/teamsystem/network/TeamSyncPacket.class
+  com/yourmod/teamsystem/network/TeamTicketSyncPacket.class
+  data/
+  data/teamsystem/
+  data/teamsystem/dimension/
+  data/teamsystem/dimension/lobby.json
+  data/teamsystem/dimension_type/
+  data/teamsystem/dimension_type/lobby.json
   pack.mcmeta
+  teamsystem_maps.json

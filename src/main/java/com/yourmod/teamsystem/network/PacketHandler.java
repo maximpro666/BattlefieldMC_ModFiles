@@ -15,7 +15,7 @@ public class PacketHandler {
 
     private static int nextId = 0;
 
-    // Protocol version "1": TeamSyncPacket (team ordinal), CombatDataSyncPacket (team ordinal, kills, deaths)
+    // Protocol version "2": TeamSyncPacket (team ordinal), CombatDataSyncPacket (team ordinal, kills, deaths, prefix, suffix, displayName), TeamTicketSyncPacket
     // Do not increment version unless packet format changes (breaking compatibility).
     public static void register() {
         CHANNEL.registerMessage(
@@ -32,6 +32,22 @@ public class PacketHandler {
             TeamSyncPacket::encode,
             TeamSyncPacket::decode,
             TeamSyncPacket::handle
+        );
+
+        CHANNEL.registerMessage(
+            nextId++,
+            TeamTicketSyncPacket.class,
+            TeamTicketSyncPacket::encode,
+            TeamTicketSyncPacket::decode,
+            TeamTicketSyncPacket::handle
+        );
+
+        CHANNEL.registerMessage(
+            nextId++,
+            GameStateSyncPacket.class,
+            GameStateSyncPacket::encode,
+            GameStateSyncPacket::decode,
+            GameStateSyncPacket::handle
         );
     }
 }
