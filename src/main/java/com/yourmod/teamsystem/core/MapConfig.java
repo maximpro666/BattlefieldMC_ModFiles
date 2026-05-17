@@ -18,6 +18,7 @@ public class MapConfig {
     private int[] natoSpawn;
     private int[] russiaSpawn;
     private int baseRadius;
+    private MapState state;
 
     public MapConfig() {
         this.name = "";
@@ -35,6 +36,7 @@ public class MapConfig {
         this.natoSpawn = new int[]{0, 64, 0};
         this.russiaSpawn = new int[]{0, 64, 0};
         this.baseRadius = 30;
+        this.state = MapState.AVAILABLE;
     }
 
     public MapConfig(String name, String worldFolder, boolean enabled, boolean hasRespawn,
@@ -57,7 +59,11 @@ public class MapConfig {
         this.natoSpawn = natoSpawn != null ? natoSpawn : new int[]{0, 64, 0};
         this.russiaSpawn = russiaSpawn != null ? russiaSpawn : new int[]{0, 64, 0};
         this.baseRadius = baseRadius > 0 ? baseRadius : 30;
+        this.state = MapState.AVAILABLE;
     }
+
+    public MapState getState() { return state; }
+    public void setState(MapState state) { this.state = state; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -124,6 +130,7 @@ public class MapConfig {
         tag.putInt("RussiaSpawnY", russiaSpawn[1]);
         tag.putInt("RussiaSpawnZ", russiaSpawn[2]);
         tag.putInt("BaseRadius", baseRadius);
+        tag.putString("State", state.name());
         return tag;
     }
 
@@ -144,6 +151,7 @@ public class MapConfig {
         config.natoSpawn = new int[]{tag.getInt("NatoSpawnX"), tag.getInt("NatoSpawnY"), tag.getInt("NatoSpawnZ")};
         config.russiaSpawn = new int[]{tag.getInt("RussiaSpawnX"), tag.getInt("RussiaSpawnY"), tag.getInt("RussiaSpawnZ")};
         config.baseRadius = tag.getInt("BaseRadius");
+        config.state = MapState.valueOf(tag.getString("State"));
         return config;
     }
 

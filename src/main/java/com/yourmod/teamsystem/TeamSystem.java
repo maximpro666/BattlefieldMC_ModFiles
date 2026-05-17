@@ -96,6 +96,7 @@ public class TeamSystem {
 
         mapPoolManager = new MapPoolManager(event.getServer());
         mapPoolManager.loadConfig();
+        MinecraftForge.EVENT_BUS.register(mapPoolManager);
 
         MapDimensionGenerator.generateDimensionDatapacks(event.getServer());
 

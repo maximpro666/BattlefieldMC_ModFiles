@@ -179,6 +179,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/core/MapDimensionGenerator.class
   com/yourmod/teamsystem/core/MapPoolManager$1.class
   com/yourmod/teamsystem/core/MapPoolManager.class
+  com/yourmod/teamsystem/core/MapState.class
   com/yourmod/teamsystem/core/MarkerData$MarkerType.class
   com/yourmod/teamsystem/core/MarkerData.class
   com/yourmod/teamsystem/core/MarkerManager.class

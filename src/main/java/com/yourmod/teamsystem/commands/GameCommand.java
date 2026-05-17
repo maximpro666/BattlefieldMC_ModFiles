@@ -78,7 +78,7 @@ public class GameCommand {
         MapPoolManager pool = TeamSystem.getMapPoolManager();
         String name = StringArgumentType.getString(context, "name");
 
-        if (pool.setCurrentMap(name)) {
+        if (pool.selectMap(name)) {
             context.getSource().sendSuccess(() ->
                 Component.literal("Next map set to: " + name).withStyle(ChatFormatting.GREEN), true);
         } else {
