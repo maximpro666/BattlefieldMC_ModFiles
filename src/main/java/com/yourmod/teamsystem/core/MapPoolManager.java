@@ -46,7 +46,7 @@ public class MapPoolManager {
         this.votes = new HashMap<>();
         this.maintenanceRunning = false;
         this.maintenanceCooldown = 0;
-        this.restartAfterMaintenance = false;
+        this.restartAfterMaintenance = true;
     }
 
     public boolean isRestartAfterMaintenance() { return restartAfterMaintenance; }
@@ -297,12 +297,7 @@ public class MapPoolManager {
 
         if (restartAfterMaintenance) {
             TeamSystem.LOGGER.info("Restarting server after maintenance...");
-            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
-                "say Server restarting in 5 seconds for maintenance...");
-            server.execute(() -> {
-                try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
-                server.halt(false);
-            });
+            server.execute(() -> server.halt(false));
         }
 
         maintenanceRunning = false;

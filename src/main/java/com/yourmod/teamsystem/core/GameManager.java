@@ -152,12 +152,20 @@ public class GameManager {
 
     private void finishMatchCycle() {
         MapConfig map = currentMap;
-
         teleportAllToLobby();
 
+        MapPoolManager pool = TeamSystem.getMapPoolManager();
+
         if (map != null) {
-            TeamSystem.getMapPoolManager().markDirty(map);
-            broadcast("Map '" + map.getName() + "' used. Vote for next map!", ChatFormatting.GRAY);
+            pool.markDirty(map);
+            broadcast("Map '" + map.getName() + "' marked dirty", ChatFormatting.GRAY);
+        }
+
+        // If all maps are dirty → run maintenance with restart
+        if (!pool.hasAvailableMaps() && pool.getDirtyCount() > 0) {
+            broadcast("All maps used! Running maintenance... server will restart.", ChatFormatting.YELLOW);
+            pool.runMaintenance();
+            return;
         }
 
         startVoting();
