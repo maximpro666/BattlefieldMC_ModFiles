@@ -20,9 +20,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 
@@ -117,9 +114,9 @@ public class GameManager {
         if (contrib != null) contrib.resetMatch();
 
         try {
-            backupOnce(map);
+            TeamSystem.getMapPoolManager().copyToLive(map);
         } catch (Exception e) {
-            TeamSystem.LOGGER.error("Backup failed for map {}: {}", map.getName(), e.getMessage());
+            TeamSystem.LOGGER.error("Failed to copy map {} from source: {}", map.getName(), e.getMessage());
         }
         useMapWorld(map);
         applyMapConfig(map);
@@ -368,57 +365,6 @@ public class GameManager {
         broadcast("Countdown cancelled.", ChatFormatting.RED);
     }
 
-    // ========== Backup ==========
-
-    private void backupOnce(MapConfig map) {
-        Path backupRegionDir = getBackupRegionDir(map);
-        if (Files.isDirectory(backupRegionDir)) return;
-        forceBackup(map);
-    }
-
-    public void forceBackup(MapConfig map) {
-        ServerLevel level = getMapWorld(map);
-        if (level == null) return;
-
-        TeamSystem.LOGGER.info("Backing up map world: {}", map.getName());
-        level.save(null, true, false);
-
-        String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
-        if (worldKey.isEmpty()) return;
-
-        try {
-            Path dimDir = server.getWorldPath(LevelResource.ROOT)
-                .resolve("dimensions").resolve("teamsystem").resolve(worldKey);
-            Path backupDir = dimDir.resolveSibling(worldKey + "_backup");
-
-            backupCopyDir(dimDir.resolve("region"), backupDir.resolve("region"));
-            backupCopyDir(dimDir.resolve("poi"), backupDir.resolve("poi"));
-            backupCopyDir(dimDir.resolve("entities"), backupDir.resolve("entities"));
-            backupCopyDir(dimDir.resolve("data"), backupDir.resolve("data"));
-
-            TeamSystem.LOGGER.info("Backup created for map: {}", map.getName());
-        } catch (java.io.IOException e) {
-            TeamSystem.LOGGER.error("Failed to backup map {}: {}", map.getName(), e.getMessage());
-        }
-    }
-
-    private void backupCopyDir(Path src, Path dst) throws java.io.IOException {
-        if (!Files.isDirectory(src)) return;
-        Files.createDirectories(dst);
-        try (var files = Files.list(src)) {
-            for (Path f : (Iterable<Path>) files::iterator) {
-                Files.copy(f, dst.resolve(f.getFileName()), StandardCopyOption.REPLACE_EXISTING);
-            }
-        }
-    }
-
-    private Path getBackupRegionDir(MapConfig map) {
-        String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
-        return server.getWorldPath(LevelResource.ROOT)
-            .resolve("dimensions").resolve("teamsystem").resolve(worldKey)
-            .resolveSibling(worldKey + "_backup").resolve("region");
-    }
-
     // ========== World ==========
 
     private void useMapWorld(MapConfig map) {
@@ -583,9 +529,4 @@ public class GameManager {
                 winningTeam != null ? winningTeam.ordinal() : -1));
     }
 
-    // ========== Legacy ==========
-
-    public void reBackupCurrentMap() {
-        if (currentMap != null) forceBackup(currentMap);
-    }
 }

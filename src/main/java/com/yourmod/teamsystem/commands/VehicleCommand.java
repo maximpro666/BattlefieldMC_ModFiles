@@ -87,6 +87,11 @@ public class VehicleCommand {
 
         ServerLevel level = (ServerLevel) player.level();
         CompoundTag nbt = vehicle.resolveNbt();
+        if (nbt != null) {
+            nbt.remove("UUID");
+            nbt.remove("uuid");
+            nbt.remove("Uuid");
+        }
 
         for (int i = 0; i < count; i++) {
             Entity ent = type.create(level);

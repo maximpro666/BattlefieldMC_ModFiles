@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -171,7 +172,8 @@ public class CombatEventHandler {
 
         if (isPlaying) {
             DownedManager dm = TeamSystem.getDownedManager();
-            if (dm != null && !dm.isDowned(victim.getUUID())) {
+            boolean isBleedoutKill = dm != null && dm.isBleedoutKill(victim.getUUID());
+            if (dm != null && !dm.isDowned(victim.getUUID()) && !isBleedoutKill) {
                 event.setCanceled(true);
                 dm.setDowned(victim, killer);
                 victim.setHealth(1.0F);
@@ -188,6 +190,7 @@ public class CombatEventHandler {
                 teamManager.syncPlayerData(victim);
                 return;
             }
+            if (isBleedoutKill) dm.clearBleedoutKill(victim.getUUID());
         }
 
         teamManager.incrementDeaths(victim.getUUID());
@@ -279,5 +282,46 @@ public class CombatEventHandler {
                     : "§a+" + vBcReward + " BC §7+" + vSpReward + " SP"), false);
         }
         teamManager.syncPlayerData(victim);
+    }
+
+    @SubscribeEvent
+    public void onLivingDeathEntity(LivingDeathEvent event) {
+        net.minecraft.world.entity.Entity ent = event.getEntity();
+        if (ent instanceof ServerPlayer) return;
+        if (!(ent instanceof LivingEntity le)) return;
+        if (le.level().isClientSide) return;
+
+        GameManager game = TeamSystem.getGameManager();
+        if (game == null || !game.isPlaying()) return;
+
+        ServerLevel level = (ServerLevel) le.level();
+        ServerPlayer killer = resolveAttacker(event.getSource(), level);
+        if (killer == null) return;
+
+        TeamSystemConfig cfg = TeamSystem.getConfig();
+        int vSpReward = cfg != null ? cfg.getVehicleKillRewardSP() : 20;
+        int vBcReward = cfg != null ? cfg.getVehicleKillRewardBC() : 10;
+
+        EconomyManager econ = TeamSystem.getEconomyManager();
+        if (econ != null) {
+            econ.addSP(killer.getUUID(), vSpReward);
+            econ.addBC(killer.getUUID(), vBcReward);
+            econ.syncAll(killer);
+        }
+
+        String name = le.hasCustomName() ? le.getCustomName().getString() : le.getType().getDescription().getString();
+        Map<String, String> vPl = new HashMap<>();
+        vPl.put("killer", killer.getName().getString());
+        vPl.put("vehicle", name);
+        vPl.put("bc", String.valueOf(vBcReward));
+        vPl.put("sp", String.valueOf(vSpReward));
+        getServer(level).getPlayerList().broadcastSystemMessage(
+            Component.literal(cfg != null
+                ? cfg.getMessage("kill_feed_vehicle", vPl)
+                : "§cТехника " + name + " §cуничтожена §6" + killer.getName().getString()), false);
+        killer.sendSystemMessage(
+            Component.literal(cfg != null
+                ? cfg.getMessage("kill_reward", vPl)
+                : "§a+" + vBcReward + " BC §7+" + vSpReward + " SP"), false);
     }
 }

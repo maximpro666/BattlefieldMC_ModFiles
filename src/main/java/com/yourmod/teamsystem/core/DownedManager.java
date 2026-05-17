@@ -62,6 +62,16 @@ public class DownedManager {
         return false;
     }
 
+    private final Set<UUID> bleedoutKills = new HashSet<>();
+
+    public boolean isBleedoutKill(UUID uuid) {
+        return bleedoutKills.contains(uuid);
+    }
+
+    public void clearBleedoutKill(UUID uuid) {
+        bleedoutKills.remove(uuid);
+    }
+
     public void tickDowned() {
         if (downedPlayers.isEmpty()) return;
         List<UUID> toRemove = new ArrayList<>();
@@ -77,6 +87,7 @@ public class DownedManager {
             downedPlayers.remove(uuid);
             ServerPlayer player = TeamSystem.getGameManager().getServer().getPlayerList().getPlayer(uuid);
             if (player != null) {
+                bleedoutKills.add(uuid);
                 player.hurt(player.damageSources().generic(), 100.0F);
             }
         }

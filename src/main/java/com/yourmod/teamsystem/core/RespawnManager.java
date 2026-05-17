@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.blockentity.RespawnBeaconBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -197,6 +198,15 @@ public class RespawnManager {
     public void respawnPlayerAtBeacon(ServerPlayer player, String beaconName) {
         SavedBeacon beacon = getBeaconByName(player.getUUID(), beaconName);
         if (beacon == null) return;
+
+        TeamManager tm = TeamSystem.getTeamManager();
+        if (tm != null) {
+            Team team = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
+            if (team.isPlayable()) {
+                tm.deductTicket(team);
+                player.sendSystemMessage(Component.literal("§c-1 ticket for respawn"));
+            }
+        }
 
         ServerLevel dest = server.getLevel(net.minecraft.resources.ResourceKey.create(
             net.minecraft.core.registries.Registries.DIMENSION,
