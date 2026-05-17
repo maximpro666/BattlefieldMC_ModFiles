@@ -22,6 +22,8 @@ public class MarkerData {
     private final int teamOrdinal;
     private final MarkerType type;
     private final UUID creatorUUID;
+    private long expiryTime;
+    private boolean isPing;
 
     public MarkerData(String name, String label, ResourceLocation dimension, double x, double y, double z,
                       int teamOrdinal, MarkerType type, UUID creatorUUID) {
@@ -34,6 +36,8 @@ public class MarkerData {
         this.teamOrdinal = teamOrdinal;
         this.type = type;
         this.creatorUUID = creatorUUID;
+        this.expiryTime = -1;
+        this.isPing = false;
     }
 
     public String getName() { return name; }
@@ -45,6 +49,15 @@ public class MarkerData {
     public int getTeamOrdinal() { return teamOrdinal; }
     public MarkerType getType() { return type; }
     public UUID getCreatorUUID() { return creatorUUID; }
+    public long getExpiryTime() { return expiryTime; }
+    public boolean isPing() { return isPing; }
+
+    public void setExpiryTime(long expiryTime) { this.expiryTime = expiryTime; }
+    public void setPing(boolean ping) { this.isPing = ping; }
+
+    public boolean isExpired(long currentTime) {
+        return expiryTime > 0 && currentTime >= expiryTime;
+    }
 
     public BlockPos getBlockPos() {
         return BlockPos.containing(x, y, z);

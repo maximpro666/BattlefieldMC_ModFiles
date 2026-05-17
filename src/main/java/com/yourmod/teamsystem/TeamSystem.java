@@ -70,6 +70,12 @@ public class TeamSystem {
     private static KitManager kitManager;
     private static SquadManager squadManager;
     private static VehicleManager vehicleManager;
+    private static EconomyManager economyManager;
+    private static CapturePointManager capturePointManager;
+    private static TicketManager ticketManager;
+    private static DownedManager downedManager;
+    private static ContributionManager contributionManager;
+    private static FOBManager fobManager;
 
     public TeamSystem() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -115,6 +121,15 @@ public class TeamSystem {
 
         MinecraftForge.EVENT_BUS.register(new PlayerEventHandler(teamManager));
         MinecraftForge.EVENT_BUS.register(new CombatEventHandler(teamManager));
+        MinecraftForge.EVENT_BUS.register(new com.yourmod.teamsystem.events.AttachmentEventHandler());
+
+        economyManager = new EconomyManager();
+        economyManager.loadFromTeamManager();
+        capturePointManager = new CapturePointManager();
+        ticketManager = new TicketManager();
+        downedManager = new DownedManager();
+        contributionManager = new ContributionManager();
+        fobManager = new FOBManager();
 
         LOGGER.info("Team System initialized");
     }
@@ -147,4 +162,10 @@ public class TeamSystem {
     public static KitManager getKitManager() { return kitManager; }
     public static SquadManager getSquadManager() { return squadManager; }
     public static VehicleManager getVehicleManager() { return vehicleManager; }
+    public static EconomyManager getEconomyManager() { return economyManager; }
+    public static CapturePointManager getCapturePointManager() { return capturePointManager; }
+    public static TicketManager getTicketManager() { return ticketManager; }
+    public static DownedManager getDownedManager() { return downedManager; }
+    public static ContributionManager getContributionManager() { return contributionManager; }
+    public static FOBManager getFOBManager() { return fobManager; }
 }

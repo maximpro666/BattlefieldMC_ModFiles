@@ -1,6 +1,7 @@
 package com.yourmod.teamsystem.events;
 
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.EconomyManager;
 import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.MapConfig;
 import com.yourmod.teamsystem.core.MarkerManager;

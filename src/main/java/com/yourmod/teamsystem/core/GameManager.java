@@ -38,6 +38,8 @@ public class GameManager {
     private static final BlockPos LOBBY_SPAWN = new BlockPos(0, 64, 0);
     private static final int VOTE_SECONDS = 20;
     private static final int COUNTDOWN_SECONDS = 15;
+    private static final int OVERTIME_TICKETS = 1;
+    private static final int MAX_OVERTIME_TICKS = 20 * 60;
 
     private final MinecraftServer server;
     private GamePhase currentPhase;
@@ -45,6 +47,9 @@ public class GameManager {
     private Team winningTeam;
     private boolean lobbyLoaded;
     private MapConfig currentMap;
+    private boolean overtime;
+    private int overtimeTicks;
+    private int captureTicks;
 
     public GameManager(MinecraftServer server) {
         this.server = server;
@@ -53,6 +58,9 @@ public class GameManager {
         this.winningTeam = null;
         this.lobbyLoaded = false;
         this.currentMap = null;
+        this.overtime = false;
+        this.overtimeTicks = 0;
+        this.captureTicks = 0;
     }
 
     public GamePhase getCurrentPhase() { return currentPhase; }
@@ -61,6 +69,8 @@ public class GameManager {
     public boolean isPlaying() { return currentPhase == GamePhase.PLAYING; }
     public boolean isVoting() { return currentPhase == GamePhase.VOTING; }
     public boolean isLobby() { return currentPhase == GamePhase.LOBBY; }
+    public boolean isOvertime() { return overtime; }
+    public MapConfig getCurrentMap() { return currentMap; }
 
     // ========== Match Flow ==========
 
@@ -83,15 +93,34 @@ public class GameManager {
         phaseTimer = 0;
         winningTeam = null;
         currentMap = map;
+        overtime = false;
+        overtimeTicks = 0;
 
         teamManager.resetTickets();
         teamManager.setTickets(Team.NATO, map.getTickets());
         teamManager.setTickets(Team.RUSSIA, map.getTickets());
 
+        EconomyManager econ = TeamSystem.getEconomyManager();
+        if (econ != null) {
+            econ.resetAllSPForMatch();
+            econ.syncSPToAll();
+        }
+
+        CapturePointManager cp = TeamSystem.getCapturePointManager();
+        if (cp != null) {
+            cp.clearPoints();
+            cp.resetAllPoints();
+        }
+
+        ContributionManager contrib = TeamSystem.getContributionManager();
+        if (contrib != null) contrib.resetMatch();
+
         backupOnce(map);
         useMapWorld(map);
         applyMapConfig(map);
         teleportAllPlayersToMap(map);
+
+        gamerule(server.overworld(), "liberateAttachment", "true");
 
         broadcast("Game started on map: " + map.getName(), ChatFormatting.GREEN, ChatFormatting.BOLD);
         syncPhaseToAll();
@@ -110,6 +139,31 @@ public class GameManager {
             Component.literal("Team ").withStyle(ChatFormatting.WHITE)
                 .append(winner.getColoredName())
                 .append(Component.literal(" wins!").withStyle(ChatFormatting.WHITE)), false);
+
+        EconomyManager econ = TeamSystem.getEconomyManager();
+        if (econ != null) {
+            TeamManager tm = TeamSystem.getTeamManager();
+            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                int baseSP = 50;
+                int baseBC = 25;
+                if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == winner) {
+                    baseSP += 50;
+                    baseBC += 50;
+                }
+                econ.addSP(p.getUUID(), baseSP);
+                econ.addBC(p.getUUID(), baseBC);
+                PlayerCombatData pcd = tm.getOrCreatePlayerData(p.getUUID());
+                pcd.addScorePoints(baseSP);
+                pcd.addBattleCredits(baseBC);
+                econ.syncAll(p);
+                p.sendSystemMessage(Component.literal("§6+ " + baseBC + " BC, + " + baseSP + " SP").withStyle(ChatFormatting.GOLD));
+            }
+            tm.setDirty();
+        }
+
+        captureTicks = 0;
+        overtime = false;
+        overtimeTicks = 0;
 
         syncPhaseToAll();
         TeamSystem.LOGGER.info("Game ended. Winner: {}", winner.getName());
@@ -145,6 +199,42 @@ public class GameManager {
                 }
             }
             if (phaseTimer <= 0) startGame();
+        }
+
+        if (currentPhase == GamePhase.PLAYING) {
+            captureTicks++;
+            if (captureTicks % 20 == 0) {
+                CapturePointManager cp = TeamSystem.getCapturePointManager();
+                if (cp != null) {
+                    MapConfig map = currentMap;
+                    if (map != null) {
+                        ServerLevel level = getMapWorld(map);
+                        if (level != null) cp.tickCapturePoints(level);
+                    }
+                }
+                TicketManager tm = TeamSystem.getTicketManager();
+                if (tm != null) tm.tick();
+
+                if (!overtime) {
+                    int natoTickets = tm != null ? tm.getTickets(Team.NATO) : 0;
+                    int russiaTickets = tm != null ? tm.getTickets(Team.RUSSIA) : 0;
+                    if (natoTickets <= OVERTIME_TICKETS || russiaTickets <= OVERTIME_TICKETS) {
+                        if (natoTickets > 0 && russiaTickets > 0) {
+                            overtime = true;
+                            overtimeTicks = 0;
+                            broadcast("OVERTIME!", ChatFormatting.GOLD, ChatFormatting.BOLD);
+                        }
+                    }
+                } else {
+                    overtimeTicks++;
+                    if (overtimeTicks >= MAX_OVERTIME_TICKS) {
+                        int natoTk = tm != null ? tm.getTickets(Team.NATO) : 0;
+                        int russiaTk = tm != null ? tm.getTickets(Team.RUSSIA) : 0;
+                        Team winner = natoTk >= russiaTk ? Team.NATO : Team.RUSSIA;
+                        endGame(winner);
+                    }
+                }
+            }
         }
     }
 

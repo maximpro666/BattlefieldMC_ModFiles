@@ -146,6 +146,10 @@ public class TeamManager extends SavedData {
         return playerData.computeIfAbsent(playerId, id -> new PlayerCombatData());
     }
 
+    public Map<UUID, PlayerCombatData> getPlayerDataCopy() {
+        return new HashMap<>(playerData);
+    }
+
     public void setPlayerTeam(ServerPlayer player, Team team) {
         PlayerCombatData data = getOrCreatePlayerData(player.getUUID());
         data.setTeam(team);

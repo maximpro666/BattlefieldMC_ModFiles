@@ -1,10 +1,14 @@
 package com.yourmod.teamsystem.events;
 
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.ContributionManager;
+import com.yourmod.teamsystem.core.DownedManager;
+import com.yourmod.teamsystem.core.EconomyManager;
 import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.Rank;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
+import com.yourmod.teamsystem.core.TicketManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -149,40 +153,83 @@ public class CombatEventHandler {
             return;
         }
 
-        teamManager.incrementDeaths(victim.getUUID());
-
-        // Deduct ticket from victim's team
-        Team victimTeam = teamManager.getOrCreatePlayerData(victim.getUUID()).getTeam();
-        if (victimTeam.isPlayable()) {
-            teamManager.deductTicket(victimTeam);
-            TeamSystem.LOGGER.info("{} lost a ticket (remaining: {})", victimTeam.getName(), teamManager.getTickets(victimTeam));
-        }
-
         DamageSource source = event.getSource();
         ServerLevel level = (ServerLevel) victim.level();
         ServerPlayer killer = resolveAttacker(source, level);
 
-        if (killer != null) {
-            if (!killer.getUUID().equals(victim.getUUID())) {
-                teamManager.incrementKills(killer.getUUID());
-                teamManager.syncPlayerData(killer);
+        GameManager game = TeamSystem.getGameManager();
+        boolean isPlaying = game != null && game.isPlaying();
 
-                Rank oldRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills() - 1);
-                Rank newRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills());
-                if (oldRank.ordinal() < newRank.ordinal()) {
-                    teamManager.setPlayerRank(killer, newRank.ordinal());
+        if (isPlaying) {
+            DownedManager dm = TeamSystem.getDownedManager();
+            if (dm != null && !dm.isDowned(victim.getUUID())) {
+                event.setCanceled(true);
+                dm.setDowned(victim, killer);
+                victim.setHealth(1.0F);
+                victim.displayClientMessage(
+                    net.minecraft.network.chat.Component.literal("§cYou are downed! Wait for revive or bleed out."),
+                    false);
+                if (killer != null && !killer.getUUID().equals(victim.getUUID())) {
                     killer.displayClientMessage(
-                        net.minecraft.network.chat.Component.literal("§6[PROMOTION] You are now " + newRank.getDisplayName() + "!"),
-                        false
-                    );
+                        net.minecraft.network.chat.Component.literal("§aEnemy downed: " + victim.getName().getString()),
+                        false);
                 }
-
-                TeamSystem.LOGGER.info("Player {} killed {} (K/D: {}/{})",
-                    killer.getName().getString(),
-                    victim.getName().getString(),
-                    teamManager.getOrCreatePlayerData(killer.getUUID()).getKills(),
-                    teamManager.getOrCreatePlayerData(killer.getUUID()).getDeaths());
+                TeamSystem.LOGGER.info("Player {} downed by {}", victim.getName().getString(),
+                    killer != null ? killer.getName().getString() : "environment");
+                teamManager.syncPlayerData(victim);
+                return;
             }
+        }
+
+        teamManager.incrementDeaths(victim.getUUID());
+
+        ContributionManager contrib = TeamSystem.getContributionManager();
+        if (contrib != null && isPlaying) {
+            contrib.addDeath(victim.getUUID(), victim.getName().getString());
+        }
+
+        Team victimTeam = teamManager.getOrCreatePlayerData(victim.getUUID()).getTeam();
+        if (victimTeam.isPlayable() && isPlaying) {
+            TicketManager ticketMgr = TeamSystem.getTicketManager();
+            if (ticketMgr != null) {
+                ticketMgr.deductTicket(victimTeam);
+            } else {
+                teamManager.deductTicket(victimTeam);
+            }
+        }
+
+        if (killer != null && !killer.getUUID().equals(victim.getUUID())) {
+            teamManager.incrementKills(killer.getUUID());
+            teamManager.syncPlayerData(killer);
+
+            if (contrib != null && isPlaying) {
+                contrib.addKill(killer.getUUID(), killer.getName().getString());
+            }
+
+            EconomyManager econ = TeamSystem.getEconomyManager();
+            if (econ != null && isPlaying) {
+                int spReward = 10;
+                int bcReward = 5;
+                econ.addSP(killer.getUUID(), spReward);
+                econ.addBC(killer.getUUID(), bcReward);
+                econ.syncAll(killer);
+            }
+
+            Rank oldRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills() - 1);
+            Rank newRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills());
+            if (oldRank.ordinal() < newRank.ordinal()) {
+                teamManager.setPlayerRank(killer, newRank.ordinal());
+                killer.displayClientMessage(
+                    net.minecraft.network.chat.Component.literal("§6[PROMOTION] You are now " + newRank.getDisplayName() + "!"),
+                    false
+                );
+            }
+
+            TeamSystem.LOGGER.info("Player {} killed {} (K/D: {}/{})",
+                killer.getName().getString(),
+                victim.getName().getString(),
+                teamManager.getOrCreatePlayerData(killer.getUUID()).getKills(),
+                teamManager.getOrCreatePlayerData(killer.getUUID()).getDeaths());
         }
         teamManager.syncPlayerData(victim);
     }

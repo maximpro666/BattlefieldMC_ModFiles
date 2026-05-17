@@ -1,6 +1,9 @@
 package com.yourmod.teamsystem.client;
 
 import com.yourmod.teamsystem.core.Team;
+import com.yourmod.teamsystem.core.DownedData;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Client-side cache of the local player's team and combat data.
@@ -37,6 +40,9 @@ public class ClientTeamData {
     private static int winningTeamOrdinal = -1;
     public static int localPlayerRank = 0;
     public static String localPlayerSquad = "";
+    public static int localPlayerBC = 0;
+    public static int localPlayerSP = 0;
+    public static List<DownedData> downedPlayers = new ArrayList<>();
 
     public static void setLocalPlayerTeam(Team team) {
         localPlayerTeam = team;

@@ -23,6 +23,19 @@ public class MarkerManager {
         return marker;
     }
 
+    public MarkerData createPing(String label, ResourceLocation dimension,
+                                 double x, double y, double z,
+                                 int teamOrdinal, UUID creatorUUID) {
+        String pingName = "ping_" + creatorUUID.toString() + "_" + System.currentTimeMillis();
+        MarkerData ping = new MarkerData(pingName, label, dimension, x, y, z,
+            teamOrdinal, MarkerData.MarkerType.POINT, creatorUUID);
+        ping.setPing(true);
+        ping.setExpiryTime(System.currentTimeMillis() + 5000);
+        markers.add(ping);
+        syncToAll();
+        return ping;
+    }
+
     public boolean removeMarker(String name) {
         boolean removed = markers.removeIf(m -> m.getName().equals(name));
         if (removed) {
@@ -69,6 +82,12 @@ public class MarkerManager {
             PacketDistributor.PLAYER.with(() -> player),
             new MarkerSyncPacket(visible)
         );
+    }
+
+    public void autoExpiryTick() {
+        long now = System.currentTimeMillis();
+        boolean removed = markers.removeIf(m -> m.isExpired(now));
+        if (removed) syncToAll();
     }
 
     public void syncToAll() {

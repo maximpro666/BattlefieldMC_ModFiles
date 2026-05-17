@@ -71,6 +71,22 @@ public class PacketHandler {
             .consumerMainThread(SquadSyncPacket::handle)
             .add();
 
+        CHANNEL.messageBuilder(BCSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(BCSyncPacket::new)
+            .encoder(BCSyncPacket::toBytes)
+            .consumerMainThread(BCSyncPacket::handle)
+            .add();
+        CHANNEL.messageBuilder(SPSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(SPSyncPacket::new)
+            .encoder(SPSyncPacket::toBytes)
+            .consumerMainThread(SPSyncPacket::handle)
+            .add();
+        CHANNEL.messageBuilder(DownedSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(DownedSyncPacket::new)
+            .encoder(DownedSyncPacket::toBytes)
+            .consumerMainThread(DownedSyncPacket::handle)
+            .add();
+
         CHANNEL.messageBuilder(KitSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
             .decoder(KitSyncPacket::new)
             .encoder(KitSyncPacket::toBytes)

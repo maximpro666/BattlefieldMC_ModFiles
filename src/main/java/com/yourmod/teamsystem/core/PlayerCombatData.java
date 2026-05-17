@@ -1,6 +1,11 @@
 package com.yourmod.teamsystem.core;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+
+import java.util.*;
 
 public class PlayerCombatData {
     private Team team;
@@ -11,6 +16,10 @@ public class PlayerCombatData {
     private String prefix;
     private String suffix;
     private String displayName;
+    private int battleCredits;
+    private int scorePoints;
+    private final Set<String> unlockedKits;
+    private final Map<String, CompoundTag> savedAttachments;
 
     public PlayerCombatData() {
         this.team = Team.SPECTATOR;
@@ -20,6 +29,10 @@ public class PlayerCombatData {
         this.prefix = "";
         this.suffix = "";
         this.displayName = "";
+        this.battleCredits = 0;
+        this.scorePoints = 0;
+        this.unlockedKits = new HashSet<>();
+        this.savedAttachments = new HashMap<>();
     }
 
     public Team getTeam() {
@@ -110,6 +123,23 @@ public class PlayerCombatData {
         this.deaths = 0;
     }
 
+    public int getBattleCredits() { return battleCredits; }
+    public void setBattleCredits(int bc) { this.battleCredits = Math.max(0, bc); }
+    public void addBattleCredits(int amount) { this.battleCredits = Math.max(0, this.battleCredits + amount); }
+    public boolean deductBattleCredits(int amount) {
+        if (this.battleCredits < amount) return false;
+        this.battleCredits -= amount;
+        return true;
+    }
+    public int getScorePoints() { return scorePoints; }
+    public void setScorePoints(int sp) { this.scorePoints = Math.max(0, sp); }
+    public void addScorePoints(int amount) { this.scorePoints = Math.max(0, this.scorePoints + amount); }
+    public Set<String> getUnlockedKits() { return unlockedKits; }
+    public boolean isKitUnlocked(String kitName) { return unlockedKits.contains(kitName); }
+    public void unlockKit(String kitName) { unlockedKits.add(kitName); }
+    public void lockKit(String kitName) { unlockedKits.remove(kitName); }
+    public Map<String, CompoundTag> getSavedAttachments() { return savedAttachments; }
+
     public void reset() {
         this.team = Team.SPECTATOR;
         this.kills = 0;
@@ -118,6 +148,7 @@ public class PlayerCombatData {
         this.prefix = "";
         this.suffix = "";
         this.displayName = "";
+        this.scorePoints = 0;
     }
 
     // ===== NBT Serialization =====
@@ -132,6 +163,21 @@ public class PlayerCombatData {
         tag.putString("Prefix", prefix);
         tag.putString("Suffix", suffix);
         tag.putString("DisplayName", displayName);
+        tag.putInt("BattleCredits", battleCredits);
+        {
+            CompoundTag attTag = new CompoundTag();
+            for (Map.Entry<String, CompoundTag> e : savedAttachments.entrySet()) {
+                attTag.put(e.getKey(), e.getValue());
+            }
+            tag.put("SavedAttachments", attTag);
+        }
+        {
+            ListTag kitList = new ListTag();
+            for (String kit : unlockedKits) {
+                kitList.add(StringTag.valueOf(kit));
+            }
+            tag.put("UnlockedKits", kitList);
+        }
         return tag;
     }
 
@@ -144,6 +190,21 @@ public class PlayerCombatData {
         this.prefix = tag.getString("Prefix");
         this.suffix = tag.getString("Suffix");
         this.displayName = tag.getString("DisplayName");
+        this.battleCredits = tag.getInt("BattleCredits");
+        if (tag.contains("SavedAttachments")) {
+            CompoundTag attTag = tag.getCompound("SavedAttachments");
+            savedAttachments.clear();
+            for (String key : attTag.getAllKeys()) {
+                savedAttachments.put(key, attTag.getCompound(key));
+            }
+        }
+        if (tag.contains("UnlockedKits")) {
+            ListTag kitList = tag.getList("UnlockedKits", Tag.TAG_STRING);
+            unlockedKits.clear();
+            for (Tag base : kitList) {
+                unlockedKits.add(base.getAsString());
+            }
+        }
     }
 
     public static PlayerCombatData fromNBT(CompoundTag tag) {

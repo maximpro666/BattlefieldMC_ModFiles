@@ -30,6 +30,8 @@ public class MarkerSyncPacket {
             buf.writeInt(m.getTeamOrdinal());
             buf.writeInt(m.getType().ordinal());
             buf.writeUUID(m.getCreatorUUID());
+            buf.writeLong(m.getExpiryTime());
+            buf.writeBoolean(m.isPing());
         }
     }
 
@@ -46,7 +48,10 @@ public class MarkerSyncPacket {
             int teamOrdinal = buf.readInt();
             int typeOrdinal = buf.readInt();
             UUID creator = buf.readUUID();
-            list.add(new MarkerData(name, label, dim, x, y, z, teamOrdinal, MarkerData.MarkerType.values()[typeOrdinal], creator));
+            MarkerData marker = new MarkerData(name, label, dim, x, y, z, teamOrdinal, MarkerData.MarkerType.values()[typeOrdinal], creator);
+            marker.setExpiryTime(buf.readLong());
+            marker.setPing(buf.readBoolean());
+            list.add(marker);
         }
         return new MarkerSyncPacket(list);
     }

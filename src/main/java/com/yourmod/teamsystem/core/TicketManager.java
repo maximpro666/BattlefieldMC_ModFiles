@@ -1,29 +1,124 @@
 package com.yourmod.teamsystem.core;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.network.TeamTicketSyncPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.PacketDistributor;
 
-/**
- * TODO: Placeholder for future Ticket System implementation.
- *
- * Intended functionality:
- * - Maintain ticket pool per team (e.g., NATO: 100, RUSSIA: 100)
- * - Deduct tickets on player death (per-team bleed rate)
- * - Deduct tickets based on capture point ownership (CapturePointManager integration)
- * - Track ticket state and broadcast updates to clients for HUD display
- * - Trigger game end condition when a team reaches 0 tickets
- * - Support custom ticket bleed rates per game mode/difficulty
- *
- * Integration points:
- * - LivingDeathEvent: call ticketManager.deductTickets(killerTeam, deathCount) after death
- * - CapturePointManager: integrate ticket bleed on capture point ownership changes
- * - TicketSyncPacket: send ticket state to clients for HUD rendering
- *
- * Current status: Reserved for future implementation. Do not use in production.
- */
 public class TicketManager {
-    private final Map<Team, Integer> teamTickets = new HashMap<>();
+    private static final int DEFAULT_TICKETS = 100;
+    private static final int BLEED_INTERVAL = 20 * 5;
 
-    // TODO: Implement ticket pool and bleed logic here
+    private int natoTickets;
+    private int russiaTickets;
+    private int natoBleedRate;
+    private int russiaBleedRate;
+    private int bleedCounter;
 
+    public TicketManager() {
+        this.natoTickets = DEFAULT_TICKETS;
+        this.russiaTickets = DEFAULT_TICKETS;
+        this.natoBleedRate = 0;
+        this.russiaBleedRate = 0;
+        this.bleedCounter = 0;
+    }
+
+    public int getTickets(Team team) {
+        if (team == Team.NATO) return natoTickets;
+        if (team == Team.RUSSIA) return russiaTickets;
+        return 0;
+    }
+
+    public void setTickets(Team team, int amount) {
+        amount = Math.max(0, amount);
+        if (team == Team.NATO) natoTickets = amount;
+        else if (team == Team.RUSSIA) russiaTickets = amount;
+        syncToAll();
+    }
+
+    public void resetTickets() {
+        natoTickets = DEFAULT_TICKETS;
+        russiaTickets = DEFAULT_TICKETS;
+        natoBleedRate = 0;
+        russiaBleedRate = 0;
+        bleedCounter = 0;
+        syncToAll();
+    }
+
+    public void resetTickets(int tickets) {
+        natoTickets = Math.max(0, tickets);
+        russiaTickets = Math.max(0, tickets);
+        natoBleedRate = 0;
+        russiaBleedRate = 0;
+        bleedCounter = 0;
+        syncToAll();
+    }
+
+    public boolean deductTicket(Team team) {
+        if (team == Team.NATO && natoTickets > 0) {
+            natoTickets--;
+            syncToAll();
+            checkGameEnd(team);
+            return true;
+        } else if (team == Team.RUSSIA && russiaTickets > 0) {
+            russiaTickets--;
+            syncToAll();
+            checkGameEnd(team);
+            return true;
+        }
+        return false;
+    }
+
+    public void setBleedRate(Team team, int rate) {
+        if (team == Team.NATO) natoBleedRate = Math.max(0, rate);
+        else if (team == Team.RUSSIA) russiaBleedRate = Math.max(0, rate);
+    }
+
+    public int getBleedRate(Team team) {
+        if (team == Team.NATO) return natoBleedRate;
+        if (team == Team.RUSSIA) return russiaBleedRate;
+        return 0;
+    }
+
+    public void tick() {
+        bleedCounter++;
+        if (bleedCounter < BLEED_INTERVAL) return;
+        bleedCounter = 0;
+
+        if (natoBleedRate > 0) {
+            for (int i = 0; i < natoBleedRate; i++) {
+                if (natoTickets <= 0) break;
+                natoTickets--;
+            }
+            syncToAll();
+            checkGameEnd(Team.NATO);
+        }
+
+        if (russiaBleedRate > 0) {
+            for (int i = 0; i < russiaBleedRate; i++) {
+                if (russiaTickets <= 0) break;
+                russiaTickets--;
+            }
+            syncToAll();
+            checkGameEnd(Team.RUSSIA);
+        }
+    }
+
+    private void checkGameEnd(Team team) {
+        if ((team == Team.NATO && natoTickets <= 0) || (team == Team.RUSSIA && russiaTickets <= 0)) {
+            GameManager game = TeamSystem.getGameManager();
+            if (game != null && game.isPlaying()) {
+                Team winner = (team == Team.NATO) ? Team.RUSSIA : Team.NATO;
+                game.endGame(winner);
+            }
+        }
+    }
+
+    public void syncToAll() {
+        TeamTicketSyncPacket packet = new TeamTicketSyncPacket(natoTickets, russiaTickets);
+        for (ServerPlayer player : TeamSystem.getGameManager().getServer().getPlayerList().getPlayers()) {
+            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+        }
+    }
 }
