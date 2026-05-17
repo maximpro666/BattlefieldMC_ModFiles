@@ -147,12 +147,14 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/
   com/yourmod/teamsystem/TeamSystem.class
   com/yourmod/teamsystem/client/
+  com/yourmod/teamsystem/client/ClientMarkerData.class
   com/yourmod/teamsystem/client/ClientTeamData.class
   com/yourmod/teamsystem/commands/
   com/yourmod/teamsystem/commands/GameCommand$1.class
   com/yourmod/teamsystem/commands/GameCommand.class
   com/yourmod/teamsystem/commands/LobbyCommand.class
   com/yourmod/teamsystem/commands/MapCommand.class
+  com/yourmod/teamsystem/commands/MarkerCommand.class
   com/yourmod/teamsystem/commands/TeamCommand.class
   com/yourmod/teamsystem/core/
   com/yourmod/teamsystem/core/CapturePointManager.class
@@ -162,6 +164,9 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/core/MapDimensionGenerator.class
   com/yourmod/teamsystem/core/MapPoolManager$1.class
   com/yourmod/teamsystem/core/MapPoolManager.class
+  com/yourmod/teamsystem/core/MarkerData$MarkerType.class
+  com/yourmod/teamsystem/core/MarkerData.class
+  com/yourmod/teamsystem/core/MarkerManager.class
   com/yourmod/teamsystem/core/PlayerCombatData.class
   com/yourmod/teamsystem/core/Team.class
   com/yourmod/teamsystem/core/TeamManager.class
@@ -172,6 +177,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/network/
   com/yourmod/teamsystem/network/CombatDataSyncPacket.class
   com/yourmod/teamsystem/network/GameStateSyncPacket.class
+  com/yourmod/teamsystem/network/MarkerSyncPacket.class
   com/yourmod/teamsystem/network/PacketHandler.class
   com/yourmod/teamsystem/network/TeamSyncPacket.class
   com/yourmod/teamsystem/network/TeamTicketSyncPacket.class

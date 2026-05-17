@@ -22,6 +22,7 @@ public class MarkerSyncPacket {
         buf.writeInt(msg.markers.size());
         for (MarkerData m : msg.markers) {
             buf.writeUtf(m.getName());
+            buf.writeUtf(m.getLabel());
             buf.writeUtf(m.getDimension().toString());
             buf.writeDouble(m.getX());
             buf.writeDouble(m.getY());
@@ -37,6 +38,7 @@ public class MarkerSyncPacket {
         List<MarkerData> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             String name = buf.readUtf();
+            String label = buf.readUtf();
             ResourceLocation dim = new ResourceLocation(buf.readUtf());
             double x = buf.readDouble();
             double y = buf.readDouble();
@@ -44,7 +46,7 @@ public class MarkerSyncPacket {
             int teamOrdinal = buf.readInt();
             int typeOrdinal = buf.readInt();
             UUID creator = buf.readUUID();
-            list.add(new MarkerData(name, dim, x, y, z, teamOrdinal, MarkerData.MarkerType.values()[typeOrdinal], creator));
+            list.add(new MarkerData(name, label, dim, x, y, z, teamOrdinal, MarkerData.MarkerType.values()[typeOrdinal], creator));
         }
         return new MarkerSyncPacket(list);
     }

@@ -49,5 +49,13 @@ public class PacketHandler {
             GameStateSyncPacket::decode,
             GameStateSyncPacket::handle
         );
+
+        CHANNEL.registerMessage(
+            nextId++,
+            MarkerSyncPacket.class,
+            MarkerSyncPacket::encode,
+            MarkerSyncPacket::decode,
+            MarkerSyncPacket::handle
+        );
     }
 }

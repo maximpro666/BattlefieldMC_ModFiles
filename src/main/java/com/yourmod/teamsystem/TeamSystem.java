@@ -4,10 +4,12 @@ import com.mojang.logging.LogUtils;
 import com.yourmod.teamsystem.commands.GameCommand;
 import com.yourmod.teamsystem.commands.LobbyCommand;
 import com.yourmod.teamsystem.commands.MapCommand;
+import com.yourmod.teamsystem.commands.MarkerCommand;
 import com.yourmod.teamsystem.commands.TeamCommand;
 import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.MapDimensionGenerator;
 import com.yourmod.teamsystem.core.MapPoolManager;
+import com.yourmod.teamsystem.core.MarkerManager;
 import com.yourmod.teamsystem.core.TeamManager;
 import com.yourmod.teamsystem.events.CombatEventHandler;
 import com.yourmod.teamsystem.events.PlayerEventHandler;
@@ -35,6 +37,7 @@ public class TeamSystem {
     private static TeamManager teamManager;
     private static MapPoolManager mapPoolManager;
     private static GameManager gameManager;
+    private static MarkerManager markerManager;
 
     public TeamSystem() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -66,6 +69,8 @@ public class TeamSystem {
         gameManager = new GameManager(event.getServer());
         MinecraftForge.EVENT_BUS.register(gameManager);
 
+        markerManager = new MarkerManager();
+
         MinecraftForge.EVENT_BUS.register(new PlayerEventHandler(teamManager));
         MinecraftForge.EVENT_BUS.register(new CombatEventHandler(teamManager));
 
@@ -83,6 +88,7 @@ public class TeamSystem {
         MapCommand.register(event.getDispatcher());
         GameCommand.register(event.getDispatcher());
         LobbyCommand.register(event.getDispatcher());
+        MarkerCommand.register(event.getDispatcher());
     }
 
     public static TeamManager getTeamManager() {
@@ -95,5 +101,9 @@ public class TeamSystem {
 
     public static GameManager getGameManager() {
         return gameManager;
+    }
+
+    public static MarkerManager getMarkerManager() {
+        return markerManager;
     }
 }

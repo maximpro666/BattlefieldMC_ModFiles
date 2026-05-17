@@ -13,12 +13,13 @@ import java.util.stream.Collectors;
 public class MarkerManager {
     private final List<MarkerData> markers = new ArrayList<>();
 
-    public MarkerData addMarker(String name, ResourceLocation dimension, double x, double y, double z,
-                               int teamOrdinal, MarkerData.MarkerType type, UUID creatorUUID) {
-        MarkerData marker = new MarkerData(name, dimension, x, y, z, teamOrdinal, type, creatorUUID);
+    public MarkerData addMarker(String name, String label, ResourceLocation dimension,
+                                double x, double y, double z,
+                                int teamOrdinal, MarkerData.MarkerType type, UUID creatorUUID) {
+        MarkerData marker = new MarkerData(name, label, dimension, x, y, z, teamOrdinal, type, creatorUUID);
         markers.add(marker);
         syncToAll();
-        TeamSystem.LOGGER.info("Marker added: {} at ({}, {}, {})", name, x, y, z);
+        TeamSystem.LOGGER.info("Marker added: {} ({}) at ({}, {}, {})", name, label, x, y, z);
         return marker;
     }
 
@@ -48,8 +49,10 @@ public class MarkerManager {
         return null;
     }
 
-    public List<MarkerData> getMarkersByTeam(int teamOrdinal) {
-        if (teamOrdinal < 0) return getMarkers();
+    public List<MarkerData> getMarkersVisibleToTeam(int teamOrdinal) {
+        if (teamOrdinal == Team.SPECTATOR.ordinal()) {
+            return getMarkers();
+        }
         return markers.stream()
             .filter(m -> m.getTeamOrdinal() < 0 || m.getTeamOrdinal() == teamOrdinal)
             .collect(Collectors.toList());
@@ -57,7 +60,7 @@ public class MarkerManager {
 
     public List<MarkerData> getMarkersForPlayer(ServerPlayer player) {
         Team team = TeamSystem.getTeamManager().getOrCreatePlayerData(player.getUUID()).getTeam();
-        return getMarkersByTeam(team.ordinal());
+        return getMarkersVisibleToTeam(team.ordinal());
     }
 
     public void syncToPlayer(ServerPlayer player) {

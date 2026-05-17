@@ -14,6 +14,7 @@ public class MarkerData {
     }
 
     private final String name;
+    private final String label;
     private final ResourceLocation dimension;
     private final double x;
     private final double y;
@@ -22,9 +23,10 @@ public class MarkerData {
     private final MarkerType type;
     private final UUID creatorUUID;
 
-    public MarkerData(String name, ResourceLocation dimension, double x, double y, double z,
+    public MarkerData(String name, String label, ResourceLocation dimension, double x, double y, double z,
                       int teamOrdinal, MarkerType type, UUID creatorUUID) {
         this.name = name;
+        this.label = label != null ? label : name;
         this.dimension = dimension;
         this.x = x;
         this.y = y;
@@ -35,6 +37,7 @@ public class MarkerData {
     }
 
     public String getName() { return name; }
+    public String getLabel() { return label; }
     public ResourceLocation getDimension() { return dimension; }
     public double getX() { return x; }
     public double getY() { return y; }

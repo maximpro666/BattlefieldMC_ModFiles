@@ -3,6 +3,7 @@ package com.yourmod.teamsystem.events;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.MapConfig;
+import com.yourmod.teamsystem.core.MarkerManager;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
 import net.minecraft.ChatFormatting;
@@ -32,6 +33,10 @@ public class PlayerEventHandler {
                     game.teleportPlayerToLobby(player);
                     game.setLobbyRespawn(player);
                 }
+            }
+            MarkerManager mm = TeamSystem.getMarkerManager();
+            if (mm != null) {
+                mm.syncToPlayer(player);
             }
             TeamSystem.LOGGER.info("Synced team data for player: {}", player.getName().getString());
         }
