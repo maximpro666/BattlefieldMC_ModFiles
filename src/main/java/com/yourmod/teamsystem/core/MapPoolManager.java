@@ -6,7 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import com.yourmod.teamsystem.TeamSystem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.storage.LevelResource;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -18,8 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-public class MapPoolManager extends SavedData {
-    private static final String DATA_NAME = "teamsystem_mappool";
+public class MapPoolManager {
     private static final String CONFIG_FILE = "teamsystem_maps.json";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
@@ -35,71 +34,105 @@ public class MapPoolManager extends SavedData {
         this.random = new Random();
     }
 
-    public static MapPoolManager load(MinecraftServer server, CompoundTag nbt) {
-        MapPoolManager manager = new MapPoolManager(server);
-        manager.currentMapIndex = nbt.getInt("CurrentMapIndex");
-        return manager;
-    }
-
-    @Override
-    public CompoundTag save(CompoundTag nbt) {
-        nbt.putInt("CurrentMapIndex", currentMapIndex);
-        return nbt;
-    }
-
     public void loadConfig() {
+        maps.clear();
+
+        scanDimensionsFolder();
+
         Path configPath = getConfigPath();
         if (!Files.exists(configPath)) {
-            createDefaultConfig(configPath);
+            saveConfig();
+            return;
         }
+
         try (Reader reader = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
             Type listType = new TypeToken<List<MapConfig>>() {}.getType();
             List<MapConfig> loaded = GSON.fromJson(reader, listType);
-            maps.clear();
             if (loaded != null) {
                 for (MapConfig map : loaded) {
-                    if (map.isEnabled()) {
+                    if (map.isEnabled() && !maps.contains(map)) {
                         maps.add(map);
                     }
                 }
             }
+
+            List<MapConfig> fromFolder = scanDimensionsFolder();
+            boolean added = false;
+            for (MapConfig folderMap : fromFolder) {
+                boolean exists = maps.stream()
+                    .anyMatch(m -> m.getWorldFolder().equalsIgnoreCase(folderMap.getWorldFolder()));
+                if (!exists) {
+                    maps.add(folderMap);
+                    added = true;
+                    TeamSystem.LOGGER.info("Auto-added map from dimensions folder: {}", folderMap.getName());
+                }
+            }
+
+            if (added) {
+                saveConfig();
+            }
+
             TeamSystem.LOGGER.info("Loaded {} maps from config", maps.size());
         } catch (IOException e) {
             TeamSystem.LOGGER.error("Failed to load map config: {}", e.getMessage());
         }
-        setDirty();
+    }
+
+    private List<MapConfig> scanDimensionsFolder() {
+        List<MapConfig> found = new ArrayList<>();
+        Path dimsDir = server.getWorldPath(LevelResource.ROOT)
+            .resolve("dimensions").resolve("teamsystem");
+
+        if (!Files.isDirectory(dimsDir)) {
+            return found;
+        }
+
+        try (var stream = Files.list(dimsDir)) {
+            stream.filter(Files::isDirectory)
+                .filter(dir -> !dir.getFileName().toString().endsWith("_backup"))
+                .filter(dir -> !dir.getFileName().toString().equals("lobby"))
+                .forEach(dir -> {
+                    String folderName = dir.getFileName().toString();
+                    Path regionDir = dir.resolve("region");
+                    if (Files.isDirectory(regionDir)) {
+                        MapConfig config = new MapConfig();
+                        config.setName(folderName);
+                        config.setWorldFolder(folderName);
+                        config.setEnabled(true);
+                        config.setHasRespawn(true);
+                        config.setHasCapturePoints(true);
+                        config.setHasRegen(true);
+                        config.setHasWorldBorder(true);
+                        config.setWorldBorderCenterX(0);
+                        config.setWorldBorderCenterZ(0);
+                        config.setWorldBorderSize(1000);
+                        config.setTickets(100);
+                        config.setLobbyWaitTime(30);
+                        found.add(config);
+                    }
+                });
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to scan dimensions folder: {}", e.getMessage());
+        }
+
+        return found;
+    }
+
+    private void saveConfig() {
+        Path configPath = getConfigPath();
+        try {
+            Files.createDirectories(configPath.getParent());
+            try (Writer writer = Files.newBufferedWriter(configPath, StandardCharsets.UTF_8)) {
+                GSON.toJson(maps, writer);
+            }
+            TeamSystem.LOGGER.info("Saved map config to {}", configPath);
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to save map config: {}", e.getMessage());
+        }
     }
 
     private Path getConfigPath() {
         return server.getServerDirectory().toPath().resolve(CONFIG_FILE);
-    }
-
-    private void createDefaultConfig(Path path) {
-        List<MapConfig> defaults = new ArrayList<>();
-        MapConfig defaultMap = new MapConfig();
-        defaultMap.setName("default");
-        defaultMap.setWorldFolder("default_map");
-        defaultMap.setEnabled(true);
-        defaultMap.setHasRespawn(true);
-        defaultMap.setHasCapturePoints(true);
-        defaultMap.setHasRegen(true);
-        defaultMap.setHasWorldBorder(true);
-        defaultMap.setWorldBorderCenterX(0);
-        defaultMap.setWorldBorderCenterZ(0);
-        defaultMap.setWorldBorderSize(1000);
-        defaultMap.setTickets(100);
-        defaultMap.setLobbyWaitTime(30);
-        defaults.add(defaultMap);
-
-        try {
-            Files.createDirectories(path.getParent());
-            try (Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-                GSON.toJson(defaults, writer);
-            }
-            TeamSystem.LOGGER.info("Created default map config at {}", path);
-        } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to create default map config: {}", e.getMessage());
-        }
     }
 
     public void reloadConfig() {
@@ -122,7 +155,6 @@ public class MapPoolManager extends SavedData {
         for (int i = 0; i < maps.size(); i++) {
             if (maps.get(i).getName().equalsIgnoreCase(name)) {
                 currentMapIndex = i;
-                setDirty();
                 TeamSystem.LOGGER.info("Current map set to: {}", name);
                 return true;
             }
@@ -133,7 +165,6 @@ public class MapPoolManager extends SavedData {
     public boolean setCurrentMap(int index) {
         if (index >= 0 && index < maps.size()) {
             currentMapIndex = index;
-            setDirty();
             TeamSystem.LOGGER.info("Current map set to index: {} ({})", index, maps.get(index).getName());
             return true;
         }
@@ -143,7 +174,6 @@ public class MapPoolManager extends SavedData {
     public MapConfig nextMap() {
         if (maps.isEmpty()) return null;
         currentMapIndex = (currentMapIndex + 1) % maps.size();
-        setDirty();
         TeamSystem.LOGGER.info("Rotated to next map: {}", maps.get(currentMapIndex).getName());
         return maps.get(currentMapIndex);
     }
@@ -151,7 +181,6 @@ public class MapPoolManager extends SavedData {
     public MapConfig getRandomMap() {
         if (maps.isEmpty()) return null;
         currentMapIndex = random.nextInt(maps.size());
-        setDirty();
         return maps.get(currentMapIndex);
     }
 

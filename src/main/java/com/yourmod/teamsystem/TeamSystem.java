@@ -58,13 +58,7 @@ public class TeamSystem {
                 "teamsystem_data"
             );
 
-        mapPoolManager = event.getServer().getLevel(overworldKey)
-            .getDataStorage()
-            .computeIfAbsent(
-                nbt -> MapPoolManager.load(event.getServer(), nbt),
-                () -> new MapPoolManager(event.getServer()),
-                "teamsystem_mappool"
-            );
+        mapPoolManager = new MapPoolManager(event.getServer());
         mapPoolManager.loadConfig();
 
         MapDimensionGenerator.generateDimensionDatapacks(event.getServer());
