@@ -37,11 +37,11 @@ public class MapPoolManager {
     public void loadConfig() {
         maps.clear();
 
-        scanDimensionsFolder();
-
         Path configPath = getConfigPath();
         if (!Files.exists(configPath)) {
+            maps.addAll(scanDimensionsFolder());
             saveConfig();
+            TeamSystem.LOGGER.info("Loaded {} maps from config", maps.size());
             return;
         }
 
@@ -50,28 +50,23 @@ public class MapPoolManager {
             List<MapConfig> loaded = GSON.fromJson(reader, listType);
             if (loaded != null) {
                 for (MapConfig map : loaded) {
-                    if (map.isEnabled() && !maps.contains(map)) {
+                    if (!map.isEnabled()) continue;
+                    Path mapDir = server.getWorldPath(LevelResource.ROOT)
+                        .resolve("dimensions").resolve("teamsystem").resolve(map.getWorldFolder());
+                    if (Files.isDirectory(mapDir.resolve("region"))) {
                         maps.add(map);
                     }
                 }
             }
 
-            List<MapConfig> fromFolder = scanDimensionsFolder();
-            boolean added = false;
-            for (MapConfig folderMap : fromFolder) {
-                boolean exists = maps.stream()
-                    .anyMatch(m -> m.getWorldFolder().equalsIgnoreCase(folderMap.getWorldFolder()));
-                if (!exists) {
+            for (MapConfig folderMap : scanDimensionsFolder()) {
+                if (maps.stream().noneMatch(m -> m.getWorldFolder().equalsIgnoreCase(folderMap.getWorldFolder()))) {
                     maps.add(folderMap);
-                    added = true;
                     TeamSystem.LOGGER.info("Auto-added map from dimensions folder: {}", folderMap.getName());
                 }
             }
 
-            if (added) {
-                saveConfig();
-            }
-
+            saveConfig();
             TeamSystem.LOGGER.info("Loaded {} maps from config", maps.size());
         } catch (IOException e) {
             TeamSystem.LOGGER.error("Failed to load map config: {}", e.getMessage());

@@ -133,14 +133,12 @@ public class MapDimensionGenerator {
 
     private static void generateMapDimensions(Path datapacksDir) {
         MapPoolManager pool = TeamSystem.getMapPoolManager();
-        MinecraftServer server = pool.getServer();
         if (pool == null) return;
 
+        MinecraftServer server = pool.getServer();
+        if (server == null) return;
+
         List<MapConfig> maps = pool.getMaps();
-        if (maps.isEmpty()) {
-            TeamSystem.LOGGER.info("No maps to generate dimensions for");
-            return;
-        }
 
         Path dimDir = datapacksDir.resolve("data").resolve("teamsystem").resolve("dimension");
         try {
@@ -148,6 +146,24 @@ public class MapDimensionGenerator {
         } catch (IOException e) {
             TeamSystem.LOGGER.error("Failed to create dimension directory: {}", e.getMessage());
             return;
+        }
+
+        // Delete dimension files for maps that no longer exist
+        try (var files = Files.list(dimDir)) {
+            for (Path file : (Iterable<Path>) files::iterator) {
+                if (!file.toString().endsWith(".json")) continue;
+                String fileName = file.getFileName().toString();
+                String mapFolder = fileName.substring(0, fileName.length() - 5);
+                if (mapFolder.equals("lobby")) continue;
+                boolean mapExists = maps.stream()
+                    .anyMatch(m -> m.getWorldFolder().equals(mapFolder));
+                if (!mapExists) {
+                    Files.deleteIfExists(file);
+                    TeamSystem.LOGGER.info("Deleted stale dimension datapack: {}", fileName);
+                }
+            }
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to clean stale dimension files: {}", e.getMessage());
         }
 
         for (MapConfig map : maps) {
