@@ -15,6 +15,8 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -254,16 +256,41 @@ public class MapPoolManager {
 
     // ========== Voting ==========
 
-    public void castVote(ServerPlayer player, String mapName) {
-        votes.put(player.getUUID().toString(), mapName.toLowerCase());
+    public boolean castVote(ServerPlayer player, String mapName) {
+        String uuid = player.getUUID().toString();
+        if (votes.containsKey(uuid)) {
+            player.sendSystemMessage(Component.literal("You already voted! Use /map votes to see results.").withStyle(ChatFormatting.RED));
+            return false;
+        }
+        votes.put(uuid, mapName.toLowerCase());
+        broadcastVoteUpdate();
+        return true;
     }
 
-    public String resolveVoteWinner() {
-        if (votes.isEmpty()) return null;
+    public void broadcastVoteUpdate() {
+        Map<String, Integer> tally = getVoteTally();
+        if (tally.isEmpty()) return;
+        StringBuilder sb = new StringBuilder("§6=== Vote Results ===\n");
+        List<Map.Entry<String, Integer>> sorted = tally.entrySet().stream()
+            .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+            .collect(Collectors.toList());
+        for (Map.Entry<String, Integer> e : sorted) {
+            sb.append("§e").append(e.getKey()).append("§7: §f").append(e.getValue()).append(" votes\n");
+        }
+        server.getPlayerList().broadcastSystemMessage(Component.literal(sb.toString()), false);
+    }
+
+    public Map<String, Integer> getVoteTally() {
         Map<String, Integer> tally = new HashMap<>();
         for (String vote : votes.values()) {
             tally.merge(vote, 1, Integer::sum);
         }
+        return tally;
+    }
+
+    public String resolveVoteWinner() {
+        if (votes.isEmpty()) return null;
+        Map<String, Integer> tally = getVoteTally();
         return tally.entrySet().stream()
             .max(Map.Entry.comparingByValue())
             .map(Map.Entry::getKey)

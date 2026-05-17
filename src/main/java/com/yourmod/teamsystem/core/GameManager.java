@@ -352,9 +352,7 @@ public class GameManager {
             return false;
         }
 
-        pool.castVote(player, mapName);
-        player.sendSystemMessage(Component.literal("Voted for: " + mapName).withStyle(ChatFormatting.GREEN));
-        return true;
+        return pool.castVote(player, mapName);
     }
 
     // ========== Timer Overrides ==========
@@ -532,10 +530,21 @@ public class GameManager {
         return w != null ? w : server.overworld();
     }
 
+    private boolean forceLoading = false;
+
     private ServerLevel getMapWorldNoFallback(MapConfig map) {
         String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
         if (worldKey.isEmpty() || worldKey.equals("overworld")) return null;
-        return server.getLevel(ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey)));
+        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey));
+        ServerLevel w = server.getLevel(key);
+        if (w == null && !forceLoading) {
+            forceLoading = true;
+            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
+                "execute in teamsystem:" + worldKey + " run say Loading dimension " + worldKey);
+            w = server.getLevel(key);
+            forceLoading = false;
+        }
+        return w;
     }
 
     private ServerLevel getMapWorld(MapConfig map) {

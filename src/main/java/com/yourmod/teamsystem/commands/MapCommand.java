@@ -16,6 +16,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MapCommand {
 
@@ -32,6 +35,9 @@ public class MapCommand {
                     .then(Commands.argument("name", StringArgumentType.greedyString())
                         .executes(context -> voteMap(context))
                     )
+                )
+                .then(Commands.literal("votes")
+                    .executes(context -> showVotes(context))
                 )
                 .then(Commands.literal("select")
                     .requires(source -> source.hasPermission(2))
@@ -57,6 +63,14 @@ public class MapCommand {
                 .then(Commands.literal("maintenance")
                     .requires(source -> source.hasPermission(2))
                     .executes(context -> runMaintenance(context))
+                )
+                .then(Commands.literal("setspawn")
+                    .requires(source -> source.hasPermission(2))
+                    .then(Commands.argument("team", StringArgumentType.word())
+                        .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
+                            new String[]{"nato", "russia"}, builder))
+                        .executes(context -> setSpawn(context))
+                    )
                 )
         );
     }
@@ -145,6 +159,61 @@ public class MapCommand {
         context.getSource().sendSuccess(() ->
             Component.literal("Maintenance complete. Available maps: " + pool.getAvailableCount())
                 .withStyle(ChatFormatting.GREEN), true);
+        return 1;
+    }
+
+    private static int showVotes(CommandContext<CommandSourceStack> context) {
+        MapPoolManager pool = TeamSystem.getMapPoolManager();
+        Map<String, Integer> tally = pool.getVoteTally();
+        if (tally.isEmpty()) {
+            context.getSource().sendSuccess(() ->
+                Component.literal("No votes yet!").withStyle(ChatFormatting.YELLOW), false);
+            return 1;
+        }
+        StringBuilder sb = new StringBuilder("§6=== Vote Results ===\n");
+        List<Map.Entry<String, Integer>> sorted = tally.entrySet().stream()
+            .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+            .collect(Collectors.toList());
+        int total = tally.values().stream().mapToInt(Integer::intValue).sum();
+        for (Map.Entry<String, Integer> e : sorted) {
+            sb.append("§e").append(e.getKey()).append("§7: §f").append(e.getValue())
+                .append(" §7(").append(String.format("%.0f%%", e.getValue() * 100.0 / total)).append(")\n");
+        }
+        context.getSource().sendSuccess(() ->
+            Component.literal(sb.toString()).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), false);
+        return 1;
+    }
+
+    private static int setSpawn(CommandContext<CommandSourceStack> context) {
+        ServerPlayer player = context.getSource().getPlayer();
+        if (player == null) return 0;
+
+        GameManager game = TeamSystem.getGameManager();
+        MapConfig map = game.getCurrentMap();
+        if (map == null) {
+            context.getSource().sendFailure(Component.literal("No map selected!").withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        String team = StringArgumentType.getString(context, "team").toLowerCase();
+        int[] pos = new int[]{(int)player.getX(), (int)player.getY(), (int)player.getZ()};
+
+        if (team.equals("nato")) {
+            map.setNatoSpawn(pos);
+            context.getSource().sendSuccess(() ->
+                Component.literal("NATO spawn set to " + pos[0] + " " + pos[1] + " " + pos[2])
+                    .withStyle(ChatFormatting.GREEN), true);
+        } else if (team.equals("russia")) {
+            map.setRussiaSpawn(pos);
+            context.getSource().sendSuccess(() ->
+                Component.literal("Russia spawn set to " + pos[0] + " " + pos[1] + " " + pos[2])
+                    .withStyle(ChatFormatting.GREEN), true);
+        } else {
+            context.getSource().sendFailure(Component.literal("Use: /map setspawn <nato|russia>").withStyle(ChatFormatting.RED));
+            return 0;
+        }
+
+        TeamSystem.getMapPoolManager().saveConfig();
         return 1;
     }
 

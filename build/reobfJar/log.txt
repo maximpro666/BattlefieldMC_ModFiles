@@ -165,6 +165,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/client/ClientTeamData.class
   com/yourmod/teamsystem/commands/
   com/yourmod/teamsystem/commands/CapturePointCommand.class
+  com/yourmod/teamsystem/commands/EconomyCommand.class
   com/yourmod/teamsystem/commands/GameCommand$1.class
   com/yourmod/teamsystem/commands/GameCommand.class
   com/yourmod/teamsystem/commands/KitCommand.class
@@ -189,6 +190,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/core/FOBManager.class
   com/yourmod/teamsystem/core/GameManager$GamePhase.class
   com/yourmod/teamsystem/core/GameManager.class
+  com/yourmod/teamsystem/core/Kit$IndexedItem.class
   com/yourmod/teamsystem/core/Kit.class
   com/yourmod/teamsystem/core/KitManager.class
   com/yourmod/teamsystem/core/MapConfig$CapturePointEntry.class
@@ -213,6 +215,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/core/SquadManager.class
   com/yourmod/teamsystem/core/Team.class
   com/yourmod/teamsystem/core/TeamManager.class
+  com/yourmod/teamsystem/core/TeamSystemConfig.class
   com/yourmod/teamsystem/core/TicketManager.class
   com/yourmod/teamsystem/core/VehicleData.class
   com/yourmod/teamsystem/core/VehicleManager.class

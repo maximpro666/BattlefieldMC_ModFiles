@@ -73,19 +73,14 @@ public class KitCommand {
         ServerPlayer player = source.getPlayer();
         if (player == null) return 0;
 
-        List<ItemStack> items = new ArrayList<>();
-        for (ItemStack item : player.getInventory().items) {
-            if (!item.isEmpty()) {
-                items.add(item.copy());
-            }
-        }
-
-        KitManager km = TeamSystem.getTeamManager().getKitManager();
         TeamManager tm = TeamSystem.getTeamManager();
         Team playerTeam = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
+        Kit kit = Kit.fromPlayerInventory(name, name, playerTeam, 0, player);
 
-        km.createKit(name, name, playerTeam, 0, items);
-        source.sendSuccess(() -> Component.literal("§aKit created: " + name), true);
+        tm.getKitManager().getKits().put(name, kit);
+        tm.getKitManager().saveKits();
+
+        source.sendSuccess(() -> Component.literal("§aKit created from your inventory: " + name), true);
         return 1;
     }
 
@@ -99,22 +94,19 @@ public class KitCommand {
         ServerPlayer player = source.getPlayer();
         if (player == null) return 0;
 
-        Kit kit = TeamSystem.getTeamManager().getKitManager().getKit(name);
+        TeamManager tm = TeamSystem.getTeamManager();
+        Kit kit = tm.getKitManager().getKit(name);
         if (kit == null) {
             source.sendFailure(Component.literal("§cKit not found: " + name));
             return 0;
         }
 
-        List<ItemStack> items = new ArrayList<>();
-        for (ItemStack item : player.getInventory().items) {
-            if (!item.isEmpty()) {
-                items.add(item.copy());
-            }
-        }
-        kit.setItems(items);
+        Team playerTeam = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
+        Kit updated = Kit.fromPlayerInventory(name, kit.getDisplayName(), playerTeam, kit.getMinRankOrdinal(), player);
+        tm.getKitManager().getKits().put(name, updated);
+        tm.getKitManager().saveKits();
 
-        TeamSystem.getTeamManager().getKitManager().saveKits();
-        source.sendSuccess(() -> Component.literal("§aKit updated: " + name), true);
+        source.sendSuccess(() -> Component.literal("§aKit updated from your inventory: " + name), true);
         return 1;
     }
 
@@ -198,13 +190,7 @@ public class KitCommand {
             return 0;
         }
 
-        player.getInventory().clearContent();
-        for (ItemStack item : kit.getItems()) {
-            if (!item.isEmpty()) {
-                player.addItem(item.copy());
-            }
-        }
-
+        kit.applyToPlayer(player);
         source.sendSuccess(() -> Component.literal("§aGave kit " + name + " to " + player.getName().getString()), true);
         return 1;
     }

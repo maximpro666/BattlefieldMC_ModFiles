@@ -76,6 +76,7 @@ public class TeamSystem {
     private static DownedManager downedManager;
     private static ContributionManager contributionManager;
     private static FOBManager fobManager;
+    private static TeamSystemConfig config;
 
     public TeamSystem() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -102,6 +103,8 @@ public class TeamSystem {
                 () -> new TeamManager(event.getServer()),
                 "teamsystem_data"
             );
+
+        config = TeamSystemConfig.load(event.getServer());
 
         mapPoolManager = new MapPoolManager(event.getServer());
         mapPoolManager.loadConfig();
@@ -153,6 +156,7 @@ public class TeamSystem {
         VehicleCommand.register(event.getDispatcher());
         PingCommand.register(event.getDispatcher());
         com.yourmod.teamsystem.commands.CapturePointCommand.register(event.getDispatcher());
+        EconomyCommand.register(event.getDispatcher());
     }
 
     public static TeamManager getTeamManager() { return teamManager; }
@@ -169,4 +173,5 @@ public class TeamSystem {
     public static DownedManager getDownedManager() { return downedManager; }
     public static ContributionManager getContributionManager() { return contributionManager; }
     public static FOBManager getFOBManager() { return fobManager; }
+    public static TeamSystemConfig getConfig() { return config; }
 }

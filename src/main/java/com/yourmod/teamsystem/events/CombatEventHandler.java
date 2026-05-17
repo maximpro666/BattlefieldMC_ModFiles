@@ -8,10 +8,13 @@ import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.Rank;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
+import com.yourmod.teamsystem.core.TeamSystemConfig;
 import com.yourmod.teamsystem.core.TicketManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -19,6 +22,8 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class CombatEventHandler {
@@ -26,6 +31,10 @@ public class CombatEventHandler {
 
     public CombatEventHandler(TeamManager teamManager) {
         this.teamManager = teamManager;
+    }
+
+    private net.minecraft.server.MinecraftServer getServer(ServerLevel level) {
+        return level.getServer();
     }
 
     /**
@@ -207,29 +216,67 @@ public class CombatEventHandler {
             }
 
             EconomyManager econ = TeamSystem.getEconomyManager();
+            TeamSystemConfig cfg = TeamSystem.getConfig();
+            int spReward = cfg != null ? cfg.getKillRewardSP() : 10;
+            int bcReward = cfg != null ? cfg.getKillRewardBC() : 5;
+
             if (econ != null && isPlaying) {
-                int spReward = 10;
-                int bcReward = 5;
                 econ.addSP(killer.getUUID(), spReward);
                 econ.addBC(killer.getUUID(), bcReward);
                 econ.syncAll(killer);
             }
 
+            Map<String, String> placeholders = new HashMap<>();
+            placeholders.put("killer", killer.getName().getString());
+            placeholders.put("victim", victim.getName().getString());
+            placeholders.put("bc", String.valueOf(bcReward));
+            placeholders.put("sp", String.valueOf(spReward));
+
+            getServer(level).getPlayerList().broadcastSystemMessage(
+                Component.literal(cfg != null
+                    ? cfg.getMessage("kill_feed_player", placeholders)
+                    : "§6" + victim.getName().getString() + " §eубит §6" + killer.getName().getString()), false);
+            killer.sendSystemMessage(
+                Component.literal(cfg != null
+                    ? cfg.getMessage("kill_reward", placeholders)
+                    : "§a+" + bcReward + " BC §7+" + spReward + " SP"), false);
+
             Rank oldRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills() - 1);
             Rank newRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills());
             if (oldRank.ordinal() < newRank.ordinal()) {
                 teamManager.setPlayerRank(killer, newRank.ordinal());
-                killer.displayClientMessage(
-                    net.minecraft.network.chat.Component.literal("§6[PROMOTION] You are now " + newRank.getDisplayName() + "!"),
-                    false
-                );
+                Map<String, String> rankPl = new HashMap<>();
+                rankPl.put("rank", newRank.getDisplayName());
+                killer.sendSystemMessage(
+                    Component.literal(cfg != null
+                        ? cfg.getMessage("rank_up", rankPl)
+                        : "§6[PROMOTION] You are now " + newRank.getDisplayName() + "!"), false);
             }
+        }
 
-            TeamSystem.LOGGER.info("Player {} killed {} (K/D: {}/{})",
-                killer.getName().getString(),
-                victim.getName().getString(),
-                teamManager.getOrCreatePlayerData(killer.getUUID()).getKills(),
-                teamManager.getOrCreatePlayerData(killer.getUUID()).getDeaths());
+        if (victim != null && killer != null && !(victim instanceof ServerPlayer)) {
+            TeamSystemConfig vcfg = TeamSystem.getConfig();
+            int vSpReward = vcfg != null ? vcfg.getVehicleKillRewardSP() : 20;
+            int vBcReward = vcfg != null ? vcfg.getVehicleKillRewardBC() : 10;
+            EconomyManager econ = TeamSystem.getEconomyManager();
+            if (econ != null && isPlaying) {
+                econ.addSP(killer.getUUID(), vSpReward);
+                econ.addBC(killer.getUUID(), vBcReward);
+                econ.syncAll(killer);
+            }
+            Map<String, String> vPl = new HashMap<>();
+            vPl.put("killer", killer.getName().getString());
+            vPl.put("vehicle", victim.getName().getString());
+            vPl.put("bc", String.valueOf(vBcReward));
+            vPl.put("sp", String.valueOf(vSpReward));
+            getServer(level).getPlayerList().broadcastSystemMessage(
+                Component.literal(vcfg != null
+                    ? vcfg.getMessage("kill_feed_vehicle", vPl)
+                    : "§cТехника " + victim.getName().getString() + " §cуничтожена §6" + killer.getName().getString()), false);
+            killer.sendSystemMessage(
+                Component.literal(vcfg != null
+                    ? vcfg.getMessage("kill_reward", vPl)
+                    : "§a+" + vBcReward + " BC §7+" + vSpReward + " SP"), false);
         }
         teamManager.syncPlayerData(victim);
     }
