@@ -139,11 +139,11 @@ Conflicting propagated mapping for com/yourmod/teamsystem/blockentity/RespawnBea
 Conflicting propagated mapping for com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity/saveAdditional(Lnet/minecraft/nbt/CompoundTag;)V from net/minecraft/world/level/block/entity/BlockEntity/saveAdditional(Lnet/minecraft/nbt/CompoundTag;)V: saveAdditional -> m_183515_
 Conflicting propagated mapping for com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity/getUpdatePacket()Lnet/minecraft/network/protocol/Packet; from net/minecraft/world/level/block/entity/BlockEntity/getUpdatePacket()Lnet/minecraft/network/protocol/Packet;: getUpdatePacket -> m_58483_
 Conflicting propagated mapping for com/yourmod/teamsystem/core/TeamManager/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag; from net/minecraft/world/level/saveddata/SavedData/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;: save -> m_7176_
+Conflicting propagated mapping for net/minecraft/world/entity/LivingEntity/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V from net/minecraft/world/entity/player/Player/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V: lambda$addAdditionalSaveData$3 -> m_219754_
 Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/onRemove(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V from net/minecraft/world/level/block/state/BlockBehaviour/onRemove(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V: onRemove -> m_6810_
 Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/newBlockEntity(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/entity/BlockEntity; from net/minecraft/world/level/block/EntityBlock/newBlockEntity(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/entity/BlockEntity;: newBlockEntity -> m_142194_
 Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/getRenderShape(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/RenderShape; from net/minecraft/world/level/block/BaseEntityBlock/getRenderShape(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/RenderShape;: getRenderShape -> m_7514_
 Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/use(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult; from net/minecraft/world/level/block/state/BlockBehaviour/use(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;: use -> m_6227_
-Conflicting propagated mapping for net/minecraft/world/entity/LivingEntity/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V from net/minecraft/world/entity/player/Player/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V: lambda$addAdditionalSaveData$3 -> m_219754_
 Adding extras
 Sorting
 Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reobfJar\output.jar
@@ -166,15 +166,22 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/commands/
   com/yourmod/teamsystem/commands/GameCommand$1.class
   com/yourmod/teamsystem/commands/GameCommand.class
+  com/yourmod/teamsystem/commands/KitCommand.class
   com/yourmod/teamsystem/commands/LobbyCommand.class
   com/yourmod/teamsystem/commands/MapCommand.class
   com/yourmod/teamsystem/commands/MarkerCommand.class
+  com/yourmod/teamsystem/commands/PingCommand.class
+  com/yourmod/teamsystem/commands/RankCommand.class
   com/yourmod/teamsystem/commands/RespawnCommand.class
+  com/yourmod/teamsystem/commands/SquadCommand.class
   com/yourmod/teamsystem/commands/TeamCommand.class
+  com/yourmod/teamsystem/commands/VehicleCommand.class
   com/yourmod/teamsystem/core/
   com/yourmod/teamsystem/core/CapturePointManager.class
   com/yourmod/teamsystem/core/GameManager$GamePhase.class
   com/yourmod/teamsystem/core/GameManager.class
+  com/yourmod/teamsystem/core/Kit.class
+  com/yourmod/teamsystem/core/KitManager.class
   com/yourmod/teamsystem/core/MapConfig.class
   com/yourmod/teamsystem/core/MapDimensionGenerator.class
   com/yourmod/teamsystem/core/MapPoolManager$1.class
@@ -184,24 +191,36 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/core/MarkerData.class
   com/yourmod/teamsystem/core/MarkerManager.class
   com/yourmod/teamsystem/core/PlayerCombatData.class
+  com/yourmod/teamsystem/core/Rank.class
+  com/yourmod/teamsystem/core/RankManager.class
   com/yourmod/teamsystem/core/RespawnBeaconBlock.class
   com/yourmod/teamsystem/core/RespawnConfig.class
   com/yourmod/teamsystem/core/RespawnManager$1.class
   com/yourmod/teamsystem/core/RespawnManager$SavedBeacon.class
   com/yourmod/teamsystem/core/RespawnManager.class
+  com/yourmod/teamsystem/core/Squad.class
+  com/yourmod/teamsystem/core/SquadManager$Invitation.class
+  com/yourmod/teamsystem/core/SquadManager.class
   com/yourmod/teamsystem/core/Team.class
   com/yourmod/teamsystem/core/TeamManager.class
   com/yourmod/teamsystem/core/TicketManager.class
+  com/yourmod/teamsystem/core/VehicleData.class
+  com/yourmod/teamsystem/core/VehicleManager.class
   com/yourmod/teamsystem/events/
   com/yourmod/teamsystem/events/CombatEventHandler.class
   com/yourmod/teamsystem/events/PlayerEventHandler.class
   com/yourmod/teamsystem/network/
+  com/yourmod/teamsystem/network/CapturePointSyncPacket.class
   com/yourmod/teamsystem/network/CombatDataSyncPacket.class
   com/yourmod/teamsystem/network/GameStateSyncPacket.class
+  com/yourmod/teamsystem/network/KitSyncPacket.class
   com/yourmod/teamsystem/network/MarkerSyncPacket.class
   com/yourmod/teamsystem/network/PacketHandler.class
+  com/yourmod/teamsystem/network/RankSyncPacket.class
+  com/yourmod/teamsystem/network/SquadSyncPacket.class
   com/yourmod/teamsystem/network/TeamSyncPacket.class
   com/yourmod/teamsystem/network/TeamTicketSyncPacket.class
+  com/yourmod/teamsystem/network/VehicleSyncPacket.class
   data/
   data/teamsystem/
   data/teamsystem/dimension/
