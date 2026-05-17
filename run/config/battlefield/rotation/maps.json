@@ -1,0 +1,9 @@
+{
+  "strategy": "weighted_random",
+  "playlist": [
+    "default_conquest",
+    "metro_conquest"
+  ],
+  "disabledScenarios": [],
+  "respectCooldown": true
+}

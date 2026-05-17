@@ -1,0 +1,60 @@
+
+[general]
+	#Master switch for the patch.
+	enable = true
+	#Log compatibility decisions and reflection failures.
+	debugLog = false
+	#Beyond this range, expensive weapon visuals may be simplified.
+	#Range: 0 ~ 256
+	maxDistanceWeapons = 48
+	#Beyond this range, far vehicles can be culled or animation-throttled.
+	#Range: 0 ~ 512
+	maxDistanceVehicles = 160
+	#Run light idle animation updates once every N ticks where possible.
+	#Range: 1 ~ 20
+	throttleIdleTicks = 2
+	#Fallback global vehicle animation throttle.
+	#Range: 1 ~ 20
+	throttleVehicleTicks = 2
+
+[tacz]
+	enable = true
+	#Legacy toggle kept for backward compatibility (acts as hideDrawAnimation + hideSwitchAnimation).
+	instantDraw = true
+	#Hide weapon draw / equip animation.
+	hideDrawAnimation = true
+	#Hide weapon put-away animation when switching items.
+	hideSwitchAnimation = true
+	cancelReloadAnimation = true
+	#Hide weapon reload animation.
+	hideReloadAnimation = true
+	hideReloadOverlay = true
+	optimizeShoot = true
+	#Range: 1 ~ 10
+	shootThrottleTicks = 2
+	#Force TACZ low-detail item rendering where the mod exposes it.
+	forceLowDetail = true
+	#Trim laser fade and similar expensive first-person effects.
+	reduceLaserEffects = true
+
+[superbwarfare]
+	enable = true
+	#Legacy toggle kept for backward compatibility (acts as hideDrawAnimation + hideSwitchAnimation).
+	instantDraw = true
+	#Hide weapon draw / equip animation.
+	hideDrawAnimation = true
+	#Hide animation when switching away from the current weapon.
+	hideSwitchAnimation = true
+	cancelReloadAnimation = true
+	#Hide weapon reload animation.
+	hideReloadAnimation = true
+	hideReloadOverlay = true
+	optimizeShoot = true
+	vehicleCulling = true
+	#Range: 1 ~ 20
+	vehicleThrottleTicks = 2
+	#Enable SuperbWarfare gun LOD automatically.
+	forceGunLod = true
+	#Clamp SuperbWarfare camera and screen shake effects.
+	reduceScreenShake = true
+

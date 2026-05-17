@@ -1,0 +1,14 @@
+{
+  "startingFactionResources": {
+    "ammunition": 500,
+    "construction": 200,
+    "reinforcement": 100,
+    "repair": 150,
+    "vehicle_supply": 80
+  },
+  "reinforcementAvailabilityThreshold": 50,
+  "deployAmmunitionCost": 1,
+  "deployReinforcementCost": 5,
+  "economyFlushIntervalTicks": 10,
+  "routeTickInterval": 5
+}

@@ -1,0 +1,10 @@
+{
+  "startingTickets": 500,
+  "maxPlayers": 64,
+  "factions": [
+    "team_a",
+    "team_b"
+  ],
+  "defaultSquadSize": 4,
+  "maxSquadsPerFaction": 8
+}

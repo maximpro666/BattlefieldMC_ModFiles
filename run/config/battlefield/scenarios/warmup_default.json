@@ -1,0 +1,14 @@
+{
+  "id": "warmup_default",
+  "world": "overworld",
+  "map": "warmup",
+  "mode": "warmup",
+  "tickets": 9999,
+  "maxPlayers": 64,
+  "factions": ["team_a", "team_b"],
+  "objectives": [],
+  "weatherPreset": "clear",
+  "commanderEnabled": false,
+  "weight": 0,
+  "disabled": true
+}

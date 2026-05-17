@@ -1,0 +1,11 @@
+{
+  "infantryDeathCost": 1,
+  "vehicleLossCost": 15,
+  "objectiveCaptureReward": 10,
+  "objectiveDefenseReward": 5,
+  "squadplayReward": 2,
+  "commanderReward": 5,
+  "matchProgressionReward": 3,
+  "overtimeBleedPerMinute": 2,
+  "objectiveDrainPerMinute": 0
+}

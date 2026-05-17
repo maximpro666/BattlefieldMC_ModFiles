@@ -1,0 +1,44 @@
+{
+  "vehicles": [
+    {
+      "id": "transport",
+      "displayName": "Transport",
+      "factionMaxActive": 2,
+      "minRankLevel": 0,
+      "matchUnlockTicks": 0,
+      "ticketCost": 0,
+      "minCrew": 1,
+      "allowedFactions": []
+    },
+    {
+      "id": "ifv",
+      "displayName": "IFV",
+      "factionMaxActive": 1,
+      "minRankLevel": 1,
+      "matchUnlockTicks": 1200,
+      "ticketCost": 15,
+      "minCrew": 2,
+      "allowedFactions": []
+    },
+    {
+      "id": "tank",
+      "displayName": "Main Battle Tank",
+      "factionMaxActive": 1,
+      "minRankLevel": 2,
+      "matchUnlockTicks": 3600,
+      "ticketCost": 40,
+      "minCrew": 3,
+      "allowedFactions": []
+    },
+    {
+      "id": "attack_heli",
+      "displayName": "Attack Helicopter",
+      "factionMaxActive": 1,
+      "minRankLevel": 3,
+      "matchUnlockTicks": 7200,
+      "ticketCost": 60,
+      "minCrew": 2,
+      "allowedFactions": []
+    }
+  ]
+}

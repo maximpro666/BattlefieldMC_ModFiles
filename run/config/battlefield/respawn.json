@@ -1,0 +1,13 @@
+{
+  "defaultCountdownSeconds": 10,
+  "fadeInTicks": 40,
+  "audioRestoreTicks": 60,
+  "openDeployAfterCountdown": true,
+  "tacticalQuotes": [
+    "Hold position. Reinforcements inbound.",
+    "Sector clear is not secure. Stay sharp.",
+    "Command advises staggered redeploy.",
+    "Watch your six on re-entry.",
+    "Rally on squad lead after respawn."
+  ]
+}

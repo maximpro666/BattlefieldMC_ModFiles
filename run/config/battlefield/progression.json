@@ -1,0 +1,81 @@
+{
+  "ranks": [
+    {
+      "id": "recruit",
+      "displayName": "Recruit",
+      "minXp": 0,
+      "leadershipLevel": 0,
+      "vehicleAccessLevel": 0
+    },
+    {
+      "id": "private",
+      "displayName": "Private",
+      "minXp": 500,
+      "leadershipLevel": 0,
+      "vehicleAccessLevel": 0
+    },
+    {
+      "id": "corporal",
+      "displayName": "Corporal",
+      "minXp": 1500,
+      "leadershipLevel": 0,
+      "vehicleAccessLevel": 1
+    },
+    {
+      "id": "sergeant",
+      "displayName": "Sergeant",
+      "minXp": 3500,
+      "leadershipLevel": 1,
+      "vehicleAccessLevel": 1
+    },
+    {
+      "id": "staff_sergeant",
+      "displayName": "Staff Sergeant",
+      "minXp": 6500,
+      "leadershipLevel": 1,
+      "vehicleAccessLevel": 2
+    },
+    {
+      "id": "lieutenant",
+      "displayName": "Lieutenant",
+      "minXp": 11000,
+      "leadershipLevel": 2,
+      "vehicleAccessLevel": 2
+    },
+    {
+      "id": "captain",
+      "displayName": "Captain",
+      "minXp": 18000,
+      "leadershipLevel": 2,
+      "vehicleAccessLevel": 3
+    },
+    {
+      "id": "major",
+      "displayName": "Major",
+      "minXp": 28000,
+      "leadershipLevel": 3,
+      "vehicleAccessLevel": 3
+    },
+    {
+      "id": "colonel",
+      "displayName": "Colonel",
+      "minXp": 42000,
+      "leadershipLevel": 3,
+      "vehicleAccessLevel": 4
+    }
+  ],
+  "xpBySource": {
+    "VEHICLE_DESTROY": 100,
+    "INFANTRY_KILL": 25,
+    "HEAL": 8,
+    "RESUPPLY": 10,
+    "OBJECTIVE_DEFENSE": 40,
+    "MATCH_VICTORY": 250,
+    "REVIVE": 35,
+    "COMMANDER_ORDER": 20,
+    "VEHICLE_KILL": 75,
+    "ASSIST": 12,
+    "OBJECTIVE_CAPTURE": 80,
+    "SQUAD_PLAY": 15
+  }
+}

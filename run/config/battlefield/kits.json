@@ -1,0 +1,158 @@
+{
+  "autoEquipLastKitDefault": true,
+  "kits": [
+    {
+      "id": "assault",
+      "displayName": "Assault",
+      "roleId": "assault",
+      "allowedFactions": [
+        "team_a",
+        "team_b"
+      ],
+      "minRankLevel": 0,
+      "unlockRules": {},
+      "loadoutSlots": [
+        "PRIMARY",
+        "SECONDARY",
+        "GRENADE",
+        "MEDICAL"
+      ]
+    },
+    {
+      "id": "medic",
+      "displayName": "Combat Medic",
+      "roleId": "medic",
+      "allowedFactions": [
+        "team_a",
+        "team_b"
+      ],
+      "minRankLevel": 0,
+      "unlockRules": {},
+      "loadoutSlots": [
+        "PRIMARY",
+        "SECONDARY",
+        "GRENADE",
+        "MEDICAL"
+      ]
+    },
+    {
+      "id": "engineer",
+      "displayName": "Engineer",
+      "roleId": "engineer",
+      "allowedFactions": [
+        "team_a",
+        "team_b"
+      ],
+      "minRankLevel": 0,
+      "unlockRules": {},
+      "loadoutSlots": [
+        "PRIMARY",
+        "SECONDARY",
+        "GRENADE",
+        "MEDICAL"
+      ]
+    },
+    {
+      "id": "support",
+      "displayName": "Support",
+      "roleId": "support",
+      "allowedFactions": [
+        "team_a",
+        "team_b"
+      ],
+      "minRankLevel": 0,
+      "unlockRules": {},
+      "loadoutSlots": [
+        "PRIMARY",
+        "SECONDARY",
+        "GRENADE",
+        "MEDICAL"
+      ]
+    },
+    {
+      "id": "recon",
+      "displayName": "Recon",
+      "roleId": "recon",
+      "allowedFactions": [
+        "team_a",
+        "team_b"
+      ],
+      "minRankLevel": 1,
+      "unlockRules": {
+        "MATCH_TIME": "18000"
+      },
+      "loadoutSlots": [
+        "PRIMARY",
+        "SECONDARY",
+        "GRENADE",
+        "MEDICAL"
+      ]
+    },
+    {
+      "id": "heavy_at",
+      "displayName": "Heavy AT",
+      "roleId": "heavy_at",
+      "allowedFactions": [
+        "team_a",
+        "team_b"
+      ],
+      "minRankLevel": 2,
+      "unlockRules": {
+        "MATCH_TIME": "12000"
+      },
+      "loadoutSlots": [
+        "PRIMARY",
+        "SECONDARY",
+        "GRENADE",
+        "MEDICAL"
+      ]
+    },
+    {
+      "id": "heavy_armor",
+      "displayName": "Heavy Armor",
+      "roleId": "heavy_armor",
+      "allowedFactions": [
+        "team_a",
+        "team_b"
+      ],
+      "minRankLevel": 3,
+      "unlockRules": {
+        "MATCH_TIME": "24000"
+      },
+      "loadoutSlots": [
+        "PRIMARY",
+        "SECONDARY",
+        "GRENADE",
+        "MEDICAL"
+      ]
+    }
+  ],
+  "limits": [
+    {
+      "roleOrKitId": "recon",
+      "scope": "FACTION",
+      "maxCount": 2
+    },
+    {
+      "roleOrKitId": "heavy_at",
+      "scope": "SQUAD",
+      "maxCount": 1
+    },
+    {
+      "roleOrKitId": "heavy_at",
+      "scope": "FACTION",
+      "maxCount": 2
+    },
+    {
+      "roleOrKitId": "medic",
+      "scope": "SQUAD",
+      "maxCount": 2
+    },
+    {
+      "roleOrKitId": "engineer",
+      "scope": "FACTION",
+      "maxCount": 4
+    }
+  ],
+  "xpRewards": {}
+}

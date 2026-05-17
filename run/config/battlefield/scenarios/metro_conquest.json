@@ -1,0 +1,11 @@
+{
+  "id": "metro_conquest",
+  "world": "metro",
+  "map": "metro",
+  "mode": "conquest",
+  "tickets": 600,
+  "factions": ["US", "RU"],
+  "objectives": ["A", "B", "C"],
+  "weatherPreset": "rain_heavy",
+  "weight": 15
+}

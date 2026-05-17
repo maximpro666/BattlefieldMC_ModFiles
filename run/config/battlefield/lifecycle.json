@@ -1,0 +1,15 @@
+{
+  "autoLifecycle": true,
+  "autoRotation": true,
+  "voteEnabled": true,
+  "victoryEvalIntervalTicks": 20,
+  "pregamDurationTicks": 200,
+  "deploymentDurationTicks": 600,
+  "matchDurationTicks": 72000,
+  "overtimeDurationTicks": 3600,
+  "endingDurationTicks": 200,
+  "postgameDurationTicks": 1200,
+  "voteDurationTicks": 600,
+  "overtimeTicketThreshold": 50,
+  "voteCandidateCount": 4
+}

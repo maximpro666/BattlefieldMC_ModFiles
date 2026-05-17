@@ -1,0 +1,19 @@
+{
+  "roles": {
+    "commander": {
+      "restrictions": [
+        "commander"
+      ],
+      "permissions": [
+        "commander_marker",
+        "faction_broadcast"
+      ]
+    },
+    "rifleman": {
+      "restrictions": [],
+      "permissions": [
+        "squad_marker"
+      ]
+    }
+  }
+}

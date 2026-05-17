@@ -1,0 +1,6 @@
+{
+  "suppressionDurationTicks": 40,
+  "atmosphereFlushIntervalTicks": 20,
+  "maxParticleScalePercent": 100,
+  "weatherIntegrationEnabled": true
+}

@@ -1,0 +1,67 @@
+{
+  "layouts": {
+    "tickets": {
+      "anchor": "TOP_RIGHT",
+      "offsetX": 8,
+      "offsetY": 8,
+      "scale": 1.6,
+      "alpha": 0.9,
+      "enabled": true,
+      "colorArgb": -5194043
+    },
+    "compass": {
+      "anchor": "TOP_CENTER",
+      "offsetX": 0,
+      "offsetY": 8,
+      "scale": 0.95,
+      "alpha": 0.88,
+      "enabled": true,
+      "colorArgb": -5194043
+    },
+    "squads": {
+      "anchor": "TOP_LEFT",
+      "offsetX": 8,
+      "offsetY": 32,
+      "scale": 1.0,
+      "alpha": 0.88,
+      "enabled": true,
+      "colorArgb": -5194043
+    },
+    "minimap": {
+      "anchor": "TOP_RIGHT",
+      "offsetX": 8,
+      "offsetY": 0,
+      "scale": 1.0,
+      "alpha": 0.88,
+      "enabled": true,
+      "colorArgb": -5194043
+    },
+    "tactical": {
+      "anchor": "TOP_LEFT",
+      "offsetX": 8,
+      "offsetY": 8,
+      "scale": 1.6,
+      "alpha": 0.85,
+      "enabled": true,
+      "colorArgb": -5194043
+    },
+    "notifications": {
+      "anchor": "TOP_CENTER",
+      "offsetX": 0,
+      "offsetY": 58,
+      "scale": 1.0,
+      "alpha": 0.92,
+      "enabled": true,
+      "colorArgb": -5194043
+    },
+    "vitals": {
+      "anchor": "BOTTOM_LEFT",
+      "offsetX": 8,
+      "offsetY": -28,
+      "scale": 1.0,
+      "alpha": 0.95,
+      "enabled": true,
+      "colorArgb": -5194043
+    }
+  }
+}
