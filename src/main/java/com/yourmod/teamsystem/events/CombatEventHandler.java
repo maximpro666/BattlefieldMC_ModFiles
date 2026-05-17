@@ -2,6 +2,7 @@ package com.yourmod.teamsystem.events;
 
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.GameManager;
+import com.yourmod.teamsystem.core.Rank;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
 import net.minecraft.server.level.ServerPlayer;
@@ -165,6 +166,16 @@ public class CombatEventHandler {
             if (!killer.getUUID().equals(victim.getUUID())) {
                 teamManager.incrementKills(killer.getUUID());
                 teamManager.syncPlayerData(killer);
+
+                Rank oldRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills() - 1);
+                Rank newRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills());
+                if (oldRank.ordinal() < newRank.ordinal()) {
+                    teamManager.setPlayerRank(killer, newRank.ordinal());
+                    killer.displayClientMessage(
+                        net.minecraft.network.chat.Component.literal("§6[PROMOTION] You are now " + newRank.getDisplayName() + "!"),
+                        false
+                    );
+                }
 
                 TeamSystem.LOGGER.info("Player {} killed {} (K/D: {}/{})",
                     killer.getName().getString(),

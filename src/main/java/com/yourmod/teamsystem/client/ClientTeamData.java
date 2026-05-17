@@ -35,6 +35,8 @@ public class ClientTeamData {
     private static int gamePhase = 0;
     private static String currentMapName = "";
     private static int winningTeamOrdinal = -1;
+    public static int localPlayerRank = 0;
+    public static String localPlayerSquad = "";
 
     public static void setLocalPlayerTeam(Team team) {
         localPlayerTeam = team;

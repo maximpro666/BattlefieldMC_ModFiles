@@ -67,6 +67,9 @@ public class TeamSystem {
     private static GameManager gameManager;
     private static MarkerManager markerManager;
     private static RespawnManager respawnManager;
+    private static KitManager kitManager;
+    private static SquadManager squadManager;
+    private static VehicleManager vehicleManager;
 
     public TeamSystem() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -106,6 +109,10 @@ public class TeamSystem {
         markerManager = new MarkerManager();
         respawnManager = new RespawnManager(event.getServer());
 
+        kitManager = teamManager.getKitManager();
+        squadManager = teamManager.getSquadManager();
+        vehicleManager = teamManager.getVehicleManager();
+
         MinecraftForge.EVENT_BUS.register(new PlayerEventHandler(teamManager));
         MinecraftForge.EVENT_BUS.register(new CombatEventHandler(teamManager));
 
@@ -125,6 +132,11 @@ public class TeamSystem {
         LobbyCommand.register(event.getDispatcher());
         MarkerCommand.register(event.getDispatcher());
         RespawnCommand.register(event.getDispatcher());
+        RankCommand.register(event.getDispatcher());
+        KitCommand.register(event.getDispatcher());
+        SquadCommand.register(event.getDispatcher());
+        VehicleCommand.register(event.getDispatcher());
+        PingCommand.register(event.getDispatcher());
     }
 
     public static TeamManager getTeamManager() { return teamManager; }
@@ -132,4 +144,7 @@ public class TeamSystem {
     public static GameManager getGameManager() { return gameManager; }
     public static MarkerManager getMarkerManager() { return markerManager; }
     public static RespawnManager getRespawnManager() { return respawnManager; }
+    public static KitManager getKitManager() { return kitManager; }
+    public static SquadManager getSquadManager() { return squadManager; }
+    public static VehicleManager getVehicleManager() { return vehicleManager; }
 }

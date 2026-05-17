@@ -7,6 +7,7 @@ public class PlayerCombatData {
     private int kills;
     private int deaths;
     private int squadId;
+    private int rankOrdinal = 0;
     private String prefix;
     private String suffix;
     private String displayName;
@@ -65,6 +66,14 @@ public class PlayerCombatData {
         return squadId >= 0;
     }
 
+    public int getRankOrdinal() {
+        return rankOrdinal;
+    }
+
+    public void setRankOrdinal(int rankOrdinal) {
+        this.rankOrdinal = Math.max(0, rankOrdinal);
+    }
+
     public String getPrefix() {
         return prefix;
     }
@@ -119,6 +128,7 @@ public class PlayerCombatData {
         tag.putInt("Kills", kills);
         tag.putInt("Deaths", deaths);
         tag.putInt("SquadId", squadId);
+        tag.putInt("RankOrdinal", rankOrdinal);
         tag.putString("Prefix", prefix);
         tag.putString("Suffix", suffix);
         tag.putString("DisplayName", displayName);
@@ -130,6 +140,7 @@ public class PlayerCombatData {
         this.kills = tag.getInt("Kills");
         this.deaths = tag.getInt("Deaths");
         this.squadId = tag.getInt("SquadId");
+        this.rankOrdinal = tag.getInt("RankOrdinal");
         this.prefix = tag.getString("Prefix");
         this.suffix = tag.getString("Suffix");
         this.displayName = tag.getString("DisplayName");

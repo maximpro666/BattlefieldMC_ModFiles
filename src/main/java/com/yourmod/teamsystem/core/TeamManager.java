@@ -24,10 +24,16 @@ public class TeamManager extends SavedData {
     private static final int DEFAULT_TICKETS = 100;
     private final Map<UUID, PlayerCombatData> playerData = new HashMap<>();
     private final Map<Team, Integer> teamTickets = new EnumMap<>(Team.class);
+    private KitManager kitManager;
+    private SquadManager squadManager;
+    private VehicleManager vehicleManager;
     private final MinecraftServer server;
 
     public TeamManager(MinecraftServer server) {
         this.server = server;
+        this.kitManager = new KitManager();
+        this.squadManager = new SquadManager();
+        this.vehicleManager = new VehicleManager();
         resetTickets();
     }
 
@@ -268,6 +274,32 @@ public class TeamManager extends SavedData {
             }
         }
         return members;
+    }
+
+    // ===== Rank System =====
+
+    public void setPlayerRank(ServerPlayer player, int rankOrdinal) {
+        PlayerCombatData data = getOrCreatePlayerData(player.getUUID());
+        data.setRankOrdinal(rankOrdinal);
+        setDirty();
+    }
+
+    public int getPlayerRank(UUID playerId) {
+        return getOrCreatePlayerData(playerId).getRankOrdinal();
+    }
+
+    // ===== Manager Accessors =====
+
+    public KitManager getKitManager() {
+        return kitManager;
+    }
+
+    public SquadManager getSquadManager() {
+        return squadManager;
+    }
+
+    public VehicleManager getVehicleManager() {
+        return vehicleManager;
     }
 
     /**
