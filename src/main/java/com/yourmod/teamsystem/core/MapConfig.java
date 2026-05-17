@@ -15,6 +15,9 @@ public class MapConfig {
     private int worldBorderSize;
     private int tickets;
     private int lobbyWaitTime;
+    private int[] natoSpawn;
+    private int[] russiaSpawn;
+    private int baseRadius;
 
     public MapConfig() {
         this.name = "";
@@ -29,12 +32,16 @@ public class MapConfig {
         this.worldBorderSize = 1000;
         this.tickets = 100;
         this.lobbyWaitTime = 30;
+        this.natoSpawn = new int[]{0, 64, 0};
+        this.russiaSpawn = new int[]{0, 64, 0};
+        this.baseRadius = 30;
     }
 
     public MapConfig(String name, String worldFolder, boolean enabled, boolean hasRespawn,
                      boolean hasCapturePoints, boolean hasRegen, boolean hasWorldBorder,
                      int worldBorderCenterX, int worldBorderCenterZ, int worldBorderSize,
-                     int tickets, int lobbyWaitTime) {
+                     int tickets, int lobbyWaitTime,
+                     int[] natoSpawn, int[] russiaSpawn, int baseRadius) {
         this.name = name;
         this.worldFolder = worldFolder;
         this.enabled = enabled;
@@ -47,6 +54,9 @@ public class MapConfig {
         this.worldBorderSize = worldBorderSize;
         this.tickets = tickets;
         this.lobbyWaitTime = lobbyWaitTime;
+        this.natoSpawn = natoSpawn != null ? natoSpawn : new int[]{0, 64, 0};
+        this.russiaSpawn = russiaSpawn != null ? russiaSpawn : new int[]{0, 64, 0};
+        this.baseRadius = baseRadius > 0 ? baseRadius : 30;
     }
 
     public String getName() { return name; }
@@ -85,6 +95,14 @@ public class MapConfig {
     public int getLobbyWaitTime() { return lobbyWaitTime; }
     public void setLobbyWaitTime(int seconds) { this.lobbyWaitTime = Math.max(5, seconds); }
 
+    public boolean hasTeamSpawns() { return natoSpawn != null && russiaSpawn != null; }
+    public int[] getNatoSpawn() { return natoSpawn; }
+    public void setNatoSpawn(int[] pos) { this.natoSpawn = pos; }
+    public int[] getRussiaSpawn() { return russiaSpawn; }
+    public void setRussiaSpawn(int[] pos) { this.russiaSpawn = pos; }
+    public int getBaseRadius() { return baseRadius; }
+    public void setBaseRadius(int radius) { this.baseRadius = Math.max(1, radius); }
+
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
         tag.putString("Name", name);
@@ -99,6 +117,13 @@ public class MapConfig {
         tag.putInt("WorldBorderSize", worldBorderSize);
         tag.putInt("Tickets", tickets);
         tag.putInt("LobbyWaitTime", lobbyWaitTime);
+        tag.putInt("NatoSpawnX", natoSpawn[0]);
+        tag.putInt("NatoSpawnY", natoSpawn[1]);
+        tag.putInt("NatoSpawnZ", natoSpawn[2]);
+        tag.putInt("RussiaSpawnX", russiaSpawn[0]);
+        tag.putInt("RussiaSpawnY", russiaSpawn[1]);
+        tag.putInt("RussiaSpawnZ", russiaSpawn[2]);
+        tag.putInt("BaseRadius", baseRadius);
         return tag;
     }
 
@@ -116,6 +141,9 @@ public class MapConfig {
         config.worldBorderSize = tag.getInt("WorldBorderSize");
         config.tickets = tag.getInt("Tickets");
         config.lobbyWaitTime = tag.getInt("LobbyWaitTime");
+        config.natoSpawn = new int[]{tag.getInt("NatoSpawnX"), tag.getInt("NatoSpawnY"), tag.getInt("NatoSpawnZ")};
+        config.russiaSpawn = new int[]{tag.getInt("RussiaSpawnX"), tag.getInt("RussiaSpawnY"), tag.getInt("RussiaSpawnZ")};
+        config.baseRadius = tag.getInt("BaseRadius");
         return config;
     }
 
