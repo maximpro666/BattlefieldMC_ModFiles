@@ -1,5 +1,7 @@
 package com.yourmod.teamsystem.network;
 
+import com.yourmod.teamsystem.client.ClientTeamData;
+import com.yourmod.teamsystem.client.VehicleData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -15,7 +17,7 @@ public class VehicleSyncPacket {
     private List<Integer> vehicleMinRanks;
 
     public VehicleSyncPacket(List<String> vehicleIds, List<String> vehicleDisplayNames,
-                            List<Integer> vehicleTicketCosts, List<Integer> vehicleMinRanks) {
+                             List<Integer> vehicleTicketCosts, List<Integer> vehicleMinRanks) {
         this.vehicleIds = vehicleIds;
         this.vehicleDisplayNames = vehicleDisplayNames;
         this.vehicleTicketCosts = vehicleTicketCosts;
@@ -57,8 +59,17 @@ public class VehicleSyncPacket {
     }
 
     private static void handleClientSide(List<String> vehicleIds, List<String> vehicleDisplayNames,
-                                        List<Integer> vehicleTicketCosts, List<Integer> vehicleMinRanks) {
-        // Client-side vehicle update
+                                         List<Integer> vehicleTicketCosts, List<Integer> vehicleMinRanks) {
+        List<VehicleData> vehicleList = new ArrayList<>();
+        for (int i = 0; i < vehicleIds.size(); i++) {
+            String id = vehicleIds.get(i);
+            String displayName = vehicleDisplayNames.get(i);
+            int ticketCost = vehicleTicketCosts.get(i);
+            int minRank = vehicleMinRanks.get(i);
+            boolean available = com.yourmod.teamsystem.core.Rank.fromOrdinal(ClientTeamData.localPlayerRank).ordinal() >= minRank;
+            vehicleList.add(new VehicleData(id, displayName, "", "", ticketCost, minRank, 0, available));
+        }
+        ClientTeamData.vehicles = vehicleList;
     }
 
     public List<String> getVehicleIds() { return vehicleIds; }

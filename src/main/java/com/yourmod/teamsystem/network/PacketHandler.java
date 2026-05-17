@@ -16,9 +16,8 @@ public class PacketHandler {
 
     private static int nextId = 0;
 
-    // Protocol version "2": TeamSyncPacket (team ordinal), CombatDataSyncPacket (team ordinal, kills, deaths, prefix, suffix, displayName), TeamTicketSyncPacket
-    // Do not increment version unless packet format changes (breaking compatibility).
     public static void register() {
+        // ===== Original packets =====
         CHANNEL.registerMessage(
             nextId++,
             CombatDataSyncPacket.class,
@@ -59,6 +58,7 @@ public class PacketHandler {
             MarkerSyncPacket::handle
         );
 
+        // ===== Builder-style packets (original) =====
         CHANNEL.messageBuilder(RankSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
             .decoder(RankSyncPacket::new)
             .encoder(RankSyncPacket::toBytes)
@@ -76,11 +76,13 @@ public class PacketHandler {
             .encoder(BCSyncPacket::toBytes)
             .consumerMainThread(BCSyncPacket::handle)
             .add();
+
         CHANNEL.messageBuilder(SPSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
             .decoder(SPSyncPacket::new)
             .encoder(SPSyncPacket::toBytes)
             .consumerMainThread(SPSyncPacket::handle)
             .add();
+
         CHANNEL.messageBuilder(DownedSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
             .decoder(DownedSyncPacket::new)
             .encoder(DownedSyncPacket::toBytes)
@@ -103,6 +105,68 @@ public class PacketHandler {
             .decoder(CapturePointSyncPacket::new)
             .encoder(CapturePointSyncPacket::toBytes)
             .consumerMainThread(CapturePointSyncPacket::handle)
+            .add();
+
+        // ===== New packets =====
+        CHANNEL.messageBuilder(ConfigSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(ConfigSyncPacket::new)
+            .encoder(ConfigSyncPacket::toBytes)
+            .consumerMainThread(ConfigSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(FOBSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(FOBSyncPacket::new)
+            .encoder(FOBSyncPacket::toBytes)
+            .consumerMainThread(FOBSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(SoundPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(SoundPacket::new)
+            .encoder(SoundPacket::toBytes)
+            .consumerMainThread(SoundPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(KitDataSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(KitDataSyncPacket::new)
+            .encoder(KitDataSyncPacket::toBytes)
+            .consumerMainThread(KitDataSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(VehicleDataSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(VehicleDataSyncPacket::new)
+            .encoder(VehicleDataSyncPacket::toBytes)
+            .consumerMainThread(VehicleDataSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(NotificationPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(NotificationPacket::new)
+            .encoder(NotificationPacket::toBytes)
+            .consumerMainThread(NotificationPacket::handle)
+            .add();
+
+        // ===== C2S packets =====
+        CHANNEL.messageBuilder(TeamChangeRequestPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(TeamChangeRequestPacket::new)
+            .encoder(TeamChangeRequestPacket::toBytes)
+            .consumerMainThread(TeamChangeRequestPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(KitSelectPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(KitSelectPacket::new)
+            .encoder(KitSelectPacket::toBytes)
+            .consumerMainThread(KitSelectPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(VehicleDeployPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(VehicleDeployPacket::new)
+            .encoder(VehicleDeployPacket::toBytes)
+            .consumerMainThread(VehicleDeployPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(FOBPlacePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(FOBPlacePacket::new)
+            .encoder(FOBPlacePacket::toBytes)
+            .consumerMainThread(FOBPlacePacket::handle)
             .add();
     }
 }

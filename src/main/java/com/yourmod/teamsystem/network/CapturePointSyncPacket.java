@@ -1,5 +1,7 @@
 package com.yourmod.teamsystem.network;
 
+import com.yourmod.teamsystem.client.CapturePointData;
+import com.yourmod.teamsystem.client.ClientTeamData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -63,8 +65,16 @@ public class CapturePointSyncPacket {
     }
 
     private static void handleClientSide(List<Integer> pointIds, List<Double> progressPercentages,
-                                         List<Integer> ownerTeamOrdinals, List<String> pointNames,
-                                         List<Integer> capturingTeamOrdinals) {
+                                          List<Integer> ownerTeamOrdinals, List<String> pointNames,
+                                          List<Integer> capturingTeamOrdinals) {
+        List<CapturePointData> points = new ArrayList<>();
+        for (int i = 0; i < pointIds.size(); i++) {
+            points.add(new CapturePointData(
+                pointIds.get(i), progressPercentages.get(i),
+                ownerTeamOrdinals.get(i), pointNames.get(i),
+                capturingTeamOrdinals.get(i)));
+        }
+        ClientTeamData.capturePoints = points;
     }
 
     public List<Integer> getPointIds() { return pointIds; }

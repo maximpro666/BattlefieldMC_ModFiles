@@ -21,6 +21,12 @@ public class PlayerCombatData {
     private final Set<String> unlockedKits;
     private final Map<String, CompoundTag> savedAttachments;
 
+    private String callsign = "";
+    private String rankPrefix = "";
+    private boolean isAdmin = false;
+    private int donatTier = 0;
+    private String playerTitle = "";
+
     public PlayerCombatData() {
         this.team = Team.SPECTATOR;
         this.kills = 0;
@@ -140,6 +146,17 @@ public class PlayerCombatData {
     public void lockKit(String kitName) { unlockedKits.remove(kitName); }
     public Map<String, CompoundTag> getSavedAttachments() { return savedAttachments; }
 
+    public String getCallsign() { return callsign; }
+    public void setCallsign(String callsign) { this.callsign = callsign != null ? callsign : ""; }
+    public String getRankPrefix() { return rankPrefix; }
+    public void setRankPrefix(String rankPrefix) { this.rankPrefix = rankPrefix != null ? rankPrefix : ""; }
+    public boolean isAdmin() { return isAdmin; }
+    public void setAdmin(boolean admin) { isAdmin = admin; }
+    public int getDonatTier() { return donatTier; }
+    public void setDonatTier(int donatTier) { this.donatTier = Math.max(0, Math.min(3, donatTier)); }
+    public String getPlayerTitle() { return playerTitle; }
+    public void setPlayerTitle(String playerTitle) { this.playerTitle = playerTitle != null ? playerTitle : ""; }
+
     public void reset() {
         this.team = Team.SPECTATOR;
         this.kills = 0;
@@ -149,6 +166,11 @@ public class PlayerCombatData {
         this.suffix = "";
         this.displayName = "";
         this.scorePoints = 0;
+        this.callsign = "";
+        this.rankPrefix = "";
+        this.isAdmin = false;
+        this.donatTier = 0;
+        this.playerTitle = "";
     }
 
     // ===== NBT Serialization =====
@@ -164,6 +186,11 @@ public class PlayerCombatData {
         tag.putString("Suffix", suffix);
         tag.putString("DisplayName", displayName);
         tag.putInt("BattleCredits", battleCredits);
+        tag.putString("Callsign", callsign);
+        tag.putString("RankPrefix", rankPrefix);
+        tag.putBoolean("IsAdmin", isAdmin);
+        tag.putInt("DonatTier", donatTier);
+        tag.putString("PlayerTitle", playerTitle);
         {
             CompoundTag attTag = new CompoundTag();
             for (Map.Entry<String, CompoundTag> e : savedAttachments.entrySet()) {
@@ -191,6 +218,11 @@ public class PlayerCombatData {
         this.suffix = tag.getString("Suffix");
         this.displayName = tag.getString("DisplayName");
         this.battleCredits = tag.getInt("BattleCredits");
+        this.callsign = tag.getString("Callsign");
+        this.rankPrefix = tag.getString("RankPrefix");
+        this.isAdmin = tag.getBoolean("IsAdmin");
+        this.donatTier = tag.getInt("DonatTier");
+        this.playerTitle = tag.getString("PlayerTitle");
         if (tag.contains("SavedAttachments")) {
             CompoundTag attTag = tag.getCompound("SavedAttachments");
             savedAttachments.clear();
@@ -215,7 +247,7 @@ public class PlayerCombatData {
 
     @Override
     public String toString() {
-        return String.format("PlayerCombatData{team=%s, kills=%d, deaths=%d, kd=%.2f, squad=%d, prefix='%s', suffix='%s', displayName='%s'}",
-                team.getName(), kills, deaths, getKDRatio(), squadId, prefix, suffix, displayName);
+        return String.format("PlayerCombatData{team=%s, kills=%d, deaths=%d, kd=%.2f, squad=%d, callsign='%s', rankPrefix='%s', displayName='%s'}",
+                team.getName(), kills, deaths, getKDRatio(), squadId, callsign, rankPrefix, displayName);
     }
 }

@@ -20,6 +20,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.lang.reflect.Method;
@@ -99,6 +101,27 @@ public class PlayerEventHandler {
                 ensureDogTag(player);
             }
             TeamSystem.LOGGER.info("Synced team data for player: {}", player.getName().getString());
+        }
+    }
+
+    @SubscribeEvent
+    public void onBlockBreak(BlockEvent.BreakEvent event) {
+        if (event.getPlayer() instanceof ServerPlayer player) {
+            net.minecraft.core.BlockPos pos = event.getPos();
+            if (player.level().getBlockState(pos).getBlock() == TeamSystem.RESPAWN_BEACON_BLOCK.get()) {
+                String dim = player.serverLevel().dimension().location().toString();
+                com.yourmod.teamsystem.core.FOBManager.SavedFOB fob = TeamSystem.getFOBManager().getFOBAt(pos, dim);
+                if (fob != null) {
+                    Team attackerTeam = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
+                    if (attackerTeam.ordinal() != fob.teamOrdinal) {
+                        TeamSystem.getFOBManager().damageFOB(fob.fobId, 50.0f);
+                        String msg = "§c[FOB] " + fob.name + " is under attack!";
+                        for (ServerPlayer teamPlayer : teamManager.getPlayersByTeam(com.yourmod.teamsystem.core.Team.fromOrdinal(fob.teamOrdinal))) {
+                            teamPlayer.displayClientMessage(net.minecraft.network.chat.Component.literal(msg), false);
+                        }
+                    }
+                }
+            }
         }
     }
 

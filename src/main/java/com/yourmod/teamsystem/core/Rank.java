@@ -1,25 +1,29 @@
 package com.yourmod.teamsystem.core;
 
 public enum Rank {
-    PRIVATE(0, "Private", "[Pvt]"),
-    PFC(5, "Private First Class", "[PFC]"),
-    CORPORAL(15, "Corporal", "[Cpl]"),
-    SERGEANT(30, "Sergeant", "[Sgt]"),
-    STAFF_SERGEANT(50, "Staff Sergeant", "[SSgt]"),
-    LIEUTENANT(80, "Lieutenant", "[Lt]"),
-    CAPTAIN(120, "Captain", "[Cpt]"),
-    MAJOR(175, "Major", "[Maj]"),
-    COLONEL(250, "Colonel", "[Col]"),
-    GENERAL(400, "General", "[Gen]");
+    PRIVATE(0, "Private", "[Pvt]", "Рядовой", "[Ряд]"),
+    PFC(5, "Private First Class", "[PFC]", "Ефрейтор", "[Ефр]"),
+    CORPORAL(15, "Corporal", "[Cpl]", "Младший сержант", "[МлСр]"),
+    SERGEANT(30, "Sergeant", "[Sgt]", "Сержант", "[Серж]"),
+    STAFF_SERGEANT(50, "Staff Sergeant", "[SSgt]", "Старший сержант", "[СтСр]"),
+    LIEUTENANT(80, "Lieutenant", "[Lt]", "Лейтенант", "[Лейт]"),
+    CAPTAIN(120, "Captain", "[Cpt]", "Капитан", "[Кап]"),
+    MAJOR(175, "Major", "[Maj]", "Майор", "[Май]"),
+    COLONEL(250, "Colonel", "[Col]", "Полковник", "[Плк]"),
+    GENERAL(400, "General", "[Gen]", "Генерал", "[Ген]");
 
     private final int killRequirement;
     private final String displayName;
     private final String prefix;
+    private final String russianName;
+    private final String russianPrefix;
 
-    Rank(int killRequirement, String displayName, String prefix) {
+    Rank(int killRequirement, String displayName, String prefix, String russianName, String russianPrefix) {
         this.killRequirement = killRequirement;
         this.displayName = displayName;
         this.prefix = prefix;
+        this.russianName = russianName;
+        this.russianPrefix = russianPrefix;
     }
 
     public int getKillRequirement() {
@@ -32,6 +36,22 @@ public enum Rank {
 
     public String getPrefix() {
         return prefix;
+    }
+
+    public String getRussianName() {
+        return russianName;
+    }
+
+    public String getRussianPrefix() {
+        return russianPrefix;
+    }
+
+    public String getDisplayName(boolean russian) {
+        return russian ? russianName : displayName;
+    }
+
+    public String getPrefix(boolean russian) {
+        return russian ? russianPrefix : prefix;
     }
 
     public static Rank fromOrdinal(int ordinal) {

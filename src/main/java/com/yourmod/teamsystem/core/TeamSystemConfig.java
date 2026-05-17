@@ -44,6 +44,7 @@ public class TeamSystemConfig {
     private boolean autoStartVoting = true;
     private boolean teamBalancing = true;
     private int maxTeamDifference = 1;
+    private int maxFOBsPerTeam = 3;
 
     private Map<String, String> messages = new LinkedHashMap<>();
 
@@ -89,6 +90,7 @@ public class TeamSystemConfig {
     public boolean isAutoStartVoting() { return autoStartVoting; }
     public boolean isTeamBalancing() { return teamBalancing; }
     public int getMaxTeamDifference() { return maxTeamDifference; }
+    public int getMaxFOBsPerTeam() { return maxFOBsPerTeam; }
 
     public String getMessage(String key) { return translateColors(messages.getOrDefault(key, "&f" + key)); }
     public String getMessage(String key, Map<String, String> placeholders) {

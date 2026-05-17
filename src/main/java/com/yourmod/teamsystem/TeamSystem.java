@@ -3,7 +3,11 @@ package com.yourmod.teamsystem;
 import com.mojang.logging.LogUtils;
 import com.yourmod.teamsystem.blockentity.RespawnBeaconBlockEntity;
 import com.yourmod.teamsystem.commands.*;
+import com.yourmod.teamsystem.commands.FOBCommand;
+import com.yourmod.teamsystem.commands.DeployCommand;
+import com.yourmod.teamsystem.commands.KitSelectCommand;
 import com.yourmod.teamsystem.core.*;
+import com.yourmod.teamsystem.core.ModSounds;
 import com.yourmod.teamsystem.events.CombatEventHandler;
 import com.yourmod.teamsystem.events.PlayerEventHandler;
 import com.yourmod.teamsystem.network.PacketHandler;
@@ -78,6 +82,7 @@ public class TeamSystem {
     private static ContributionManager contributionManager;
     private static FOBManager fobManager;
     private static TeamSystemConfig config;
+    private static CaptureParticleManager captureParticleManager;
 
     public TeamSystem() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -85,6 +90,7 @@ public class TeamSystem {
         ITEMS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
         TABS.register(modEventBus);
+        ModSounds.SOUNDS.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -136,6 +142,7 @@ public class TeamSystem {
         downedManager = new DownedManager();
         contributionManager = new ContributionManager();
         fobManager = new FOBManager();
+        captureParticleManager = new CaptureParticleManager();
 
         LOGGER.info("Team System initialized");
     }
@@ -161,6 +168,9 @@ public class TeamSystem {
         com.yourmod.teamsystem.commands.CapturePointCommand.register(event.getDispatcher());
         EconomyCommand.register(event.getDispatcher());
         CallsignCommand.register(event.getDispatcher());
+        FOBCommand.register(event.getDispatcher());
+        DeployCommand.register(event.getDispatcher());
+        KitSelectCommand.register(event.getDispatcher());
     }
 
     public static TeamManager getTeamManager() { return teamManager; }
@@ -180,4 +190,5 @@ public class TeamSystem {
     public static PlayerEventHandler getPlayerEventHandler() { return playerEventHandler; }
 
     public static TeamSystemConfig getConfig() { return config; }
+    public static CaptureParticleManager getCaptureParticleManager() { return captureParticleManager; }
 }

@@ -1,5 +1,7 @@
 package com.yourmod.teamsystem.network;
 
+import com.yourmod.teamsystem.client.ClientTeamData;
+import com.yourmod.teamsystem.client.KitData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -51,7 +53,15 @@ public class KitSyncPacket {
     }
 
     private static void handleClientSide(List<String> kitNames, List<String> kitDisplayNames, List<Integer> minRankOrdinals) {
-        // Client-side kit update
+        List<KitData> kitList = new ArrayList<>();
+        for (int i = 0; i < kitNames.size(); i++) {
+            String name = kitNames.get(i);
+            String displayName = kitDisplayNames.get(i);
+            int minRank = minRankOrdinals.get(i);
+            boolean available = com.yourmod.teamsystem.core.Rank.fromOrdinal(ClientTeamData.localPlayerRank).ordinal() >= minRank;
+            kitList.add(new KitData(name, displayName, "", "", minRank, 0, available, ""));
+        }
+        ClientTeamData.kits = kitList;
     }
 
     public List<String> getKitNames() { return kitNames; }

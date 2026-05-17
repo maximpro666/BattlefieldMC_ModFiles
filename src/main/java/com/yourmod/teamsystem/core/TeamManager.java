@@ -3,6 +3,7 @@ package com.yourmod.teamsystem.core;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.network.CombatDataSyncPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.network.RankSyncPacket;
 import com.yourmod.teamsystem.network.TeamSyncPacket;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -66,10 +67,37 @@ public class TeamManager extends SavedData {
 
     public void updatePlayerDisplayName(ServerPlayer player) {
         PlayerCombatData data = getOrCreatePlayerData(player.getUUID());
+        Team team = data.getTeam();
+
+        if (team == Team.SPECTATOR) {
+            player.setCustomName(Component.literal("§7[Spectator] " + player.getName().getString()));
+            player.setCustomNameVisible(true);
+            return;
+        }
+
+        boolean russian = "ru".equals(TeamSystem.getConfig().getLanguage());
+        Rank rank = Rank.fromOrdinal(data.getRankOrdinal());
+        String rankPrefix = rank.getPrefix(russian);
+        String callsign = data.getCallsign();
         String actualName = player.getName().getString();
-        String displayName = data.getDisplayName();
-        String nameToShow = displayName.isEmpty() ? actualName : displayName;
-        String fullName = data.getPrefix() + nameToShow + data.getSuffix();
+
+        String fullName;
+        if (!callsign.isEmpty()) {
+            fullName = rankPrefix + " " + callsign + " §7(" + actualName + ")";
+        } else {
+            fullName = rankPrefix + " " + actualName;
+        }
+
+        data.setRankPrefix(rankPrefix);
+        if (data.isAdmin()) {
+            fullName = "§c[Admin] " + fullName;
+        } else if (data.getDonatTier() > 0) {
+            fullName = "§6[Donat] " + fullName;
+        }
+        String title = data.getPlayerTitle();
+        if (!title.isEmpty()) {
+            fullName = "§e[" + title + "] " + fullName;
+        }
 
         player.setCustomName(Component.literal(fullName));
         player.setCustomNameVisible(true);
@@ -223,6 +251,60 @@ public class TeamManager extends SavedData {
         syncPlayerTeam(player);
         syncPlayerData(player);
         updatePlayerDisplayName(player);
+        syncConfig(player);
+        syncRank(player);
+        syncKits(player);
+        syncVehicles(player);
+        syncFOBs(player);
+    }
+
+    public void syncConfig(ServerPlayer player) {
+        com.yourmod.teamsystem.network.ConfigSyncPacket packet =
+            new com.yourmod.teamsystem.network.ConfigSyncPacket(TeamSystem.getConfig().getLanguage());
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    public void syncRank(ServerPlayer player) {
+        int ordinal = getOrCreatePlayerData(player.getUUID()).getRankOrdinal();
+        boolean russian = "ru".equals(TeamSystem.getConfig().getLanguage());
+        RankSyncPacket packet = new RankSyncPacket(ordinal, russian);
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    public void syncFOBs(ServerPlayer player) {
+        TeamSystem.getFOBManager().syncToPlayer(player);
+    }
+
+    public void syncKits(ServerPlayer player) {
+        List<Kit> kitList = kitManager.getAvailableKits(player, this);
+        List<String> names = new ArrayList<>();
+        List<String> displayNames = new ArrayList<>();
+        List<Integer> minRanks = new ArrayList<>();
+        for (Kit kit : kitList) {
+            names.add(kit.getName());
+            displayNames.add(kit.getDisplayName());
+            minRanks.add(kit.getMinRankOrdinal());
+        }
+        com.yourmod.teamsystem.network.KitSyncPacket packet =
+            new com.yourmod.teamsystem.network.KitSyncPacket(names, displayNames, minRanks);
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    public void syncVehicles(ServerPlayer player) {
+        List<VehicleData> vehicleList = vehicleManager.getAvailableVehicles(player, this);
+        List<String> ids = new ArrayList<>();
+        List<String> displayNames = new ArrayList<>();
+        List<Integer> costs = new ArrayList<>();
+        List<Integer> minRanks = new ArrayList<>();
+        for (VehicleData v : vehicleList) {
+            ids.add(v.getVehicleId());
+            displayNames.add(v.getDisplayName());
+            costs.add(v.getTicketCost());
+            minRanks.add(v.getMinRankOrdinal());
+        }
+        com.yourmod.teamsystem.network.VehicleSyncPacket packet =
+            new com.yourmod.teamsystem.network.VehicleSyncPacket(ids, displayNames, costs, minRanks);
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
     // ===== Player Name Data =====
@@ -271,6 +353,9 @@ public class TeamManager extends SavedData {
         PlayerCombatData data = getOrCreatePlayerData(player.getUUID());
         data.setRankOrdinal(rankOrdinal);
         setDirty();
+        RankSyncPacket packet = new RankSyncPacket(rankOrdinal,
+            "ru".equals(TeamSystem.getConfig().getLanguage()));
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
     public int getPlayerRank(UUID playerId) {

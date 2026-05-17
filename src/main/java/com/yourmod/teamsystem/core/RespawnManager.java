@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 public class RespawnManager {
     private static final String FILE_NAME = "teamsystem_respawn_beacons.json";
@@ -199,6 +200,30 @@ public class RespawnManager {
 
     public void setCapturePointsForDimension(String dimStr, List<int[]> points) {
         capturePoints.put(dimStr, points);
+    }
+
+    public List<BlockPos> getRespawnPointsForPlayer(ServerPlayer player) {
+        UUID uuid = player.getUUID();
+        Team team = TeamSystem.getTeamManager().getOrCreatePlayerData(uuid).getTeam();
+        if (!team.isPlayable()) return Collections.emptyList();
+
+        String dimStr = player.serverLevel().dimension().location().toString();
+        List<BlockPos> points = new ArrayList<>();
+
+        // Add player's own beacons
+        for (SavedBeacon b : beacons) {
+            if (b.uuid.equals(uuid.toString()) && b.dimension.equals(dimStr)) {
+                points.add(new BlockPos(b.x, b.y, b.z));
+            }
+        }
+
+        // Add team FOBs
+        FOBManager fobManager = TeamSystem.getFOBManager();
+        if (fobManager != null) {
+            points.addAll(fobManager.getRespawnPointsForTeam(team, dimStr));
+        }
+
+        return points;
     }
 
     public void respawnPlayerAtBeacon(ServerPlayer player, String beaconName) {
