@@ -1,7 +1,6 @@
 package com.yourmod.teamsystem.client;
 
 import com.yourmod.teamsystem.core.Team;
-import com.yourmod.teamsystem.core.DownedData;
 import com.yourmod.teamsystem.client.VehicleData;
 import java.util.List;
 import java.util.ArrayList;
@@ -26,8 +25,6 @@ public class ClientTeamData {
     public static String localPlayerSquad = "";
     public static int localPlayerBC = 0;
     public static int localPlayerSP = 0;
-    public static List<DownedData> downedPlayers = new ArrayList<>();
-
     public static List<KitData> kits = new ArrayList<>();
     public static List<VehicleData> vehicles = new ArrayList<>();
     public static List<FOBData> fobs = new ArrayList<>();

@@ -77,7 +77,7 @@ public class TeamSystem {
     private static EconomyManager economyManager;
     private static CapturePointManager capturePointManager;
     private static TicketManager ticketManager;
-    private static DownedManager downedManager;
+
     private static PlayerEventHandler playerEventHandler;
     private static ContributionManager contributionManager;
     private static FOBManager fobManager;
@@ -139,7 +139,6 @@ public class TeamSystem {
         economyManager.loadFromTeamManager();
         capturePointManager = new CapturePointManager();
         ticketManager = new TicketManager();
-        downedManager = new DownedManager();
         contributionManager = new ContributionManager();
         fobManager = new FOBManager();
         captureParticleManager = new CaptureParticleManager();
@@ -172,6 +171,7 @@ public class TeamSystem {
         DeployCommand.register(event.getDispatcher());
         KitSelectCommand.register(event.getDispatcher());
         com.yourmod.teamsystem.commands.AdminNotifyCommand.register(event.getDispatcher());
+
     }
 
     public static TeamManager getTeamManager() { return teamManager; }
@@ -185,7 +185,6 @@ public class TeamSystem {
     public static EconomyManager getEconomyManager() { return economyManager; }
     public static CapturePointManager getCapturePointManager() { return capturePointManager; }
     public static TicketManager getTicketManager() { return ticketManager; }
-    public static DownedManager getDownedManager() { return downedManager; }
     public static ContributionManager getContributionManager() { return contributionManager; }
     public static FOBManager getFOBManager() { return fobManager; }
     public static PlayerEventHandler getPlayerEventHandler() { return playerEventHandler; }

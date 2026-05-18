@@ -281,23 +281,54 @@ public class MapPoolManager {
             Object chunkMap = level.getChunkSource().chunkMap;
             Class<?> cmc = chunkMap.getClass();
 
-            for (String fieldName : new String[]{"visibleChunkMap", "updatingChunkMap"}) {
-                Object m = findField(cmc, chunkMap, fieldName);
-                if (m instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> lm) lm.clear();
+            // 1) Clear visible/updating chunk maps (Long2ObjectMap of chunks)
+            for (String name : new String[]{"visibleChunkMap", "visibleChunks",
+                    "updatingChunkMap", "updatingChunks", "f__chunksBeingLoaded_", "chunksToUpdate"}) {
+                Object m = findFieldAnywhere(cmc, chunkMap, name);
+                if (m instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> lm) {
+                    lm.clear();
+                    break;
+                }
             }
 
-            Object pending = findField(cmc, chunkMap, "pendingUnloads");
-            if (pending instanceof it.unimi.dsi.fastutil.longs.LongSet ls) ls.clear();
+            // 2) For 1.20.1: also try to clear the `chunksToLoad` and `pendingLoads` maps
+            for (String name : new String[]{"pendingLoads", "pendingUnloads", "toDrop",
+                    "chunksToLoad", "f_chunksToLoad", "pendingUnloads"}) {
+                Object p = findFieldAnywhere(cmc, chunkMap, name);
+                if (p instanceof it.unimi.dsi.fastutil.longs.LongSet ls) {
+                    ls.clear();
+                    break;
+                }
+            }
 
-            Object dist = findField(cmc, chunkMap, "distanceManager");
+            // 3) DistanceManager tickets
+            Object dist = findFieldAnywhere(cmc, chunkMap, "distanceManager",
+                "f_$distanceManager", "distanceManager");
             if (dist != null) {
-                Object tickets = findField(dist.getClass(), dist, "tickets");
-                if (tickets instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> lm) lm.clear();
+                for (String name : new String[]{"tickets", "ticketMap", "f_$tickets"}) {
+                    Object tickets = findFieldAnywhere(dist.getClass(), dist, name);
+                    if (tickets instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> lm) {
+                        lm.clear();
+                        break;
+                    }
+                }
+                // Also clear per-player tickets
+                for (String name : new String[]{"playerTickets", "f_$playerTickets"}) {
+                    Object pt = findFieldAnywhere(dist.getClass(), dist, name);
+                    if (pt != null) {
+                        if (pt instanceof Map<?,?> m) m.clear();
+                        else if (pt instanceof it.unimi.dsi.fastutil.objects.Object2ObjectMap<?,?> m) m.clear();
+                        break;
+                    }
+                }
             }
 
+            // 4) Force chunk source to re-evaluate
             level.getChunkSource().tick(() -> true, true);
+
+            TeamSystem.LOGGER.info("Chunk cache cleared for teamsystem:map");
         } catch (Exception e) {
-            TeamSystem.LOGGER.error("Failed to clear chunk cache: {}", e.getMessage());
+            TeamSystem.LOGGER.warn("Failed to clear chunk cache: {} (map may still work)", e.getMessage());
         }
     }
 
@@ -332,13 +363,17 @@ public class MapPoolManager {
         }
     }
 
-    private Object findField(Class<?> clazz, Object instance, String... names) throws Exception {
+    private Object findFieldAnywhere(Class<?> clazz, Object instance, String... names) {
         for (String name : names) {
-            try {
-                java.lang.reflect.Field f = clazz.getDeclaredField(name);
-                f.setAccessible(true);
-                return f.get(instance);
-            } catch (NoSuchFieldException ignored) {}
+            Class<?> current = clazz;
+            while (current != null && current != Object.class) {
+                try {
+                    java.lang.reflect.Field f = current.getDeclaredField(name);
+                    f.setAccessible(true);
+                    return f.get(instance);
+                } catch (NoSuchFieldException | IllegalAccessException ignored) {}
+                current = current.getSuperclass();
+            }
         }
         return null;
     }

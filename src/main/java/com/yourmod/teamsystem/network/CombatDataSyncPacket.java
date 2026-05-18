@@ -63,7 +63,7 @@ public class CombatDataSyncPacket {
                 );
             }
             ClientTeamData.playerDataMap.put(msg.playerId, new PlayerListEntry(
-                msg.rankOrdinal, msg.callsign, "", msg.kills, msg.deaths, msg.teamOrdinal, false
+                msg.rankOrdinal, msg.callsign, "", msg.kills, msg.deaths, msg.teamOrdinal
             ));
         });
         ctx.get().setPacketHandled(true);

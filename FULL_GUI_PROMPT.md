@@ -2,17 +2,52 @@
 
 ## Context
 
-Forge 1.20.1 mod "TeamSystem" (`com.yourmod.teamsystem`). We already have:
+Forge 1.20.1 mod "TeamSystem" (`com.yourmod.teamsystem`). Already implemented:
+
+### Existing Screens
 - `TeamSelectionScreen` — pick NATO/RUSSIA
 - `BattlefieldPauseScreen` — ESC menu with return/team/settings/disconnect
 - `SettingsMenuScreen` — volume/language/scale/opacity
 - `VoteScreen` — map voting
+- `KitSelectionScreen` — grid of kits (old version, uses `KitEntry`/`KitSelectPacket`)
+- `KitLoadoutScreen` — slot-based loadout editing (old version, uses `KitSavePacket`)
+- `VehicleSelectionScreen` — vehicle at spawn
+- `SquadScreen` — squad management
+- `BattlefieldMainMenuScreen` — main menu
 
-We need to build a complete Battlefield-style menu system:
-- **Kit menu** (class → kit → loadout editing)
-- **Attachment customization** (per gun: scope, barrel, grip, magazine, etc.)
-- **Vehicle selection** (choose vehicle at spawn)
-- **Admin panel** (match control, kit config, map mgmt, permissions)
+### Existing Widgets (in `client.gui.component`)
+- `BCard` — simple rendering card (slide animation, colored border/accent)
+- `BButton` — custom button with hover glow + accent bar
+- `BProgressBar` — animated progress bar
+- `BScrollPanel` — scroll container
+- `BSlider` — slider control
+
+### NEW data models already generated (in `data/`)
+- **`KitConfig.java`** — server-side config: `Map<String, ClassConfig>` → `KitDef` → `KitWeapons`/`AttachmentLimit`/`KitRequirements`. Saved to `world/teamsystem/kits.json`.
+- **`PlayerLoadout.java`** — per-player: `classId`/`kitId`/`LoadoutSlots`(primary/secondary WeaponSlot + special/grenade). Saved to `world/teamsystem/playerloadouts/<uuid>.json`.
+- **`LockState.java`** — enum: `AVAILABLE`, `LOCKED_RANK`, `LOCKED_KIT`, `LOCKED_TEAM`, `LOCKED_MAP`, `INCOMPATIBLE` with tooltip helpers.
+- **`LockChecker.java`** — static methods: `checkKit()`, `checkAttachment()`, `checkVehicle()`.
+
+### NEW client screens already generated (in `client.gui.widget` / `client.gui.screen`)
+- **`widget/BCard.java`** — interactive `AbstractWidget` card (title/subtitle/lock overlay/stagger fade-in/hover scale). Extends `net.minecraft.client.gui.components.AbstractWidget`.
+- **`widget/BWidgets.java`** — contains: `BToggle` (animated switch), `BDropdown` (scrollable dropdown), `BNumberInput` (+/−), `BTag` (colored tag), `BLockOverlay` (dim+lock icon), `BScrollPanel` (scrollbar with drag).
+- **`screen/ClassSelectionScreen.java`** — 5 class cards grid → opens `KitSelectionScreen`
+- **`screen/LoadoutScreen.java`** — PRIMARY/SECONDARY/SPECIAL/GRENADE slots with inline attachment tags, `[CHANGE]` → `AttachmentPickerScreen`
+- *(Note: `AttachmentPickerScreen` not yet generated — needs to be created)*
+
+### NEW server-side data already generated (in `data/`)
+- `KitConfig` with full JSON save/load + default config
+- `PlayerLoadout` with JSON load/save per UUID
+- `LockChecker` with player context (rank/team/map/class/kit)
+
+We need to build the complete Battlefield-style menu system:
+- **Kit menu** (class → kit → loadout editing) — screens done, wire up to `KitConfig`/`PlayerLoadout`
+- **Attachment customization** — `AttachmentPickerScreen` still needs to be implemented
+- **Vehicle selection** — `VehicleSelectionScreen` exists, needs `LockChecker` integration
+- **Admin panel** — match control, kit config, map mgmt, permissions — new screens needed
+- **Match Results Screen** — new
+- **Spawn Screen** — new
+- **Admin Permission System** — new
 
 ## UI Theme (from `UITheme.java`)
 

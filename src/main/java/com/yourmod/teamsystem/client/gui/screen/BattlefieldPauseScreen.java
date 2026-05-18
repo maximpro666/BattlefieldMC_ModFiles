@@ -7,6 +7,7 @@ import com.yourmod.teamsystem.client.gui.component.BButton;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -21,6 +22,11 @@ public class BattlefieldPauseScreen extends Screen {
     private float fadeAlpha = 0f;
     private long openTime;
     private float slideIn = 0f;
+    private int[] buttonBaseX;
+    private int[] buttonY;
+    private int btnW;
+    private int btnH;
+    private int gap;
 
     public BattlefieldPauseScreen() {
         super(Component.literal(I18n.get("teamsystem.ui.paused")));
@@ -31,29 +37,38 @@ public class BattlefieldPauseScreen extends Screen {
         openTime = System.currentTimeMillis();
         int cx = width / 2;
         int startY = height / 2 - 60;
-        int btnW = 180;
-        int btnH = 22;
-        int gap  = 6;
+        btnW = 180;
+        btnH = 22;
+        gap  = 6;
 
-        addRenderableWidget(new BButton(cx - btnW / 2, startY, btnW, btnH,
+        int baseX = cx - btnW / 2;
+        buttonBaseX = new int[5];
+        buttonY    = new int[5];
+
+        buttonBaseX[0] = baseX; buttonY[0] = startY;
+        addRenderableWidget(new BButton(baseX, startY, btnW, btnH,
             Component.literal(I18n.get("teamsystem.ui.return_to_battle")), btn -> onClose()));
 
-        addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap), btnW, btnH,
+        buttonBaseX[1] = baseX; buttonY[1] = startY + (btnH + gap);
+        addRenderableWidget(new BButton(baseX, startY + (btnH + gap), btnW, btnH,
             Component.literal(I18n.get("teamsystem.ui.team_selection")), btn -> {
                 Minecraft.getInstance().setScreen(new TeamSelectionScreen());
             }));
 
-        addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 2, btnW, btnH,
+        buttonBaseX[2] = baseX; buttonY[2] = startY + (btnH + gap) * 2;
+        addRenderableWidget(new BButton(baseX, startY + (btnH + gap) * 2, btnW, btnH,
             Component.literal(I18n.get("teamsystem.ui.settings")), btn -> {
                 Minecraft.getInstance().setScreen(new SettingsMenuScreen());
             }));
 
-        addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 3, btnW, btnH,
+        buttonBaseX[3] = baseX; buttonY[3] = startY + (btnH + gap) * 3;
+        addRenderableWidget(new BButton(baseX, startY + (btnH + gap) * 3, btnW, btnH,
             Component.literal(I18n.get("teamsystem.ui.vanilla_settings")), btn -> {
                 Minecraft.getInstance().setScreen(new OptionsScreen(this, Minecraft.getInstance().options));
             }));
 
-        addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 4, btnW, btnH,
+        buttonBaseX[4] = baseX; buttonY[4] = startY + (btnH + gap) * 4;
+        addRenderableWidget(new BButton(baseX, startY + (btnH + gap) * 4, btnW, btnH,
             Component.literal(I18n.get("teamsystem.ui.disconnect")), btn -> {
                 Minecraft.getInstance().level.disconnect();
                 Minecraft.getInstance().setScreen(new BattlefieldMainMenuScreen());
@@ -71,7 +86,8 @@ public class BattlefieldPauseScreen extends Screen {
 
         int panelW = 220;
         int panelH = 200;
-        int panelX = (int)(width / 2 - panelW / 2 + (1f - slideIn) * (-width / 2));
+        int slideOffset = (int)((1f - slideIn) * (-width / 2));
+        int panelX = width / 2 - panelW / 2 + slideOffset;
         int panelY = height / 2 - panelH / 2;
 
         g.fill(panelX, panelY, panelX + panelW, panelY + panelH,
@@ -83,6 +99,12 @@ public class BattlefieldPauseScreen extends Screen {
         int pw = font.width(paused);
         g.drawString(font, paused, panelX + panelW / 2 - pw / 2, panelY + 12,
             AnimationHelper.withAlpha(COLOR_ORANGE, (int)(fadeAlpha * 255)));
+
+        for (int i = 0; i < buttonBaseX.length && i < children().size(); i++) {
+            AbstractWidget w = (AbstractWidget) children().get(i);
+            w.setX(buttonBaseX[i] + slideOffset);
+            w.setY(buttonY[i]);
+        }
 
         super.render(g, mx, my, pt);
     }

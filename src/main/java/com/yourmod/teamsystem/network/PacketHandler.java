@@ -83,12 +83,6 @@ public class PacketHandler {
             .consumerMainThread(SPSyncPacket::handle)
             .add();
 
-        CHANNEL.messageBuilder(DownedSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
-            .decoder(DownedSyncPacket::new)
-            .encoder(DownedSyncPacket::toBytes)
-            .consumerMainThread(DownedSyncPacket::handle)
-            .add();
-
         CHANNEL.messageBuilder(KitSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
             .decoder(KitSyncPacket::new)
             .encoder(KitSyncPacket::toBytes)
