@@ -1,16 +1,20 @@
 package com.yourmod.teamsystem.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.client.gui.renderer.CaptureParticles;
 import com.yourmod.teamsystem.client.gui.renderer.CustomNametagRenderer;
 import com.yourmod.teamsystem.client.gui.renderer.WorldMarkerRenderer;
 import com.yourmod.teamsystem.client.gui.screen.KitSelectionScreen;
-import com.yourmod.teamsystem.client.gui.screen.VehicleSelectionScreen;
+import com.yourmod.teamsystem.core.GameManager;
 import net.minecraft.client.Camera;
+import java.util.List;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -19,8 +23,6 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
-
-import java.util.List;
 
 @Mod.EventBusSubscriber(modid = "teamsystem", bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ClientSetup {
@@ -47,9 +49,33 @@ public class ClientSetup {
         if (OPEN_KIT_VEHICLE_KEY.consumeClick()) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player != null && mc.level != null) {
+                GameManager gm = TeamSystem.getGameManager();
+                if (gm != null && gm.isPlaying()) {
+                    if (!isNearCapturePoint(mc.player)) {
+                        mc.player.displayClientMessage(
+                            Component.literal("\u00a7e[\u00a76BF\u00a7e] \u00a7cYou must be near a capture point to change loadout!"),
+                            true);
+                        return;
+                    }
+                }
                 mc.setScreen(new KitSelectionScreen());
             }
         }
+    }
+
+    private static boolean isNearCapturePoint(Player player) {
+        List<CapturePointData> points = ClientTeamData.capturePoints;
+        if (points == null || points.isEmpty()) return false;
+        double px = player.getX();
+        double py = player.getY();
+        double pz = player.getZ();
+        for (CapturePointData cp : points) {
+            double dx = px - cp.x();
+            double dy = py - cp.y();
+            double dz = pz - cp.z();
+            if (dx * dx + dz * dz <= 4.5 * 4.5 && Math.abs(dy) <= 6.0) return true;
+        }
+        return false;
     }
 
     @SubscribeEvent
@@ -59,18 +85,12 @@ public class ClientSetup {
             MultiBufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
             Camera camera = event.getCamera();
             float partialTick = event.getPartialTick();
+            Vec3 camPos = camera.getPosition();
 
             markerRenderer.render(poseStack, bufferSource, camera, partialTick);
 
-            List<CapturePointData> points = ClientTeamData.capturePoints;
-            if (points != null) {
-                for (CapturePointData cp : points) {
-                    captureParticles.render(poseStack, bufferSource,
-                        cp.x(), cp.y() + 1.0, cp.z(),
-                        camera.getPosition().x, camera.getPosition().y, camera.getPosition().z,
-                        partialTick);
-                }
-            }
+            captureParticles.render(poseStack, bufferSource,
+                camPos.x, camPos.y, camPos.z, partialTick);
         }
     }
 

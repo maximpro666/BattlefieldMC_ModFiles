@@ -19,6 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
@@ -50,6 +51,7 @@ public class GameManager {
     private Team winningTeam;
     private boolean lobbyLoaded;
     private MapConfig currentMap;
+    private ResourceKey<Level> currentDimKey;
     private boolean overtime;
     private int overtimeTicks;
     private int captureTicks;
@@ -79,6 +81,7 @@ public class GameManager {
     public boolean isLobby() { return currentPhase == GamePhase.LOBBY; }
     public boolean isOvertime() { return overtime; }
     public MapConfig getCurrentMap() { return currentMap; }
+    public ResourceKey<Level> getCurrentDimKey() { return currentDimKey; }
 
     public void startInitialCountdown() {
         if (currentPhase == GamePhase.LOBBY && phaseTimer <= 0) {
@@ -120,36 +123,43 @@ public class GameManager {
             econ.syncSPToAll();
         }
 
-                CapturePointManager cp = TeamSystem.getCapturePointManager();
-                if (cp != null) {
-                    if (map.hasCapturePoints()) {
-                        cp.loadFromMapConfig(map);
-                        cp.setActive(true);
-                    } else {
-                        cp.clearPoints();
-                        cp.setActive(false);
-                    }
-                }
+                int mapIndex = MapOffsetManager.getMapIndex(map, TeamSystem.getMapPoolManager().getMaps());
+        int zOffset = MapOffsetManager.getZOffset(mapIndex);
+
+        CapturePointManager cp = TeamSystem.getCapturePointManager();
+        if (cp != null) {
+            if (map.hasCapturePoints()) {
+                cp.loadFromMapConfig(map, zOffset);
+                cp.setActive(true);
+            } else {
+                cp.clearPoints();
+                cp.setActive(false);
+            }
+        }
 
         ContributionManager contrib = TeamSystem.getContributionManager();
         if (contrib != null) contrib.resetMatch();
 
-        if (!TeamSystem.getMapPoolManager().copyToLive(map)) {
-            TeamSystem.LOGGER.error("Failed to copy map {} from source, aborting start", map.getName());
+        currentDimKey = DynamicDimensionManager.getDimKey();
+        ServerLevel mapLevel = server.getLevel(currentDimKey);
+        if (mapLevel == null) {
+            TeamSystem.LOGGER.error("teamsystem:map dimension not available, aborting start");
             currentPhase = GamePhase.LOBBY;
             phaseTimer = 0;
             currentMap = null;
+            currentDimKey = null;
             return;
         }
-        useMapWorld(map);
-        applyMapConfig(map);
-        teleportAllPlayersToMap(map);
+
+        clearEntitiesInZone(mapLevel, zOffset);
+        applyMapConfig(map, zOffset);
+        teleportAllPlayersToMap(map, zOffset);
 
         gamerule(server.overworld(), "liberateAttachment", "false");
 
         broadcast("Game started on map: " + map.getName(), CHAT_SUCCESS, CHAT_EMPHASIS);
         syncPhaseToAll();
-        TeamSystem.LOGGER.info("Game started on map: {}", map.getName());
+        TeamSystem.LOGGER.info("Game started on map: {} (zOffset={})", map.getName(), zOffset);
     }
 
     public void endGame(Team winner) {
@@ -296,6 +306,10 @@ public class GameManager {
     private void finishMatchCycle() {
         teleportAllToLobby();
 
+        ServerLevel mapLevel = server.getLevel(DynamicDimensionManager.getDimKey());
+        if (mapLevel != null) clearWorldEntities(mapLevel);
+        currentDimKey = null;
+
         TeamManager tm = TeamSystem.getTeamManager();
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             tm.setPlayerTeam(p, Team.SPECTATOR);
@@ -409,11 +423,6 @@ public class GameManager {
 
     // ========== World ==========
 
-    private void useMapWorld(MapConfig map) {
-        ServerLevel level = getMapWorldNoFallback(map);
-        if (level != null) clearWorldEntities(level);
-    }
-
     private void clearWorldEntities(ServerLevel level) {
         List<Entity> all = new java.util.ArrayList<>();
         for (Entity e : level.getEntities().getAll()) all.add(e);
@@ -442,7 +451,7 @@ public class GameManager {
         gamerule(l, "fallDamage", "false");
     }
 
-    private void applyMapConfig(MapConfig map) {
+    private void applyMapConfig(MapConfig map, int zOffset) {
         ServerLevel l = getMapWorld(map);
         if (l == null) return;
         gamerule(l, "naturalRegeneration", map.hasRegen() ? "true" : "false");
@@ -453,7 +462,7 @@ public class GameManager {
         gamerule(l, "keepInventory", "false");
         gamerule(l, "fallDamage", "true");
         if (map.hasWorldBorder()) {
-            l.getWorldBorder().setCenter(map.getWorldBorderCenterX(), map.getWorldBorderCenterZ());
+            l.getWorldBorder().setCenter(map.getWorldBorderCenterX(), map.getWorldBorderCenterZ() + zOffset);
             l.getWorldBorder().setSize(map.getWorldBorderSize());
         } else {
             l.getWorldBorder().setSize(6.0E7);
@@ -495,18 +504,18 @@ public class GameManager {
 
     // ========== Teleport ==========
 
-    public void teleportAllPlayersToMap(MapConfig map) {
+    public void teleportAllPlayersToMap(MapConfig map, int zOffset) {
         ServerLevel target = getMapWorld(map);
         if (target == null) return;
         TeamManager tm = TeamSystem.getTeamManager();
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == Team.SPECTATOR) continue;
             Team team = tm.getOrCreatePlayerData(p.getUUID()).getTeam();
-            double x = 0.5, y = 65, z = 0.5;
+            double x = 0.5, y = 65, z = 0.5 + zOffset;
             if (map.hasTeamSpawns()) {
                 int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
                 if (spawn != null && spawn.length >= 3) {
-                    x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5;
+                    x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5 + zOffset;
                 }
             }
             safeTeleport(p, target, x, y, z);
@@ -536,29 +545,49 @@ public class GameManager {
     }
 
     public void teleportPlayerToMapAtTeamSpawn(ServerPlayer p, MapConfig map, Team team) {
+        int zOffset = MapOffsetManager.getZOffset(
+            MapOffsetManager.getMapIndex(currentMap, TeamSystem.getMapPoolManager().getMaps()));
         ServerLevel target = getMapWorld(map);
         if (target == null) return;
-        double x = 0.5, y = 65, z = 0.5;
+        double x = 0.5, y = 65, z = 0.5 + zOffset;
         if (map.hasTeamSpawns()) {
             int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
             if (spawn != null && spawn.length >= 3) {
-                x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5;
+                x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5 + zOffset;
             }
         }
         safeTeleport(p, target, x, y, z);
     }
 
     public void setMapRespawn(ServerPlayer p, MapConfig map, Team team) {
+        int zOffset = MapOffsetManager.getZOffset(
+            MapOffsetManager.getMapIndex(currentMap, TeamSystem.getMapPoolManager().getMaps()));
         ServerLevel target = getMapWorld(map);
         if (target == null) return;
-        int x = 0, y = 65, z = 0;
+        int x = 0, y = 65, z = zOffset;
         if (map.hasTeamSpawns()) {
             int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
             if (spawn != null && spawn.length >= 3) {
-                x = spawn[0]; y = spawn[1]; z = spawn[2];
+                x = spawn[0]; y = spawn[1]; z = spawn[2] + zOffset;
             }
         }
         p.setRespawnPosition(target.dimension(), new BlockPos(x, y, z), 0, false, false);
+    }
+
+    private void clearEntitiesInZone(ServerLevel level, int zOffset) {
+        int halfSize = 1024;
+        AABB zone = new AABB(-halfSize, -64, zOffset - halfSize, halfSize, 320, zOffset + halfSize);
+        List<Entity> toRemove = new java.util.ArrayList<>();
+        for (Entity e : level.getEntities().getAll()) {
+            if (e != null && !(e instanceof ServerPlayer) && !(e instanceof Player)) {
+                if (zone.contains(e.getX(), e.getY(), e.getZ())) {
+                    toRemove.add(e);
+                }
+            }
+        }
+        for (Entity e : toRemove) e.discard();
+        if (!toRemove.isEmpty())
+            TeamSystem.LOGGER.info("Cleared {} entities in map zone zOffset={}", toRemove.size(), zOffset);
     }
 
     private void safeTeleport(ServerPlayer p, ServerLevel target, double x, double y, double z) {
@@ -582,7 +611,8 @@ public class GameManager {
     }
 
     private ServerLevel getMapWorldNoFallback(MapConfig map) {
-        return server.getLevel(MapPoolManager.MAP_DIMENSION_KEY);
+        if (currentDimKey != null) return server.getLevel(currentDimKey);
+        return server.getLevel(DynamicDimensionManager.getDimKey());
     }
 
     private ServerLevel getMapWorld(MapConfig map) {

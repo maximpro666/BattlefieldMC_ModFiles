@@ -77,8 +77,9 @@ public class MapPoolManager {
         return getServerRoot().resolve("dimensions").resolve("teamsystem").resolve("map").resolve("region");
     }
 
-    private String sanitize(String name) {
-        return MapConfig.sanitizeToResourcePath(name);
+    private boolean sourceFolderExists(String worldFolder) {
+        if (worldFolder == null || worldFolder.isEmpty()) return false;
+        return Files.isDirectory(getSourcesPath().resolve(worldFolder).resolve("region"));
     }
 
     public static ServerLevel getMapLevel(MinecraftServer server) {
@@ -118,8 +119,7 @@ public class MapPoolManager {
                     for (MapConfig map : loaded) {
                         if (!map.isEnabled()) continue;
                         if (map.getState() == null) map.setState(MapState.AVAILABLE);
-                        String key = sanitize(map.getWorldFolder());
-                        if (Files.isDirectory(getSourcesPath().resolve(key).resolve("region"))) {
+                        if (sourceFolderExists(map.getWorldFolder())) {
                             maps.add(map);
                         } else {
                             TeamSystem.LOGGER.warn("Source folder missing for map {}, skipping", map.getName());
@@ -140,8 +140,7 @@ public class MapPoolManager {
                         for (MapConfig map : loaded) {
                             if (!map.isEnabled()) continue;
                             if (map.getState() == null) map.setState(MapState.AVAILABLE);
-                            String key = sanitize(map.getWorldFolder());
-                            if (Files.isDirectory(getSourcesPath().resolve(key).resolve("region"))) {
+                            if (sourceFolderExists(map.getWorldFolder())) {
                                 maps.add(map);
                             } else {
                                 TeamSystem.LOGGER.warn("Source folder missing for map {}, skipping", map.getName());
@@ -152,8 +151,8 @@ public class MapPoolManager {
             }
 
             for (MapConfig srcMap : scanSourcesFolder()) {
-                String key = sanitize(srcMap.getWorldFolder());
-                boolean exists = maps.stream().anyMatch(m -> sanitize(m.getWorldFolder()).equals(key));
+                boolean exists = maps.stream()
+                    .anyMatch(m -> m.getWorldFolder().equals(srcMap.getWorldFolder()));
                 if (!exists) {
                     srcMap.setState(MapState.AVAILABLE);
                     maps.add(srcMap);
@@ -252,6 +251,9 @@ public class MapPoolManager {
 
             mapLevel.save(null, true, false);
 
+            // Закрываем все открытые RegionFile до удаления — иначе на Windows файлы заблокированы
+            closeRegionFileCache(mapLevel);
+
             Path dimDir = getMapRegionDir().getParent();
             if (Files.isDirectory(dimDir)) {
                 deleteDirectory(dimDir);
@@ -274,6 +276,31 @@ public class MapPoolManager {
     public boolean deleteLive(MapConfig map) {
         TeamSystem.LOGGER.info("Map {} deleted from live (no-op - dimension stays loaded)", map.getName());
         return true;
+    }
+
+    private void closeRegionFileCache(ServerLevel level) {
+        try {
+            Object chunkMap = level.getChunkSource().chunkMap;
+            Class<?> cmc = chunkMap.getClass();
+            Object storage = findFieldAnywhere(cmc, chunkMap,
+                "chunkStorage", "f_$chunkStorage", "storage", "f_$storage");
+            if (storage != null) {
+                Class<?> rfsClass = storage.getClass();
+                Object regionCache = findFieldAnywhere(rfsClass, storage,
+                    "regionCache", "f_regionCache", "cachedRegionFiles", "f_cachedRegionFiles");
+                if (regionCache instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> rcm) {
+                    for (long key : new java.util.ArrayList<>(rcm.keySet())) {
+                        Object rf = rcm.get(key);
+                        if (rf instanceof java.io.Closeable c) {
+                            try { c.close(); } catch (Exception ignored) {}
+                        }
+                    }
+                    rcm.clear();
+                }
+            }
+        } catch (Exception e) {
+            TeamSystem.LOGGER.warn("Failed to close region file cache: {}", e.getMessage());
+        }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -368,6 +395,26 @@ public class MapPoolManager {
             for (int i = 0; i < 10; i++) {
                 level.getChunkSource().tick(() -> true, true);
             }
+
+            // 8) Clear RegionFileStorage region cache so fresh region files are read from disk
+            try {
+                Object storage = findFieldAnywhere(cmc, chunkMap,
+                    "chunkStorage", "f_$chunkStorage", "storage", "f_$storage");
+                if (storage != null) {
+                    Class<?> rfsClass = storage.getClass();
+                    Object regionCache = findFieldAnywhere(rfsClass, storage,
+                        "regionCache", "f_regionCache", "cachedRegionFiles", "f_cachedRegionFiles");
+                    if (regionCache instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> rcm) {
+                        for (long key : new java.util.ArrayList<>(rcm.keySet())) {
+                            Object rf = rcm.get(key);
+                            if (rf instanceof java.io.Closeable c) {
+                                try { c.close(); } catch (Exception ignored) {}
+                            }
+                        }
+                        rcm.clear();
+                    }
+                }
+            } catch (Exception ignored) {}
 
             TeamSystem.LOGGER.info("Chunk cache cleared for teamsystem:map");
         } catch (Exception e) {

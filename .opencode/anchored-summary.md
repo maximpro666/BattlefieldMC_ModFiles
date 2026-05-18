@@ -1,98 +1,39 @@
-# Session Summary (May 18, 2026)
+# BattlefieldMC Mod — Anchored Summary
 
-## Goal
-Fix map chunk regeneration without server restart and implement full read-write kit editor in AdminPanel with proper data preservation.
+## Session: 2026-05-18 — Fix compilation errors, redesign ESC menu, add /redeploy, fix death handling, rewrite CaptureParticles/WorldMarkerRenderer
 
-## Constraints & Preferences
-- All server→client screen-opening packets must use `Class.forName` + full reflection to avoid `RuntimeDistCleaner` rejecting `CONSTANT_Class` entries for client-only classes (Screen, Minecraft, etc.)
-- Kit editing must preserve all data — weapon IDs (TaCZ guns) must not collapse to same item; JSON-based round-trip editing keeps extra fields unknown to UI
-- Kit save JSON may exceed 256 chars — must use Forge packet directly, not chat command
+### Changes Made
 
-## Progress
+1. **RedeployCommand.java** — Created `/redeploy` command: kills player via `hurt(damageSources().genericKill(), Float.MAX_VALUE)`, clears inventory. Ticket deduction removed (handled by death handler). Added 5-second cooldown per player to prevent griefing.
 
-### Done
-- **Map chunk cache clearing (dimension reset without restart)** — completely rewrote `MapPoolManager.clearChunkCache()` to aggressively nuke ALL stale data instead of partial clearing:
-  1. Save pending chunks via `ChunkMap.saveAllChunks()` reflection
-  2. Drop each visible chunk via `ChunkMap.drop(long)` reflection (proper ChunkHolder cleanup, not just map clear)
-  3. Clear `visibleChunkMap`, `updatingChunkMap`, `pendingUnloads`, `chunksToLoad`, `pendingLoads`, `toDrop`
-  4. Clear entity lookup maps (`entityMap`, `entityByIdMap`) — stale mobs/items from previous match
-  5. Clear `ServerLevel.blockEntityTickers` + `pendingBlockEntityTickers` — stale block entities that would re-generate old world state
-  6. Clear ALL DistanceManager tickets via `SortedArraySet` iteration — iterate each key, call `removeTicket(long, Ticket)` reflection per ticket, then clear the map; also clear `playerTickets`
-  7. Tick chunk source 10× to flush pending operations
-  8. New `findMethod()` helper to locate methods by name + param types in class hierarchy
-  9. Moved save→clear→copy ordering in `copyToLive()` — ensures no auto-save writes back stale data
+2. **BattlefieldPauseScreen.java** — Redesigned ESC menu: 5 buttons (Continue, Change Team, Settings, Redeploy, Exit) with slide-in animation, dark overlay panel, orange accent bar. Removed unused `TeamSystem` import, fixed `startY` variable shadow warning.
 
-- **OpenAdminPanelPacket** — new S2C packet that opens `AdminPanel` screen via `Class.forName` reflection pattern; registered in `PacketHandler`
+3. **CommandRegistration.java** — Registered `RedeployCommand` alongside existing commands.
 
-- **AdminPanel.java** — full admin panel GUI with sidebar navigation (Match, Maps, Kits, Teams, Config tabs), fade-in animation, slide-out nav bar, quick action buttons (START/RESTART/STOP/VOTE), match info display, map management display, team/player list, config display
+4. **CombatEventHandler.java** — `onPlayerDeath()` now calls `victim.getInventory().clearContent()` so players respawn without items.
 
-- **AdminPanel Kit tab** — complete inline kit editor:
-  - Left panel: class list from KitConfig JSON (parsed from `ClientTeamData.kitConfigEditJson`)
-  - Right panel: kit list for selected class; click any kit to show editable fields below
-  - Editable fields: display_name, description, requirements.rank, weapons.primary/secondary/special/grenade (comma-separated)
-  - Inline text editor with full keyboard support: Enter confirms, Escape cancels, Backspace/Delete, Home/End, Left/Right cursor, blinking cursor
-  - Attachment limits displayed read-only
-  - SAVE button → `KitAdminSavePacket` (direct Forge packet, no 256-char limit)
-  - REQUEST button → `KitAdminRequestPacket` (pulls current config from server)
-  - JSON parse caching: skips re-parse when `kitConfigEditJson` unchanged
+5. **CaptureParticles.java** — Complete rewrite: rotating team-colored ring with inner/outer glow and vertical pulse "flame" columns per capture point. Removed duplicate progress arc. Fixed contested state detection: contested now correctly triggers when `capturerOrdinal == 2` (SPECTATOR).
 
-- **KitAdminConfigSyncPacket** (S2C) — receives full KitConfig JSON (up to 65535 bytes) from server, stores in `ClientTeamData.kitConfigEditJson`
+6. **WorldMarkerRenderer.java** — Removed ground ring/pole rendering; now only draws floating text label with bob animation above each capture point. Marker labels rendered as SEE_THROUGH text. Fixed contested logic same as above. Removed unused imports (`VertexConsumer`, `RenderType`, `Matrix4f`).
 
-- **KitAdminRequestPacket** (C2S) — admin panel requests kit config from server via packet instead of chat command
+7. **ClientSetup.java** — Added missing imports (`Component`, `GameManager`, `TeamSystem`, `List`), fixed `isNearCapturePoint` to include Y-distance check (`Math.abs(dy) <= 6.0`), cleaned up fully qualified names.
 
-- **KitAdminSavePacket** (C2S) — receives edited KitConfig JSON, validates permission (level 2), deserializes with Gson, persists to `world/teamsystem/kits.json`, calls `KitConfig.set()` to update in-memory singleton, sends confirmation + syncs back
+### Vulnerabilities Fixed
+- **Double ticket deduction**: Removed `deductTicket` from `RedeployCommand` — death handler already deducts once per death
+- **No cooldown**: Added 5-second cooldown per player using `ConcurrentHashMap<UUID, Long>` to prevent ticket-drain griefing
 
-- **KitAdminCommand** — `/kitadmin request | reload | save <json>` (op 2): save is fallback only (256-char limit); admin panel uses direct packet
+### Design Principles
+- **ESC menu**: 5 buttons only, no redundant options, slide-in animation, rounded buttons with orange accent
+- **Capture particles**: Ground ring (subtle, animated) + vertical glow columns (breathing animation), team-colored, contested flash, capturing progress glow
+- **World markers**: No ground geometry, just floating labels with bob, SEE_THROUGH rendering
+- **Death handling**: Inventory cleared on death, `/redeploy` triggers death + ticket deduction (1 ticket via death handler)
+- **Contested detection**: Use `capturerOrdinal == 2` as contested flag (SPECTATOR team ordinal)
+- **Security**: 5s cooldown on `/redeploy` to prevent griefing via ticket drain
 
-- **AdminCommand** — `/admin` (op 2): opens AdminPanel via `OpenAdminPanelPacket`
-
-- **KitConfig.java** — added `set(KitConfig)` static method for in-memory singleton replacement
-
-- **ClientTeamData.java** — added `kitConfigEditJson` field
-
-- **BattlefieldPauseScreen.java** — completely redesigned layout: 2-column button grid (wider panel), added Change Class, Squad, Vehicle Spawn, Admin Panel buttons alongside existing Return/Team/Settings/Disconnect
-
-- **KitSelectionScreen.java** — minor modifications
-
-- **TeamSelectionScreen.java** — minor modifications
-
-- **OpenTeamSelectionScreenPacket.java** — rewritten: removed retry timer (no longer needed); still uses `Class.forName` reflection pattern
-
-- **PacketHandler.java** — registered 4 new packets: `OpenAdminPanelPacket`, `KitAdminConfigSyncPacket`, `KitAdminSavePacket`, `KitAdminRequestPacket`
-
-- **TeamSystem.java** — registered `AdminCommand` and `KitAdminCommand` in `FMLServerStartingEvent`
-
-### In Progress
-- (none)
-
-### Blocked
-- (none)
-
-## Key Decisions
-- **JSON-round-trip editing**: AdminPanel edits `JsonObject` tree directly, serializes back to string on save. Server deserializes with Gson and writes file. Any fields the UI doesn't render (unknown weapon categories, future config additions) survive unmodified — prevents data loss
-- **Direct packet for save**: `KitAdminSavePacket` sent via `PacketHandler.CHANNEL.sendToServer()` instead of `sendCommand("kitadmin save " + json)` — avoids 256-char chat command limit that would truncate large configs
-- **Chunk clearing before file copy**: Level saved → cache cleared → old files deleted → new files copied. Ensures no in-memory chunks try to auto-save to new region files
-- **Entity + block-entity ticker clearing**: Without this, old entities (dropped items, vehicles, beacons) remain ticking even after region files are replaced, re-creating old world state in freshly visited chunks
-- **DistanceManager ticket nuke via reflection**: `removeTicket(long, Ticket)` is package-private on `DistanceManager` — must call via `findMethod` with exact `Ticket.class` parameter type (was using `Object.class` match)
-
-## Next Steps
-1. Test full game cycle on Mohist hybrid — debug chunk clearing if field names differ from Mojang mappings
-2. Add "Add Class" / "Add Kit" / "Delete Kit" buttons to AdminPanel Kit tab
-3. Make attachment limits editable in the kit editor
-4. Validate weapon IDs exist in TaCZ registry before saving
-5. Consider separate `team` and `cooldown` fields in kit editor (currently not shown)
-
-## Relevant Files
-- `MapPoolManager.java` — `clearChunkCache()` (line 280): aggressive multi-layer clear with entity + block-entity + distance-manager nuke; `copyToLive()`: reordered save→clear→copy flow; `findMethod()` helper (line 379)
-- `AdminPanel.java` — full admin GUI (880 lines): sidebar nav, 5 tabs, inline Kit editor with text input, cursor, SAVE/REQUEST via direct packets
-- `KitAdminConfigSyncPacket.java` — S2C packet, stores JSON in `ClientTeamData.kitConfigEditJson`
-- `KitAdminRequestPacket.java` — C2S packet, triggers server to send config back to requesting player
-- `KitAdminSavePacket.java` — C2S packet, Gson-deserializes KitConfig, saves to `world/teamsystem/kits.json`, calls `KitConfig.set()`, sends confirmation S2C
-- `KitAdminCommand.java` — `/kitadmin request | reload | save <json>` (op 2)
-- `AdminCommand.java` — `/admin` (op 2), opens AdminPanel
-- `OpenAdminPanelPacket.java` — S2C packet using `Class.forName` reflection to open AdminPanel
-- `PacketHandler.java` — registers 4 new packets
-- `BattlefieldPauseScreen.java` — redesigned layout with 2-column grid + new buttons
-- `KitConfig.java` — added `set(KitConfig)` for in-memory replace
-- `ClientTeamData.java` — added `kitConfigEditJson` field
-- `TeamSystem.java` — registered `AdminCommand` + `KitAdminCommand`
+### Key Files
+- `src/main/java/com/yourmod/teamsystem/client/gui/screen/BattlefieldPauseScreen.java`
+- `src/main/java/com/yourmod/teamsystem/client/gui/renderer/CaptureParticles.java`
+- `src/main/java/com/yourmod/teamsystem/client/gui/renderer/WorldMarkerRenderer.java`
+- `src/main/java/com/yourmod/teamsystem/commands/RedeployCommand.java`
+- `src/main/java/com/yourmod/teamsystem/events/CombatEventHandler.java`
+- `src/main/java/com/yourmod/teamsystem/client/ClientSetup.java`

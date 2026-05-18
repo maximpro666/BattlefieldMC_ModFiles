@@ -119,6 +119,8 @@ public class TeamSystem {
 
         MapDimensionGenerator.generateDimensionDatapacks(event.getServer());
 
+        MapOffsetManager.preloadAllMaps(event.getServer(), mapPoolManager.getMaps());
+
         gameManager = new GameManager(event.getServer());
         MinecraftForge.EVENT_BUS.register(gameManager);
         gameManager.startInitialCountdown();
@@ -173,6 +175,7 @@ public class TeamSystem {
         com.yourmod.teamsystem.commands.AdminNotifyCommand.register(event.getDispatcher());
         com.yourmod.teamsystem.commands.AdminCommand.register(event.getDispatcher());
         com.yourmod.teamsystem.commands.KitAdminCommand.register(event.getDispatcher());
+        com.yourmod.teamsystem.commands.RedeployCommand.register(event.getDispatcher());
 
     }
 

@@ -52,7 +52,7 @@ public class ZoneDataManager {
         }
     }
 
-    public void loadFromMapConfig(MapConfig map, String dimension) {
+    public void loadFromMapConfig(MapConfig map, String dimension, int zOffset) {
         clearZones(dimension);
         List<MapConfig.CapturePointEntry> entries = map.getCapturePoints();
         if (entries == null || entries.isEmpty()) return;
@@ -61,7 +61,7 @@ public class ZoneDataManager {
         for (MapConfig.CapturePointEntry entry : entries) {
             String id = "map_" + index;
             String name = entry.name != null ? entry.name : id;
-            BlockPos center = new BlockPos(entry.x, entry.y, entry.z);
+            BlockPos center = new BlockPos(entry.x, entry.y, entry.z + zOffset);
             int radius = (int) Math.ceil(entry.radius);
             int captureSec = (int) Math.ceil(entry.captureSpeed * 20);
             CaptureZone zone = new CaptureZone(
@@ -74,7 +74,7 @@ public class ZoneDataManager {
             index++;
         }
         if (index > 0) {
-            TeamSystem.LOGGER.info("Loaded {} capture zones from map config", index);
+            TeamSystem.LOGGER.info("Loaded {} capture zones from map config (zOffset={})", index, zOffset);
         }
     }
 }

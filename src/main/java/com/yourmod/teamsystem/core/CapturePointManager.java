@@ -48,10 +48,10 @@ public class CapturePointManager {
         return zoneData.getZones(dimId.toString());
     }
 
-    public void loadFromMapConfig(MapConfig map) {
+    public void loadFromMapConfig(MapConfig map, int zOffset) {
         ResourceLocation dimId = getCurrentMapDimension();
         if (dimId != null) {
-            zoneData.loadFromMapConfig(map, dimId.toString());
+            zoneData.loadFromMapConfig(map, dimId.toString(), zOffset);
         }
     }
 

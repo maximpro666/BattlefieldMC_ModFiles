@@ -154,12 +154,13 @@ public class TeamManager extends SavedData {
         GameManager game = TeamSystem.getGameManager();
         if (game != null) {
             if (team.isPlayable() && game.isPlaying()) {
-                MapConfig map = game.getCurrentMap();
-                if (map != null) {
-                    ServerLevel target = server.getLevel(MapPoolManager.MAP_DIMENSION_KEY);
+                ResourceKey<Level> dimKey = game.getCurrentDimKey();
+                if (dimKey != null) {
+                    MapConfig map = game.getCurrentMap();
+                    ServerLevel target = server.getLevel(dimKey);
                     if (target != null) {
                         double x = 0.5, y = 65, z = 0.5;
-                        if (map.hasTeamSpawns()) {
+                        if (map != null && map.hasTeamSpawns()) {
                             int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
                             if (spawn != null && spawn.length >= 3) {
                                 x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5;

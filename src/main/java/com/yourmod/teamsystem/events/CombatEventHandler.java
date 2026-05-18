@@ -287,8 +287,8 @@ public class CombatEventHandler {
         teamManager.syncPlayerData(victim);
     }
 
-    /** Hook for future death GUI — sound, concussion effect, kill cam, etc. */
     private void onPlayerDeath(ServerPlayer victim, ServerPlayer killer) {
+        victim.getInventory().clearContent();
     }
 
     private boolean isDedupKill(ServerPlayer killer, net.minecraft.world.entity.Entity victim) {

@@ -82,7 +82,11 @@ public class CapturePointCommand {
             String dim = player.level().dimension().location().toString();
             CaptureZone zone = new CaptureZone(name, name, dim, pos1, pos2, captureTime);
             CapturePointManager cpm = TeamSystem.getCapturePointManager();
-            if (cpm != null) cpm.getZoneData().addZone(zone);
+            if (cpm != null) {
+                cpm.getZoneData().addZone(zone);
+                cpm.setActive(true);
+                cpm.syncToAll();
+            }
             source.sendSuccess(() -> Component.literal("§aZone '" + name + "' added"), true);
         }, () -> {
             source.sendFailure(Component.literal("§cNo map selected"));

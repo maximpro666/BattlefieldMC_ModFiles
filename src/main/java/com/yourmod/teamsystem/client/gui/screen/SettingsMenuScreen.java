@@ -11,6 +11,7 @@ import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import com.yourmod.teamsystem.core.ModSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -77,6 +78,11 @@ public class SettingsMenuScreen extends Screen {
         addRenderableWidget(opacitySlider[0]);
 
         addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 4, btnW, btnH,
+            Component.literal(I18n.get("teamsystem.ui.vanilla_settings")), btn -> {
+                Minecraft.getInstance().setScreen(new OptionsScreen(this, Minecraft.getInstance().options));
+            }));
+
+        addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 5, btnW, btnH,
             Component.literal(I18n.get("teamsystem.ui.back")), btn -> onClose()));
     }
 
@@ -88,7 +94,7 @@ public class SettingsMenuScreen extends Screen {
         g.fill(0, 0, width, height, AnimationHelper.withAlpha(COLOR_BG, (int)(fadeAlpha * 0xCC)));
 
         int panelW = 240;
-        int panelH = 190;
+        int panelH = 220;
         int panelX = width / 2 - panelW / 2;
         int panelY = 30;
 
