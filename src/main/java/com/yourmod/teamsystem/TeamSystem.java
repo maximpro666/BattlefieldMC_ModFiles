@@ -26,12 +26,14 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -101,6 +103,23 @@ public class TeamSystem {
     }
 
     @SubscribeEvent
+    public void onServerStarting(ServerStartingEvent event) {
+        MapPoolManager temp = new MapPoolManager(event.getServer());
+        temp.loadConfig();
+        java.util.List<MapConfig> maps = temp.getMaps();
+        MinecraftServer server = event.getServer();
+        Thread preloader = new Thread(() -> {
+            try {
+                MapOffsetManager.preloadAllMaps(server, maps);
+            } catch (Exception e) {
+                LOGGER.error("Map preload failed: {}", e.getMessage());
+            }
+        }, "MapPreloader");
+        preloader.setDaemon(true);
+        preloader.start();
+    }
+
+    @SubscribeEvent
     public void onServerStarted(ServerStartedEvent event) {
         ResourceKey<Level> overworldKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("minecraft:overworld"));
         teamManager = event.getServer().getLevel(overworldKey)
@@ -118,8 +137,6 @@ public class TeamSystem {
         MinecraftForge.EVENT_BUS.register(mapPoolManager);
 
         MapDimensionGenerator.generateDimensionDatapacks(event.getServer());
-
-        MapOffsetManager.preloadAllMaps(event.getServer(), mapPoolManager.getMaps());
 
         gameManager = new GameManager(event.getServer());
         MinecraftForge.EVENT_BUS.register(gameManager);

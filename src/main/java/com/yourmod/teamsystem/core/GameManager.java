@@ -59,6 +59,7 @@ public class GameManager {
     private boolean lastLiberateAttachment;
     /** Match index used to determine team rotation parity */
     private int currentMatchIndex;
+    private final ChunkSnapshotManager snapshotManager = new ChunkSnapshotManager();
 
     public GameManager(MinecraftServer server) {
         this.server = server;
@@ -95,6 +96,10 @@ public class GameManager {
     // ========== Match Flow ==========
 
     public void startGame() {
+        if (!MapOffsetManager.isPreloadDone()) {
+            broadcast("Map data is still preloading, please wait...", CHAT_WARNING);
+            return;
+        }
         TeamManager teamManager = TeamSystem.getTeamManager();
         MapPoolManager mapPool = TeamSystem.getMapPoolManager();
 
@@ -157,12 +162,26 @@ public class GameManager {
         currentMatchIndex = TeamSystem.getMapPoolManager().nextMatchId();
         boolean swapped = map.isTeamRotation() && (currentMatchIndex % 2 == 1);
 
-        clearEntitiesInZone(mapLevel, zOffset);
+        if (snapshotManager.hasSnapshot(map.getName())) {
+            snapshotManager.restoreSnapshot(mapLevel, map, zOffset);
+        } else {
+            // First time: take snapshot after teleport
+            clearEntitiesInZone(mapLevel, zOffset);
+        }
         applyMapConfig(map, zOffset);
         unloadChunksOutsideZone(mapLevel, zOffset);
         autoAssignTeams(map);
         teleportAllPlayersToMap(map, zOffset, swapped);
         openLoadoutScreenForAllPlayers();
+
+        if (!snapshotManager.hasSnapshot(map.getName())) {
+            final ChunkSnapshotManager sm = snapshotManager;
+            final MapConfig finalMap = map;
+            final int finalZ = zOffset;
+            server.execute(() -> sm.takeSnapshot(mapLevel, finalMap, finalZ,
+                server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
+                    .resolve("teamsystem_sources")));
+        }
 
         gamerule(server.overworld(), "liberateAttachment", "false");
 
@@ -509,7 +528,6 @@ public class GameManager {
 
     private void autoAssignTeams(MapConfig map) {
         TeamManager tm = TeamSystem.getTeamManager();
-        boolean swapped = map.isTeamRotation() && (currentMatchIndex % 2 == 1);
         int natoCount = 0, russiaCount = 0;
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             PlayerCombatData data = tm.getOrCreatePlayerData(p.getUUID());
@@ -534,7 +552,7 @@ public class GameManager {
     }
 
     public void teleportAllPlayersToMap(MapConfig map, int zOffset) {
-        teleportAllPlayersToMap(map, zOffset, false);
+        teleportAllPlayersToMap(map, zOffset, isSwapped());
     }
 
     public void teleportAllPlayersToMap(MapConfig map, int zOffset, boolean swapped) {
@@ -578,20 +596,21 @@ public class GameManager {
         if (l != null) p.setRespawnPosition(l.dimension(), p.blockPosition(), p.getYRot(), false, false);
     }
 
-    private boolean isSwapped(MapConfig map) {
-        return map.isTeamRotation() && (currentMatchIndex % 2 == 1);
+    private boolean isSwapped() {
+        return currentMap != null && currentMap.isTeamRotation() && (currentMatchIndex % 2 == 1);
     }
 
-    public void teleportPlayerToMapAtTeamSpawn(ServerPlayer p, MapConfig map, Team team) {
+    public void teleportPlayerToMapAtTeamSpawn(ServerPlayer p, Team team) {
+        if (currentMap == null) return;
         int zOffset = MapOffsetManager.getZOffset(
             MapOffsetManager.getMapIndex(currentMap, TeamSystem.getMapPoolManager().getMaps()));
-        boolean swapped = isSwapped(map);
+        boolean swapped = isSwapped();
         Team spawnTeam = swapped ? (team == Team.NATO ? Team.RUSSIA : Team.NATO) : team;
-        ServerLevel target = getMapWorld(map);
+        ServerLevel target = getMapWorld(currentMap);
         if (target == null) return;
         double x = 0.5, y = 65, z = 0.5 + zOffset;
-        if (map.hasTeamSpawns()) {
-            int[] spawn = spawnTeam == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
+        if (currentMap.hasTeamSpawns()) {
+            int[] spawn = spawnTeam == Team.NATO ? currentMap.getNatoSpawn() : currentMap.getRussiaSpawn();
             if (spawn != null && spawn.length >= 3) {
                 x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5 + zOffset;
             }
@@ -599,16 +618,17 @@ public class GameManager {
         safeTeleport(p, target, x, y, z);
     }
 
-    public void setMapRespawn(ServerPlayer p, MapConfig map, Team team) {
+    public void setMapRespawn(ServerPlayer p, Team team) {
+        if (currentMap == null) return;
         int zOffset = MapOffsetManager.getZOffset(
             MapOffsetManager.getMapIndex(currentMap, TeamSystem.getMapPoolManager().getMaps()));
-        boolean swapped = isSwapped(map);
+        boolean swapped = isSwapped();
         Team spawnTeam = swapped ? (team == Team.NATO ? Team.RUSSIA : Team.NATO) : team;
-        ServerLevel target = getMapWorld(map);
+        ServerLevel target = getMapWorld(currentMap);
         if (target == null) return;
         int x = 0, y = 65, z = zOffset;
-        if (map.hasTeamSpawns()) {
-            int[] spawn = spawnTeam == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
+        if (currentMap.hasTeamSpawns()) {
+            int[] spawn = spawnTeam == Team.NATO ? currentMap.getNatoSpawn() : currentMap.getRussiaSpawn();
             if (spawn != null && spawn.length >= 3) {
                 x = spawn[0]; y = spawn[1]; z = spawn[2] + zOffset;
             }

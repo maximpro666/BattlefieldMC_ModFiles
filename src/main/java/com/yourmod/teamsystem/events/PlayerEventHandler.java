@@ -84,8 +84,8 @@ public class PlayerEventHandler {
                     Team team = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
                     MapConfig map = game.getCurrentMap();
                     if (team != null && team.isPlayable() && map != null) {
-                        game.teleportPlayerToMapAtTeamSpawn(player, map, team);
-                        game.setMapRespawn(player, map, team);
+                        game.teleportPlayerToMapAtTeamSpawn(player, team);
+                        game.setMapRespawn(player, team);
                     } else {
                         game.teleportPlayerToLobby(player);
                         game.setLobbyRespawn(player);
@@ -166,8 +166,8 @@ public class PlayerEventHandler {
                 // Teleport back to map at team spawn
                 Team team = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
                 if (team != null && team.isPlayable()) {
-                    game.teleportPlayerToMapAtTeamSpawn(player, map, team);
-                    game.setMapRespawn(player, map, team);
+                    game.teleportPlayerToMapAtTeamSpawn(player, team);
+                    game.setMapRespawn(player, team);
                     PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
                         new com.yourmod.teamsystem.network.SoundPacket(
                             com.yourmod.teamsystem.core.ModSounds.GUI_RESPAWN.get().getLocation().toString()));

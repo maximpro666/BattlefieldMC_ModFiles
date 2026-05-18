@@ -158,6 +158,12 @@ public class RespawnManager {
         save();
     }
 
+    public void clearAllBeacons() {
+        beacons.clear();
+        save();
+        TeamSystem.LOGGER.info("All respawn beacons cleared");
+    }
+
     private void removeBeaconBlocks(String playerUUID, String name) {
         for (SavedBeacon b : beacons) {
             if (b.uuid.equals(playerUUID) && (name == null || b.name.equals(name))) {

@@ -1,6 +1,16 @@
 # BattlefieldMC Mod — Anchored Summary
 
-## Session: 2026-05-18 — Fix compilation errors, redesign ESC menu, add /redeploy, fix death handling, rewrite CaptureParticles/WorldMarkerRenderer
+## Session: 2026-05-18 — Fix compilation errors, redesign ESC menu, add /redeploy, fix death handling, rewrite CaptureParticles/WorldMarkerRenderer, design spawn system
+
+### Design Decisions (NEW)
+1. **Xaero's Minimap** — используется для мини-карты и полной карты (Entity Radar + waypoint'ы `[TS]`). Кастомный рендер карты НЕ пишем.
+2. **SpawnSelectionScreen** — экран респавна для мёртвых игроков (левая панель: точки респавна, правая: команда+кит). Открывается при смерти или `/redeploy`.
+3. **Cooldown 20s** — сквадмейт под огнём (урон) + FOB под атакой (враг в 15 блоках). КД на спавн.
+4. **Пакеты**: `RespawnAtPointPacket` (C2S), `RespawnBeaconSyncPacket`, `SquadmateStatusSyncPacket` (ServerTickEvent.END), `OpenSpawnSelectionScreenPacket`, `CloseSpawnScreenPacket` (S2C).
+5. **XaeroIntegration** — через рефлексию, soft dependency, префикс `[TS]`.
+
+### Key Files
+- `DESIGN_Map_Minimap_Xaero.md` — полный дизайн-документ
 
 ### Changes Made
 

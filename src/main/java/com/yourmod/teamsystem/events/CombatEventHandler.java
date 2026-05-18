@@ -320,8 +320,8 @@ public class CombatEventHandler {
         Team team = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
         player.setHealth(player.getMaxHealth());
         if (team != null && team.isPlayable()) {
-            game.teleportPlayerToMapAtTeamSpawn(player, map, team);
-            game.setMapRespawn(player, map, team);
+            game.teleportPlayerToMapAtTeamSpawn(player, team);
+            game.setMapRespawn(player, team);
         } else {
             game.teleportPlayerToLobby(player);
         }

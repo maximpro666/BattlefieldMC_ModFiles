@@ -228,6 +228,13 @@ public class FOBManager {
         return points;
     }
 
+    public void clearAll() {
+        fobs.clear();
+        save();
+        syncAll();
+        TeamSystem.LOGGER.info("All FOBs cleared");
+    }
+
     public void tickFOBs() {
         // Periodic save and health regen could go here
     }

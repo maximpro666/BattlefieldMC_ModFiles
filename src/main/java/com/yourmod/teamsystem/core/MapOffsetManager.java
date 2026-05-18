@@ -17,6 +17,10 @@ import java.util.zip.GZIPInputStream;
 
 public class MapOffsetManager {
 
+    private static final java.util.concurrent.atomic.AtomicBoolean preloadDone = new java.util.concurrent.atomic.AtomicBoolean(false);
+
+    public static boolean isPreloadDone() { return preloadDone.get(); }
+
     private static final int MAP_STRIDE = 30720;
     private static final int CHUNK_SHIFT = MAP_STRIDE / 16;
     private static final int SECTOR_BYTES = 4096;
@@ -42,42 +46,46 @@ public class MapOffsetManager {
     }
 
     public static void preloadAllMaps(MinecraftServer server, java.util.List<MapConfig> maps) {
-        Path destDir = server.getWorldPath(LevelResource.ROOT)
-            .resolve("dimensions").resolve("teamsystem").resolve("map").resolve("region");
-        Path sourcesPath = server.getWorldPath(LevelResource.ROOT).resolve("teamsystem_sources");
+        try {
+            Path destDir = server.getWorldPath(LevelResource.ROOT)
+                .resolve("dimensions").resolve("teamsystem").resolve("map").resolve("region");
+            Path sourcesPath = server.getWorldPath(LevelResource.ROOT).resolve("teamsystem_sources");
 
-        if (maps.isEmpty()) return;
+            if (maps.isEmpty()) return;
 
-        try { Files.createDirectories(destDir); } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to create region dir: {}", e.getMessage());
-            return;
-        }
-
-        int loaded = 0;
-        for (int i = 0; i < maps.size(); i++) {
-            MapConfig map = maps.get(i);
-            Path sourceRegionDir = sourcesPath.resolve(map.getWorldFolder()).resolve("region");
-            if (!Files.isDirectory(sourceRegionDir)) {
-                TeamSystem.LOGGER.warn("No source region folder for {}, skipping", map.getName());
-                continue;
+            try { Files.createDirectories(destDir); } catch (IOException e) {
+                TeamSystem.LOGGER.error("Failed to create region dir: {}", e.getMessage());
+                return;
             }
 
-            int chunkShift = i * CHUNK_SHIFT;
+            int loaded = 0;
+            for (int i = 0; i < maps.size(); i++) {
+                MapConfig map = maps.get(i);
+                Path sourceRegionDir = sourcesPath.resolve(map.getWorldFolder()).resolve("region");
+                if (!Files.isDirectory(sourceRegionDir)) {
+                    TeamSystem.LOGGER.warn("No source region folder for {}, skipping", map.getName());
+                    continue;
+                }
 
-            try (var files = Files.list(sourceRegionDir)) {
-                files.filter(f -> f.toString().endsWith(".mca")).forEach(srcPath -> {
-                    try {
-                        rewriteRegionFile(srcPath, destDir, chunkShift);
-                    } catch (Exception e) {
-                        TeamSystem.LOGGER.error("Failed to process {}: {}", srcPath.getFileName(), e.getMessage());
-                    }
-                });
-                loaded++;
-            } catch (IOException e) {
-                TeamSystem.LOGGER.error("Failed to scan {}: {}", map.getName(), e.getMessage());
+                int chunkShift = i * CHUNK_SHIFT;
+
+                try (var files = Files.list(sourceRegionDir)) {
+                    files.filter(f -> f.toString().endsWith(".mca")).forEach(srcPath -> {
+                        try {
+                            rewriteRegionFile(srcPath, destDir, chunkShift);
+                        } catch (Exception e) {
+                            TeamSystem.LOGGER.error("Failed to process {}: {}", srcPath.getFileName(), e.getMessage());
+                        }
+                    });
+                    loaded++;
+                } catch (IOException e) {
+                    TeamSystem.LOGGER.error("Failed to scan {}: {}", map.getName(), e.getMessage());
+                }
             }
+            TeamSystem.LOGGER.info("Preloaded {} maps with coordinate rewrite", loaded);
+        } finally {
+            preloadDone.set(true);
         }
-        TeamSystem.LOGGER.info("Preloaded {} maps with coordinate rewrite", loaded);
     }
 
     private static void rewriteRegionFile(Path srcPath, Path destDir, int chunkShift) throws IOException {
