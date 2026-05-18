@@ -28,6 +28,8 @@ public class PlayerCombatData {
     private String playerTitle = "";
     private String loadoutConfig = "";
 
+    private boolean hasChosenTeam = false;
+
     public PlayerCombatData() {
         this.team = Team.SPECTATOR;
         this.kills = 0;
@@ -49,6 +51,9 @@ public class PlayerCombatData {
     public void setTeam(Team team) {
         this.team = team;
     }
+
+    public boolean hasChosenTeam() { return hasChosenTeam; }
+    public void setHasChosenTeam(boolean v) { this.hasChosenTeam = v; }
 
     public int getKills() {
         return kills;

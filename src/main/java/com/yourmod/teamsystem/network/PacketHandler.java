@@ -200,6 +200,12 @@ public class PacketHandler {
             .consumerMainThread(OpenTeamSelectionScreenPacket::handle)
             .add();
 
+        CHANNEL.messageBuilder(OpenLoadoutScreenPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(OpenLoadoutScreenPacket::new)
+            .encoder(OpenLoadoutScreenPacket::toBytes)
+            .consumerMainThread(OpenLoadoutScreenPacket::handle)
+            .add();
+
         CHANNEL.messageBuilder(OpenAdminPanelPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
             .decoder(OpenAdminPanelPacket::new)
             .encoder(OpenAdminPanelPacket::toBytes)

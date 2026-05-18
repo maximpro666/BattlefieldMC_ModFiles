@@ -17,6 +17,7 @@ import java.util.*;
 
 public class CaptureProcessor {
     private static final double BASE_SPEED = 1.0;
+    private static final double MAIN_MULTIPLIER = 1.5;
     private static final double DECAY_SPEED = 0.003;
 
     public static void tick(ServerLevel level, ZoneDataManager data) {
@@ -26,8 +27,8 @@ public class CaptureProcessor {
         if (zones.isEmpty()) return;
 
         boolean changed = false;
-        int natoOwned = 0;
-        int russiaOwned = 0;
+        double natoOwned = 0;
+        double russiaOwned = 0;
 
         for (CaptureZone zone : zones) {
             Team prevCapturing = zone.getCapturingTeam();
@@ -47,8 +48,9 @@ public class CaptureProcessor {
                     zone.setCapturingTeam(Team.SPECTATOR);
                     changed = true;
                 }
-                if (zone.getOwnerTeam() == Team.NATO) natoOwned++;
-                else if (zone.getOwnerTeam() == Team.RUSSIA) russiaOwned++;
+                double weight = zone.isMain() ? MAIN_MULTIPLIER : 1.0;
+                if (zone.getOwnerTeam() == Team.NATO) natoOwned += weight;
+                else if (zone.getOwnerTeam() == Team.RUSSIA) russiaOwned += weight;
                 continue;
             }
 
@@ -75,15 +77,17 @@ public class CaptureProcessor {
                 if (prevCapturing.isPlayable() && prevCapturing != zone.getOwnerTeam()) {
                     broadcastContested(zone, level);
                 }
-                if (zone.getOwnerTeam() == Team.NATO) natoOwned++;
-                else if (zone.getOwnerTeam() == Team.RUSSIA) russiaOwned++;
+                double weight = zone.isMain() ? MAIN_MULTIPLIER : 1.0;
+                if (zone.getOwnerTeam() == Team.NATO) natoOwned += weight;
+                else if (zone.getOwnerTeam() == Team.RUSSIA) russiaOwned += weight;
                 continue;
             }
 
             if (zone.getOwnerTeam() == dominant) {
                 if (zone.getProgress() < 1.0f) {
                     zone.setCapturingTeam(dominant);
-                    zone.addProgress((float) (BASE_SPEED * dominantCount / zone.getCaptureSeconds() / 20.0));
+                    double speedMult = zone.isMain() ? MAIN_MULTIPLIER : 1.0;
+                    zone.addProgress((float) (BASE_SPEED * speedMult * dominantCount / zone.getCaptureSeconds() / 20.0));
                     changed = true;
                     if (prevCapturing != dominant) broadcastCapturing(zone, dominant, level);
                     if (zone.getProgress() >= 1.0f) {
@@ -93,14 +97,17 @@ public class CaptureProcessor {
                         broadcastCapture(zone, level);
                     }
                 }
-                if (zone.getOwnerTeam() == Team.NATO) natoOwned++;
-                else if (zone.getOwnerTeam() == Team.RUSSIA) russiaOwned++;
+                double weight = zone.isMain() ? MAIN_MULTIPLIER : 1.0;
+                if (zone.getOwnerTeam() == Team.NATO) natoOwned += weight;
+                else if (zone.getOwnerTeam() == Team.RUSSIA) russiaOwned += weight;
                 continue;
             }
 
+            double speedMult = zone.isMain() ? MAIN_MULTIPLIER : 1.0;
+
             if (zone.getOwnerTeam().isPlayable()) {
                 zone.setCapturingTeam(dominant);
-                float neutralize = (float) (BASE_SPEED * dominantCount / zone.getCaptureSeconds() / 20.0);
+                float neutralize = (float) (BASE_SPEED * speedMult * dominantCount / zone.getCaptureSeconds() / 20.0);
                 zone.addProgress(-neutralize);
                 changed = true;
                 if (prevCapturing != dominant) broadcastNeutralizing(zone, dominant, level);
@@ -114,7 +121,7 @@ public class CaptureProcessor {
             }
 
             zone.setCapturingTeam(dominant);
-            float capSpeed = (float) (BASE_SPEED * dominantCount / zone.getCaptureSeconds() / 20.0);
+            float capSpeed = (float) (BASE_SPEED * speedMult * dominantCount / zone.getCaptureSeconds() / 20.0);
             zone.addProgress(capSpeed);
             changed = true;
             if (prevCapturing != dominant) broadcastCapturing(zone, dominant, level);
@@ -128,8 +135,8 @@ public class CaptureProcessor {
 
         TicketManager tm = TeamSystem.getTicketManager();
         if (tm != null) {
-            tm.setBleedRate(Team.NATO, Math.max(0, russiaOwned - natoOwned));
-            tm.setBleedRate(Team.RUSSIA, Math.max(0, natoOwned - russiaOwned));
+            tm.setBleedRate(Team.NATO, (int) Math.round(Math.max(0, russiaOwned - natoOwned)));
+            tm.setBleedRate(Team.RUSSIA, (int) Math.round(Math.max(0, natoOwned - russiaOwned)));
         }
 
         if (changed) syncToAll(level, zones);

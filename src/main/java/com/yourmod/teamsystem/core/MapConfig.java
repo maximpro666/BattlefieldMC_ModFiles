@@ -28,26 +28,32 @@ public class MapConfig {
     private int baseRadius;
     private MapState state;
     private List<CapturePointEntry> capturePoints;
+    private boolean teamRotation;
 
+    public boolean isTeamRotation() { return teamRotation; }
+    public void setTeamRotation(boolean v) { this.teamRotation = v; }
 
     public static class CapturePointEntry {
         public String name;
         public int x, y, z;
         public double radius;
         public double captureSpeed;
+        public boolean main;
 
         public CapturePointEntry() {
             this.radius = 5.0;
             this.captureSpeed = 1.0;
+            this.main = false;
         }
 
-        public CapturePointEntry(String name, int x, int y, int z, double radius, double captureSpeed) {
+        public CapturePointEntry(String name, int x, int y, int z, double radius, double captureSpeed, boolean main) {
             this.name = name;
             this.x = x;
             this.y = y;
             this.z = z;
             this.radius = radius;
             this.captureSpeed = captureSpeed;
+            this.main = main;
         }
     }
 
@@ -167,9 +173,9 @@ public class MapConfig {
         this.capturePoints = capturePoints != null ? capturePoints : new ArrayList<>();
     }
 
-    public void addCapturePoint(String name, int x, int y, int z, double radius, double captureSpeed) {
+    public void addCapturePoint(String name, int x, int y, int z, double radius, double captureSpeed, boolean main) {
         if (capturePoints == null) capturePoints = new ArrayList<>();
-        capturePoints.add(new CapturePointEntry(name, x, y, z, radius, captureSpeed));
+        capturePoints.add(new CapturePointEntry(name, x, y, z, radius, captureSpeed, main));
     }
 
     public void removeCapturePoint(String name) {
@@ -209,6 +215,11 @@ public class MapConfig {
         tag.putInt("RussiaVehicleSpawnZ", russiaVehicleSpawn[2]);
         tag.putInt("BaseRadius", baseRadius);
         tag.putString("State", state.name());
+        tag.putBoolean("TeamRotation", teamRotation);
+        if (capturePoints != null && !capturePoints.isEmpty()) {
+            var mainPoint = capturePoints.stream().filter(cp -> cp.main).findFirst();
+            tag.putBoolean("HasMainPoint", mainPoint.isPresent());
+        }
         return tag;
     }
 
@@ -243,6 +254,7 @@ public class MapConfig {
         config.russiaVehicleSpawn = new int[]{tag.getInt("RussiaVehicleSpawnX"), tag.getInt("RussiaVehicleSpawnY"), tag.getInt("RussiaVehicleSpawnZ")};
         config.baseRadius = tag.getInt("BaseRadius");
         config.state = MapState.valueOf(tag.getString("State"));
+        config.teamRotation = tag.getBoolean("TeamRotation");
         return config;
     }
 

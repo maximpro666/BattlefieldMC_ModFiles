@@ -12,6 +12,7 @@ public class CaptureZone {
     private final BlockPos min;
     private final BlockPos max;
     private final int captureSeconds;
+    private final boolean main;
 
     private Team ownerTeam;
     private Team capturingTeam;
@@ -32,12 +33,17 @@ public class CaptureZone {
     private static final String TAG_PROGRESS = "progress";
 
     public CaptureZone(String id, String name, String dimension, BlockPos pos1, BlockPos pos2, int captureSeconds) {
+        this(id, name, dimension, pos1, pos2, captureSeconds, false);
+    }
+
+    public CaptureZone(String id, String name, String dimension, BlockPos pos1, BlockPos pos2, int captureSeconds, boolean main) {
         this.id = id;
         this.name = name;
         this.dimension = dimension;
         this.min = new BlockPos(Math.min(pos1.getX(), pos2.getX()), Math.min(pos1.getY(), pos2.getY()), Math.min(pos1.getZ(), pos2.getZ()));
         this.max = new BlockPos(Math.max(pos1.getX(), pos2.getX()), Math.max(pos1.getY(), pos2.getY()), Math.max(pos1.getZ(), pos2.getZ()));
         this.captureSeconds = Math.max(1, captureSeconds);
+        this.main = main;
         this.ownerTeam = Team.SPECTATOR;
         this.capturingTeam = Team.SPECTATOR;
         this.progress = 0.0f;
@@ -49,6 +55,7 @@ public class CaptureZone {
     public BlockPos getMin() { return min; }
     public BlockPos getMax() { return max; }
     public int getCaptureSeconds() { return captureSeconds; }
+    public boolean isMain() { return main; }
     public Team getOwnerTeam() { return ownerTeam; }
     public Team getCapturingTeam() { return capturingTeam; }
     public float getProgress() { return progress; }

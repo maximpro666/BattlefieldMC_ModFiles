@@ -57,6 +57,8 @@ public class GameManager {
     private int captureTicks;
     private int matchTimeRemaining;
     private boolean lastLiberateAttachment;
+    /** Match index used to determine team rotation parity */
+    private int currentMatchIndex;
 
     public GameManager(MinecraftServer server) {
         this.server = server;
@@ -70,6 +72,7 @@ public class GameManager {
         this.captureTicks = 0;
         this.matchTimeRemaining = 0;
         this.lastLiberateAttachment = false;
+        this.currentMatchIndex = 0;
     }
 
     public GamePhase getCurrentPhase() { return currentPhase; }
@@ -151,9 +154,15 @@ public class GameManager {
             return;
         }
 
+        currentMatchIndex = TeamSystem.getMapPoolManager().nextMatchId();
+        boolean swapped = map.isTeamRotation() && (currentMatchIndex % 2 == 1);
+
         clearEntitiesInZone(mapLevel, zOffset);
         applyMapConfig(map, zOffset);
-        teleportAllPlayersToMap(map, zOffset);
+        unloadChunksOutsideZone(mapLevel, zOffset);
+        autoAssignTeams(map);
+        teleportAllPlayersToMap(map, zOffset, swapped);
+        openLoadoutScreenForAllPlayers();
 
         gamerule(server.overworld(), "liberateAttachment", "false");
 
@@ -309,12 +318,6 @@ public class GameManager {
         ServerLevel mapLevel = server.getLevel(DynamicDimensionManager.getDimKey());
         if (mapLevel != null) clearWorldEntities(mapLevel);
         currentDimKey = null;
-
-        TeamManager tm = TeamSystem.getTeamManager();
-        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-            tm.setPlayerTeam(p, Team.SPECTATOR);
-            tm.updatePlayerDisplayName(p);
-        }
 
         startVoting();
     }
@@ -504,16 +507,47 @@ public class GameManager {
 
     // ========== Teleport ==========
 
+    private void autoAssignTeams(MapConfig map) {
+        TeamManager tm = TeamSystem.getTeamManager();
+        boolean swapped = map.isTeamRotation() && (currentMatchIndex % 2 == 1);
+        int natoCount = 0, russiaCount = 0;
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            PlayerCombatData data = tm.getOrCreatePlayerData(p.getUUID());
+            if (!data.hasChosenTeam()) {
+                Team assigned = (natoCount <= russiaCount) ? Team.NATO : Team.RUSSIA;
+                data.setTeam(assigned);
+                data.setHasChosenTeam(true);
+                if (assigned == Team.NATO) natoCount++;
+                else russiaCount++;
+                tm.updatePlayerDisplayName(p);
+            }
+        }
+    }
+
+    private void openLoadoutScreenForAllPlayers() {
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            TeamManager tm = TeamSystem.getTeamManager();
+            if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == Team.SPECTATOR) continue;
+            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
+                new com.yourmod.teamsystem.network.OpenLoadoutScreenPacket());
+        }
+    }
+
     public void teleportAllPlayersToMap(MapConfig map, int zOffset) {
+        teleportAllPlayersToMap(map, zOffset, false);
+    }
+
+    public void teleportAllPlayersToMap(MapConfig map, int zOffset, boolean swapped) {
         ServerLevel target = getMapWorld(map);
         if (target == null) return;
         TeamManager tm = TeamSystem.getTeamManager();
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == Team.SPECTATOR) continue;
             Team team = tm.getOrCreatePlayerData(p.getUUID()).getTeam();
+            Team spawnTeam = swapped ? (team == Team.NATO ? Team.RUSSIA : Team.NATO) : team;
             double x = 0.5, y = 65, z = 0.5 + zOffset;
             if (map.hasTeamSpawns()) {
-                int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
+                int[] spawn = spawnTeam == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
                 if (spawn != null && spawn.length >= 3) {
                     x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5 + zOffset;
                 }
@@ -544,14 +578,20 @@ public class GameManager {
         if (l != null) p.setRespawnPosition(l.dimension(), p.blockPosition(), p.getYRot(), false, false);
     }
 
+    private boolean isSwapped(MapConfig map) {
+        return map.isTeamRotation() && (currentMatchIndex % 2 == 1);
+    }
+
     public void teleportPlayerToMapAtTeamSpawn(ServerPlayer p, MapConfig map, Team team) {
         int zOffset = MapOffsetManager.getZOffset(
             MapOffsetManager.getMapIndex(currentMap, TeamSystem.getMapPoolManager().getMaps()));
+        boolean swapped = isSwapped(map);
+        Team spawnTeam = swapped ? (team == Team.NATO ? Team.RUSSIA : Team.NATO) : team;
         ServerLevel target = getMapWorld(map);
         if (target == null) return;
         double x = 0.5, y = 65, z = 0.5 + zOffset;
         if (map.hasTeamSpawns()) {
-            int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
+            int[] spawn = spawnTeam == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
             if (spawn != null && spawn.length >= 3) {
                 x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5 + zOffset;
             }
@@ -562,16 +602,23 @@ public class GameManager {
     public void setMapRespawn(ServerPlayer p, MapConfig map, Team team) {
         int zOffset = MapOffsetManager.getZOffset(
             MapOffsetManager.getMapIndex(currentMap, TeamSystem.getMapPoolManager().getMaps()));
+        boolean swapped = isSwapped(map);
+        Team spawnTeam = swapped ? (team == Team.NATO ? Team.RUSSIA : Team.NATO) : team;
         ServerLevel target = getMapWorld(map);
         if (target == null) return;
         int x = 0, y = 65, z = zOffset;
         if (map.hasTeamSpawns()) {
-            int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
+            int[] spawn = spawnTeam == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
             if (spawn != null && spawn.length >= 3) {
                 x = spawn[0]; y = spawn[1]; z = spawn[2] + zOffset;
             }
         }
         p.setRespawnPosition(target.dimension(), new BlockPos(x, y, z), 0, false, false);
+    }
+
+    private void unloadChunksOutsideZone(ServerLevel level, int zOffset) {
+        level.getChunkSource().tick(() -> true, true);
+        level.getChunkSource().tick(() -> true, true);
     }
 
     private void clearEntitiesInZone(ServerLevel level, int zOffset) {

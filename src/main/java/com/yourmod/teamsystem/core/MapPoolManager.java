@@ -69,6 +69,11 @@ public class MapPoolManager {
         return matchSequence++;
     }
 
+    // NOTE: after nextMatchId() is called once per match, use getMatchSequence() for idempotent reads
+    public int getMatchSequence() {
+        return matchSequence;
+    }
+
     public Path getSourcesPath() {
         return getServerRoot().resolve(SOURCES_DIR_NAME);
     }

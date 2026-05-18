@@ -68,7 +68,8 @@ public class ZoneDataManager {
                 id, name, dimension,
                 center.offset(-radius, -radius, -radius),
                 center.offset(radius, radius, radius),
-                Math.max(5, captureSec)
+                Math.max(5, captureSec),
+                entry.main
             );
             addZone(zone);
             index++;
