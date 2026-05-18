@@ -1,61 +1,63 @@
 package com.yourmod.teamsystem.client.gui.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.PlayerListEntry;
 import com.yourmod.teamsystem.core.Rank;
 import com.yourmod.teamsystem.core.Team;
-import java.util.UUID;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import org.joml.Matrix4f;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.Map;
+import java.util.UUID;
 
 public class CustomNametagRenderer {
-    public static void render(PoseStack poseStack, MultiBufferSource bufferSource, Player player, int packedLight) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
 
-        UUID playerUUID = player.getUUID();
-        PlayerListEntry pData = ClientTeamData.getPlayerData(playerUUID);
-        if (pData == null) return;
+    public void renderNametag(PoseStack poseStack, MultiBufferSource bufferSource,
+                               Player player, Camera camera) {
+        if (player == Minecraft.getInstance().player) return;
+        UUID uuid = player.getUUID();
 
-        int rank = pData.rank();
-        String callsign = pData.callsign();
-        boolean isDowned = pData.isDowned();
-        int teamOrdinal = pData.teamOrdinal();
+        Map<UUID, PlayerListEntry> map = ClientTeamData.playerDataMap;
+        if (map == null) return;
+        PlayerListEntry ple = map.get(uuid);
+        if (ple == null) return;
 
-        Rank rankObj = Rank.fromOrdinal(rank);
-        boolean isRussian = ClientTeamData.getLocalPlayerTeam() == Team.RUSSIA;
-        String prefix = rankObj.getPrefix(isRussian);
+        Rank rank = Rank.fromOrdinal(ple.rank());
+        boolean russian = ple.teamOrdinal() == Team.RUSSIA.ordinal();
+        String rankPrefix  = rank != null ? rank.getPrefix(russian) : "";
+        String callsign    = ple.callsign() != null ? ple.callsign() : player.getName().getString();
+        String displayText = "[" + rankPrefix + "] " + callsign;
 
-        int color = teamOrdinal == 0 ? 0x4488FF : (teamOrdinal == 1 ? 0xFF4444 : 0x888888);
-        if (isDowned) color = 0xFF4444;
-
-        String display = prefix + " " + callsign;
-        if (isDowned) display = "[X] " + display;
+        Vec3 camPos = camera.getPosition();
+        double dx = player.getX() - camPos.x;
+        double dy = player.getY() + player.getBbHeight() + 0.5 - camPos.y;
+        double dz = player.getZ() - camPos.z;
+        double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (dist > 32) return;
 
         poseStack.pushPose();
-        EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
-        double dist = dispatcher.distanceToSqr(player);
-        if (dist > 4096) { // 64 blocks
-            poseStack.popPose();
-            return;
-        }
+        poseStack.translate(dx, dy, dz);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
+        poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
 
-        float scale = 0.026F;
-        poseStack.translate(0, player.getBbHeight() + 0.5, 0);
-        poseStack.mulPose(dispatcher.cameraOrientation());
+        float scale = 0.025f;
         poseStack.scale(-scale, -scale, scale);
 
-        Matrix4f mat = poseStack.last().pose();
-        var font = mc.font;
-        int halfWidth = font.width(display) / 2;
-        int bgColor = (int) (0.25 * 255) << 24;
+        Minecraft mc = Minecraft.getInstance();
+        int tw = mc.font.width(displayText);
 
-        font.drawInBatch(display, -halfWidth, 0, color, false, mat, bufferSource, net.minecraft.client.gui.Font.DisplayMode.SEE_THROUGH, bgColor, packedLight);
+        mc.font.draw(poseStack, displayText, -tw / 2f, 0f, 0xFFFFFFFF);
+
+        if (!rankPrefix.isEmpty()) {
+            String rankPart = "[" + rankPrefix + "]";
+            mc.font.draw(poseStack, rankPart, -tw / 2f, 0f, 0xFFE07B00);
+        }
+
         poseStack.popPose();
     }
 }

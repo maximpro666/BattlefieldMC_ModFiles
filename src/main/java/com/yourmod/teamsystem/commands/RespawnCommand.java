@@ -4,7 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.RespawnManager;
-import net.minecraft.ChatFormatting;
+import static com.yourmod.teamsystem.core.ChatHelper.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -50,7 +50,7 @@ public class RespawnCommand {
         }
 
         source.sendSuccess(() ->
-            Component.literal("Respawn beacon '" + name + "' placed").withStyle(ChatFormatting.GREEN), false);
+            success("Respawn beacon '" + name + "' placed"), false);
         return 1;
     }
 
@@ -63,16 +63,15 @@ public class RespawnCommand {
 
         if (beacons.isEmpty()) {
             source.sendSuccess(() ->
-                Component.literal("You have no respawn beacons. Use /respawn set <name>").withStyle(ChatFormatting.YELLOW), false);
+                warning("You have no respawn beacons. Use /respawn set <name>"), false);
             return 1;
         }
 
         source.sendSuccess(() ->
-            Component.literal("--- Your Respawn Beacons ---").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), false);
+            header("--- Your Respawn Beacons ---"), false);
         for (RespawnManager.SavedBeacon b : beacons) {
             source.sendSuccess(() ->
-                Component.literal(" - " + b.name + " @ " + b.x + ", " + b.y + ", " + b.z)
-                    .withStyle(ChatFormatting.WHITE), false);
+                bright(" - " + b.name + " @ " + b.x + ", " + b.y + ", " + b.z), false);
         }
         return 1;
     }
@@ -89,7 +88,7 @@ public class RespawnCommand {
         }
 
         source.sendSuccess(() ->
-            Component.literal("Respawning at beacon '" + name + "'...").withStyle(ChatFormatting.GREEN), false);
+            success("Respawning at beacon '" + name + "'..."), false);
         rm.respawnPlayerAtBeacon(player, name);
         return 1;
     }
@@ -101,7 +100,7 @@ public class RespawnCommand {
         RespawnManager rm = TeamSystem.getRespawnManager();
         if (rm.removeBeacon(name, player)) {
             source.sendSuccess(() ->
-                Component.literal("Beacon '" + name + "' removed").withStyle(ChatFormatting.GREEN), false);
+                success("Beacon '" + name + "' removed"), false);
         } else {
             source.sendFailure(Component.literal("Beacon '" + name + "' not found"));
         }

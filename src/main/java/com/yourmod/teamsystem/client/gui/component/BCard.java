@@ -4,14 +4,15 @@ import java.util.List;
 import java.util.ArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import com.yourmod.teamsystem.client.gui.UITheme;
 
 public class BCard {
     private int x, y, width, height;
     private int animOffset = 0;
     private static final int ANIM_OFFSET_START = -20;
-    private int borderColor = 0xFF555555;
-    private int backgroundColor = 0xCC222222;
-    private int accentColor = 0xFF00AAFF;
+    private int borderColor = UITheme.BORDER;
+    private int backgroundColor = UITheme.BG_PANEL;
+    private int accentColor = UITheme.ACCENT;
     private float animProgress = 0F;
     private boolean isVisible = true;
 

@@ -1,70 +1,118 @@
 package com.yourmod.teamsystem.client.gui.overlay;
 
+import com.yourmod.teamsystem.client.gui.UITheme;
+
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.PlayerListEntry;
+import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
+import com.yourmod.teamsystem.core.Rank;
+import com.yourmod.teamsystem.core.Team;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 import java.util.Map;
 import java.util.UUID;
 
-public class BattlefieldTabOverlay implements IGuiOverlay {
-    private static final int PANEL_W = 320;
-    private static final int PANEL_H = 240;
-    private static final int HEADER_H = 30;
+public class BattlefieldTabOverlay {
 
-    @Override
-    public void render(ForgeGui gui, GuiGraphics g, float partialTick, int screenWidth, int screenHeight) {
-        Minecraft mc = Minecraft.getInstance();
-        if (!mc.options.keyPlayerList.isDown()) return;
+    private static final int COLOR_BG        = UITheme.BG_SCREEN;
+    private static final int COLOR_HEADER    = UITheme.BG_PANEL;
+    private static final int COLOR_ORANGE    = UITheme.ACCENT;
+    private static final int COLOR_TEXT      = UITheme.TEXT_PRIMARY;
+    private static final int COLOR_SUBTEXT   = UITheme.TEXT_SECONDARY;
+    private static final int COLOR_ROW_ALT   = UITheme.BORDER_ALT;
 
-        int panelX = (screenWidth - PANEL_W) / 2;
-        int panelY = (screenHeight - PANEL_H) / 2;
+    private static final int COL_RANK = 50;
+    private static final int COL_CS   = 70;
+    private static final int COL_NICK = 80;
+    private static final int COL_SQ   = 40;
+    private static final int COL_KD   = 50;
+    private static final int COL_PING = 36;
+    private static final int TOTAL_W  = COL_RANK + COL_CS + COL_NICK + COL_SQ + COL_KD + COL_PING + 12;
+    private static final int ROW_H    = 14;
 
-        g.fill(panelX, panelY, panelX + PANEL_W, panelY + PANEL_H, 0xCC111111);
-        g.fill(panelX, panelY, panelX + PANEL_W, panelY + 1, 0xFF555555);
-        g.fill(panelX, panelY + PANEL_H - 1, panelX + PANEL_W, panelY + PANEL_H, 0xFF555555);
-        g.fill(panelX, panelY, panelX + 1, panelY + PANEL_H, 0xFF555555);
-        g.fill(panelX + PANEL_W - 1, panelY, panelX + PANEL_W, panelY + PANEL_H, 0xFF555555);
+    private boolean visible = false;
+    private float   alpha   = 0f;
 
-        String title = "BATTLEFIELD 2 - " + ClientTeamData.getCurrentMapName();
-        g.drawString(mc.font, title, panelX + 10, panelY + 8, 0xFF00AAFF);
+    public void setVisible(boolean v) { this.visible = v; }
 
-        String ticketStr = "NATO: " + ClientTeamData.getNatoTickets() + " / RUSSIA: " + ClientTeamData.getRussiaTickets();
-        g.drawString(mc.font, ticketStr, panelX + 10, panelY + 20, 0xFFFFFFFF);
+    public void tick() {
+        alpha = AnimationHelper.lerp(alpha, visible ? 1f : 0f, 0.18f);
+    }
 
-        String timeStr = "TIME: " + formatTime(ClientTeamData.matchTimeSeconds);
-        g.drawString(mc.font, timeStr, panelX + PANEL_W - 80, panelY + 20, 0xFFFFFFFF);
+    public void render(GuiGraphics g, int screenWidth, int screenHeight) {
+        if (alpha < 0.02f) return;
+        int a = (int)(alpha * 255);
 
-        int nameX = panelX + 10;
-        int killsX = panelX + 180;
-        int deathsX = panelX + 220;
-        int squadX = panelX + 260;
+        int panelX = screenWidth / 2 - TOTAL_W / 2;
+        int panelY = 20;
 
-        g.drawString(mc.font, "NAME", nameX, panelY + HEADER_H + 2, 0xFFAAAAAA);
-        g.drawString(mc.font, "K", killsX, panelY + HEADER_H + 2, 0xFFAAAAAA);
-        g.drawString(mc.font, "D", deathsX, panelY + HEADER_H + 2, 0xFFAAAAAA);
-        g.drawString(mc.font, "SQD", squadX, panelY + HEADER_H + 2, 0xFFAAAAAA);
+        g.fill(panelX - 4, panelY - 4,
+               panelX + TOTAL_W + 4, panelY + countRows() * ROW_H + 32,
+               AnimationHelper.withAlpha(COLOR_BG, (int)(alpha * 0xCC)));
 
-        int yOff = panelY + HEADER_H + 12;
-        for (var entry : ClientTeamData.playerDataMap.entrySet()) {
-            if (yOff > panelY + PANEL_H - 10) break;
-            PlayerListEntry pData = entry.getValue();
-            int teamOrdinal = pData.teamOrdinal();
-            int color = teamOrdinal == 0 ? 0xFF4488FF : (teamOrdinal == 1 ? 0xFFFF4444 : 0xFF888888);
-            g.drawString(mc.font, pData.callsign(), nameX, yOff, color);
-            g.drawString(mc.font, String.valueOf(pData.kills()), killsX, yOff, 0xFFFFFFFF);
-            g.drawString(mc.font, String.valueOf(pData.deaths()), deathsX, yOff, 0xFFFFFFFF);
-            g.drawString(mc.font, pData.squad(), squadX, yOff, 0xFFAAAAAA);
-            yOff += 10;
+        drawHeaderRow(g, panelX, panelY, a);
+
+        int y = panelY + ROW_H + 4;
+        int rowIdx = 0;
+        Map<UUID, PlayerListEntry> map = ClientTeamData.playerDataMap;
+        if (map == null) return;
+
+        for (Map.Entry<UUID, PlayerListEntry> entry : map.entrySet()) {
+            PlayerListEntry ple = entry.getValue();
+            if (rowIdx % 2 == 0) {
+                g.fill(panelX, y, panelX + TOTAL_W, y + ROW_H, AnimationHelper.withAlpha(COLOR_ROW_ALT, (int)(alpha * 0x0A)));
+            }
+            drawPlayerRow(g, panelX, y, ple, a);
+            y += ROW_H;
+            rowIdx++;
         }
     }
 
-    private String formatTime(int seconds) {
-        int m = seconds / 60;
-        int s = seconds % 60;
-        return String.format("%02d:%02d", m, s);
+    private void drawHeaderRow(GuiGraphics g, int x, int y, int a) {
+        g.fill(x, y, x + TOTAL_W, y + ROW_H, AnimationHelper.withAlpha(COLOR_HEADER, a));
+        g.fill(x, y, x + TOTAL_W, y + 2, AnimationHelper.withAlpha(COLOR_ORANGE, a));
+
+        int[] cols = { COL_RANK, COL_CS, COL_NICK, COL_SQ, COL_KD, COL_PING };
+        String[] headers = { "Rank", "Callsign", "Nick", "Sq", "K/D", "Ping" };
+        int cx = x + 4;
+        for (int i = 0; i < headers.length; i++) {
+            g.drawString(Minecraft.getInstance().font, headers[i], cx, y + 3,
+                AnimationHelper.withAlpha(COLOR_ORANGE, a));
+            cx += cols[i];
+        }
+    }
+
+    private void drawPlayerRow(GuiGraphics g, int x, int y, PlayerListEntry ple, int a) {
+        Minecraft mc = Minecraft.getInstance();
+        int cx = x + 4;
+
+        Rank rank = Rank.fromOrdinal(ple.rank());
+        String rankStr = rank != null ? rank.getDisplayName(ple.teamOrdinal() == Team.RUSSIA.ordinal()) : "-";
+        g.drawString(mc.font, rankStr, cx, y + 3, AnimationHelper.withAlpha(COLOR_TEXT, a));
+        cx += COL_RANK;
+
+        g.drawString(mc.font, ple.callsign() != null ? ple.callsign() : "-", cx, y + 3,
+            AnimationHelper.withAlpha(COLOR_TEXT, a));
+        cx += COL_CS;
+
+        g.drawString(mc.font, "...", cx, y + 3, AnimationHelper.withAlpha(COLOR_SUBTEXT, a));
+        cx += COL_NICK;
+
+        g.drawString(mc.font, ple.squad() != null ? ple.squad() : "-", cx, y + 3,
+            AnimationHelper.withAlpha(COLOR_SUBTEXT, a));
+        cx += COL_SQ;
+
+        g.drawString(mc.font, ple.kills() + "/" + ple.deaths(), cx, y + 3,
+            AnimationHelper.withAlpha(COLOR_TEXT, a));
+        cx += COL_KD;
+
+        g.drawString(mc.font, "...", cx, y + 3, AnimationHelper.withAlpha(COLOR_SUBTEXT, a));
+    }
+
+    private int countRows() {
+        if (ClientTeamData.playerDataMap == null) return 0;
+        return Math.min(ClientTeamData.playerDataMap.size(), 32);
     }
 }
+

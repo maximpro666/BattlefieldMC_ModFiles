@@ -1,117 +1,134 @@
 package com.yourmod.teamsystem.client.gui.screen;
 
-import com.yourmod.teamsystem.client.ClientTeamData;
-import com.yourmod.teamsystem.client.gui.component.BButton;
-import com.yourmod.teamsystem.client.gui.component.BProgressBar;
-import com.yourmod.teamsystem.client.gui.component.BScrollPanel;
-import com.yourmod.teamsystem.network.MapVotePacket;
+import com.yourmod.teamsystem.client.gui.UITheme;
+
 import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.network.MapVotePacket;
+import com.yourmod.teamsystem.client.gui.component.BButton;
+import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
 
 public class VoteScreen extends Screen {
-    private final Screen parent;
-    private BScrollPanel scroll;
-    private List<MapOption> maps;
 
-    private static class MapOption {
-        String id;
-        String name;
-        int votes;
-        int maxVotes;
-    }
+    private static final int COLOR_BG       = UITheme.BG_SCREEN;
+    private static final int COLOR_CARD     = UITheme.BG_PANEL;
+    private static final int COLOR_ORANGE   = UITheme.ACCENT;
+    private static final int COLOR_BORDER   = UITheme.BORDER;
+    private static final int COLOR_TEXT     = UITheme.TEXT_PRIMARY;
+    private static final int COLOR_SUBTEXT  = UITheme.TEXT_MUTED;
+    private static final int COLOR_SELECTED = UITheme.ACCENT_GHOST;
 
-    public VoteScreen(Screen parent) {
+    private static final List<String> MAPS = Arrays.asList(
+        "Operation Sandstorm",
+        "Arctic Outpost",
+        "Urban Assault",
+        "Desert Storm",
+        "Eastern Front"
+    );
+
+    private String selectedMap = null;
+    private float fadeAlpha    = 0f;
+    private long openTime;
+    private float[] hoverState = new float[MAPS.size()];
+
+    private static final int CARD_W = 220;
+    private static final int CARD_H = 44;
+    private static final int GAP    = 8;
+
+    public VoteScreen() {
         super(Component.literal("Map Vote"));
-        this.parent = parent;
     }
 
     @Override
     protected void init() {
-        maps = new ArrayList<>();
+        openTime = System.currentTimeMillis();
+        int totalH = MAPS.size() * (CARD_H + GAP) - GAP;
+        int listY  = height / 2 - totalH / 2;
 
-        scroll = new BScrollPanel(10, 40, width - 20, height - 100);
-        rebuildList();
-
-        addRenderableWidget(new BButton(width / 2 - 50, height - 35, 100, 20, "Close", btn -> {
-            minecraft.setScreen(parent);
-        }));
+        addRenderableWidget(new BButton(
+            width / 2 - 60, height / 2 + totalH / 2 + 20, 120, 20,
+            Component.literal("Cast Vote"), btn -> castVote()
+        ));
     }
 
-    public void setMaps(List<String> mapIds, List<String> mapNames, List<Integer> voteCounts) {
-        maps.clear();
-        for (int i = 0; i < mapIds.size() && i < mapNames.size(); i++) {
-            MapOption mo = new MapOption();
-            mo.id = mapIds.get(i);
-            mo.name = mapNames.get(i);
-            mo.votes = i < voteCounts.size() ? voteCounts.get(i) : 0;
-            mo.maxVotes = 1;
-            maps.add(mo);
+    private void castVote() {
+        if (selectedMap != null) {
+            PacketHandler.CHANNEL.sendToServer(new MapVotePacket(selectedMap));
+            onClose();
         }
-        if (!maps.isEmpty()) {
-            int maxV = maps.stream().mapToInt(m -> m.votes).max().orElse(1);
-            for (MapOption mo : maps) mo.maxVotes = Math.max(maxV, 1);
-        }
-        rebuildList();
-    }
-
-    private void rebuildList() {
-        scroll.clearContent();
-        int[] idx = {0};
-        for (MapOption mo : maps) {
-            int yOff = idx[0] * 40;
-            scroll.addContent(g -> {
-                int sx = scroll.getX() + 5;
-                int sy = scroll.getY() + yOff - scroll.getScrollOffset();
-                g.drawString(font, mo.name, sx, sy + 2, 0xFFFFFFFF);
-
-                BProgressBar bar = new BProgressBar(sx, sy + 14, scroll.getWidth() - 20, 12, 0xFF00AAFF);
-                bar.setFraction(mo.maxVotes > 0 ? (float) mo.votes / mo.maxVotes : 0);
-                bar.render(g);
-
-                String voteStr = mo.votes + " votes";
-                g.drawString(font, voteStr, sx + scroll.getWidth() - 20 - font.width(voteStr), sy + 2, 0xFFAAAAAA);
-            });
-            idx[0]++;
-        }
-        scroll.setContentHeight(idx[0] * 40);
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (button == 0) {
-            int idx = (int) ((my - scroll.getY() + scroll.getScrollOffset()) / 40);
-            if (idx >= 0 && idx < maps.size()) {
-                PacketHandler.CHANNEL.sendToServer(new MapVotePacket(maps.get(idx).id));
+    public void render(GuiGraphics g, int mx, int my, float pt) {
+        float elapsed = (System.currentTimeMillis() - openTime) / 250f;
+        fadeAlpha = Math.min(1f, elapsed);
+
+        g.fill(0, 0, width, height, AnimationHelper.withAlpha(COLOR_BG, (int)(fadeAlpha * 0xCC)));
+
+        String title = "VOTE FOR NEXT MAP";
+        int tw = font.width(title);
+        g.drawString(font, title, width / 2 - tw / 2, 20, AnimationHelper.withAlpha(COLOR_ORANGE, (int)(fadeAlpha * 255)));
+
+        int totalH = MAPS.size() * (CARD_H + GAP) - GAP;
+        int listY  = height / 2 - totalH / 2;
+        int listX  = width / 2 - CARD_W / 2;
+
+        for (int i = 0; i < MAPS.size(); i++) {
+            String map = MAPS.get(i);
+            int cy = listY + i * (CARD_H + GAP);
+            boolean hov = mx >= listX && mx <= listX + CARD_W && my >= cy && my <= cy + CARD_H;
+            hoverState[i] = AnimationHelper.lerp(hoverState[i], hov ? 1f : 0f, 0.15f);
+            boolean sel = map.equals(selectedMap);
+            drawMapCard(g, listX, cy, map, sel, hoverState[i], fadeAlpha);
+        }
+
+        super.render(g, mx, my, pt);
+    }
+
+    private void drawMapCard(GuiGraphics g, int x, int y, String mapName,
+                              boolean selected, float hover, float alpha) {
+        int bg  = selected
+            ? AnimationHelper.withAlpha(COLOR_SELECTED, (int)(alpha * 255))
+            : AnimationHelper.withAlpha(COLOR_CARD, (int)(alpha * 0xDD));
+        int brd = selected
+            ? AnimationHelper.withAlpha(COLOR_ORANGE, (int)(alpha * 255))
+            : AnimationHelper.withAlpha(COLOR_BORDER, (int)(alpha * (0x44 + hover * 0xBB)));
+
+        g.fill(x, y, x + CARD_W, y + CARD_H, bg);
+        g.fill(x, y, x + CARD_W, y + 1, brd);
+        g.fill(x, y + CARD_H - 1, x + CARD_W, y + CARD_H, brd);
+        g.fill(x, y, x + 1, y + CARD_H, brd);
+        g.fill(x + CARD_W - 1, y, x + CARD_W, y + CARD_H, brd);
+
+        if (selected) {
+            g.fill(x, y, x + 3, y + CARD_H, AnimationHelper.withAlpha(COLOR_ORANGE, (int)(alpha * 255)));
+        }
+
+        int tw = font.width(mapName);
+        g.drawString(font, mapName, x + CARD_W / 2 - tw / 2, y + CARD_H / 2 - 4,
+            AnimationHelper.withAlpha(COLOR_TEXT, (int)(alpha * 255)));
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int btn) {
+        int totalH = MAPS.size() * (CARD_H + GAP) - GAP;
+        int listY  = height / 2 - totalH / 2;
+        int listX  = width / 2 - CARD_W / 2;
+        for (int i = 0; i < MAPS.size(); i++) {
+            int cy = listY + i * (CARD_H + GAP);
+            if (mx >= listX && mx <= listX + CARD_W && my >= cy && my <= cy + CARD_H) {
+                selectedMap = MAPS.get(i);
+                return true;
             }
-            return true;
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(mx, my, btn);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        g.fill(0, 0, width, height, 0xCC111111);
-        String title = "MAP VOTE";
-        int titleW = font.width(title);
-        g.drawString(font, title, (width - titleW) / 2, 16, 0xFF00AAFF);
-        scroll.render(g);
-        super.render(g, mouseX, mouseY, partialTick);
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        scroll.onScroll(mouseX, mouseY, delta);
-        return true;
-    }
-
-    @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
+    public boolean isPauseScreen() { return false; }
 }

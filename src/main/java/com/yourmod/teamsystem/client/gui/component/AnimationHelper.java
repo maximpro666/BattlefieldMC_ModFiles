@@ -29,4 +29,33 @@ public class AnimationHelper {
         float mod = value % (max * 2.0F);
         return mod <= max ? mod : max * 2.0F - mod;
     }
+
+    public static int withAlpha(int color, int alpha) {
+        return (alpha & 0xFF) << 24 | (color & 0xFFFFFF);
+    }
+
+    public static int blendColors(int base, int overlay, float overlayAlpha) {
+        int ba = (base >> 24) & 0xFF;
+        int br = (base >> 16) & 0xFF;
+        int bg = (base >>  8) & 0xFF;
+        int bb =  base        & 0xFF;
+
+        int oa = (overlay >> 24) & 0xFF;
+        int or = (overlay >> 16) & 0xFF;
+        int og = (overlay >>  8) & 0xFF;
+        int ob =  overlay        & 0xFF;
+
+        float a = Mth.clamp(overlayAlpha, 0f, 1f) * (oa / 255f);
+        int r = (int)(br * (1f - a) + or * a);
+        int g = (int)(bg * (1f - a) + og * a);
+        int b_val = (int)(bb * (1f - a) + ob * a);
+
+        return (ba << 24) | (r << 16) | (g << 8) | b_val;
+    }
+
+    public static int hpColor(float fraction) {
+        if (fraction > 0.6f) return 0xFF50B050;
+        if (fraction > 0.3f) return 0xFFCCA030;
+        return 0xFFCC3030;
+    }
 }

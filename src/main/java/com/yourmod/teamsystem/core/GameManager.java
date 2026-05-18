@@ -3,6 +3,9 @@ package com.yourmod.teamsystem.core;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.network.GameStateSyncPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
+import static com.yourmod.teamsystem.core.ChatHelper.*;
+import static com.yourmod.teamsystem.core.TeamSystemColors.*;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -84,7 +87,7 @@ public class GameManager {
         MapPoolManager mapPool = TeamSystem.getMapPoolManager();
 
         if (!mapPool.hasAvailableMaps()) {
-            broadcast("No available maps!", ChatFormatting.RED);
+            broadcast("No available maps!", CHAT_ERROR);
             return;
         }
 
@@ -124,10 +127,12 @@ public class GameManager {
         ContributionManager contrib = TeamSystem.getContributionManager();
         if (contrib != null) contrib.resetMatch();
 
-        try {
-            TeamSystem.getMapPoolManager().copyToLive(map);
-        } catch (Exception e) {
-            TeamSystem.LOGGER.error("Failed to copy map {} from source: {}", map.getName(), e.getMessage());
+        if (!TeamSystem.getMapPoolManager().copyToLive(map)) {
+            TeamSystem.LOGGER.error("Failed to copy map {} from source, aborting start", map.getName());
+            currentPhase = GamePhase.LOBBY;
+            phaseTimer = 0;
+            currentMap = null;
+            return;
         }
         useMapWorld(map);
         applyMapConfig(map);
@@ -135,7 +140,7 @@ public class GameManager {
 
         gamerule(server.overworld(), "liberateAttachment", "false");
 
-        broadcast("Game started on map: " + map.getName(), ChatFormatting.GREEN, ChatFormatting.BOLD);
+        broadcast("Game started on map: " + map.getName(), CHAT_SUCCESS, CHAT_EMPHASIS);
         syncPhaseToAll();
         TeamSystem.LOGGER.info("Game started on map: {}", map.getName());
     }
@@ -147,11 +152,11 @@ public class GameManager {
         winningTeam = winner;
         phaseTimer = 80;
 
-        broadcast("=== GAME OVER ===", ChatFormatting.GOLD, ChatFormatting.BOLD);
+        broadcast("=== GAME OVER ===", CHAT_ACCENT, CHAT_EMPHASIS);
         server.getPlayerList().broadcastSystemMessage(
-            Component.literal("Team ").withStyle(ChatFormatting.WHITE)
+            bright("Team ")
                 .append(winner.getColoredName())
-                .append(Component.literal(" wins!").withStyle(ChatFormatting.WHITE)), false);
+                .append(bright(" wins!")), false);
 
         EconomyManager econ = TeamSystem.getEconomyManager();
         if (econ != null) {
@@ -169,7 +174,7 @@ public class GameManager {
                 pcd.addScorePoints(baseSP);
                 pcd.addBattleCredits(baseBC);
                 econ.syncAll(p);
-                p.sendSystemMessage(Component.literal("§6+ " + baseBC + " BC, + " + baseSP + " SP").withStyle(ChatFormatting.GOLD));
+                p.sendSystemMessage(accent("+ " + baseBC + " BC, + " + baseSP + " SP"));
             }
             tm.setDirty();
         }
@@ -201,7 +206,7 @@ public class GameManager {
             if (phaseTimer % 20 == 0 && phaseTimer > 0) {
                 int sec = phaseTimer / 20;
                 if (sec <= 5 || sec % 5 == 0) {
-                    broadcast("Voting ends in " + sec + "s. Vote: /map vote <name>", ChatFormatting.AQUA);
+                    broadcast("Voting ends in " + sec + "s. Vote: /map vote <name>", CHAT_INFO);
                 }
             }
         }
@@ -211,7 +216,7 @@ public class GameManager {
             if (phaseTimer % 20 == 0 && phaseTimer > 0) {
                 int sec = phaseTimer / 20;
                 if (sec <= 5 || sec % 10 == 0) {
-                    broadcast("Game starts in " + sec + "s", ChatFormatting.AQUA);
+                    broadcast("Game starts in " + sec + "s", CHAT_INFO);
                 }
             }
             if (phaseTimer <= 0) startGame();
@@ -241,7 +246,7 @@ public class GameManager {
                         if (natoTickets > 0 && russiaTickets > 0) {
                             overtime = true;
                             overtimeTicks = 0;
-                            broadcast("OVERTIME!", ChatFormatting.GOLD, ChatFormatting.BOLD);
+                            broadcast("OVERTIME!", CHAT_ACCENT, CHAT_EMPHASIS);
                         }
                     }
                 } else {
@@ -273,7 +278,7 @@ public class GameManager {
 
         if (map != null) {
             pool.deleteLive(map);
-            broadcast("Map '" + map.getName() + "' instance cleaned up", ChatFormatting.GRAY);
+            broadcast("Map '" + map.getName() + "' instance cleaned up", CHAT_NEUTRAL);
         }
 
         startVoting();
@@ -290,20 +295,20 @@ public class GameManager {
 
         List<MapConfig> available = pool.getMapsByState(MapState.AVAILABLE);
         if (available.isEmpty()) {
-            broadcast("No available maps!", ChatFormatting.RED);
+            broadcast("No available maps!", CHAT_ERROR);
             currentPhase = GamePhase.LOBBY;
             phaseTimer = 0;
             returnToLobby();
             return;
         }
 
-        broadcast("=== VOTE FOR NEXT MAP ===", ChatFormatting.GOLD, ChatFormatting.BOLD);
+        broadcast("=== VOTE FOR NEXT MAP ===", CHAT_ACCENT, CHAT_EMPHASIS);
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < available.size(); i++) {
             sb.append("\n").append(i + 1).append(". ").append(available.get(i).getName());
         }
-        broadcast(sb.toString(), ChatFormatting.YELLOW);
-        broadcast("Use /map vote <name> to vote!", ChatFormatting.GREEN);
+        broadcast(sb.toString(), CHAT_WARNING);
+        broadcast("Use /map vote <name> to vote!", CHAT_SUCCESS);
 
         applyLobbyRules();
         syncPhaseToAll();
@@ -315,21 +320,21 @@ public class GameManager {
 
         String winner = pool.resolveVoteWinner();
         if (winner != null && pool.selectMap(winner)) {
-            broadcast("Map '" + winner + "' won the vote!", ChatFormatting.GOLD);
+            broadcast("Map '" + winner + "' won the vote!", CHAT_ACCENT);
         } else {
             MapConfig picked = pool.pickNextAvailable();
             if (picked == null) {
-                broadcast("No available maps!", ChatFormatting.RED);
+                broadcast("No available maps!", CHAT_ERROR);
                 startVoting();
                 return;
             }
-            broadcast("Auto-selected map: " + picked.getName(), ChatFormatting.YELLOW);
+            broadcast("Auto-selected map: " + picked.getName(), CHAT_WARNING);
         }
 
         pool.clearVotes();
         currentPhase = GamePhase.LOBBY;
         phaseTimer = COUNTDOWN_SECONDS * 20;
-        broadcast("Game starts in " + COUNTDOWN_SECONDS + "s on " + pool.getCurrentMap().map(MapConfig::getName).orElse("?") + "!", ChatFormatting.GREEN);
+        broadcast("Game starts in " + COUNTDOWN_SECONDS + "s on " + pool.getCurrentMap().map(MapConfig::getName).orElse("?") + "!", CHAT_SUCCESS);
     }
 
     private void returnToLobby() {
@@ -345,7 +350,7 @@ public class GameManager {
         if (pool.hasAvailableMaps()) {
             pool.pickNextAvailable();
         }
-        broadcast("Game starts in " + COUNTDOWN_SECONDS + "s", ChatFormatting.GREEN);
+        broadcast("Game starts in " + COUNTDOWN_SECONDS + "s", CHAT_SUCCESS);
         TeamSystem.LOGGER.info("Returned to lobby");
     }
 
@@ -353,7 +358,7 @@ public class GameManager {
 
     public boolean voteMap(ServerPlayer player, String mapName) {
         if (currentPhase != GamePhase.VOTING) {
-            player.sendSystemMessage(Component.literal("Not in voting phase!").withStyle(ChatFormatting.RED));
+            player.sendSystemMessage(error("Not in voting phase!"));
             return false;
         }
         MapPoolManager pool = TeamSystem.getMapPoolManager();
@@ -361,7 +366,7 @@ public class GameManager {
         boolean found = pool.getMapsByState(MapState.AVAILABLE).stream()
             .anyMatch(m -> m.getName().equalsIgnoreCase(mapName));
         if (!found) {
-            player.sendSystemMessage(Component.literal("Map not available: " + mapName).withStyle(ChatFormatting.RED));
+            player.sendSystemMessage(error("Map not available: " + mapName));
             return false;
         }
 
@@ -373,12 +378,12 @@ public class GameManager {
     public void startCountdown(int seconds) {
         if (currentPhase != GamePhase.VOTING && currentPhase != GamePhase.LOBBY) return;
         phaseTimer = seconds * 20;
-        broadcast("Countdown set to " + seconds + "s", ChatFormatting.GREEN);
+        broadcast("Countdown set to " + seconds + "s", CHAT_SUCCESS);
     }
 
     public void cancelCountdown() {
         phaseTimer = 0;
-        broadcast("Countdown cancelled.", ChatFormatting.RED);
+        broadcast("Countdown cancelled.", CHAT_ERROR);
     }
 
     // ========== World ==========
@@ -555,7 +560,7 @@ public class GameManager {
         return w != null ? w : server.overworld();
     }
 
-    private boolean forceLoading = false;
+    private static final ThreadLocal<Boolean> loadingDimension = ThreadLocal.withInitial(() -> false);
 
     private ServerLevel getMapWorldNoFallback(MapConfig map) {
         String instanceKey = map.getMatchInstance();
@@ -566,21 +571,20 @@ public class GameManager {
         if (instanceKey.startsWith("overworld_")) return null;
         ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", instanceKey));
         ServerLevel w = server.getLevel(key);
-        if (w == null && !forceLoading) {
-            forceLoading = true;
-            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
-                "execute in teamsystem:" + instanceKey + " run say Loading dimension " + instanceKey);
-            w = server.getLevel(key);
-            if (w == null) {
-                TeamSystem.LOGGER.warn("Dimension {} not immediately available after /reload, retrying once", instanceKey);
-                server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
-                    "execute in teamsystem:" + instanceKey + " run say Loading dimension " + instanceKey + " (retry)");
-                w = server.getLevel(key);
+        if (w == null && !loadingDimension.get()) {
+            loadingDimension.set(true);
+            try {
+                for (int attempt = 0; attempt < 3 && w == null; attempt++) {
+                    server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
+                        "execute in teamsystem:" + instanceKey + " run say Loading dimension " + instanceKey);
+                    w = server.getLevel(key);
+                }
+                if (w == null) {
+                    TeamSystem.LOGGER.error("FAILED to load dimension {} after 3 attempts", instanceKey);
+                }
+            } finally {
+                loadingDimension.set(false);
             }
-            if (w == null) {
-                TeamSystem.LOGGER.error("FAILED to load dimension {} after 3 attempts", instanceKey);
-            }
-            forceLoading = false;
         }
         return w;
     }

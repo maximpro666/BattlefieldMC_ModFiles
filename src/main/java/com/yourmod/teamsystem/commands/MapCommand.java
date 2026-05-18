@@ -9,6 +9,7 @@ import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.MapConfig;
 import com.yourmod.teamsystem.core.MapPoolManager;
 import com.yourmod.teamsystem.core.MapState;
+import static com.yourmod.teamsystem.core.ChatHelper.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -91,8 +92,7 @@ public class MapCommand {
         MapPoolManager pool = TeamSystem.getMapPoolManager();
         String mapList = pool.getMapListFormatted();
         context.getSource().sendSuccess(() ->
-            Component.literal("=== Map Pool ===\n" + mapList)
-                .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), false);
+            header("=== Map Pool ===\n" + mapList), false);
         return 1;
     }
 
@@ -100,8 +100,7 @@ public class MapCommand {
         MapPoolManager pool = TeamSystem.getMapPoolManager();
         String mapList = pool.getAvailableMapListFormatted();
         context.getSource().sendSuccess(() ->
-            Component.literal("=== Available Maps ===\n" + mapList)
-                .withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD), false);
+            styled("=== Available Maps ===\n" + mapList, ChatFormatting.GREEN, ChatFormatting.BOLD), false);
         return 1;
     }
 
@@ -111,12 +110,10 @@ public class MapCommand {
 
         if (pool.selectMap(index)) {
             context.getSource().sendSuccess(() ->
-                Component.literal("Map selected for next match")
-                    .withStyle(ChatFormatting.GREEN), true);
+                success("Map selected for next match"), true);
         } else {
             context.getSource().sendFailure(
-                Component.literal("Invalid index or map not AVAILABLE. Use /map available")
-                    .withStyle(ChatFormatting.RED));
+                error("Invalid index or map not AVAILABLE. Use /map available"));
         }
         return 1;
     }
@@ -127,11 +124,10 @@ public class MapCommand {
 
         if (pool.selectMap(name)) {
             context.getSource().sendSuccess(() ->
-                Component.literal("Map selected: " + name).withStyle(ChatFormatting.GREEN), true);
+                success("Map selected: " + name), true);
         } else {
             context.getSource().sendFailure(
-                Component.literal("Map not found or not AVAILABLE: " + name)
-                    .withStyle(ChatFormatting.RED));
+                error("Map not found or not AVAILABLE: " + name));
         }
         return 1;
     }
@@ -140,15 +136,13 @@ public class MapCommand {
         MapPoolManager pool = TeamSystem.getMapPoolManager();
         pool.reloadConfig();
         context.getSource().sendSuccess(() ->
-            Component.literal("Map config reloaded! " + pool.getMaps().size() + " maps loaded.")
-                .withStyle(ChatFormatting.GREEN), true);
+            success("Map config reloaded! " + pool.getMaps().size() + " maps loaded."), true);
         return 1;
     }
 
     private static int listStates(CommandContext<CommandSourceStack> context) {
         MapPoolManager pool = TeamSystem.getMapPoolManager();
-        context.getSource().sendSuccess(() -> Component.literal("=== Map States ===")
-            .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), false);
+        context.getSource().sendSuccess(() -> header("=== Map States ==="), false);
         context.getSource().sendSuccess(() ->
             Component.literal("Available: " + pool.getAvailableCount()), false);
         context.getSource().sendSuccess(() ->
@@ -160,13 +154,12 @@ public class MapCommand {
         MapPoolManager pool = TeamSystem.getMapPoolManager();
         if (pool.isMaintenanceRunning()) {
             context.getSource().sendFailure(
-                Component.literal("Maintenance already running!").withStyle(ChatFormatting.RED));
+                error("Maintenance already running!"));
             return 0;
         }
         pool.runMaintenance();
         context.getSource().sendSuccess(() ->
-            Component.literal("Maintenance complete. Available maps: " + pool.getAvailableCount())
-                .withStyle(ChatFormatting.GREEN), true);
+            success("Maintenance complete. Available maps: " + pool.getAvailableCount()), true);
         return 1;
     }
 
@@ -175,7 +168,7 @@ public class MapCommand {
         Map<String, Integer> tally = pool.getVoteTally();
         if (tally.isEmpty()) {
             context.getSource().sendSuccess(() ->
-                Component.literal("No votes yet!").withStyle(ChatFormatting.YELLOW), false);
+                warning("No votes yet!"), false);
             return 1;
         }
         StringBuilder sb = new StringBuilder("§6=== Vote Results ===\n");
@@ -188,7 +181,7 @@ public class MapCommand {
                 .append(" §7(").append(String.format("%.0f%%", e.getValue() * 100.0 / total)).append(")\n");
         }
         context.getSource().sendSuccess(() ->
-            Component.literal(sb.toString()).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), false);
+            header(sb.toString()), false);
         return 1;
     }
 
@@ -199,7 +192,7 @@ public class MapCommand {
         GameManager game = TeamSystem.getGameManager();
         MapConfig map = game.getCurrentMap();
         if (map == null) {
-            context.getSource().sendFailure(Component.literal("No map selected!").withStyle(ChatFormatting.RED));
+            context.getSource().sendFailure(error("No map selected!"));
             return 0;
         }
 
@@ -209,15 +202,13 @@ public class MapCommand {
         if (team.equals("nato")) {
             map.setNatoSpawn(pos);
             context.getSource().sendSuccess(() ->
-                Component.literal("NATO spawn set to " + pos[0] + " " + pos[1] + " " + pos[2])
-                    .withStyle(ChatFormatting.GREEN), true);
+                success("NATO spawn set to " + pos[0] + " " + pos[1] + " " + pos[2]), true);
         } else if (team.equals("russia")) {
             map.setRussiaSpawn(pos);
             context.getSource().sendSuccess(() ->
-                Component.literal("Russia spawn set to " + pos[0] + " " + pos[1] + " " + pos[2])
-                    .withStyle(ChatFormatting.GREEN), true);
+                success("Russia spawn set to " + pos[0] + " " + pos[1] + " " + pos[2]), true);
         } else {
-            context.getSource().sendFailure(Component.literal("Use: /map setspawn <nato|russia>").withStyle(ChatFormatting.RED));
+            context.getSource().sendFailure(error("Use: /map setspawn <nato|russia>"));
             return 0;
         }
 
@@ -234,7 +225,7 @@ public class MapCommand {
 
         if (game.voteMap(player, name)) {
             context.getSource().sendSuccess(() ->
-                Component.literal("Voted for map: " + name).withStyle(ChatFormatting.GREEN), false);
+                success("Voted for map: " + name), false);
         }
         return 1;
     }
@@ -246,8 +237,7 @@ public class MapCommand {
         if (optMap.isPresent()) {
             MapConfig map = optMap.get();
             context.getSource().sendSuccess(() ->
-                Component.literal("=== Current Map: " + map.getName() + " ===")
-                    .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), false);
+                header("=== Current Map: " + map.getName() + " ==="), false);
             context.getSource().sendSuccess(() ->
                 Component.literal("State: " + map.getState().name()), false);
             context.getSource().sendSuccess(() ->
@@ -260,8 +250,7 @@ public class MapCommand {
                 Component.literal("Tickets: " + map.getTickets()), false);
         } else {
             context.getSource().sendFailure(
-                Component.literal("No map currently selected.")
-                    .withStyle(ChatFormatting.RED));
+                error("No map currently selected."));
         }
         return 1;
     }

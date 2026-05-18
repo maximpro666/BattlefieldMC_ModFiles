@@ -10,6 +10,7 @@ import com.yourmod.teamsystem.core.MapConfig;
 import com.yourmod.teamsystem.core.MapPoolManager;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TicketManager;
+import static com.yourmod.teamsystem.core.ChatHelper.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -62,7 +63,7 @@ public class GameCommand {
 
         if (game.isPlaying()) {
             context.getSource().sendFailure(
-                Component.literal("Game is already in progress!").withStyle(ChatFormatting.RED));
+                error("Game is already in progress!"));
             return 0;
         }
 
@@ -75,7 +76,7 @@ public class GameCommand {
 
         if (!game.isPlaying()) {
             context.getSource().sendFailure(
-                Component.literal("No game is currently running.").withStyle(ChatFormatting.RED));
+                error("No game is currently running."));
             return 0;
         }
 
@@ -96,10 +97,10 @@ public class GameCommand {
 
         if (pool.selectMap(name)) {
             context.getSource().sendSuccess(() ->
-                Component.literal("Next map set to: " + name).withStyle(ChatFormatting.GREEN), true);
+                success("Next map set to: " + name), true);
         } else {
             context.getSource().sendFailure(
-                Component.literal("Map not found: " + name).withStyle(ChatFormatting.RED));
+                error("Map not found: " + name));
         }
         return 1;
     }
@@ -117,13 +118,13 @@ public class GameCommand {
         }
 
         context.getSource().sendSuccess(() ->
-            Component.literal("=== Game Status ===").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), false);
+            header("=== Game Status ==="), false);
         context.getSource().sendSuccess(() ->
-            Component.literal("Phase: " + phaseName).withStyle(ChatFormatting.AQUA), false);
+            info("Phase: " + phaseName), false);
 
         String mapName = pool.getCurrentMap().map(m -> m.getName()).orElse("none");
         context.getSource().sendSuccess(() ->
-            Component.literal("Current Map: " + mapName).withStyle(ChatFormatting.YELLOW), false);
+            warning("Current Map: " + mapName), false);
 
         if (game.getWinningTeam() != null) {
             context.getSource().sendSuccess(() ->

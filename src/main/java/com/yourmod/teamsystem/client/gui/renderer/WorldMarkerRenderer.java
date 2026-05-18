@@ -1,56 +1,51 @@
 package com.yourmod.teamsystem.client.gui.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import com.yourmod.teamsystem.client.ClientMarkerData;
-import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.core.MarkerData;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
+
+import java.util.List;
 
 public class WorldMarkerRenderer {
-    private static final double RENDER_DIST = 64.0;
 
-    public static void render(PoseStack poseStack, Camera camera, Matrix4f projectionMatrix) {
+    public void render(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera, float partialTick) {
+        List<MarkerData> markers = ClientMarkerData.getMarkers();
+        if (markers == null || markers.isEmpty()) return;
+
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
-
         Vec3 camPos = camera.getPosition();
-        var markers = ClientMarkerData.getMarkers();
-        if (markers.isEmpty()) return;
 
-        var bufferSource = mc.renderBuffers().bufferSource();
-        VertexConsumer builder = bufferSource.getBuffer(RenderType.LINES);
-
-        poseStack.pushPose();
-        Vec3 markerPos;
         for (MarkerData marker : markers) {
-            markerPos = new Vec3(marker.getX(), marker.getY(), marker.getZ());
-            double dist = markerPos.distanceTo(camPos);
-            if (dist > RENDER_DIST) continue;
-
             double dx = marker.getX() - camPos.x;
-            double dy = marker.getY() - camPos.y;
+            double dy = marker.getY() + 2.5 - camPos.y;
             double dz = marker.getZ() - camPos.z;
 
-            int teamColor = marker.getTeamOrdinal() == 0 ? 0x4444FFFF : 0xFF4444FF;
-            float r = ((teamColor >> 24) & 0xFF) / 255f;
-            float g = ((teamColor >> 16) & 0xFF) / 255f;
-            float b = ((teamColor >> 8) & 0xFF) / 255f;
-            float a = (teamColor & 0xFF) / 255f;
+            double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (dist > 128) continue;
 
             poseStack.pushPose();
             poseStack.translate(dx, dy, dz);
-            Matrix4f mat = poseStack.last().pose();
-            builder.vertex(mat, 0, 0, 0).color(r, g, b, a).endVertex();
-            builder.vertex(mat, 0, 2, 0).color(r, g, b, a).endVertex();
+            poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
+            poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+
+            float scale = 0.025f;
+            poseStack.scale(scale, scale, scale);
+
+            String label = buildLabel(marker);
+            mc.font.draw(poseStack, label, -mc.font.width(label) / 2f, -4f, 0xFFFFFFFF);
+
             poseStack.popPose();
         }
-        poseStack.popPose();
-        bufferSource.endBatch(RenderType.LINES);
+    }
+
+    private String buildLabel(MarkerData m) {
+        String prefix = m.getType() != null ? "[" + m.getType().name() + "] " : "";
+        String lbl    = m.getLabel() != null ? m.getLabel() : "";
+        return prefix + lbl;
     }
 }

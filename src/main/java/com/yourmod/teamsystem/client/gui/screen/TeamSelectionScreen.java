@@ -1,78 +1,144 @@
 package com.yourmod.teamsystem.client.gui.screen;
 
+import com.yourmod.teamsystem.client.gui.UITheme;
+
 import com.yourmod.teamsystem.client.ClientTeamData;
-import com.yourmod.teamsystem.client.gui.component.BButton;
+import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.TeamSelectPacket;
+import com.yourmod.teamsystem.client.gui.component.BButton;
+import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class TeamSelectionScreen extends Screen {
-    private final Screen parent;
-    private static final int CARD_W = 180;
-    private static final int CARD_H = 220;
 
-    public TeamSelectionScreen(Screen parent) {
+    private static final int COLOR_ORANGE    = UITheme.ACCENT;
+    private static final int COLOR_BG        = UITheme.BG_SCREEN;
+    private static final int COLOR_CARD_BG   = UITheme.BG_SURFACE;
+    private static final int COLOR_NATO_ACCENT   = UITheme.TEAM_NATO;
+    private static final int COLOR_RUSSIA_ACCENT = UITheme.TEAM_RUSSIA;
+    private static final int COLOR_TEXT      = UITheme.TEXT_PRIMARY;
+    private static final int COLOR_SUBTEXT   = UITheme.TEXT_SECONDARY;
+    private static final int COLOR_BORDER    = UITheme.ACCENT;
+
+    private float fadeAlpha = 0f;
+    private long openTime;
+
+    private BButton natoButton;
+    private BButton russiaButton;
+    private BButton spectatorButton;
+
+    private float natoHover   = 0f;
+    private float russiaHover = 0f;
+
+    public TeamSelectionScreen() {
         super(Component.literal("Team Selection"));
-        this.parent = parent;
     }
 
     @Override
     protected void init() {
-        int gap = 30;
-        int totalW = 2 * CARD_W + gap;
-        int startX = (width - totalW) / 2;
-        int cy = height / 2 - CARD_H / 2;
+        openTime = System.currentTimeMillis();
+        int cx = width / 2;
+        int cy = height / 2;
+        int cardW = 180;
+        int cardH = 220;
+        int gap   = 24;
 
-        addRenderableWidget(new BButton(startX, cy + CARD_H + 10, CARD_W, 30, "NATO", btn -> {
-            PacketHandler.CHANNEL.sendToServer(new TeamSelectPacket(0));
-            minecraft.setScreen(parent);
-        }));
+        natoButton = addRenderableWidget(new BButton(
+            cx - cardW - gap / 2, cy - cardH / 2, cardW, cardH,
+            Component.literal(""), btn -> selectTeam(Team.NATO)
+        ));
 
-        addRenderableWidget(new BButton(startX + CARD_W + gap, cy + CARD_H + 10, CARD_W, 30, "RUSSIA", btn -> {
-            PacketHandler.CHANNEL.sendToServer(new TeamSelectPacket(1));
-            minecraft.setScreen(parent);
-        }));
+        russiaButton = addRenderableWidget(new BButton(
+            cx + gap / 2, cy - cardH / 2, cardW, cardH,
+            Component.literal(""), btn -> selectTeam(Team.RUSSIA)
+        ));
 
-        addRenderableWidget(new BButton(width / 2 - 50, cy + CARD_H + 50, 100, 20, "Back", btn -> {
-            minecraft.setScreen(parent);
-        }));
+        spectatorButton = addRenderableWidget(new BButton(
+            cx - 60, cy + cardH / 2 + 20, 120, 20,
+            Component.literal("Spectator"), btn -> selectTeam(Team.SPECTATOR)
+        ));
+    }
+
+    private void selectTeam(Team team) {
+        PacketHandler.CHANNEL.sendToServer(new TeamSelectPacket(team.ordinal()));
+        onClose();
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        g.fill(0, 0, width, height, 0xCC111111);
+    public void render(GuiGraphics g, int mx, int my, float pt) {
+        float elapsed = (System.currentTimeMillis() - openTime) / 250f;
+        fadeAlpha = Math.min(1f, elapsed);
+
+        int cx = width / 2;
+        int cy = height / 2;
+        int cardW = 180;
+        int cardH = 220;
+        int gap   = 24;
+
+        g.fill(0, 0, width, height, AnimationHelper.withAlpha(COLOR_BG, (int)(fadeAlpha * 0xCC)));
 
         String title = "SELECT YOUR TEAM";
         int titleW = font.width(title);
-        g.drawString(font, title, (width - titleW) / 2, 20, 0xFF00AAFF);
+        g.drawString(font, title, cx - titleW / 2, cy - cardH / 2 - 36, AnimationHelper.withAlpha(COLOR_ORANGE, (int)(fadeAlpha * 255)));
 
-        int gap = 30;
-        int totalW = 2 * CARD_W + gap;
-        int startX = (width - totalW) / 2;
-        int cy = height / 2 - CARD_H / 2;
+        int natoX = cx - cardW - gap / 2;
+        int natoY = cy - cardH / 2;
+        boolean natoHovered = mx >= natoX && mx <= natoX + cardW && my >= natoY && my <= natoY + cardH;
+        natoHover = AnimationHelper.lerp(natoHover, natoHovered ? 1f : 0f, 0.15f);
+        drawTeamCard(g, natoX, natoY, cardW, cardH, "NATO", "North Atlantic\nTreaty Organization",
+            COLOR_NATO_ACCENT, natoHover, fadeAlpha);
 
-        drawCard(g, startX, cy, "NATO", ClientTeamData.getNatoTickets());
-        drawCard(g, startX + CARD_W + gap, cy, "RUSSIA", ClientTeamData.getRussiaTickets());
+        int rusX = cx + gap / 2;
+        int rusY = cy - cardH / 2;
+        boolean rusHovered = mx >= rusX && mx <= rusX + cardW && my >= rusY && my <= rusY + cardH;
+        russiaHover = AnimationHelper.lerp(russiaHover, rusHovered ? 1f : 0f, 0.15f);
+        drawTeamCard(g, rusX, rusY, cardW, cardH, "RUSSIA", "Russian Armed\nForces",
+            COLOR_RUSSIA_ACCENT, russiaHover, fadeAlpha);
 
-        super.render(g, mouseX, mouseY, partialTick);
+        int natoTickets   = ClientTeamData.getNatoTickets();
+        int russiaTickets = ClientTeamData.getRussiaTickets();
+        g.drawString(font, "Tickets: " + natoTickets,
+            natoX + 8, natoY + cardH - 30,
+            AnimationHelper.withAlpha(COLOR_SUBTEXT, (int)(fadeAlpha * 200)));
+        g.drawString(font, "Tickets: " + russiaTickets,
+            rusX + 8, rusY + cardH - 30,
+            AnimationHelper.withAlpha(COLOR_SUBTEXT, (int)(fadeAlpha * 200)));
+
+        super.render(g, mx, my, pt);
     }
 
-    private void drawCard(GuiGraphics g, int x, int y, String name, int tickets) {
-        int cardColor = 0xCC222222;
-        g.fill(x, y, x + CARD_W, y + CARD_H, cardColor);
-        g.fill(x, y, x + CARD_W, y + 2, 0xFF555555);
-        g.fill(x, y + CARD_H - 2, x + CARD_W, y + CARD_H, 0xFF555555);
-        g.fill(x, y, x + 2, y + CARD_H, 0xFF555555);
-        g.fill(x + CARD_W - 2, y, x + CARD_W, y + CARD_H, 0xFF555555);
+    private void drawTeamCard(GuiGraphics g, int x, int y, int w, int h,
+                               String teamName, String subName,
+                               int accentColor, float hover, float alpha) {
+        int bgAlpha  = (int)(alpha * (0xDD + hover * 0x11));
+        int brdAlpha = (int)(alpha * (0x88 + hover * 0x77));
 
-        g.fill(x + 8, y + 8, x + CARD_W - 8, y + 10, 0xFF4488FF);
-        g.drawString(font, name, x + 10, y + 14, 0xFFFFFFFF);
+        g.fill(x, y, x + w, y + h, AnimationHelper.withAlpha(COLOR_CARD_BG, bgAlpha));
 
-        g.drawString(font, "Tickets: " + tickets, x + 10, y + 40, 0xFFAAAAAA);
-        g.drawString(font, "Click to join", x + 10, y + 60, 0xFF888888);
+        int barH = (int)(4 + hover * 2);
+        g.fill(x, y, x + w, y + barH, AnimationHelper.withAlpha(accentColor, (int)(alpha * 255)));
+
+        g.fill(x, y, x + 1, y + h, AnimationHelper.withAlpha(accentColor, brdAlpha));
+        g.fill(x + w - 1, y, x + w, y + h, AnimationHelper.withAlpha(accentColor, brdAlpha));
+        g.fill(x, y + h - 1, x + w, y + h, AnimationHelper.withAlpha(accentColor, brdAlpha));
+
+        int nameW = font.width(teamName);
+        g.drawString(font, teamName, x + w / 2 - nameW / 2, y + 20, AnimationHelper.withAlpha(COLOR_TEXT, (int)(alpha * 255)));
+
+        String[] lines = subName.split("\n");
+        for (int i = 0; i < lines.length; i++) {
+            int lw = font.width(lines[i]);
+            g.drawString(font, lines[i], x + w / 2 - lw / 2, y + 36 + i * 12,
+                AnimationHelper.withAlpha(COLOR_SUBTEXT, (int)(alpha * 200)));
+        }
+
+        if (hover > 0.01f) {
+            g.fill(x + 1, y + barH, x + w - 1, y + barH + 1,
+                AnimationHelper.withAlpha(accentColor, (int)(hover * 80)));
+        }
     }
 
     @Override

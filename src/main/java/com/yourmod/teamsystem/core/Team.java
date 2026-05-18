@@ -1,13 +1,15 @@
 package com.yourmod.teamsystem.core;
 
+import static com.yourmod.teamsystem.core.TeamSystemColors.*;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
 public enum Team {
-    NATO("Nato", ChatFormatting.BLUE, 0x5555FF),
-    RUSSIA("Russia", ChatFormatting.RED, 0xFF5555),
-    SPECTATOR("Spectator", ChatFormatting.GRAY, 0x888888);
+    NATO("Nato", ChatFormatting.BLUE, TEAM_NATO_RGB),
+    RUSSIA("Russia", ChatFormatting.RED, TEAM_RUSSIA_RGB),
+    SPECTATOR("Spectator", ChatFormatting.GRAY, TEAM_SPECTATOR_RGB);
 
     private final String name;
     private final ChatFormatting chatColor;

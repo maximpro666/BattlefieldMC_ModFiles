@@ -6,6 +6,8 @@ import com.google.gson.reflect.TypeToken;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.blockentity.RespawnBeaconBlockEntity;
 import net.minecraft.core.BlockPos;
+import static com.yourmod.teamsystem.core.ChatHelper.*;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -234,7 +236,7 @@ public class RespawnManager {
         if (team.isPlayable()) {
             TicketManager tm = TeamSystem.getTicketManager();
             if (tm != null) tm.deductTicket(team);
-            player.sendSystemMessage(Component.literal("§c-1 ticket for respawn"));
+            player.sendSystemMessage(error("-1 ticket for respawn"));
         }
 
         ServerLevel dest = server.getLevel(net.minecraft.resources.ResourceKey.create(

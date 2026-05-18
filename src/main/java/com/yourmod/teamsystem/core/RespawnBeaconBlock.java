@@ -1,5 +1,7 @@
 package com.yourmod.teamsystem.core;
 
+import static com.yourmod.teamsystem.core.TeamSystemColors.*;
+
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.blockentity.RespawnBeaconBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -38,11 +40,11 @@ public class RespawnBeaconBlock extends BaseEntityBlock {
             if (beacon.getOwnerUUID() != null && beacon.getOwnerUUID().equals(player.getUUID())) {
                 player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                     "This is your respawn beacon. Use /respawn select " + beacon.getName() + " to set it as active."
-                ).withStyle(net.minecraft.ChatFormatting.GREEN));
+                ).withStyle(CHAT_SUCCESS));
             } else {
                 player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                     "This beacon belongs to " + (beacon.getOwnerName() != null ? beacon.getOwnerName() : "someone")
-                ).withStyle(net.minecraft.ChatFormatting.YELLOW));
+                ).withStyle(CHAT_WARNING));
             }
         }
         return InteractionResult.SUCCESS;

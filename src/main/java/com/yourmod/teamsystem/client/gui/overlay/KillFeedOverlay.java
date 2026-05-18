@@ -1,62 +1,74 @@
 package com.yourmod.teamsystem.client.gui.overlay;
 
+import com.yourmod.teamsystem.client.gui.UITheme;
+
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-public class KillFeedOverlay implements IGuiOverlay {
-    private static final int MAX_ENTRIES = 10;
-    private static final int DISPLAY_TIME = 100;
-    private static final int ENTRY_H = 12;
+public class KillFeedOverlay {
 
-    private final List<KillFeedEntry> entries = new ArrayList<>();
+    private static final int COLOR_BG      = UITheme.BG_HUD;
+    private static final int COLOR_KILLER  = UITheme.ACCENT;
+    private static final int COLOR_TEXT    = UITheme.TEXT_PRIMARY;
+    private static final int FADE_MS       = 400;
+    private static final int DISPLAY_MS    = 6000;
+    private static final int ENTRY_H       = 16;
+    private static final int MAX_ENTRIES   = 6;
 
-    public static class KillFeedEntry {
+    public static class KillEntry {
         public final String killer;
         public final String victim;
         public final String weapon;
-        public int timer;
+        public final long   expireAt;
 
-        public KillFeedEntry(String killer, String victim, String weapon) {
-            this.killer = killer;
-            this.victim = victim;
-            this.weapon = weapon;
-            this.timer = DISPLAY_TIME;
+        public KillEntry(String killer, String victim, String weapon) {
+            this.killer   = killer;
+            this.victim   = victim;
+            this.weapon   = weapon;
+            this.expireAt = System.currentTimeMillis() + DISPLAY_MS;
+        }
+
+        public float getAlpha() {
+            long remaining = expireAt - System.currentTimeMillis();
+            return (float) Math.min(1.0, remaining / (double) FADE_MS);
         }
     }
 
-    @Override
-    public void render(ForgeGui gui, GuiGraphics g, float partialTick, int screenWidth, int screenHeight) {
-        Minecraft mc = Minecraft.getInstance();
-        int x = screenWidth - 200;
-        int y = screenHeight / 2 - 100;
+    private final List<KillEntry> entries = new ArrayList<>();
 
-        List<KillFeedEntry> toRemove = new ArrayList<>();
-        for (var entry : entries) {
-            entry.timer--;
-            if (entry.timer <= 0) {
-                toRemove.add(entry);
-                continue;
-            }
-
-            float alpha = Math.min(1, entry.timer / 20F);
-            int color = ((int) (alpha * 255) << 24) | 0xFFFFFF;
-            String text = entry.killer + " [" + entry.weapon + "] " + entry.victim;
-            g.drawString(mc.font, text, x, y, color);
-            y += ENTRY_H;
-        }
-        entries.removeAll(toRemove);
+    public void addKill(String killer, String victim, String weapon) {
+        entries.add(new KillEntry(killer, victim, weapon));
+        if (entries.size() > MAX_ENTRIES) entries.remove(0);
     }
 
-    public void addEntry(String killer, String victim, String weapon) {
-        entries.add(0, new KillFeedEntry(killer, victim, weapon));
-        if (entries.size() > MAX_ENTRIES) {
-            entries.remove(entries.size() - 1);
+    public void render(GuiGraphics g, int screenWidth) {
+        long now = System.currentTimeMillis();
+        entries.removeIf(e -> e.expireAt < now);
+
+        int x = screenWidth - 4;
+        int y = 4;
+
+        for (KillEntry e : entries) {
+            float alpha = e.getAlpha();
+            String line = e.killer + " \u2715 " + e.victim;
+            if (e.weapon != null && !e.weapon.isEmpty()) line += " [" + e.weapon + "]";
+            int tw = Minecraft.getInstance().font.width(line);
+            int lx = x - tw - 8;
+
+            g.fill(lx, y, lx + tw + 8, y + ENTRY_H,
+                AnimationHelper.withAlpha(COLOR_BG, (int)(alpha * 180)));
+            g.drawString(Minecraft.getInstance().font, e.killer,
+                lx + 4, y + 4, AnimationHelper.withAlpha(COLOR_KILLER, (int)(alpha * 255)));
+            int killerW = Minecraft.getInstance().font.width(e.killer);
+            g.drawString(Minecraft.getInstance().font, " \u2715 " + e.victim,
+                lx + 4 + killerW, y + 4, AnimationHelper.withAlpha(COLOR_TEXT, (int)(alpha * 200)));
+
+            y += ENTRY_H + 2;
         }
     }
 }

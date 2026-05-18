@@ -1,44 +1,49 @@
 package com.yourmod.teamsystem.client.gui.overlay;
 
+import com.yourmod.teamsystem.client.gui.UITheme;
+
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.PlayerListEntry;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
-import com.yourmod.teamsystem.client.gui.component.BButton;
+import com.yourmod.teamsystem.core.Rank;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
-public class SquadOverlay implements IGuiOverlay {
-    private static final int PANEL_W = 140;
-    private static final int PANEL_H = 120;
+import java.util.Map;
+import java.util.UUID;
 
-    @Override
-    public void render(ForgeGui gui, GuiGraphics g, float partialTick, int screenWidth, int screenHeight) {
-        Minecraft mc = Minecraft.getInstance();
-        String squad = ClientTeamData.getLocalPlayerSquad();
-        if (squad == null || squad.isEmpty()) return;
+public class SquadOverlay {
 
-        int x = screenWidth - PANEL_W - 5;
-        int y = screenHeight - PANEL_H - 40;
+    private static final int COLOR_BG     = UITheme.BG_HUD;
+    private static final int COLOR_TEXT   = UITheme.TEXT_PRIMARY;
+    private static final int ROW_H        = 20;
+    private static final int PANEL_W      = 140;
 
-        g.fill(x, y, x + PANEL_W, y + PANEL_H, 0x88000000);
-        BButton.drawBorder(g, x, y, PANEL_W, PANEL_H, 0xFF555555);
-        g.fill(x, y, x + PANEL_W, y + 1, 0xFF00AAFF);
-        g.drawString(mc.font, "SQUAD " + squad, x + 5, y + 4, 0xFF00AAFF);
+    public void render(GuiGraphics g, int screenHeight) {
+        Map<UUID, PlayerListEntry> map = ClientTeamData.playerDataMap;
+        String mySquad = ClientTeamData.localPlayerSquad;
+        if (map == null || mySquad == null || mySquad.isEmpty()) return;
 
-        int yOff = y + 16;
-        for (var entry : ClientTeamData.playerDataMap.entrySet()) {
-            PlayerListEntry pData = entry.getValue();
-            if (!squad.equals(pData.squad())) continue;
-            if (yOff > y + PANEL_H - 10) break;
+        int startY = screenHeight / 2 - 60;
+        int x = 4;
+        int idx = 0;
 
-            String name = pData.callsign();
-            String health = pData.isDowned() ? "X" : "OK";
-            int col = pData.isDowned() ? 0xFFFF4444 : 0xFFFFFFFF;
-            g.drawString(mc.font, name, x + 5, yOff, col);
-            g.drawString(mc.font, health, x + PANEL_W - 20, yOff, col);
-            yOff += 10;
+        for (Map.Entry<UUID, PlayerListEntry> entry : map.entrySet()) {
+            PlayerListEntry ple = entry.getValue();
+            if (!mySquad.equals(ple.squad())) continue;
+            int y = startY + idx * ROW_H;
+
+            g.fill(x, y, x + PANEL_W, y + ROW_H - 1, AnimationHelper.withAlpha(COLOR_BG, 180));
+
+            Rank rank = Rank.fromOrdinal(ple.rank());
+            String prefix = rank != null ? rank.getPrefix(false) : "";
+            String callsign = ple.callsign() != null ? ple.callsign() : "Unknown";
+            String label = prefix + " " + callsign;
+            g.drawString(Minecraft.getInstance().font, label, x + 4, y + 6, AnimationHelper.withAlpha(COLOR_TEXT, 230));
+
+            idx++;
+            if (idx >= 6) break;
         }
     }
 }
+

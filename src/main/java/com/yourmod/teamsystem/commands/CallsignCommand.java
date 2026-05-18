@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.PlayerCombatData;
 import com.yourmod.teamsystem.events.PlayerEventHandler;
-import net.minecraft.ChatFormatting;
+import static com.yourmod.teamsystem.core.ChatHelper.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -23,14 +23,12 @@ public class CallsignCommand {
                         String name = StringArgumentType.getString(context, "name").trim();
 
                         if (name.isEmpty()) {
-                            player.sendSystemMessage(Component.literal("Позывной не может быть пустым")
-                                .withStyle(ChatFormatting.RED));
+                            player.sendSystemMessage(error("Позывной не может быть пустым"));
                             return 0;
                         }
 
                         if (name.length() > 32) {
-                            player.sendSystemMessage(Component.literal("Позывной слишком длинный (максимум 32 символа)")
-                                .withStyle(ChatFormatting.RED));
+                            player.sendSystemMessage(error("Позывной слишком длинный (максимум 32 символа)"));
                             return 0;
                         }
 
@@ -42,8 +40,7 @@ public class CallsignCommand {
                             handler.setDogTagName(player, name);
                         }
 
-                        player.sendSystemMessage(Component.literal("Позывной установлен: " + name)
-                            .withStyle(ChatFormatting.GREEN));
+                        player.sendSystemMessage(success("Позывной установлен: " + name));
                         TeamSystem.LOGGER.info("Player {} set callsign to {}", player.getName().getString(), name);
                         return 1;
                     })
@@ -54,11 +51,9 @@ public class CallsignCommand {
                     String current = TeamSystem.getTeamManager()
                         .getOrCreatePlayerData(player.getUUID()).getDisplayName();
                     if (current.isEmpty()) {
-                        player.sendSystemMessage(Component.literal("У вас ещё нет позывного. Используйте /callsign <имя>")
-                            .withStyle(ChatFormatting.YELLOW));
+                        player.sendSystemMessage(warning("У вас ещё нет позывного. Используйте /callsign <имя>"));
                     } else {
-                        player.sendSystemMessage(Component.literal("Ваш позывной: " + current)
-                            .withStyle(ChatFormatting.YELLOW));
+                        player.sendSystemMessage(warning("Ваш позывной: " + current));
                     }
                     return 1;
                 })

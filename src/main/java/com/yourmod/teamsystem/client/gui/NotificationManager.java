@@ -5,6 +5,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.sounds.SoundEvents;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import com.yourmod.teamsystem.client.gui.UITheme;
 
 public class NotificationManager {
     private static final Queue<Notification> queue = new ConcurrentLinkedQueue<>();
@@ -27,7 +28,7 @@ public class NotificationManager {
     }
 
     public static void showNotification(String title, String subtitle) {
-        showNotification(title, subtitle, 0xFF00AAFF, 1);
+        showNotification(title, subtitle, UITheme.ACCENT, 1);
     }
 
     public static void showNotification(String title, String subtitle, int color) {

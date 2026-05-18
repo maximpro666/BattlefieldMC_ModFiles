@@ -1,56 +1,52 @@
 package com.yourmod.teamsystem.client.gui.renderer;
 
-import com.yourmod.teamsystem.client.ClientTeamData;
-import com.yourmod.teamsystem.client.CapturePointData;
-import net.minecraft.client.Minecraft;
+import com.yourmod.teamsystem.client.gui.UITheme;
+
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
+import org.joml.Matrix4f;
 
 public class CaptureParticles {
 
-    public static void render(RenderLevelStageEvent event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+    private static final int   PARTICLE_COUNT = 32;
+    private static final float RING_RADIUS    = 3.5f;
+    private static final float PARTICLE_SIZE  = 0.08f;
+    private static final int   COLOR_ORANGE   = UITheme.ACCENT;
+    private static final int   COLOR_WHITE    = UITheme.TEXT_PRIMARY;
 
-        var points = ClientTeamData.capturePoints;
-        if (points.isEmpty()) return;
+    private long startTime = System.currentTimeMillis();
 
-        var poseStack = event.getPoseStack();
-        var bufferSource = mc.renderBuffers().bufferSource();
-        var builder = bufferSource.getBuffer(RenderType.LINES);
-        var camPos = event.getCamera().getPosition();
+    public void render(PoseStack poseStack, MultiBufferSource bufferSource,
+                       double worldX, double worldY, double worldZ,
+                       double camX, double camY, double camZ,
+                       float partialTick) {
 
-        for (CapturePointData point : points) {
-            double progress = point.progress();
-            if (progress <= 0) continue;
+        float elapsed  = (System.currentTimeMillis() - startTime) / 1000f;
+        float rotation = elapsed * 0.8f;
 
-            int teamOrdinal = point.capturingTeamOrdinal();
-            int argb = teamOrdinal == 0 ? 0x4444FFFF : 0xFFFF4444;
-            float r = ((argb >> 24) & 0xFF) / 255f;
-            float g = ((argb >> 16) & 0xFF) / 255f;
-            float b = ((argb >> 8) & 0xFF) / 255f;
+        poseStack.pushPose();
+        poseStack.translate(worldX - camX, worldY - camY + 0.1, worldZ - camZ);
 
-            poseStack.pushPose();
-            poseStack.translate(
-                -(camPos.x - (point.id() * 10)),
-                -(camPos.y - 2.5 - progress * 2),
-                -(camPos.z)
-            );
-            var mat = poseStack.last().pose();
+        VertexConsumer vc = bufferSource.getBuffer(RenderType.debugLineStrip(2.0));
+        Matrix4f mat = poseStack.last().pose();
 
-            float radius = 1.5f + (float) progress * 0.5f;
-            for (int i = 0; i < 8; i++) {
-                float angle = (float) (i / 8.0 * Math.PI * 2);
-                float px = (float) Math.cos(angle) * radius;
-                float pz = (float) Math.sin(angle) * radius;
-                float nx = (float) Math.cos(angle + 0.1) * radius * 0.9f;
-                float nz = (float) Math.sin(angle + 0.1) * radius * 0.9f;
-                builder.vertex(mat, px, 0, pz).color(r, g, b, 0.7f).endVertex();
-                builder.vertex(mat, nx, (float) (Math.sin(event.getPartialTick() + i) * 0.3), nz).color(r, g, b, 0.7f).endVertex();
-            }
-            poseStack.popPose();
+        for (int i = 0; i < PARTICLE_COUNT; i++) {
+            float angle = (float)(i / (double) PARTICLE_COUNT * Math.PI * 2.0) + rotation;
+            float nx    = (float)(Math.cos(angle) * RING_RADIUS);
+            float nz    = (float)(Math.sin(angle) * RING_RADIUS);
+            int col = (i % 2 == 0) ? COLOR_ORANGE : COLOR_WHITE;
+            float a = ((col >> 24) & 0xFF) / 255f;
+            float r = ((col >> 16) & 0xFF) / 255f;
+            float g = ((col >>  8) & 0xFF) / 255f;
+            float b = ( col        & 0xFF) / 255f;
+
+            float hs = PARTICLE_SIZE;
+            vc.vertex(mat, nx - hs, hs, nz - hs).color(r, g, b, a).endVertex();
+            vc.vertex(mat, nx + hs, hs, nz + hs).color(r, g, b, a).endVertex();
         }
-        bufferSource.endBatch(RenderType.LINES);
+
+        poseStack.popPose();
     }
 }

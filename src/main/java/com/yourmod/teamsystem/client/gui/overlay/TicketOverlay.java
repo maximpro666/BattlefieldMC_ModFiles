@@ -1,54 +1,68 @@
 package com.yourmod.teamsystem.client.gui.overlay;
 
+import com.yourmod.teamsystem.client.gui.UITheme;
+
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
-import com.yourmod.teamsystem.client.gui.component.BButton;
+import com.yourmod.teamsystem.client.gui.component.BProgressBar;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
-public class TicketOverlay implements IGuiOverlay {
-    private static final int BAR_W = 120;
-    private static final int BAR_H = 14;
+public class TicketOverlay {
 
-    @Override
-    public void render(ForgeGui gui, GuiGraphics g, float partialTick, int screenWidth, int screenHeight) {
-        Minecraft mc = Minecraft.getInstance();
-        int x = screenWidth - BAR_W - 5;
-        int y = 25;
+    private static final int COLOR_NATO_BAR  = UITheme.TEAM_NATO;
+    private static final int COLOR_RUS_BAR   = UITheme.TEAM_RUSSIA;
+    private static final int COLOR_BG        = UITheme.BG_HUD;
+    private static final int COLOR_TEXT      = UITheme.TEXT_PRIMARY;
+    private static final int COLOR_ORANGE    = UITheme.ACCENT;
+    private static final int COLOR_BORDER    = UITheme.BORDER;
 
-        int phase = ClientTeamData.getGamePhase();
-        if (phase == 0) return;
+    private static final int BAR_W = 140;
+    private static final int BAR_H = 6;
+    private static final int MAX_TICKETS = 500;
 
-        g.fill(x, y, x + BAR_W, y + 5, 0x88000000);
-        BButton.drawBorder(g, x, y, BAR_W, 5, 0xFF555555);
+    private final BProgressBar natoBar;
+    private final BProgressBar russiaBar;
 
-        String natoTitle = "NATO";
-        String russiaTitle = "RUSSIA";
-        g.drawString(mc.font, natoTitle, x, y + 6, 0xFF4488FF);
-        g.drawString(mc.font, russiaTitle, x + BAR_W - mc.font.width(russiaTitle), y + 6, 0xFFFF4444);
+    private float natoSmooth   = 0f;
+    private float russiaSmooth = 0f;
 
-        int barY = y + 18;
-        g.fill(x, barY, x + BAR_W, barY + BAR_H, 0x88000000);
-        BButton.drawBorder(g, x, barY, BAR_W, BAR_H, 0xFF555555);
+    public TicketOverlay(int screenWidth) {
+        int cx = screenWidth / 2;
+        natoBar   = new BProgressBar(cx - BAR_W - 4, 4, BAR_W, BAR_H, COLOR_NATO_BAR);
+        russiaBar = new BProgressBar(cx + 4,          4, BAR_W, BAR_H, COLOR_RUS_BAR);
+    }
 
-        float natoFill = Math.min(1, ClientTeamData.getNatoTickets() / 150F);
-        if (natoFill > 0) {
-            g.fill(x + 1, barY + 1, x + 1 + (int) ((BAR_W - 2) * natoFill), barY + BAR_H - 1, 0xFF4488FF);
-        }
-        String natoStr = String.valueOf(ClientTeamData.getNatoTickets());
-        g.drawString(mc.font, natoStr, x + (BAR_W - mc.font.width(natoStr)) / 2, barY + 3, 0xFFFFFFFF);
+    public void render(GuiGraphics g, int screenWidth, float partialTick) {
+        int natoTickets   = ClientTeamData.getNatoTickets();
+        int russiaTickets = ClientTeamData.getRussiaTickets();
+        int timeSeconds   = ClientTeamData.matchTimeSeconds;
 
-        barY += BAR_H + 2;
-        g.fill(x, barY, x + BAR_W, barY + BAR_H, 0x88000000);
-        BButton.drawBorder(g, x, barY, BAR_W, BAR_H, 0xFF555555);
+        natoSmooth   = AnimationHelper.lerp(natoSmooth,   natoTickets   / (float) MAX_TICKETS, 0.06f);
+        russiaSmooth = AnimationHelper.lerp(russiaSmooth, russiaTickets / (float) MAX_TICKETS, 0.06f);
 
-        float rusFill = Math.min(1, ClientTeamData.getRussiaTickets() / 150F);
-        if (rusFill > 0) {
-            g.fill(x + 1, barY + 1, x + 1 + (int) ((BAR_W - 2) * rusFill), barY + BAR_H - 1, 0xFFFF4444);
-        }
-        String rusStr = String.valueOf(ClientTeamData.getRussiaTickets());
-        g.drawString(mc.font, rusStr, x + (BAR_W - mc.font.width(rusStr)) / 2, barY + 3, 0xFFFFFFFF);
+        int cx = screenWidth / 2;
+
+        g.fill(cx - BAR_W - 8, 0, cx + BAR_W + 8, 26, COLOR_BG);
+        g.fill(cx - BAR_W - 8, 25, cx + BAR_W + 8, 26, COLOR_BORDER);
+
+        String natoText = "NATO  " + natoTickets;
+        g.drawString(null, natoText, cx - BAR_W - 4, 14, AnimationHelper.withAlpha(COLOR_TEXT, 220));
+
+        String rusText = russiaTickets + "  RUSSIA";
+        int rw = Minecraft.getInstance().font.width(rusText);
+        g.drawString(null, rusText, cx + BAR_W + 4 - rw, 14, AnimationHelper.withAlpha(COLOR_TEXT, 220));
+
+        natoBar.setFraction(natoSmooth);
+        natoBar.render(g);
+
+        russiaBar.setFraction(russiaSmooth);
+        russiaBar.render(g);
+
+        int mins = timeSeconds / 60;
+        int secs = timeSeconds % 60;
+        String timerStr = String.format("%02d:%02d", mins, secs);
+        int tw = Minecraft.getInstance().font.width(timerStr);
+        g.drawString(Minecraft.getInstance().font, timerStr, cx - tw / 2, 8, AnimationHelper.withAlpha(COLOR_ORANGE, 255));
     }
 }

@@ -1,51 +1,39 @@
 package com.yourmod.teamsystem.client.gui.overlay;
 
+import com.yourmod.teamsystem.client.gui.UITheme;
+
 import com.yourmod.teamsystem.client.ClientTeamData;
-import com.yourmod.teamsystem.client.PlayerListEntry;
-import com.yourmod.teamsystem.core.Rank;
-import com.yourmod.teamsystem.core.Team;
+import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import java.util.UUID;
 
-public class VoiceIndicatorOverlay implements IGuiOverlay {
-    private static final int ICON_SIZE = 16;
+import java.util.List;
 
-    @Override
-    public void render(ForgeGui gui, GuiGraphics g, float partialTick, int screenWidth, int screenHeight) {
-        Minecraft mc = Minecraft.getInstance();
-        var speakers = ClientTeamData.getSpeakingPlayers();
-        if (speakers.isEmpty()) return;
+public class VoiceIndicatorOverlay {
 
-        int x = 10;
-        int y = screenHeight / 2 - (speakers.size() * (ICON_SIZE + 2)) / 2;
+    private static final int COLOR_BG     = UITheme.BG_HUD;
+    private static final int COLOR_ACTIVE = UITheme.STATUS_OK;
+    private static final int COLOR_TEXT   = UITheme.TEXT_PRIMARY;
+    private static final int ENTRY_H      = 14;
+    private static final int PANEL_W      = 130;
 
-        for (String uuidStr : speakers) {
-            UUID uuid;
-            try {
-                uuid = UUID.fromString(uuidStr);
-            } catch (Exception e) {
-                continue;
-            }
+    public void render(GuiGraphics g, int screenWidth, int screenHeight) {
+        List<String> speaking = ClientTeamData.speakingPlayers;
+        if (speaking == null || speaking.isEmpty()) return;
 
-            PlayerListEntry playerData = ClientTeamData.getPlayerData(uuid);
-            if (playerData == null) continue;
+        int x = 4;
+        int y = screenHeight - 60 - speaking.size() * (ENTRY_H + 2);
 
-            int rank = playerData.rank();
-            String callsign = playerData.callsign();
-            Rank rankObj = Rank.fromOrdinal(rank);
-            String prefix = rankObj.getPrefix(ClientTeamData.getLocalPlayerTeam() == Team.RUSSIA);
+        for (String name : speaking) {
+            g.fill(x, y, x + PANEL_W, y + ENTRY_H, AnimationHelper.withAlpha(COLOR_BG, 180));
 
-            String text = prefix + " " + callsign;
-            int textW = mc.font.width(text);
-            int bgW = textW + ICON_SIZE + 8;
+            g.fill(x + 3, y + ENTRY_H / 2 - 3, x + 9, y + ENTRY_H / 2 + 3,
+                AnimationHelper.withAlpha(COLOR_ACTIVE, 255));
 
-            g.fill(x, y, x + bgW, y + ICON_SIZE, 0x88000000);
-            g.fill(x, y, x + 2, y + ICON_SIZE, 0xFF00FF00);
-            g.drawString(mc.font, text, x + ICON_SIZE + 4, y + 4, 0xFFFFFFFF);
-            y += ICON_SIZE + 2;
+            g.drawString(Minecraft.getInstance().font, name, x + 13, y + 3,
+                AnimationHelper.withAlpha(COLOR_TEXT, 230));
+
+            y += ENTRY_H + 2;
         }
     }
 }

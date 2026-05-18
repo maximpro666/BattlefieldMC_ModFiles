@@ -1,49 +1,45 @@
 package com.yourmod.teamsystem.client.gui.overlay;
 
+import com.yourmod.teamsystem.client.gui.UITheme;
+
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
-import com.yourmod.teamsystem.client.gui.component.BButton;
 import com.yourmod.teamsystem.client.gui.component.BProgressBar;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraft.world.entity.player.Player;
 
-public class VitalsOverlay implements IGuiOverlay {
-    private BProgressBar healthBar;
-    private BProgressBar armorBar;
+public class VitalsOverlay {
 
-    public VitalsOverlay() {
-        healthBar = new BProgressBar(0, 0, 100, 10, 0xFF44FF44);
-        armorBar = new BProgressBar(0, 0, 100, 6, 0xFF4488FF);
-    }
+    private static final int COLOR_BG     = UITheme.BG_HUD;
+    private static final int COLOR_BORDER = UITheme.BORDER;
+    private static final int COLOR_TEXT   = UITheme.TEXT_PRIMARY;
+    private static final int BAR_W        = 120;
+    private static final int BAR_H        = 8;
 
-    @Override
-    public void render(ForgeGui gui, GuiGraphics g, float partialTick, int screenWidth, int screenHeight) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
+    private BProgressBar hpBar;
+    private float smoothHp = 1f;
 
-        float health = mc.player.getHealth();
-        float maxHealth = mc.player.getMaxHealth();
-        int armor = 0;
-        var armorItem = mc.player.getInventory().getArmor(2);
-        if (!armorItem.isEmpty()) {
-            armor = armorItem.getMaxDamage() - armorItem.getDamageValue();
-        }
-        int maxArmor = 100;
+    public void render(GuiGraphics g, int screenWidth, int screenHeight) {
+        Player player = Minecraft.getInstance().player;
+        if (player == null) return;
 
-        int barX = 10;
-        int barY = screenHeight - 50;
+        float maxHp = player.getMaxHealth();
+        float hp    = player.getHealth();
+        float frac  = maxHp > 0 ? hp / maxHp : 0f;
+        smoothHp    = AnimationHelper.lerp(smoothHp, frac, 0.1f);
+        int hpColor = AnimationHelper.hpColor(smoothHp);
 
-        healthBar.setPosition(barX, barY);
-        healthBar.setSize(100, 10);
-        healthBar.setFraction(health / maxHealth);
-        healthBar.tick();
-        healthBar.renderHp(g);
+        int x = 8;
+        int y = screenHeight - 30;
 
-        armorBar.setPosition(barX, barY + 14);
-        armorBar.setSize(100, 6);
-        armorBar.setFraction(Math.min(1, armor / (float) maxArmor));
-        armorBar.tick();
-        armorBar.render(g);
+        g.fill(x, y, x + BAR_W + 16, y + 22, AnimationHelper.withAlpha(COLOR_BG, 200));
+        g.fill(x, y, x + BAR_W + 16, y + 1, AnimationHelper.withAlpha(COLOR_BORDER, 180));
+
+        g.drawString(Minecraft.getInstance().font, "HP  " + (int) hp,
+            x + 4, y + 5, AnimationHelper.withAlpha(COLOR_TEXT, 230));
+
+        if (hpBar == null) hpBar = new BProgressBar(x + 4, y + 14, BAR_W, BAR_H, hpColor);
+        hpBar.setFraction(smoothHp);
+        hpBar.render(g);
     }
 }

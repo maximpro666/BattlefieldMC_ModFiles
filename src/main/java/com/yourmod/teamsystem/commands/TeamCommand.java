@@ -11,6 +11,7 @@ import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
 import com.yourmod.teamsystem.core.TeamSystemConfig;
 import com.yourmod.teamsystem.core.TicketManager;
+import static com.yourmod.teamsystem.core.ChatHelper.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -145,15 +146,14 @@ public class TeamCommand {
         Team team = Team.fromString(teamName);
 
         if (team == null) {
-            player.sendSystemMessage(Component.literal("Invalid team! Available teams: NATO, RUSSIA, SPECTATOR")
-                .withStyle(ChatFormatting.RED));
+            player.sendSystemMessage(error("Invalid team! Available teams: NATO, RUSSIA, SPECTATOR"));
             return 0;
         }
 
         Team currentTeam = manager.getOrCreatePlayerData(player.getUUID()).getTeam();
 
         if (currentTeam == team) {
-            player.sendSystemMessage(Component.literal("You are already in team ")
+            player.sendSystemMessage(bright("You are already in team ")
                 .append(team.getColoredName()));
             return 0;
         }
@@ -166,21 +166,18 @@ public class TeamCommand {
             int targetCount = team == Team.NATO ? natoCount : russiaCount;
             int otherCount = team == Team.NATO ? russiaCount : natoCount;
             if (targetCount >= otherCount + maxDiff + 1) {
-                player.sendSystemMessage(Component.literal("Команда переполнена! Выберите другую сторону.")
-                    .withStyle(ChatFormatting.RED));
+                player.sendSystemMessage(error("Команда переполнена! Выберите другую сторону."));
                 return 0;
             }
         }
 
         manager.setPlayerTeam(player, team);
 
-        player.sendSystemMessage(Component.literal("You joined team ")
-            .append(team.getColoredName())
-            .withStyle(ChatFormatting.GREEN));
+        player.sendSystemMessage(success("You joined team ")
+            .append(team.getColoredName()));
 
-        Component announcement = Component.literal(player.getName().getString())
-            .withStyle(ChatFormatting.YELLOW)
-            .append(Component.literal(" joined team "))
+        Component announcement = warning(player.getName().getString())
+            .append(bright(" joined team "))
             .append(team.getColoredName());
 
         manager.getServer().getPlayerList().broadcastSystemMessage(announcement, false);
@@ -197,13 +194,11 @@ public class TeamCommand {
 
         PlayerCombatData data = manager.getOrCreatePlayerData(player.getUUID());
 
-        player.sendSystemMessage(Component.literal("Your team: ")
-            .append(data.getTeam().getColoredName())
-            .withStyle(ChatFormatting.GOLD));
+        player.sendSystemMessage(accent("Your team: ")
+            .append(data.getTeam().getColoredName()));
 
-        player.sendSystemMessage(Component.literal(String.format("Stats: %d kills, %d deaths, %.2f K/D",
-            data.getKills(), data.getDeaths(), data.getKDRatio()))
-            .withStyle(ChatFormatting.GRAY));
+        player.sendSystemMessage(neutral(String.format("Stats: %d kills, %d deaths, %.2f K/D",
+            data.getKills(), data.getDeaths(), data.getKDRatio())));
 
         return 1;
     }
@@ -217,21 +212,16 @@ public class TeamCommand {
 
         PlayerCombatData data = manager.getOrCreatePlayerData(player.getUUID());
 
-        player.sendSystemMessage(Component.literal("=== Your Combat Stats ===")
-            .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+        player.sendSystemMessage(header("=== Your Combat Stats ==="));
 
-        player.sendSystemMessage(Component.literal("Team: ")
-            .withStyle(ChatFormatting.GRAY)
+        player.sendSystemMessage(neutral("Team: ")
             .append(data.getTeam().getColoredName()));
 
-        player.sendSystemMessage(Component.literal(String.format("Kills: %d", data.getKills()))
-            .withStyle(ChatFormatting.GREEN));
+        player.sendSystemMessage(success(String.format("Kills: %d", data.getKills())));
 
-        player.sendSystemMessage(Component.literal(String.format("Deaths: %d", data.getDeaths()))
-            .withStyle(ChatFormatting.RED));
+        player.sendSystemMessage(error(String.format("Deaths: %d", data.getDeaths())));
 
-        player.sendSystemMessage(Component.literal(String.format("K/D Ratio: %.2f", data.getKDRatio()))
-            .withStyle(ChatFormatting.AQUA));
+        player.sendSystemMessage(info(String.format("K/D Ratio: %.2f", data.getKDRatio())));
 
         return 1;
     }
@@ -247,8 +237,7 @@ public class TeamCommand {
         int russiaCount = countPlayersInTeam(manager, Team.RUSSIA);
         int spectatorCount = countPlayersInTeam(manager, Team.SPECTATOR);
 
-        player.sendSystemMessage(Component.literal("=== Team Balance ===")
-            .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+        player.sendSystemMessage(header("=== Team Balance ==="));
 
         player.sendSystemMessage(Team.NATO.getColoredName()
             .append(Component.literal(": " + natoCount + " players")));
@@ -261,11 +250,9 @@ public class TeamCommand {
 
         int balance = Math.abs(natoCount - russiaCount);
         if (balance > 0) {
-            player.sendSystemMessage(Component.literal(String.format("Imbalance: %d players", balance))
-                .withStyle(ChatFormatting.YELLOW));
+            player.sendSystemMessage(warning(String.format("Imbalance: %d players", balance)));
         } else {
-            player.sendSystemMessage(Component.literal("Teams are balanced!")
-                .withStyle(ChatFormatting.GREEN));
+            player.sendSystemMessage(success("Teams are balanced!"));
         }
 
         return 1;
@@ -279,8 +266,7 @@ public class TeamCommand {
         }
 
         manager.getOrCreatePlayerData(player.getUUID()).resetStats();
-        player.sendSystemMessage(Component.literal("Your stats have been reset!")
-            .withStyle(ChatFormatting.GREEN));
+        player.sendSystemMessage(success("Your stats have been reset!"));
 
         return 1;
     }
@@ -294,16 +280,13 @@ public class TeamCommand {
         TicketManager tm = TeamSystem.getTicketManager();
         if (tm == null) return 0;
 
-        player.sendSystemMessage(Component.literal("=== Team Tickets ===")
-            .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
+        player.sendSystemMessage(header("=== Team Tickets ==="));
 
         player.sendSystemMessage(Team.NATO.getColoredName()
-            .append(Component.literal(String.format(": %d tickets", tm.getTickets(Team.NATO)))
-                .withStyle(ChatFormatting.WHITE)));
+            .append(bright(String.format(": %d tickets", tm.getTickets(Team.NATO)))));
 
         player.sendSystemMessage(Team.RUSSIA.getColoredName()
-            .append(Component.literal(String.format(": %d tickets", tm.getTickets(Team.RUSSIA)))
-                .withStyle(ChatFormatting.WHITE)));
+            .append(bright(String.format(": %d tickets", tm.getTickets(Team.RUSSIA)))));
 
         return 1;
     }
@@ -312,8 +295,7 @@ public class TeamCommand {
         String teamName = StringArgumentType.getString(context, "team");
         Team team = Team.fromString(teamName);
         if (team == null || !team.isPlayable()) {
-            context.getSource().sendFailure(Component.literal("Invalid team! Use NATO or RUSSIA.")
-                .withStyle(ChatFormatting.RED));
+            context.getSource().sendFailure(error("Invalid team! Use NATO or RUSSIA."));
             return 0;
         }
 
@@ -323,8 +305,7 @@ public class TeamCommand {
         tm.setTickets(team, amount);
 
         context.getSource().sendSuccess(() ->
-            Component.literal(String.format("Set %s tickets to %d", team.getName(), amount))
-                .withStyle(ChatFormatting.GREEN), true);
+            success(String.format("Set %s tickets to %d", team.getName(), amount)), true);
 
         return 1;
     }
@@ -339,8 +320,7 @@ public class TeamCommand {
         String prefix = StringArgumentType.getString(context, "prefix");
         manager.setPlayerPrefix(player, prefix);
 
-        player.sendSystemMessage(Component.literal(String.format("Prefix set to: %s", prefix))
-            .withStyle(ChatFormatting.GREEN));
+        player.sendSystemMessage(success(String.format("Prefix set to: %s", prefix)));
 
         return 1;
     }
@@ -355,8 +335,7 @@ public class TeamCommand {
         String suffix = StringArgumentType.getString(context, "suffix");
         manager.setPlayerSuffix(player, suffix);
 
-        player.sendSystemMessage(Component.literal(String.format("Suffix set to: %s", suffix))
-            .withStyle(ChatFormatting.GREEN));
+        player.sendSystemMessage(success(String.format("Suffix set to: %s", suffix)));
 
         return 1;
     }
@@ -371,8 +350,7 @@ public class TeamCommand {
         String name = StringArgumentType.getString(context, "name");
         manager.setPlayerDisplayName(player, name);
 
-        player.sendSystemMessage(Component.literal(String.format("Display name set to: %s", name))
-            .withStyle(ChatFormatting.GREEN));
+        player.sendSystemMessage(success(String.format("Display name set to: %s", name)));
 
         return 1;
     }
@@ -388,8 +366,7 @@ public class TeamCommand {
         manager.setPlayerSuffix(player, "");
         manager.setPlayerDisplayName(player, "");
 
-        player.sendSystemMessage(Component.literal("Name customization cleared!")
-            .withStyle(ChatFormatting.GREEN));
+        player.sendSystemMessage(success("Name customization cleared!"));
 
         return 1;
     }
@@ -401,10 +378,9 @@ public class TeamCommand {
             String prefix = StringArgumentType.getString(context, "prefix");
             manager.setPlayerPrefix(target, prefix);
             context.getSource().sendSuccess(() ->
-                Component.literal("Set prefix of " + target.getName().getString() + " to: " + prefix)
-                    .withStyle(ChatFormatting.GREEN), true);
+                success("Set prefix of " + target.getName().getString() + " to: " + prefix), true);
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Player not found"));
+            context.getSource().sendFailure(error("Player not found"));
         }
         return 1;
     }
@@ -416,10 +392,9 @@ public class TeamCommand {
             String suffix = StringArgumentType.getString(context, "suffix");
             manager.setPlayerSuffix(target, suffix);
             context.getSource().sendSuccess(() ->
-                Component.literal("Set suffix of " + target.getName().getString() + " to: " + suffix)
-                    .withStyle(ChatFormatting.GREEN), true);
+                success("Set suffix of " + target.getName().getString() + " to: " + suffix), true);
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Player not found"));
+            context.getSource().sendFailure(error("Player not found"));
         }
         return 1;
     }
@@ -431,10 +406,9 @@ public class TeamCommand {
             String name = StringArgumentType.getString(context, "name");
             manager.setPlayerDisplayName(target, name);
             context.getSource().sendSuccess(() ->
-                Component.literal("Set display name of " + target.getName().getString() + " to: " + name)
-                    .withStyle(ChatFormatting.GREEN), true);
+                success("Set display name of " + target.getName().getString() + " to: " + name), true);
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Player not found"));
+            context.getSource().sendFailure(error("Player not found"));
         }
         return 1;
     }
@@ -447,10 +421,9 @@ public class TeamCommand {
             manager.setPlayerSuffix(target, "");
             manager.setPlayerDisplayName(target, "");
             context.getSource().sendSuccess(() ->
-                Component.literal("Reset name customization for " + target.getName().getString())
-                    .withStyle(ChatFormatting.GREEN), true);
+                success("Reset name customization for " + target.getName().getString()), true);
         } catch (Exception e) {
-            context.getSource().sendFailure(Component.literal("Player not found"));
+            context.getSource().sendFailure(error("Player not found"));
         }
         return 1;
     }

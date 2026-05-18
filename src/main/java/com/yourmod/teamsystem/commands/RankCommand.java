@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.Rank;
 import com.yourmod.teamsystem.core.TeamManager;
+import static com.yourmod.teamsystem.core.ChatHelper.*;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -48,7 +49,7 @@ public class RankCommand {
             source.sendSuccess(() -> Component.literal(
                 String.format("§7Next: §b%s §7at §e%d §7kills", next.getDisplayName(), next.getKillRequirement())), false);
         } else {
-            source.sendSuccess(() -> Component.literal("§7You are at the highest rank!").withStyle(net.minecraft.ChatFormatting.GOLD), false);
+            source.sendSuccess(() -> accent("You are at the highest rank!"), false);
         }
         return 1;
     }
@@ -58,7 +59,7 @@ public class RankCommand {
         TeamManager tm = TeamSystem.getTeamManager();
         int playerRank = player != null ? tm.getPlayerRank(player.getUUID()) : -1;
 
-        source.sendSuccess(() -> Component.literal("§6=== Ranks ==="), false);
+        source.sendSuccess(() -> accent("=== Ranks ==="), false);
         StringBuilder sb = new StringBuilder("§6=== Ranks ===\n");
         Rank[] ranks = Rank.values();
         for (int i = 0; i < ranks.length; i++) {
@@ -98,7 +99,7 @@ public class RankCommand {
                     player.getName().getString(), rank.getDisplayName())), true);
             return 1;
         } catch (NumberFormatException e) {
-            source.sendFailure(Component.literal("§cInvalid rank. Use ordinal 0-9"));
+            source.sendFailure(error("Invalid rank. Use ordinal 0-9"));
             return 0;
         }
     }

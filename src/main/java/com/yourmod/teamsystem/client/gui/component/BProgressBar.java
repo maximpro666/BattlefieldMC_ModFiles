@@ -5,9 +5,9 @@ import net.minecraft.client.gui.GuiGraphics;
 public class BProgressBar {
     protected int x, y, width, height;
     protected float fraction;
-    protected int fillColor = 0xFF00AAFF;
+    protected int fillColor = 0xFFE07B00;
     protected int backgroundColor = 0x80000000;
-    protected int borderColor = 0xFF555555;
+    protected int borderColor = 0xFF2E2E2E;
     protected boolean showBorder = true;
 
     public BProgressBar(int x, int y, int width, int height, int fillColor) {
@@ -46,21 +46,6 @@ public class BProgressBar {
             g.fill(x, y + height - 1, x + width, y + height, borderColor);
             g.fill(x, y, x + 1, y + height, borderColor);
             g.fill(x + width - 1, y, x + width, y + height, borderColor);
-        }
-    }
-
-    public void renderHp(GuiGraphics g) {
-        int totalW = width;
-        int drawW = (int)(totalW * fraction);
-        g.fill(x, y, x + totalW, y + height, backgroundColor);
-        if (drawW > 0) {
-            g.fill(x, y, x + drawW, y + height, fillColor);
-            float hp = fraction * 100F;
-            var mc = net.minecraft.client.Minecraft.getInstance();
-            var txt = String.format("%.0f", hp);
-            int tx = x + (totalW - mc.font.width(txt)) / 2;
-            int ty = y + (height - mc.font.lineHeight) / 2;
-            g.drawString(mc.font, txt, tx, ty, 0xFFFFFFFF);
         }
     }
 

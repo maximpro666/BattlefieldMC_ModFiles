@@ -1,97 +1,180 @@
 package com.yourmod.teamsystem.client.gui.screen;
 
+import com.yourmod.teamsystem.client.gui.UITheme;
+
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.KitEntry;
+import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.network.KitSelectPacket;
 import com.yourmod.teamsystem.client.gui.component.BButton;
 import com.yourmod.teamsystem.client.gui.component.BScrollPanel;
-import com.yourmod.teamsystem.network.KitSelectPacket;
-import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.List;
+
 public class KitSelectionScreen extends Screen {
-    private final Screen parent;
-    private BScrollPanel scroll;
 
-    private static final int LEFT_W = 200;
+    private static final int COLOR_BG       = UITheme.BG_SCREEN;
+    private static final int COLOR_CARD     = UITheme.BG_SURFACE;
+    private static final int COLOR_SELECTED = UITheme.ACCENT;
+    private static final int COLOR_BORDER   = UITheme.NAMETAG_SPECTATOR;
+    private static final int COLOR_TEXT     = UITheme.TEXT_PRIMARY;
+    private static final int COLOR_SUBTEXT  = UITheme.TEXT_SECONDARY;
 
-    public KitSelectionScreen(Screen parent) {
+    private static final int COLS    = 3;
+    private static final int CELL_W  = 130;
+    private static final int CELL_H  = 80;
+    private static final int PADDING = 10;
+
+    private String selectedKit = null;
+    private float fadeAlpha    = 0f;
+    private long openTime;
+    private BScrollPanel scrollPanel;
+    private BButton confirmButton;
+    private float[] hoverState;
+
+    public KitSelectionScreen() {
         super(Component.literal("Kit Selection"));
-        this.parent = parent;
     }
 
     @Override
     protected void init() {
-        scroll = new BScrollPanel(4, 40, LEFT_W - 8, height - 80);
-        scroll.setContentHeight(Math.max(height - 80, ClientTeamData.availableKits.size() * 60));
-        rebuildKitList();
+        openTime = System.currentTimeMillis();
+        List<KitEntry> kits = ClientTeamData.availableKits;
+        hoverState = new float[kits == null ? 0 : kits.size()];
 
-        int rx = LEFT_W + 10;
-        int by = height - 30;
-        addRenderableWidget(new BButton(rx, by, 100, 20, "Back", btn -> minecraft.setScreen(parent)));
+        int panelW = COLS * (CELL_W + PADDING) + PADDING;
+        int panelH = height - 80;
+        int panelX = width / 2 - panelW / 2;
+        int panelY = 40;
+
+        scrollPanel = new BScrollPanel(panelX, panelY, panelW, panelH);
+        int rows = (kits == null || kits.isEmpty()) ? 1 : (kits.size() + COLS - 1) / COLS;
+        scrollPanel.setContentHeight(rows * (CELL_H + PADDING) + PADDING);
+
+        confirmButton = addRenderableWidget(new BButton(
+            width / 2 - 60, height - 28, 120, 20,
+            Component.literal("Select Kit"), btn -> confirmSelection()
+        ));
     }
 
-    private void rebuildKitList() {
-        scroll.clearContent();
-        int[] idx = {0};
-        for (KitEntry kit : ClientTeamData.availableKits) {
-            int yOff = idx[0] * 60;
-            scroll.addContent(g -> {
-                int sx = scroll.getX() + 5;
-                int sy = scroll.getY() + yOff - scroll.getScrollOffset();
-                boolean locked = ClientTeamData.localPlayerRank < kit.minRankOrdinal();
-                String name = kit.name();
-                String desc = kit.description();
-                int col = locked ? 0xFF888888 : 0xFFFFFFFF;
-                g.drawString(font, name, sx, sy + 4, col);
-                g.drawString(font, desc, sx, sy + 16, 0xFFAAAAAA);
-                if (locked) {
-                    g.drawString(font, "LOCKED (Rank " + kit.minRankOrdinal() + ")", sx, sy + 28, 0xFFFF4444);
-                }
-            });
-            idx[0]++;
+    private void confirmSelection() {
+        if (selectedKit != null) {
+            PacketHandler.CHANNEL.sendToServer(new KitSelectPacket(selectedKit));
+            onClose();
         }
-        scroll.setContentHeight(idx[0] * 60);
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (button == 0) {
-            int sy = scroll.getY();
-            int idx = (int) ((my - sy + scroll.getScrollOffset()) / 60);
-            if (idx >= 0 && idx < ClientTeamData.availableKits.size()) {
-                KitEntry kit = ClientTeamData.availableKits.get(idx);
-                if (ClientTeamData.localPlayerRank >= kit.minRankOrdinal()) {
-                    PacketHandler.CHANNEL.sendToServer(new KitSelectPacket(kit.id()));
+    public void render(GuiGraphics g, int mx, int my, float pt) {
+        float elapsed = (System.currentTimeMillis() - openTime) / 250f;
+        fadeAlpha = Math.min(1f, elapsed);
+
+        g.fill(0, 0, width, height, AnimationHelper.withAlpha(COLOR_BG, (int)(fadeAlpha * 0xCC)));
+
+        String title = "SELECT KIT";
+        int tw = font.width(title);
+        g.drawString(font, title, width / 2 - tw / 2, 14, AnimationHelper.withAlpha(COLOR_SELECTED, (int)(fadeAlpha * 255)));
+
+        List<KitEntry> kits = ClientTeamData.availableKits;
+        if (kits != null && !kits.isEmpty()) {
+            int panelW = COLS * (CELL_W + PADDING) + PADDING;
+            int panelX = width / 2 - panelW / 2;
+            int panelY = 40;
+
+            scrollPanel.render(g);
+
+            float scrollOff = scrollPanel.getScrollOffset();
+            g.enableScissor(panelX, panelY, panelX + panelW, panelY + scrollPanel.getHeight());
+
+            for (int i = 0; i < kits.size(); i++) {
+                int col = i % COLS;
+                int row = i / COLS;
+                int cx = panelX + PADDING + col * (CELL_W + PADDING);
+                int cy = panelY + PADDING + row * (CELL_H + PADDING) - (int)scrollOff;
+
+                if (cy + CELL_H < panelY || cy > panelY + scrollPanel.getHeight()) continue;
+
+                boolean hov = mx >= cx && mx <= cx + CELL_W && my >= cy && my <= cy + CELL_H;
+                hoverState[i] = AnimationHelper.lerp(hoverState[i], hov ? 1f : 0f, 0.15f);
+
+                boolean sel = kits.get(i).id().equals(selectedKit);
+                drawKitCell(g, cx, cy, kits.get(i), sel, hoverState[i], fadeAlpha);
+            }
+
+            g.disableScissor();
+        } else {
+            String none = "No kits available";
+            int nw = font.width(none);
+            g.drawString(font, none, width / 2 - nw / 2, height / 2, AnimationHelper.withAlpha(COLOR_SUBTEXT, (int)(fadeAlpha * 200)));
+        }
+
+        super.render(g, mx, my, pt);
+    }
+
+    private void drawKitCell(GuiGraphics g, int x, int y, KitEntry kit, boolean selected, float hover, float alpha) {
+        int bgColor  = selected ? AnimationHelper.blendColors(UITheme.BG_SURFACE, UITheme.ACCENT, 0.15f)
+                                : AnimationHelper.withAlpha(COLOR_CARD, (int)(alpha * 0xDD));
+        int brdColor = selected ? AnimationHelper.withAlpha(COLOR_SELECTED, (int)(alpha * 255))
+                                : AnimationHelper.withAlpha(COLOR_BORDER, (int)(alpha * (0x44 + hover * 0xBB)));
+
+        g.fill(x, y, x + CELL_W, y + CELL_H, bgColor);
+        g.fill(x, y, x + CELL_W, y + 1, brdColor);
+        g.fill(x, y + CELL_H - 1, x + CELL_W, y + CELL_H, brdColor);
+        g.fill(x, y, x + 1, y + CELL_H, brdColor);
+        g.fill(x + CELL_W - 1, y, x + CELL_W, y + CELL_H, brdColor);
+
+        String display = kit.name().toUpperCase();
+        int tw = font.width(display);
+        g.drawString(font, display,
+            x + CELL_W / 2 - tw / 2, y + CELL_H / 2 - 4,
+            AnimationHelper.withAlpha(COLOR_TEXT, (int)(alpha * 255)));
+
+        if (selected) {
+            String sel = "\u2713 SELECTED";
+            int sw = font.width(sel);
+            g.drawString(font, sel, x + CELL_W / 2 - sw / 2, y + CELL_H / 2 + 8,
+                AnimationHelper.withAlpha(COLOR_SELECTED, (int)(alpha * 255)));
+        }
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int btn) {
+        List<KitEntry> kits = ClientTeamData.availableKits;
+        if (kits != null) {
+            int panelW = COLS * (CELL_W + PADDING) + PADDING;
+            int panelX = width / 2 - panelW / 2;
+            int panelY = 40;
+            float scrollOff = scrollPanel.getScrollOffset();
+
+            for (int i = 0; i < kits.size(); i++) {
+                int col = i % COLS;
+                int row = i / COLS;
+                int cx = panelX + PADDING + col * (CELL_W + PADDING);
+                int cy = panelY + PADDING + row * (CELL_H + PADDING) - (int)scrollOff;
+                if (mx >= cx && mx <= cx + CELL_W && my >= cy && my <= cy + CELL_H) {
+                    selectedKit = kits.get(i).id();
+                    return true;
                 }
             }
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(mx, my, btn);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
-        g.fill(0, 0, width, height, 0xCC111111);
-        String title = "KIT SELECTION";
-        int titleW = font.width(title);
-        g.drawString(font, title, (width - titleW) / 2, 16, 0xFF00AAFF);
-        scroll.render(g);
-        super.render(g, mouseX, mouseY, partialTick);
+    public boolean mouseScrolled(double mx, double my, double delta) {
+        scrollPanel.onScroll((int)mx, (int)my, delta);
+        return true;
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (mouseX < LEFT_W) {
-            scroll.onScroll(mouseX, mouseY, delta);
-            return true;
-        }
-        return super.mouseScrolled(mouseX, mouseY, delta);
+    public void tick() {
+        scrollPanel.tick();
     }
 
     @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
+    public boolean isPauseScreen() { return false; }
 }

@@ -15,8 +15,8 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import static com.yourmod.teamsystem.core.ChatHelper.*;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -71,8 +71,8 @@ public class MapPoolManager {
         return getServerRoot().resolve(SOURCES_DIR_NAME);
     }
 
-    private Path getLivePath(String instanceKey) {
-        return getServerRoot().resolve("dimensions").resolve("teamsystem").resolve(instanceKey);
+    private Path getDimensionStorageDir(String worldKey) {
+        return getServerRoot().resolve("dimensions").resolve("teamsystem").resolve(worldKey);
     }
 
     private String sanitize(String name) {
@@ -96,17 +96,28 @@ public class MapPoolManager {
         }
 
         try (Reader reader = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
-            Type listType = new TypeToken<List<MapConfig>>() {}.getType();
-            List<MapConfig> loaded = GSON.fromJson(reader, listType);
-            if (loaded != null) {
-                for (MapConfig map : loaded) {
-                    if (!map.isEnabled()) continue;
-                    if (map.getState() == null) map.setState(MapState.AVAILABLE);
-                    String key = sanitize(map.getWorldFolder());
-                    if (Files.isDirectory(getSourcesPath().resolve(key).resolve("region"))) {
-                        maps.add(map);
-                    } else {
-                        TeamSystem.LOGGER.warn("Source folder missing for map {}, skipping", map.getName());
+            Map<String, Object> root = GSON.fromJson(reader, Map.class);
+            if (root == null) root = new HashMap<>();
+
+            Object rawSeq = root.get("matchSequence");
+            if (rawSeq instanceof Number n) {
+                matchSequence = n.intValue();
+            }
+
+            Object rawMaps = root.get("maps");
+            if (rawMaps instanceof List) {
+                Type listType = new TypeToken<List<MapConfig>>() {}.getType();
+                List<MapConfig> loaded = GSON.fromJson(GSON.toJsonTree(rawMaps), listType);
+                if (loaded != null) {
+                    for (MapConfig map : loaded) {
+                        if (!map.isEnabled()) continue;
+                        if (map.getState() == null) map.setState(MapState.AVAILABLE);
+                        String key = sanitize(map.getWorldFolder());
+                        if (Files.isDirectory(getSourcesPath().resolve(key).resolve("region"))) {
+                            maps.add(map);
+                        } else {
+                            TeamSystem.LOGGER.warn("Source folder missing for map {}, skipping", map.getName());
+                        }
                     }
                 }
             }
@@ -121,7 +132,7 @@ public class MapPoolManager {
             }
 
             saveConfig();
-            TeamSystem.LOGGER.info("Loaded {} maps from config", maps.size());
+            TeamSystem.LOGGER.info("Loaded {} maps, next match id: {}", maps.size(), matchSequence);
         } catch (IOException e) {
             TeamSystem.LOGGER.error("Failed to load map config: {}", e.getMessage());
         }
@@ -170,7 +181,10 @@ public class MapPoolManager {
         try {
             Files.createDirectories(configPath.getParent());
             try (Writer writer = Files.newBufferedWriter(configPath, StandardCharsets.UTF_8)) {
-                GSON.toJson(maps, writer);
+                Map<String, Object> root = new LinkedHashMap<>();
+                root.put("matchSequence", matchSequence);
+                root.put("maps", maps);
+                GSON.toJson(root, writer);
             }
         } catch (IOException e) {
             TeamSystem.LOGGER.error("Failed to save map config: {}", e.getMessage());
@@ -192,11 +206,10 @@ public class MapPoolManager {
         String worldKey = sanitize(map.getWorldFolder());
         if (worldKey.isEmpty()) return false;
 
-        String instanceKey = worldKey + "_" + matchSequence++;
-        map.setMatchInstance(instanceKey);
+        map.setMatchInstance(worldKey);
 
-        Path sourceDir = getSourcesPath().resolve(worldKey);
-        Path liveDir = getLivePath(instanceKey);
+        Path sourceDir = getSourcesPath().resolve(map.getWorldFolder());
+        Path dimDir = getDimensionStorageDir(worldKey);
 
         if (!Files.isDirectory(sourceDir.resolve("region"))) {
             TeamSystem.LOGGER.warn("No source data for map {}", map.getName());
@@ -204,63 +217,102 @@ public class MapPoolManager {
         }
 
         try {
-            ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", instanceKey));
+            ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey));
             ServerLevel level = server.getLevel(dimKey);
+
             if (level != null) {
-                level.save(null, true, false);
-                purgeDimensionCaches(level);
+                purgeDimensionData(level);
             }
 
-            if (Files.isDirectory(liveDir)) {
-                deleteDirectory(liveDir);
+            if (Files.isDirectory(dimDir)) {
+                deleteDirectory(dimDir);
             }
 
-            Files.createDirectories(liveDir.getParent());
-            copyDirectory(sourceDir, liveDir);
+            Files.createDirectories(dimDir);
+            copyDirectory(sourceDir, dimDir);
 
-            MapDimensionGenerator.generateInstanceDatapack(server, instanceKey);
-            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "reload");
+            saveConfig();
 
-            TeamSystem.LOGGER.info("Copied map {} to live instance {} (key={})", map.getName(), map.getMatchInstance(), instanceKey);
+            TeamSystem.LOGGER.info("Deployed map {} to teamsystem:{}", map.getName(), worldKey);
             return true;
         } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to copy map {} to live: {}", map.getName(), e.getMessage());
+            TeamSystem.LOGGER.error("Failed to deploy map {}: {}", map.getName(), e.getMessage());
             return false;
         }
     }
 
     public boolean deleteLive(MapConfig map) {
-        String instanceKey = map.getMatchInstance();
-        if (instanceKey == null || instanceKey.isEmpty()) {
-            instanceKey = sanitize(map.getWorldFolder());
-            if (instanceKey.isEmpty()) return false;
-        }
+        String worldKey = sanitize(map.getWorldFolder());
+        if (worldKey.isEmpty()) return false;
 
-        Path liveDir = getLivePath(instanceKey);
+        Path dimDir = getDimensionStorageDir(worldKey);
 
         try {
-            if (Files.isDirectory(liveDir)) {
-                ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", instanceKey));
-                ServerLevel level = server.getLevel(dimKey);
-                if (level != null) {
-                    level.save(null, true, false);
-                    purgeDimensionCaches(level);
-                }
-                deleteDirectory(liveDir);
+            ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey));
+            ServerLevel level = server.getLevel(dimKey);
+
+            if (level != null) {
+                purgeDimensionData(level);
             }
 
-            MapDimensionGenerator.removeInstanceDatapack(server, instanceKey);
-            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "reload");
+            if (Files.isDirectory(dimDir)) {
+                deleteDirectory(dimDir);
+            }
+
             map.setMatchInstance(null);
             saveConfig();
 
-            TeamSystem.LOGGER.info("Deleted live instance {} for map {}", instanceKey, map.getName());
+            TeamSystem.LOGGER.info("Cleaned dimension storage for map {}", map.getName());
             return true;
         } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to delete live instance {} for map {}: {}", instanceKey, map.getName(), e.getMessage());
+            TeamSystem.LOGGER.error("Failed to clean dimension {}: {}", worldKey, e.getMessage());
             return false;
         }
     }
+
+    private void purgeDimensionData(ServerLevel level) {
+        try {
+            level.getPlayers(levelPlayer -> true).forEach(p ->
+                p.teleportTo(server.overworld(), 0, 100, 0, 0, 0));
+
+            level.save(null, true, false);
+
+            Object chunkMap = level.getChunkSource().chunkMap;
+            Class<?> cmc = chunkMap.getClass();
+            storageClose0(cmc, chunkMap, "poiManager");
+
+            for (String fieldName : new String[]{"visibleChunkMap", "updatingChunkMap"}) {
+                Object m = findField(cmc, chunkMap, fieldName);
+                if (m instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> lm) lm.clear();
+            }
+
+            Object pending = findField(cmc, chunkMap, "pendingUnloads");
+            if (pending instanceof it.unimi.dsi.fastutil.longs.LongSet ls) ls.clear();
+
+            Object dist = findField(cmc, chunkMap, "distanceManager");
+            if (dist != null) {
+                Object tickets = findField(dist.getClass(), dist, "tickets");
+                if (tickets instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> lm) lm.clear();
+            }
+        } catch (Exception e) {
+            TeamSystem.LOGGER.error("Failed to purge dimension data: {}", e.getMessage());
+        }
+    }
+
+    private void storageClose0(Class<?> clazz, Object instance, String... names) {
+        for (String name : names) {
+            try {
+                java.lang.reflect.Field f = clazz.getDeclaredField(name);
+                f.setAccessible(true);
+                Object o = f.get(instance);
+                if (o instanceof AutoCloseable c) {
+                    try { c.close(); } catch (Exception ignored) {}
+                }
+                return;
+            } catch (NoSuchFieldException | IllegalAccessException ignored) {}
+        }
+    }
+
 
     private void copyDirectory(Path src, Path dst) throws IOException {
         Files.createDirectories(dst);
@@ -283,36 +335,6 @@ public class MapPoolManager {
             while (it.hasNext()) {
                 Files.deleteIfExists(it.next());
             }
-        }
-    }
-
-    private void purgeDimensionCaches(ServerLevel level) {
-        try {
-            Object chunkMap = level.getChunkSource().chunkMap;
-            Class<?> cmc = chunkMap.getClass();
-
-            Object storage = findField(cmc, chunkMap, "storage");
-            if (storage instanceof AutoCloseable c) c.close();
-
-            Object poiMgr = findField(cmc, chunkMap, "poiManager");
-            if (poiMgr instanceof AutoCloseable c) c.close();
-
-            Object visible = findField(cmc, chunkMap, "visibleChunkMap");
-            if (visible instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> m) m.clear();
-
-            Object updating = findField(cmc, chunkMap, "updatingChunkMap");
-            if (updating instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> m) m.clear();
-
-            Object pending = findField(cmc, chunkMap, "pendingUnloads");
-            if (pending instanceof it.unimi.dsi.fastutil.longs.LongSet s) s.clear();
-
-            Object dist = findField(cmc, chunkMap, "distanceManager");
-            if (dist != null) {
-                Object tickets = findField(dist.getClass(), dist, "tickets");
-                if (tickets instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> m) m.clear();
-            }
-        } catch (Exception e) {
-            TeamSystem.LOGGER.error("Failed to purge dimension caches: {}", e.getMessage());
         }
     }
 
@@ -388,7 +410,7 @@ public class MapPoolManager {
     public boolean castVote(ServerPlayer player, String mapName) {
         String uuid = player.getUUID().toString();
         if (votes.containsKey(uuid)) {
-            player.sendSystemMessage(Component.literal("You already voted! Use /map votes to see results.").withStyle(ChatFormatting.RED));
+            player.sendSystemMessage(error("You already voted! Use /map votes to see results."));
             return false;
         }
         votes.put(uuid, mapName.toLowerCase());
