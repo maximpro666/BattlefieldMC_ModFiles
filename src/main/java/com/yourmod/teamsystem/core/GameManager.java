@@ -266,7 +266,6 @@ public class GameManager {
         TeamManager tm = TeamSystem.getTeamManager();
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             tm.setPlayerTeam(p, Team.SPECTATOR);
-            tm.getOrCreatePlayerData(p.getUUID()).setDisplayName("");
             tm.updatePlayerDisplayName(p);
         }
 

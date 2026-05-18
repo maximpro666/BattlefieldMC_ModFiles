@@ -111,7 +111,7 @@ public class MapCommand {
 
         if (pool.selectMap(index)) {
             context.getSource().sendSuccess(() ->
-                Component.literal("Map selected and set to IN_MATCH")
+                Component.literal("Map selected for next match")
                     .withStyle(ChatFormatting.GREEN), true);
         } else {
             context.getSource().sendFailure(
@@ -151,10 +151,6 @@ public class MapCommand {
             .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), false);
         context.getSource().sendSuccess(() ->
             Component.literal("Available: " + pool.getAvailableCount()), false);
-        context.getSource().sendSuccess(() ->
-            Component.literal("Dirty: " + pool.getDirtyCount()), false);
-        context.getSource().sendSuccess(() ->
-            Component.literal("Maintenance needed: " + pool.isMaintenanceNeeded()), false);
         context.getSource().sendSuccess(() ->
             Component.literal("Maintenance running: " + pool.isMaintenanceRunning()), false);
         return 1;

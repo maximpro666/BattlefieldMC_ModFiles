@@ -2,6 +2,7 @@ package com.yourmod.teamsystem.client.gui;
 
 import com.yourmod.teamsystem.client.gui.overlay.*;
 import com.yourmod.teamsystem.client.gui.screen.BattlefieldPauseScreen;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
@@ -24,6 +25,7 @@ public class ClientGuiHandler {
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "bf_killfeed", new KillFeedOverlay());
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "bf_capture_notification", new CaptureNotificationOverlay());
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "bf_hotbar", new HotbarOverlay());
+        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "bf_voice", new VoiceIndicatorOverlay());
     }
 
     @Mod.EventBusSubscriber(modid = "teamsystem", bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
@@ -31,7 +33,10 @@ public class ClientGuiHandler {
         @SubscribeEvent
         public static void onScreenOpen(ScreenEvent.Opening event) {
             if (event.getScreen() instanceof PauseScreen) {
-                event.setNewScreen(new BattlefieldPauseScreen());
+                Minecraft mc = Minecraft.getInstance();
+                if (mc.level != null) {
+                    event.setNewScreen(new BattlefieldPauseScreen());
+                }
             }
         }
     }

@@ -3,6 +3,7 @@ package com.yourmod.teamsystem.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.PlayerCombatData;
 import com.yourmod.teamsystem.events.PlayerEventHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -33,6 +34,8 @@ public class CallsignCommand {
                             return 0;
                         }
 
+                        PlayerCombatData pcd = TeamSystem.getTeamManager().getOrCreatePlayerData(player.getUUID());
+                        pcd.setCallsign(name);
                         TeamSystem.getTeamManager().setPlayerDisplayName(player, name);
                         PlayerEventHandler handler = TeamSystem.getPlayerEventHandler();
                         if (handler != null) {

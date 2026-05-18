@@ -252,10 +252,9 @@ public class MapPoolManager {
             MapDimensionGenerator.removeInstanceDatapack(server, instanceKey);
             server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "reload");
             map.setMatchInstance(null);
-            map.setState(MapState.AVAILABLE);
             saveConfig();
 
-            TeamSystem.LOGGER.info("Deleted live instance {} for map {}, returned to AVAILABLE", instanceKey, map.getName());
+            TeamSystem.LOGGER.info("Deleted live instance {} for map {}", instanceKey, map.getName());
             return true;
         } catch (IOException e) {
             TeamSystem.LOGGER.error("Failed to delete live instance {} for map {}: {}", instanceKey, map.getName(), e.getMessage());
@@ -344,10 +343,6 @@ public class MapPoolManager {
         return (int) maps.stream().filter(m -> m.getState() == MapState.AVAILABLE).count();
     }
 
-    public int getDirtyCount() {
-        return (int) maps.stream().filter(m -> m.getState() == MapState.DIRTY).count();
-    }
-
     // ========== Map Selection ==========
 
     public Optional<MapConfig> getCurrentMap() {
@@ -362,7 +357,6 @@ public class MapPoolManager {
             if (maps.get(i).getName().equalsIgnoreCase(name)) {
                 if (maps.get(i).getState() != MapState.AVAILABLE) return false;
                 currentMapIndex = i;
-                maps.get(i).setState(MapState.IN_MATCH);
                 saveConfig();
                 return true;
             }
@@ -374,7 +368,6 @@ public class MapPoolManager {
         if (index < 0 || index >= maps.size()) return false;
         if (maps.get(index).getState() != MapState.AVAILABLE) return false;
         currentMapIndex = index;
-        maps.get(index).setState(MapState.IN_MATCH);
         saveConfig();
         return true;
     }
@@ -386,29 +379,8 @@ public class MapPoolManager {
         int weightedPick = random.nextInt(available.size());
         MapConfig picked = available.get(weightedPick);
         currentMapIndex = maps.indexOf(picked);
-        picked.setState(MapState.IN_MATCH);
         saveConfig();
         return picked;
-    }
-
-    // ========== State Transitions ==========
-
-    public void markInMatch(MapConfig map) {
-        map.setState(MapState.IN_MATCH);
-        saveConfig();
-    }
-
-    public void markDirty(MapConfig map) {
-        map.setState(MapState.DIRTY);
-        if (currentMapIndex >= 0 && currentMapIndex < maps.size() && maps.get(currentMapIndex) == map) {
-            currentMapIndex = -1;
-        }
-        saveConfig();
-    }
-
-    public void markAvailable(MapConfig map) {
-        map.setState(MapState.AVAILABLE);
-        saveConfig();
     }
 
     // ========== Voting ==========
@@ -457,11 +429,7 @@ public class MapPoolManager {
     public void clearVotes() { votes.clear(); }
     public boolean hasVotes() { return !votes.isEmpty(); }
 
-    // ========== Maintenance ==========
-
-    public boolean isMaintenanceNeeded() {
-        return getAvailableCount() <= 1 && getDirtyCount() > 0;
-    }
+    // ========== Maintenance (legacy - kept for manual use) ==========
 
     public boolean isMaintenanceRunning() { return maintenanceRunning; }
 
@@ -481,19 +449,15 @@ public class MapPoolManager {
 
         int cleaned = 0;
         int failed = 0;
-        List<MapConfig> dirty = getMapsByState(MapState.DIRTY);
-        for (MapConfig map : dirty) {
+        for (MapConfig map : maps) {
+            String inst = map.getMatchInstance();
+            if (inst == null || inst.isEmpty()) continue;
             try {
-                if (deleteLive(map)) {
-                    map.setState(MapState.AVAILABLE);
-                    cleaned++;
-                    TeamSystem.LOGGER.info("Cleaned live data for map {}", map.getName());
-                } else {
-                    failed++;
-                }
+                if (deleteLive(map)) cleaned++;
+                else failed++;
             } catch (Exception e) {
                 failed++;
-                TeamSystem.LOGGER.error("Failed to clean map {}: {}", map.getName(), e.getMessage());
+                TeamSystem.LOGGER.error("Failed to clean instance {} for map {}: {}", inst, map.getName(), e.getMessage());
             }
         }
         saveConfig();
@@ -501,27 +465,8 @@ public class MapPoolManager {
         maintenanceRunning = false;
         maintenanceCooldown = MAINTENANCE_INTERVAL_TICKS;
 
-        if (restartAfterMaintenance) {
-            TeamSystem.LOGGER.info("Maintenance finished. Cleaned: {}, Failed: {}. Server will now restart.", cleaned, failed);
-            server.getPlayerList().broadcastSystemMessage(
-                net.minecraft.network.chat.Component.literal("§6[Maintenance] Maps cleaned. Server restarting..."), false);
-            try {
-                server.getPlayerList().saveAll();
-                for (ServerLevel level : server.getAllLevels()) {
-                    try { level.save(null, true, level.noSave()); } catch (Exception ignored) {}
-                }
-            } catch (Exception e) {
-                TeamSystem.LOGGER.error("Error during final save: {}", e.getMessage());
-            }
-            server.halt(false);
-            return;
-        }
-
-        TeamSystem.LOGGER.info("Maintenance finished. Cleaned: {}, Failed: {}, Available: {}",
-            cleaned, failed, getAvailableCount());
+        TeamSystem.LOGGER.info("Maintenance finished. Cleaned: {}, Failed: {}", cleaned, failed);
     }
-
-    // ========== Tick ==========
 
     @SubscribeEvent
     public void onServerTick(TickEvent.ServerTickEvent event) {
@@ -529,13 +474,6 @@ public class MapPoolManager {
 
         if (maintenanceCooldown > 0) {
             maintenanceCooldown--;
-            return;
-        }
-
-        if (isMaintenanceNeeded() && !maintenanceRunning) {
-            TeamSystem.LOGGER.info("Maintenance triggered: available={}, dirty={}",
-                getAvailableCount(), getDirtyCount());
-            runMaintenance();
         }
     }
 

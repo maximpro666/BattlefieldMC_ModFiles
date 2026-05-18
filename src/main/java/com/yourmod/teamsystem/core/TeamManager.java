@@ -156,7 +156,10 @@ public class TeamManager extends SavedData {
             if (team.isPlayable() && game.isPlaying()) {
                 MapConfig map = game.getCurrentMap();
                 if (map != null) {
-                    String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+                    String worldKey = map.getMatchInstance();
+                    if (worldKey == null || worldKey.isEmpty()) {
+                        worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+                    }
                     if (!worldKey.isEmpty()) {
                         ServerLevel target = server.getLevel(
                             ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey)));
@@ -237,14 +240,17 @@ public class TeamManager extends SavedData {
     public void syncPlayerData(ServerPlayer player) {
         PlayerCombatData data = getOrCreatePlayerData(player.getUUID());
         CombatDataSyncPacket packet = new CombatDataSyncPacket(
+            player.getUUID(),
             data.getTeam().ordinal(),
             data.getKills(),
             data.getDeaths(),
             data.getPrefix(),
             data.getSuffix(),
-            data.getDisplayName()
+            data.getDisplayName(),
+            data.getCallsign(),
+            data.getRankOrdinal()
         );
-        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+        PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
     }
 
     public void fullSyncPlayer(ServerPlayer player) {

@@ -77,8 +77,20 @@ public class PlayerEventHandler {
             GameManager game = TeamSystem.getGameManager();
             if (game != null) {
                 game.syncPhaseToPlayer(player);
-                game.teleportPlayerToLobby(player);
-                game.setLobbyRespawn(player);
+                if (game.isPlaying()) {
+                    Team team = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
+                    MapConfig map = game.getCurrentMap();
+                    if (team != null && team.isPlayable() && map != null) {
+                        game.teleportPlayerToMapAtTeamSpawn(player, map, team);
+                        game.setMapRespawn(player, map, team);
+                    } else {
+                        game.teleportPlayerToLobby(player);
+                        game.setLobbyRespawn(player);
+                    }
+                } else {
+                    game.teleportPlayerToLobby(player);
+                    game.setLobbyRespawn(player);
+                }
 
                 if (game.isPlaying() || game.isVoting()) {
                     player.sendSystemMessage(Component.literal("§6=== Game in progress ===")
@@ -93,7 +105,8 @@ public class PlayerEventHandler {
             if (mm != null) {
                 mm.syncToPlayer(player);
             }
-            if (teamManager.getOrCreatePlayerData(player.getUUID()).getDisplayName().isEmpty()) {
+            var pcd = teamManager.getOrCreatePlayerData(player.getUUID());
+            if (pcd.getDisplayName().isEmpty() && pcd.getCallsign().isEmpty()) {
                 player.sendSystemMessage(Component.literal("§6=== Добро пожаловать! ===")
                     .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
                 player.sendSystemMessage(Component.literal("§eУстановите свой позывной командой: §a/callsign <ник>")
