@@ -34,6 +34,8 @@ public class ClientTeamData {
     public static KitData selectedKit = null;
 
     public static final Map<UUID, PlayerListEntry> playerDataMap = new HashMap<>();
+    /** Full KitConfig JSON received from server for admin editing */
+    public static String kitConfigEditJson = "";
     public static final Map<UUID, Integer> playerTeamMap = new HashMap<>();
     public static final List<KitEntry> availableKits = new ArrayList<>();
     public static final List<VehicleEntry> availableVehicles = new ArrayList<>();

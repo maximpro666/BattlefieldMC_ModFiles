@@ -9,6 +9,7 @@ import com.yourmod.teamsystem.network.KitSelectPacket;
 import com.yourmod.teamsystem.client.gui.component.BButton;
 import com.yourmod.teamsystem.client.gui.component.BScrollPanel;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -34,6 +35,7 @@ public class KitSelectionScreen extends Screen {
     private long openTime;
     private BScrollPanel scrollPanel;
     private BButton confirmButton;
+    private BButton customizeButton;
     private float[] hoverState;
 
     public KitSelectionScreen() {
@@ -59,12 +61,23 @@ public class KitSelectionScreen extends Screen {
             width / 2 - 60, height - 28, 120, 20,
             Component.literal("Select Kit"), btn -> confirmSelection()
         ));
+
+        customizeButton = addRenderableWidget(new BButton(
+            width / 2 + 66, height - 28, 120, 20,
+            Component.literal("Customize"), btn -> customizeKit()
+        ));
     }
 
     private void confirmSelection() {
         if (selectedKit != null) {
             PacketHandler.CHANNEL.sendToServer(new KitSelectPacket(selectedKit));
             onClose();
+        }
+    }
+
+    private void customizeKit() {
+        if (selectedKit != null) {
+            Minecraft.getInstance().setScreen(new KitLoadoutScreen(selectedKit));
         }
     }
 
@@ -112,6 +125,8 @@ public class KitSelectionScreen extends Screen {
             g.drawString(font, none, width / 2 - nw / 2, height / 2, AnimationHelper.withAlpha(COLOR_SUBTEXT, (int)(fadeAlpha * 200)));
         }
 
+        customizeButton.visible = selectedKit != null;
+        customizeButton.active = selectedKit != null;
         super.render(g, mx, my, pt);
     }
 

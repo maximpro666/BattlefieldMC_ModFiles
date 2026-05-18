@@ -65,6 +65,9 @@ public class KitConfig {
 
     public static KitConfig get() { return INSTANCE; }
 
+    /** Used by KitAdminSavePacket to replace the in-memory config after admin edit */
+    public static void set(KitConfig cfg) { INSTANCE = cfg; }
+
     public static KitConfig loadOrCreate(Path worldDir) {
         Path file = worldDir.resolve("teamsystem/kits.json");
         if (Files.exists(file)) {

@@ -276,60 +276,117 @@ public class MapPoolManager {
         return true;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void clearChunkCache(ServerLevel level) {
         try {
             Object chunkMap = level.getChunkSource().chunkMap;
             Class<?> cmc = chunkMap.getClass();
 
-            // 1) Clear visible/updating chunk maps (Long2ObjectMap of chunks)
-            for (String name : new String[]{"visibleChunkMap", "visibleChunks",
-                    "updatingChunkMap", "updatingChunks", "f__chunksBeingLoaded_", "chunksToUpdate"}) {
-                Object m = findFieldAnywhere(cmc, chunkMap, name);
-                if (m instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> lm) {
-                    lm.clear();
-                    break;
+            // 1) Save pending chunks before clearing
+            try {
+                java.lang.reflect.Method saveAll = findMethod(cmc, "saveAllChunks", boolean.class);
+                if (saveAll != null) saveAll.invoke(chunkMap, false);
+            } catch (Exception ignored) {}
+
+            // 2) Drop each visible chunk via ChunkMap.drop(long) (properly cleans up ChunkHolder)
+            Object visible = findFieldAnywhere(cmc, chunkMap,
+                "visibleChunkMap", "visibleChunks", "f_visibleChunkMap");
+            if (visible instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> vcm) {
+                java.lang.reflect.Method dropMethod = findMethod(cmc, "drop", long.class);
+                if (dropMethod != null) {
+                    for (long pos : new java.util.ArrayList<>(vcm.keySet())) {
+                        try { dropMethod.invoke(chunkMap, pos); } catch (Exception ignored) {}
+                    }
                 }
+                vcm.clear();
             }
 
-            // 2) For 1.20.1: also try to clear the `chunksToLoad` and `pendingLoads` maps
-            for (String name : new String[]{"pendingLoads", "pendingUnloads", "toDrop",
-                    "chunksToLoad", "f_chunksToLoad", "pendingUnloads"}) {
-                Object p = findFieldAnywhere(cmc, chunkMap, name);
-                if (p instanceof it.unimi.dsi.fastutil.longs.LongSet ls) {
-                    ls.clear();
-                    break;
-                }
+            // 3) Clear updating chunk map
+            Object updating = findFieldAnywhere(cmc, chunkMap,
+                "updatingChunkMap", "updatingChunks", "f_updatingChunkMap");
+            if (updating instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> ucm) {
+                ucm.clear();
             }
 
-            // 3) DistanceManager tickets
-            Object dist = findFieldAnywhere(cmc, chunkMap, "distanceManager",
-                "f_$distanceManager", "distanceManager");
+            // 4) Clear pending operations LongSets
+            for (String name : new String[]{"pendingUnloads", "chunksToLoad", "pendingLoads",
+                    "toDrop", "f_chunksToLoad", "f_pendingUnloads"}) {
+                Object set = findFieldAnywhere(cmc, chunkMap, name);
+                if (set instanceof it.unimi.dsi.fastutil.longs.LongSet ls) ls.clear();
+            }
+
+            // 5) Clear entity lookup + block-entity ticking lists to drop stale references
+            for (String fn : new String[]{"entityMap", "entityByIdMap", "f_entityMap"}) {
+                Object em = findFieldAnywhere(cmc, chunkMap, fn);
+                if (em instanceof Map<?,?> m) m.clear();
+            }
+            // Also clear block entities pending ticks list in the level
+            try {
+                java.lang.reflect.Field beField = net.minecraft.server.level.ServerLevel.class.getDeclaredField("blockEntityTickers");
+                beField.setAccessible(true);
+                Object beTickers = beField.get(level);
+                if (beTickers instanceof List<?> l) l.clear();
+            } catch (Exception ignored) {}
+            try {
+                java.lang.reflect.Field beField = net.minecraft.server.level.ServerLevel.class.getDeclaredField("pendingBlockEntityTickers");
+                beField.setAccessible(true);
+                Object beTickers = beField.get(level);
+                if (beTickers instanceof List<?> l) l.clear();
+            } catch (Exception ignored) {}
+
+            // 6) Nuke all DistanceManager tickets (public API + reflection fallback)
+            Object dist = findFieldAnywhere(cmc, chunkMap,
+                "distanceManager", "f_$distanceManager");
             if (dist != null) {
-                for (String name : new String[]{"tickets", "ticketMap", "f_$tickets"}) {
-                    Object tickets = findFieldAnywhere(dist.getClass(), dist, name);
-                    if (tickets instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> lm) {
+                java.lang.reflect.Method rmTicket = findMethod(dist.getClass(),
+                    "removeTicket", long.class, net.minecraft.server.level.Ticket.class);
+                Class<?> dmc = dist.getClass();
+                for (String fn : new String[]{"tickets", "ticketMap", "f_$tickets", "ticketsByChunk"}) {
+                    Object tmap = findFieldAnywhere(dmc, dist, fn);
+                    if (tmap instanceof it.unimi.dsi.fastutil.longs.Long2ObjectMap<?> lm) {
+                        for (long key : new java.util.ArrayList<>(lm.keySet())) {
+                            if (rmTicket != null) {
+                                try {
+                                    Object raw = lm.get(key);
+                                    if (raw instanceof net.minecraft.util.SortedArraySet<?> set) {
+                                        for (Object t : set) rmTicket.invoke(dist, key, t);
+                                    }
+                                } catch (Exception ignored) {}
+                            }
+                        }
                         lm.clear();
-                        break;
                     }
                 }
-                // Also clear per-player tickets
-                for (String name : new String[]{"playerTickets", "f_$playerTickets"}) {
-                    Object pt = findFieldAnywhere(dist.getClass(), dist, name);
-                    if (pt != null) {
-                        if (pt instanceof Map<?,?> m) m.clear();
-                        else if (pt instanceof it.unimi.dsi.fastutil.objects.Object2ObjectMap<?,?> m) m.clear();
-                        break;
-                    }
+                for (String fn : new String[]{"playerTickets", "f_$playerTickets"}) {
+                    Object pt = findFieldAnywhere(dmc, dist, fn);
+                    if (pt instanceof Map<?,?> m) m.clear();
+                    else if (pt instanceof it.unimi.dsi.fastutil.objects.Object2ObjectMap<?,?> m2) m2.clear();
                 }
             }
 
-            // 4) Force chunk source to re-evaluate
-            level.getChunkSource().tick(() -> true, true);
+            // 7) Force chunk source to tick multiple times to flush pending operations
+            for (int i = 0; i < 10; i++) {
+                level.getChunkSource().tick(() -> true, true);
+            }
 
             TeamSystem.LOGGER.info("Chunk cache cleared for teamsystem:map");
         } catch (Exception e) {
             TeamSystem.LOGGER.warn("Failed to clear chunk cache: {} (map may still work)", e.getMessage());
         }
+    }
+
+    /** Reflection helper to find a method by name in class hierarchy */
+    private java.lang.reflect.Method findMethod(Class<?> clazz, String name, Class<?>... paramTypes) {
+        Class<?> current = clazz;
+        while (current != null && current != Object.class) {
+            try {
+                java.lang.reflect.Method m = current.getDeclaredMethod(name, paramTypes);
+                m.setAccessible(true);
+                return m;
+            } catch (NoSuchMethodException ignored) {}
+            current = current.getSuperclass();
+        }
+        return null;
     }
 
     private void teleportToLobby(ServerPlayer p) {

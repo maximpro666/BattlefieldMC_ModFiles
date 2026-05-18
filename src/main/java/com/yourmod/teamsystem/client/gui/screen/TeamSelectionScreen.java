@@ -9,6 +9,7 @@ import com.yourmod.teamsystem.network.TeamSelectPacket;
 import com.yourmod.teamsystem.client.gui.component.BButton;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -64,7 +65,11 @@ public class TeamSelectionScreen extends Screen {
 
     private void selectTeam(Team team) {
         PacketHandler.CHANNEL.sendToServer(new TeamSelectPacket(team.ordinal()));
-        onClose();
+        if (team != Team.SPECTATOR) {
+            Minecraft.getInstance().setScreen(new ClassSelectionScreen());
+        } else {
+            onClose();
+        }
     }
 
     @Override

@@ -7,12 +7,12 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class OpenTeamSelectionScreenPacket {
+public class OpenAdminPanelPacket {
 
-    public OpenTeamSelectionScreenPacket() {
+    public OpenAdminPanelPacket() {
     }
 
-    public OpenTeamSelectionScreenPacket(FriendlyByteBuf buf) {
+    public OpenAdminPanelPacket(FriendlyByteBuf buf) {
     }
 
     public void toBytes(FriendlyByteBuf buf) {
@@ -29,7 +29,7 @@ public class OpenTeamSelectionScreenPacket {
                     Object mcPlayer = mcClazz.getMethod("getPlayer").invoke(mc);
                     if (mcPlayer == null || mcLevel == null) return;
 
-                    Object screen = Class.forName("com.yourmod.teamsystem.client.gui.screen.TeamSelectionScreen")
+                    Object screen = Class.forName("com.yourmod.teamsystem.client.gui.screen.AdminPanel")
                         .getConstructor().newInstance();
 
                     mcClazz.getMethod("setScreen",

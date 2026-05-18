@@ -171,6 +171,8 @@ public class TeamSystem {
         DeployCommand.register(event.getDispatcher());
         KitSelectCommand.register(event.getDispatcher());
         com.yourmod.teamsystem.commands.AdminNotifyCommand.register(event.getDispatcher());
+        com.yourmod.teamsystem.commands.AdminCommand.register(event.getDispatcher());
+        com.yourmod.teamsystem.commands.KitAdminCommand.register(event.getDispatcher());
 
     }
 

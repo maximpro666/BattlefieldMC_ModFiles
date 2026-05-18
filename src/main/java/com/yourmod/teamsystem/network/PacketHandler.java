@@ -199,5 +199,29 @@ public class PacketHandler {
             .encoder(OpenTeamSelectionScreenPacket::toBytes)
             .consumerMainThread(OpenTeamSelectionScreenPacket::handle)
             .add();
+
+        CHANNEL.messageBuilder(OpenAdminPanelPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(OpenAdminPanelPacket::new)
+            .encoder(OpenAdminPanelPacket::toBytes)
+            .consumerMainThread(OpenAdminPanelPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(KitAdminConfigSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(KitAdminConfigSyncPacket::new)
+            .encoder(KitAdminConfigSyncPacket::toBytes)
+            .consumerMainThread(KitAdminConfigSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(KitAdminSavePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(KitAdminSavePacket::new)
+            .encoder(KitAdminSavePacket::toBytes)
+            .consumerMainThread(KitAdminSavePacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(KitAdminRequestPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(KitAdminRequestPacket::new)
+            .encoder(KitAdminRequestPacket::toBytes)
+            .consumerMainThread(KitAdminRequestPacket::handle)
+            .add();
     }
 }

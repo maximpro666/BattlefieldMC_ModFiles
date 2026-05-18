@@ -36,39 +36,64 @@ public class BattlefieldPauseScreen extends Screen {
     protected void init() {
         openTime = System.currentTimeMillis();
         int cx = width / 2;
-        int startY = height / 2 - 60;
-        btnW = 180;
-        btnH = 22;
-        gap  = 6;
+        int startY = height / 2 - 80;
+        btnW = 160;
+        btnH = 20;
+        gap  = 4;
+        int leftX = cx - btnW - 4;
+        int rightX = cx + 4;
 
-        int baseX = cx - btnW / 2;
-        buttonBaseX = new int[5];
-        buttonY    = new int[5];
+        buttonBaseX = new int[10];
+        buttonY     = new int[10];
 
-        buttonBaseX[0] = baseX; buttonY[0] = startY;
-        addRenderableWidget(new BButton(baseX, startY, btnW, btnH,
+        buttonBaseX[0] = leftX; buttonY[0] = startY;
+        addRenderableWidget(new BButton(leftX, startY, btnW, btnH,
             Component.literal(I18n.get("teamsystem.ui.return_to_battle")), btn -> onClose()));
 
-        buttonBaseX[1] = baseX; buttonY[1] = startY + (btnH + gap);
-        addRenderableWidget(new BButton(baseX, startY + (btnH + gap), btnW, btnH,
+        buttonBaseX[1] = rightX; buttonY[1] = startY;
+        addRenderableWidget(new BButton(rightX, startY, btnW, btnH,
             Component.literal(I18n.get("teamsystem.ui.team_selection")), btn -> {
                 Minecraft.getInstance().setScreen(new TeamSelectionScreen());
             }));
 
-        buttonBaseX[2] = baseX; buttonY[2] = startY + (btnH + gap) * 2;
-        addRenderableWidget(new BButton(baseX, startY + (btnH + gap) * 2, btnW, btnH,
+        buttonBaseX[2] = leftX; buttonY[2] = startY + (btnH + gap);
+        addRenderableWidget(new BButton(leftX, startY + (btnH + gap), btnW, btnH,
+            Component.literal("Change Class"), btn -> {
+                Minecraft.getInstance().setScreen(new ClassSelectionScreen());
+            }));
+
+        buttonBaseX[3] = rightX; buttonY[3] = startY + (btnH + gap);
+        addRenderableWidget(new BButton(rightX, startY + (btnH + gap), btnW, btnH,
+            Component.literal("Squad"), btn -> {
+                Minecraft.getInstance().setScreen(new SquadScreen());
+            }));
+
+        buttonBaseX[4] = leftX; buttonY[4] = startY + (btnH + gap) * 2;
+        addRenderableWidget(new BButton(leftX, startY + (btnH + gap) * 2, btnW, btnH,
+            Component.literal("Vehicle Spawn"), btn -> {
+                Minecraft.getInstance().setScreen(new VehicleSelectionScreen());
+            }));
+
+        buttonBaseX[5] = rightX; buttonY[5] = startY + (btnH + gap) * 2;
+        addRenderableWidget(new BButton(rightX, startY + (btnH + gap) * 2, btnW, btnH,
+            Component.literal("Admin Panel"), btn -> {
+                Minecraft.getInstance().setScreen(new AdminPanel());
+            }));
+
+        buttonBaseX[6] = leftX; buttonY[6] = startY + (btnH + gap) * 3;
+        addRenderableWidget(new BButton(leftX, startY + (btnH + gap) * 3, btnW, btnH,
             Component.literal(I18n.get("teamsystem.ui.settings")), btn -> {
                 Minecraft.getInstance().setScreen(new SettingsMenuScreen());
             }));
 
-        buttonBaseX[3] = baseX; buttonY[3] = startY + (btnH + gap) * 3;
-        addRenderableWidget(new BButton(baseX, startY + (btnH + gap) * 3, btnW, btnH,
+        buttonBaseX[7] = rightX; buttonY[7] = startY + (btnH + gap) * 3;
+        addRenderableWidget(new BButton(rightX, startY + (btnH + gap) * 3, btnW, btnH,
             Component.literal(I18n.get("teamsystem.ui.vanilla_settings")), btn -> {
                 Minecraft.getInstance().setScreen(new OptionsScreen(this, Minecraft.getInstance().options));
             }));
 
-        buttonBaseX[4] = baseX; buttonY[4] = startY + (btnH + gap) * 4;
-        addRenderableWidget(new BButton(baseX, startY + (btnH + gap) * 4, btnW, btnH,
+        buttonBaseX[8] = leftX; buttonY[8] = startY + (btnH + gap) * 4;
+        addRenderableWidget(new BButton(leftX, startY + (btnH + gap) * 4, btnW, btnH,
             Component.literal(I18n.get("teamsystem.ui.disconnect")), btn -> {
                 Minecraft.getInstance().level.disconnect();
                 Minecraft.getInstance().setScreen(new BattlefieldMainMenuScreen());
@@ -84,7 +109,7 @@ public class BattlefieldPauseScreen extends Screen {
 
         g.fill(0, 0, width, height, AnimationHelper.withAlpha(COLOR_BG, (int)(fadeAlpha * 0xBB)));
 
-        int panelW = 220;
+        int panelW = 340;
         int panelH = 200;
         int slideOffset = (int)((1f - slideIn) * (-width / 2));
         int panelX = width / 2 - panelW / 2 + slideOffset;
