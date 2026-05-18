@@ -2,91 +2,96 @@ package com.yourmod.teamsystem.client.gui.screen;
 
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.KitEntry;
+import com.yourmod.teamsystem.client.gui.component.BButton;
+import com.yourmod.teamsystem.client.gui.component.BScrollPanel;
 import com.yourmod.teamsystem.network.KitSelectPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import java.util.List;
-
 public class KitSelectionScreen extends Screen {
-    private static final int ENTRY_HEIGHT = 40;
-    private static final int ENTRY_WIDTH = 220;
-    private int scrollOffset;
+    private final Screen parent;
+    private BScrollPanel scroll;
 
-    public KitSelectionScreen() {
+    private static final int LEFT_W = 200;
+
+    public KitSelectionScreen(Screen parent) {
         super(Component.literal("Kit Selection"));
+        this.parent = parent;
     }
 
     @Override
     protected void init() {
-        super.init();
-        scrollOffset = 0;
-        refreshButtons();
+        scroll = new BScrollPanel(4, 40, LEFT_W - 8, height - 80);
+        scroll.setContentHeight(Math.max(height - 80, ClientTeamData.availableKits.size() * 60));
+        rebuildKitList();
+
+        int rx = LEFT_W + 10;
+        int by = height - 30;
+        addRenderableWidget(new BButton(rx, by, 100, 20, "Back", btn -> minecraft.setScreen(parent)));
     }
 
-    private void refreshButtons() {
-        clearWidgets();
-        List<KitEntry> kits = ClientTeamData.availableKits;
-        int centerX = width / 2;
-        int startY = 60;
-
-        for (int i = 0; i < kits.size(); i++) {
-            KitEntry kit = kits.get(i);
-            int y = startY + i * (ENTRY_HEIGHT + 4) - scrollOffset;
-            int finalI = i;
-
-            addRenderableWidget(Button.builder(
-                Component.literal(kit.name()),
-                btn -> PacketHandler.CHANNEL.sendToServer(new KitSelectPacket(kits.get(finalI).id()))
-                )
-                .bounds(centerX - ENTRY_WIDTH / 2, y, ENTRY_WIDTH, ENTRY_HEIGHT)
-                .build());
+    private void rebuildKitList() {
+        scroll.clearContent();
+        int[] idx = {0};
+        for (KitEntry kit : ClientTeamData.availableKits) {
+            int yOff = idx[0] * 60;
+            scroll.addContent(g -> {
+                int sx = scroll.getX() + 5;
+                int sy = scroll.getY() + yOff - scroll.getScrollOffset();
+                boolean locked = ClientTeamData.localPlayerRank < kit.minRankOrdinal();
+                String name = kit.name();
+                String desc = kit.description();
+                int col = locked ? 0xFF888888 : 0xFFFFFFFF;
+                g.drawString(font, name, sx, sy + 4, col);
+                g.drawString(font, desc, sx, sy + 16, 0xFFAAAAAA);
+                if (locked) {
+                    g.drawString(font, "LOCKED (Rank " + kit.minRankOrdinal() + ")", sx, sy + 28, 0xFFFF4444);
+                }
+            });
+            idx[0]++;
         }
-
-        addRenderableWidget(Button.builder(
-            Component.literal("Back"),
-            btn -> onClose())
-            .bounds(centerX - 50, height - 30, 100, 20)
-            .build());
+        scroll.setContentHeight(idx[0] * 60);
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics);
-        graphics.fillGradient(0, 0, width, height, 0xCC000000, 0xCC222222);
-
-        graphics.drawCenteredString(font, Component.literal("SELECT KIT"), width / 2, 20, 0xFFFFFFFF);
-
-        List<KitEntry> kits = ClientTeamData.availableKits;
-        int startY = 60;
-        int centerX = width / 2;
-
-        for (int i = 0; i < kits.size(); i++) {
-            KitEntry kit = kits.get(i);
-            int y = startY + i * (ENTRY_HEIGHT + 4) - scrollOffset;
-
-            if (y < 50 || y + ENTRY_HEIGHT > height - 40) continue;
-
-            graphics.fill(centerX - ENTRY_WIDTH / 2, y, centerX + ENTRY_WIDTH / 2, y + ENTRY_HEIGHT, 0x80000000);
-            graphics.fill(centerX - ENTRY_WIDTH / 2, y, centerX - ENTRY_WIDTH / 2 + ENTRY_HEIGHT, y + ENTRY_HEIGHT, 0x88FFFFFF);
-
-            graphics.drawString(font, Component.literal(kit.name()), centerX - ENTRY_WIDTH / 2 + ENTRY_HEIGHT + 6, y + 4, 0xFFFFFFFF);
-            graphics.drawString(font, Component.literal(kit.description()), centerX - ENTRY_WIDTH / 2 + ENTRY_HEIGHT + 6, y + 16, 0xFFAAAAAA);
-            graphics.drawString(font, Component.literal("Rank: " + kit.minRankOrdinal()), centerX - ENTRY_WIDTH / 2 + ENTRY_HEIGHT + 6, y + 28, 0xFFFFAA00);
+    public boolean mouseClicked(double mx, double my, int button) {
+        if (button == 0) {
+            int sy = scroll.getY();
+            int idx = (int) ((my - sy + scroll.getScrollOffset()) / 60);
+            if (idx >= 0 && idx < ClientTeamData.availableKits.size()) {
+                KitEntry kit = ClientTeamData.availableKits.get(idx);
+                if (ClientTeamData.localPlayerRank >= kit.minRankOrdinal()) {
+                    PacketHandler.CHANNEL.sendToServer(new KitSelectPacket(kit.id()));
+                }
+            }
         }
+        return super.mouseClicked(mx, my, button);
+    }
 
-        super.render(graphics, mouseX, mouseY, partialTick);
+    @Override
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        renderBackground(g);
+        g.fill(0, 0, width, height, 0xCC111111);
+        String title = "KIT SELECTION";
+        int titleW = font.width(title);
+        g.drawString(font, title, (width - titleW) / 2, 16, 0xFF00AAFF);
+        scroll.render(g);
+        super.render(g, mouseX, mouseY, partialTick);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        List<KitEntry> kits = ClientTeamData.availableKits;
-        int maxScroll = Math.max(0, kits.size() * (ENTRY_HEIGHT + 4) - (height - 100));
-        scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (int) delta * 20));
-        refreshButtons();
-        return true;
+        if (mouseX < LEFT_W) {
+            scroll.onScroll(mouseX, mouseY, delta);
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, delta);
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
     }
 }

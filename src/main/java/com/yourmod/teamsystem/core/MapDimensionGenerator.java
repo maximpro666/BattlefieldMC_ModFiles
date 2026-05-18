@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 public class MapDimensionGenerator {
@@ -191,5 +192,35 @@ public class MapDimensionGenerator {
                 TeamSystem.LOGGER.error("Failed to generate lobby dimension: {}", e.getMessage());
             }
         }
+    }
+
+    public static void generateInstanceDatapack(MinecraftServer server, String instanceKey) {
+        Path instanceFile = getInstanceDimsDir(server).resolve(instanceKey + ".json");
+        try {
+            Files.createDirectories(instanceFile.getParent());
+            if (!Files.exists(instanceFile)) {
+                Files.writeString(instanceFile, DIMENSION_TEMPLATE, StandardCharsets.UTF_8);
+                TeamSystem.LOGGER.info("Generated instance dimension datapack: {}", instanceKey);
+            }
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to generate instance datapack {}: {}", instanceKey, e.getMessage());
+        }
+    }
+
+    public static void removeInstanceDatapack(MinecraftServer server, String instanceKey) {
+        Path instanceFile = getInstanceDimsDir(server).resolve(instanceKey + ".json");
+        try {
+            if (Files.deleteIfExists(instanceFile)) {
+                TeamSystem.LOGGER.info("Removed instance dimension datapack: {}", instanceKey);
+            }
+        } catch (IOException e) {
+            TeamSystem.LOGGER.error("Failed to remove instance datapack {}: {}", instanceKey, e.getMessage());
+        }
+    }
+
+    public static Path getInstanceDimsDir(MinecraftServer server) {
+        return server.getWorldPath(LevelResource.ROOT)
+            .resolve("datapacks").resolve("teamsystem_maps")
+            .resolve("data").resolve("teamsystem").resolve("dimension");
     }
 }

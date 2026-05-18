@@ -1,8 +1,6 @@
 package com.yourmod.teamsystem.core;
 
 import com.yourmod.teamsystem.TeamSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -10,7 +8,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -36,16 +33,6 @@ public class ModSounds {
     private static RegistryObject<SoundEvent> register(String name) {
         ResourceLocation id = new ResourceLocation(TeamSystem.MODID, name);
         return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(id));
-    }
-
-    public static void playGUISound(SoundEvent sound) {
-        if (Minecraft.getInstance().level == null || Minecraft.getInstance().player == null) return;
-        Minecraft.getInstance().getSoundManager().play(
-            SimpleSoundInstance.forUI(sound, 1.0F, 1.0F));
-    }
-
-    public static void playGUISound(RegistryObject<SoundEvent> sound) {
-        playGUISound(sound.get());
     }
 
     public static void playPositionedSound(Level level, SoundEvent sound, double x, double y, double z, float radius) {

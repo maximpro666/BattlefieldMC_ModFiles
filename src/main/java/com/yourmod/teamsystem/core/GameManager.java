@@ -559,15 +559,28 @@ public class GameManager {
     private boolean forceLoading = false;
 
     private ServerLevel getMapWorldNoFallback(MapConfig map) {
-        String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
-        if (worldKey.isEmpty() || worldKey.equals("overworld")) return null;
-        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey));
+        String instanceKey = map.getMatchInstance();
+        if (instanceKey == null || instanceKey.isEmpty()) {
+            instanceKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
+        }
+        if (instanceKey.isEmpty() || instanceKey.equals("overworld")) return null;
+        if (instanceKey.startsWith("overworld_")) return null;
+        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", instanceKey));
         ServerLevel w = server.getLevel(key);
         if (w == null && !forceLoading) {
             forceLoading = true;
             server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
-                "execute in teamsystem:" + worldKey + " run say Loading dimension " + worldKey);
+                "execute in teamsystem:" + instanceKey + " run say Loading dimension " + instanceKey);
             w = server.getLevel(key);
+            if (w == null) {
+                TeamSystem.LOGGER.warn("Dimension {} not immediately available after /reload, retrying once", instanceKey);
+                server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
+                    "execute in teamsystem:" + instanceKey + " run say Loading dimension " + instanceKey + " (retry)");
+                w = server.getLevel(key);
+            }
+            if (w == null) {
+                TeamSystem.LOGGER.error("FAILED to load dimension {} after 3 attempts", instanceKey);
+            }
             forceLoading = false;
         }
         return w;

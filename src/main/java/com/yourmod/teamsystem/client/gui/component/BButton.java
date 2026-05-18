@@ -1,54 +1,69 @@
 package com.yourmod.teamsystem.client.gui.component;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import java.util.function.Consumer;
 
-@FunctionalInterface
-interface OnPress {
-    void onPress(BButton button);
-}
+public class BButton extends Button {
+    private int borderColor = 0xFF555555;
+    private int hoverBorderColor = 0xFFAAAAAA;
+    private int fillColor = 0xAA222222;
+    private int hoverFillColor = 0xAA444444;
+    private int textColor = 0xFFCCCCCC;
+    private int hoverTextColor = 0xFFFFFFFF;
+    private int accentColor = 0xFF00AAFF;
+    private boolean drawAccent = true;
 
-public class BButton extends AbstractWidget {
-    private static final ResourceLocation TEXTURE = new ResourceLocation("teamsystem", "textures/gui/button.png");
-    private final OnPress onPress;
-    private boolean toggled;
+    public BButton(int x, int y, int width, int height, String text, Button.OnPress onPress) {
+        super(x, y, width, height, Component.literal(text), onPress, DEFAULT_NARRATION);
+    }
 
-    public BButton(int x, int y, int width, int height, Component message, OnPress onPress) {
-        super(x, y, width, height, message);
-        this.onPress = onPress;
+    public BButton(int x, int y, int width, int height, String text, Button.OnPress onPress, boolean drawAccent) {
+        super(x, y, width, height, Component.literal(text), onPress, DEFAULT_NARRATION);
+        this.drawAccent = drawAccent;
+    }
+
+    public void setColors(int border, int hoverBorder, int fill, int hoverFill, int text, int hoverText, int accent) {
+        this.borderColor = border;
+        this.hoverBorderColor = hoverBorder;
+        this.fillColor = fill;
+        this.hoverFillColor = hoverFill;
+        this.textColor = text;
+        this.hoverTextColor = hoverText;
+        this.accentColor = accent;
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        RenderSystem.setShaderTexture(0, TEXTURE);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-        int v = isHoveredOrFocused() ? height : 0;
-        graphics.blit(TEXTURE, getX(), getY(), 0, v, width, height, width, height * 2);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        int textColor = isHoveredOrFocused() ? 0xFFFFAA00 : 0xFFFFFFFF;
-        graphics.drawCenteredString(Minecraft.getInstance().font, this.getMessage(), getX() + width / 2, getY() + (height - 8) / 2, textColor);
+    public void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        boolean hovered = isHoveredOrFocused();
+        int border = hovered ? hoverBorderColor : borderColor;
+        int fill = hovered ? hoverFillColor : fillColor;
+        int txtCol = hovered ? hoverTextColor : textColor;
+
+        g.fill(getX(), getY(), getX() + width, getY() + height, fill);
+        g.fill(getX(), getY(), getX() + width, getY() + 1, border);
+        g.fill(getX(), getY() + height - 1, getX() + width, getY() + height, border);
+        g.fill(getX(), getY(), getX() + 1, getY() + height, border);
+        g.fill(getX() + width - 1, getY(), getX() + width, getY() + height, border);
+
+        if (drawAccent) {
+            g.fill(getX(), getY(), getX() + 2, getY() + height, accentColor);
+        }
+
+        var font = Minecraft.getInstance().font;
+        var txt = getMessage();
+        int tx = getX() + (width - font.width(txt)) / 2;
+        int ty = getY() + (height - font.lineHeight) / 2;
+        g.drawString(font, txt, tx, ty, txtCol);
     }
 
-    @Override
-    public void onClick(double mouseX, double mouseY) {
-        this.onPress.onPress(this);
-    }
-
-    @Override
-    protected void updateWidgetNarration(NarrationElementOutput narration) {
-        this.defaultButtonNarrationText(narration);
-    }
-
-    public boolean isToggled() {
-        return toggled;
-    }
-
-    public void setToggled(boolean toggled) {
-        this.toggled = toggled;
+    public static void drawBorder(GuiGraphics g, int x, int y, int w, int h, int color) {
+        g.fill(x, y, x + w, y + 1, color);
+        g.fill(x, y + h - 1, x + w, y + h, color);
+        g.fill(x, y, x + 1, y + h, color);
+        g.fill(x + w - 1, y, x + w, y + h, color);
     }
 }

@@ -42,6 +42,7 @@ public class ClientTeamData {
     public static final List<VehicleEntry> availableVehicles = new ArrayList<>();
     public static int matchTimeSeconds = 0;
     public static final List<String> speakingPlayers = new ArrayList<>();
+    public static float guiVolume = 1.0f;
 
     public static PlayerListEntry getPlayerData(UUID uuid) { return playerDataMap.get(uuid); }
     public static List<String> getSpeakingPlayers() { return Collections.unmodifiableList(speakingPlayers); }
@@ -122,5 +123,9 @@ public class ClientTeamData {
 
     public static int getWinningTeamOrdinal() {
         return winningTeamOrdinal;
+    }
+
+    public static String getLocalPlayerSquad() {
+        return localPlayerSquad;
     }
 }

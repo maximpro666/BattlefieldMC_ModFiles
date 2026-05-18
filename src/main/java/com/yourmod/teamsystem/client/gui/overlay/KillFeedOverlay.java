@@ -1,58 +1,62 @@
 package com.yourmod.teamsystem.client.gui.overlay;
 
+import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 
-@Mod.EventBusSubscriber(modid = "teamsystem", value = Dist.CLIENT)
-public class KillFeedOverlay {
-    private static final Minecraft mc = Minecraft.getInstance();
-    private static final List<KillFeedEntry> entries = new ArrayList<>();
-    private static final long FADE_TIME = 5000;
+public class KillFeedOverlay implements IGuiOverlay {
+    private static final int MAX_ENTRIES = 10;
+    private static final int DISPLAY_TIME = 100;
+    private static final int ENTRY_H = 12;
 
-    public static void addEntry(String message) {
-        synchronized (entries) {
-            entries.add(new KillFeedEntry(message, System.currentTimeMillis()));
-            if (entries.size() > 20) {
-                entries.remove(0);
-            }
+    private final List<KillFeedEntry> entries = new ArrayList<>();
+
+    public static class KillFeedEntry {
+        public final String killer;
+        public final String victim;
+        public final String weapon;
+        public int timer;
+
+        public KillFeedEntry(String killer, String victim, String weapon) {
+            this.killer = killer;
+            this.victim = victim;
+            this.weapon = weapon;
+            this.timer = DISPLAY_TIME;
         }
     }
 
-    @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiOverlayEvent.Post event) {
-        if (!event.getOverlay().id().getPath().equals("hotbar")) return;
-        GuiGraphics gui = event.getGuiGraphics();
-        int w = mc.getWindow().getGuiScaledWidth();
-        long now = System.currentTimeMillis();
+    @Override
+    public void render(ForgeGui gui, GuiGraphics g, float partialTick, int screenWidth, int screenHeight) {
+        Minecraft mc = Minecraft.getInstance();
+        int x = screenWidth - 200;
+        int y = screenHeight / 2 - 100;
 
-        synchronized (entries) {
-            Iterator<KillFeedEntry> it = entries.iterator();
-            int yOff = 10;
-            while (it.hasNext()) {
-                KillFeedEntry e = it.next();
-                long age = now - e.timestamp;
-                if (age > FADE_TIME) {
-                    it.remove();
-                    continue;
-                }
-                float alpha = 1.0f - (float) age / FADE_TIME;
-                int a = Math.min(255, Math.max(0, (int) (alpha * 255)));
-                int color = (a << 24) | 0xFFFFFF;
-                int tw = mc.font.width(e.message);
-                gui.fill(w - tw - 12, yOff - 1, w - 4, yOff + 9, (a / 2) << 24 | 0x000000);
-                gui.drawString(mc.font, e.message, w - tw - 8, yOff, color);
-                yOff += 12;
+        List<KillFeedEntry> toRemove = new ArrayList<>();
+        for (var entry : entries) {
+            entry.timer--;
+            if (entry.timer <= 0) {
+                toRemove.add(entry);
+                continue;
             }
+
+            float alpha = Math.min(1, entry.timer / 20F);
+            int color = ((int) (alpha * 255) << 24) | 0xFFFFFF;
+            String text = entry.killer + " [" + entry.weapon + "] " + entry.victim;
+            g.drawString(mc.font, text, x, y, color);
+            y += ENTRY_H;
         }
+        entries.removeAll(toRemove);
     }
 
-    private record KillFeedEntry(String message, long timestamp) {}
+    public void addEntry(String killer, String victim, String weapon) {
+        entries.add(0, new KillFeedEntry(killer, victim, weapon));
+        if (entries.size() > MAX_ENTRIES) {
+            entries.remove(entries.size() - 1);
+        }
+    }
 }

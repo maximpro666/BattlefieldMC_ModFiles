@@ -1,0 +1,67 @@
+{
+  "gui.button_click": {
+    "category": "master",
+    "subtitle": "Button Click",
+    "sounds": ["teamsystem:gui/button_click"]
+  },
+  "gui.button_hover": {
+    "category": "master",
+    "subtitle": "Button Hover",
+    "sounds": ["teamsystem:gui/button_hover"]
+  },
+  "gui.error": {
+    "category": "master",
+    "subtitle": "Error",
+    "sounds": ["teamsystem:gui/error"]
+  },
+  "gui.success": {
+    "category": "master",
+    "subtitle": "Success",
+    "sounds": ["teamsystem:gui/success"]
+  },
+  "gui.transition": {
+    "category": "master",
+    "subtitle": "Transition",
+    "sounds": ["teamsystem:gui/transition"]
+  },
+  "gui.first_deploy": {
+    "category": "master",
+    "subtitle": "First Deploy",
+    "sounds": ["teamsystem:gui/first_deploy"]
+  },
+  "gui.respawn": {
+    "category": "master",
+    "subtitle": "Respawn",
+    "sounds": ["teamsystem:gui/respawn"]
+  },
+  "game.capture_point": {
+    "category": "master",
+    "subtitle": "Capture Point",
+    "sounds": ["teamsystem:game/capture_point"]
+  },
+  "game.victory": {
+    "category": "master",
+    "subtitle": "Victory",
+    "sounds": ["teamsystem:game/victory"]
+  },
+  "game.defeat": {
+    "category": "master",
+    "subtitle": "Defeat",
+    "sounds": ["teamsystem:game/defeat"]
+  },
+  "game.map_change": {
+    "category": "master",
+    "subtitle": "Map Change",
+    "sounds": ["teamsystem:game/map_change"]
+  },
+  "notification.info": {
+    "category": "master",
+    "subtitle": "Notification",
+    "sounds": ["teamsystem:notification/info"]
+  },
+  "notification.alert": {
+    "category": "master",
+    "subtitle": "Alert",
+    "sounds": ["teamsystem:notification/alert"]
+  }
+}

@@ -1,88 +1,82 @@
 package com.yourmod.teamsystem.client.gui.screen;
 
 import com.yourmod.teamsystem.client.ClientTeamData;
+import com.yourmod.teamsystem.client.gui.component.BButton;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.TeamSelectPacket;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class TeamSelectionScreen extends Screen {
-    public static boolean isOpen = false;
+    private final Screen parent;
+    private static final int CARD_W = 180;
+    private static final int CARD_H = 220;
 
-    private Button natoButton;
-    private Button russiaButton;
-    private Button spectatorButton;
-    private Button closeButton;
-
-    public TeamSelectionScreen() {
+    public TeamSelectionScreen(Screen parent) {
         super(Component.literal("Team Selection"));
+        this.parent = parent;
     }
 
     @Override
     protected void init() {
-        int centerX = width / 2;
-        int centerY = height / 2;
+        int gap = 30;
+        int totalW = 2 * CARD_W + gap;
+        int startX = (width - totalW) / 2;
+        int cy = height / 2 - CARD_H / 2;
 
-        natoButton = addRenderableWidget(Button.builder(
-            Component.literal("NATO"),
-            btn -> {
-                PacketHandler.CHANNEL.sendToServer(new TeamSelectPacket(0));
-                isOpen = false;
-                onClose();
-            })
-            .bounds(centerX - 100, centerY - 60, 200, 30)
-            .build());
+        addRenderableWidget(new BButton(startX, cy + CARD_H + 10, CARD_W, 30, "NATO", btn -> {
+            PacketHandler.CHANNEL.sendToServer(new TeamSelectPacket(0));
+            minecraft.setScreen(parent);
+        }));
 
-        russiaButton = addRenderableWidget(Button.builder(
-            Component.literal("RUSSIA"),
-            btn -> {
-                PacketHandler.CHANNEL.sendToServer(new TeamSelectPacket(1));
-                isOpen = false;
-                onClose();
-            })
-            .bounds(centerX - 100, centerY - 20, 200, 30)
-            .build());
+        addRenderableWidget(new BButton(startX + CARD_W + gap, cy + CARD_H + 10, CARD_W, 30, "RUSSIA", btn -> {
+            PacketHandler.CHANNEL.sendToServer(new TeamSelectPacket(1));
+            minecraft.setScreen(parent);
+        }));
 
-        spectatorButton = addRenderableWidget(Button.builder(
-            Component.literal("SPECTATOR"),
-            btn -> {
-                PacketHandler.CHANNEL.sendToServer(new TeamSelectPacket(2));
-                isOpen = false;
-                onClose();
-            })
-            .bounds(centerX - 100, centerY + 20, 200, 30)
-            .build());
-
-        closeButton = addRenderableWidget(Button.builder(
-            Component.literal("Close"),
-            btn -> {
-                isOpen = false;
-                onClose();
-            })
-            .bounds(centerX - 50, centerY + 70, 100, 20)
-            .build());
+        addRenderableWidget(new BButton(width / 2 - 50, cy + CARD_H + 50, 100, 20, "Back", btn -> {
+            minecraft.setScreen(parent);
+        }));
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics);
-        graphics.fillGradient(0, 0, width, height, 0xCC000000, 0xCC222222);
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        renderBackground(g);
+        g.fill(0, 0, width, height, 0xCC111111);
 
-        int centerX = width / 2;
+        String title = "SELECT YOUR TEAM";
+        int titleW = font.width(title);
+        g.drawString(font, title, (width - titleW) / 2, 20, 0xFF00AAFF);
 
-        graphics.drawCenteredString(font, Component.literal("SELECT YOUR TEAM"), centerX, 30, 0xFFFFFFFF);
+        int gap = 30;
+        int totalW = 2 * CARD_W + gap;
+        int startX = (width - totalW) / 2;
+        int cy = height / 2 - CARD_H / 2;
 
-        graphics.drawString(font, Component.literal("NATO Tickets: " + ClientTeamData.getNatoTickets()), centerX - 140, 80, 0x5555FF);
-        graphics.drawString(font, Component.literal("Russia Tickets: " + ClientTeamData.getRussiaTickets()), centerX + 20, 80, 0xFF5555);
+        drawCard(g, startX, cy, "NATO", ClientTeamData.getNatoTickets());
+        drawCard(g, startX + CARD_W + gap, cy, "RUSSIA", ClientTeamData.getRussiaTickets());
 
-        super.render(graphics, mouseX, mouseY, partialTick);
+        super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    private void drawCard(GuiGraphics g, int x, int y, String name, int tickets) {
+        int cardColor = 0xCC222222;
+        g.fill(x, y, x + CARD_W, y + CARD_H, cardColor);
+        g.fill(x, y, x + CARD_W, y + 2, 0xFF555555);
+        g.fill(x, y + CARD_H - 2, x + CARD_W, y + CARD_H, 0xFF555555);
+        g.fill(x, y, x + 2, y + CARD_H, 0xFF555555);
+        g.fill(x + CARD_W - 2, y, x + CARD_W, y + CARD_H, 0xFF555555);
+
+        g.fill(x + 8, y + 8, x + CARD_W - 8, y + 10, 0xFF4488FF);
+        g.drawString(font, name, x + 10, y + 14, 0xFFFFFFFF);
+
+        g.drawString(font, "Tickets: " + tickets, x + 10, y + 40, 0xFFAAAAAA);
+        g.drawString(font, "Click to join", x + 10, y + 60, 0xFF888888);
     }
 
     @Override
-    public void onClose() {
-        isOpen = false;
-        super.onClose();
+    public boolean isPauseScreen() {
+        return false;
     }
 }

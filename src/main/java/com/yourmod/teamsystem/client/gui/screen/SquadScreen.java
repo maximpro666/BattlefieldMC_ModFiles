@@ -1,113 +1,139 @@
 package com.yourmod.teamsystem.client.gui.screen;
 
 import com.yourmod.teamsystem.client.ClientTeamData;
+import com.yourmod.teamsystem.client.PlayerListEntry;
+import com.yourmod.teamsystem.client.gui.component.BButton;
+import com.yourmod.teamsystem.client.gui.component.BScrollPanel;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.SquadActionPacket;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import java.util.UUID;
-
 public class SquadScreen extends Screen {
-    private static final int MEMBER_HEIGHT = 24;
-    private int selectedIndex = -1;
+    private final Screen parent;
+    private BScrollPanel leftPanel;
+    private BScrollPanel rightPanel;
 
-    public SquadScreen() {
+    private static final int PANEL_W = 200;
+
+    public SquadScreen(Screen parent) {
         super(Component.literal("Squad Management"));
+        this.parent = parent;
     }
 
     @Override
     protected void init() {
-        int centerX = width / 2;
+        int cx = width / 2;
+        int h = height - 80;
 
-        addRenderableWidget(Button.builder(
-            Component.literal("Create Squad"),
-            btn -> {
-                PacketHandler.CHANNEL.sendToServer(new SquadActionPacket("CREATE", new UUID(0, 0)));
-            })
-            .bounds(centerX - 120, 50, 110, 20)
-            .build());
+        leftPanel = new BScrollPanel(cx - PANEL_W - 10, 60, PANEL_W, h);
+        rightPanel = new BScrollPanel(cx + 10, 60, PANEL_W, h);
 
-        addRenderableWidget(Button.builder(
-            Component.literal("Leave Squad"),
-            btn -> {
-                PacketHandler.CHANNEL.sendToServer(new SquadActionPacket("LEAVE", new UUID(0, 0)));
-            })
-            .bounds(centerX + 10, 50, 110, 20)
-            .build());
+        rebuildPanels();
 
-        addRenderableWidget(Button.builder(
-            Component.literal("Invite Player"),
-            btn -> {
-                PacketHandler.CHANNEL.sendToServer(new SquadActionPacket("INVITE", UUID.randomUUID()));
-            })
-            .bounds(centerX - 120, 80, 110, 20)
-            .build());
-
-        addRenderableWidget(Button.builder(
-            Component.literal("Kick"),
-            btn -> {
-                if (selectedIndex >= 0) {
-                    PacketHandler.CHANNEL.sendToServer(new SquadActionPacket("KICK", UUID.randomUUID()));
-                }
-            })
-            .bounds(centerX + 10, 80, 110, 20)
-            .build());
-
-        addRenderableWidget(Button.builder(
-            Component.literal("Promote"),
-            btn -> {
-                if (selectedIndex >= 0) {
-                    PacketHandler.CHANNEL.sendToServer(new SquadActionPacket("PROMOTE", UUID.randomUUID()));
-                }
-            })
-            .bounds(centerX + 130, 80, 80, 20)
-            .build());
-
-        addRenderableWidget(Button.builder(
-            Component.literal("Back"),
-            btn -> onClose())
-            .bounds(centerX - 50, height - 30, 100, 20)
-            .build());
+        addRenderableWidget(new BButton(cx - 50, height - 35, 100, 20, "Close", btn -> {
+            minecraft.setScreen(parent);
+        }));
     }
 
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics);
-        graphics.fillGradient(0, 0, width, height, 0xCC000000, 0xCC222222);
+    private void rebuildPanels() {
+        leftPanel.clearContent();
+        leftPanel.setPosition(width / 2 - PANEL_W - 10, 60);
+        leftPanel.setSize(PANEL_W, height - 80);
 
-        int centerX = width / 2;
-        graphics.drawCenteredString(font, Component.literal("SQUAD MANAGEMENT"), centerX, 20, 0xFFFFFFFF);
+        rightPanel.clearContent();
+        rightPanel.setPosition(width / 2 + 10, 60);
+        rightPanel.setSize(PANEL_W, height - 80);
 
-        String squadName = ClientTeamData.localPlayerSquad;
-        graphics.drawCenteredString(font, Component.literal("Squad: " + (squadName.isEmpty() ? "None" : squadName)), centerX, 34, 0xFFAAAAAA);
+        String localSquad = ClientTeamData.getLocalPlayerSquad();
+        int[] playerIdx = {0};
 
-        graphics.drawString(font, Component.literal("Members:"), centerX - 150, 115, 0xFFFFAA00);
+        for (var entry : ClientTeamData.playerDataMap.entrySet()) {
+            PlayerListEntry player = entry.getValue();
+            if (localSquad != null && localSquad.equals(player.squad())) continue;
 
-        int startY = 130;
-        for (int i = 0; i < 4; i++) {
-            int y = startY + i * (MEMBER_HEIGHT + 2);
-            int color = (selectedIndex == i) ? 0x664444FF : 0x66000000;
-            graphics.fill(centerX - 150, y, centerX + 150, y + MEMBER_HEIGHT, color);
-            graphics.drawString(font, Component.literal("Slot " + (i + 1)), centerX - 140, y + 6, 0xFF888888);
+            int yOff = playerIdx[0] * 28;
+            leftPanel.addContent(g -> {
+                int sx = leftPanel.getX() + 5;
+                int sy = leftPanel.getY() + yOff - leftPanel.getScrollOffset();
+                String name = player.callsign();
+                int col = player.teamOrdinal() == 0 ? 0xFF4488FF : (player.teamOrdinal() == 1 ? 0xFFFF4444 : 0xFF888888);
+                g.drawString(font, name, sx, sy + 6, col);
+            });
+            playerIdx[0]++;
         }
+        leftPanel.setContentHeight(playerIdx[0] * 28);
 
-        super.render(graphics, mouseX, mouseY, partialTick);
-    }
+        if (localSquad != null && !localSquad.isEmpty()) {
+            int[] squadIdx = {0};
+            for (var entry : ClientTeamData.playerDataMap.entrySet()) {
+                PlayerListEntry player = entry.getValue();
+                if (!localSquad.equals(player.squad())) continue;
 
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        int startY = 130;
-        int centerX = width / 2;
-        for (int i = 0; i < 4; i++) {
-            int y = startY + i * (MEMBER_HEIGHT + 2);
-            if (mouseX >= centerX - 150 && mouseX <= centerX + 150 && mouseY >= y && mouseY <= y + MEMBER_HEIGHT) {
-                selectedIndex = (selectedIndex == i) ? -1 : i;
-                return true;
+                int yOff = squadIdx[0] * 28;
+                rightPanel.addContent(g -> {
+                    int sx = rightPanel.getX() + 5;
+                    int sy = rightPanel.getY() + yOff - rightPanel.getScrollOffset();
+                    String name = player.callsign();
+                    int col = player.isDowned() ? 0xFFFF4444 : 0xFFFFFFFF;
+                    g.drawString(font, name, sx, sy + 6, col);
+                });
+                squadIdx[0]++;
             }
+            rightPanel.setContentHeight(squadIdx[0] * 28);
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        renderBackground(g);
+        g.fill(0, 0, width, height, 0xCC111111);
+
+        String title = "SQUAD MANAGEMENT";
+        int titleW = font.width(title);
+        g.drawString(font, title, (width - titleW) / 2, 16, 0xFF00AAFF);
+
+        g.drawString(font, "Available Players", width / 2 - PANEL_W - 5, 50, 0xFFAAAAAA);
+        g.drawString(font, "My Squad (" + ClientTeamData.getLocalPlayerSquad() + ")", width / 2 + 15, 50, 0xFFAAAAAA);
+
+        leftPanel.render(g);
+        rightPanel.render(g);
+        super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        if (button == 0 && mx >= leftPanel.getX() && mx <= leftPanel.getX() + leftPanel.getWidth()) {
+            int idx = (int) ((my - leftPanel.getY() + leftPanel.getScrollOffset()) / 28);
+            int i = 0;
+            for (var entry : ClientTeamData.playerDataMap.entrySet()) {
+                PlayerListEntry player = entry.getValue();
+                String localSquad = ClientTeamData.getLocalPlayerSquad();
+                if (localSquad != null && localSquad.equals(player.squad())) continue;
+                if (i == idx) {
+                    PacketHandler.CHANNEL.sendToServer(new SquadActionPacket("invite", entry.getKey()));
+                    break;
+                }
+                i++;
+            }
+            return true;
+        }
+        return super.mouseClicked(mx, my, button);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        if (mouseX < width / 2) {
+            leftPanel.onScroll(mouseX, mouseY, delta);
+        } else {
+            rightPanel.onScroll(mouseX, mouseY, delta);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
     }
 }
