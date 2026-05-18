@@ -39,7 +39,7 @@ public class NotificationPacket {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                // Data is stored; GUI will render it
+                com.yourmod.teamsystem.client.gui.overlay.NotificationOverlay.addNotification(text, duration);
             });
         });
         return true;

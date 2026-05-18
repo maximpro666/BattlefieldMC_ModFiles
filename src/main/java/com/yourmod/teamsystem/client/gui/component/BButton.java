@@ -1,5 +1,7 @@
 package com.yourmod.teamsystem.client.gui.component;
 
+import com.yourmod.teamsystem.client.ClientSoundHandler;
+import com.yourmod.teamsystem.core.ModSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -17,6 +19,7 @@ public class BButton extends Button {
     private int accentColor = 0xFFE07B00;
     private boolean drawAccent = true;
     private float hoverAnim = 0f;
+    private boolean wasHovered = false;
 
     public BButton(int x, int y, int width, int height, Component text, OnPress onPress) {
         super(x, y, width, height, text, onPress, DEFAULT_NARRATION);
@@ -40,6 +43,10 @@ public class BButton extends Button {
     @Override
     public void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         boolean hovered = isHoveredOrFocused();
+        if (hovered && !wasHovered) {
+            ClientSoundHandler.playGuiSound(ModSounds.GUI_BUTTON_HOVER);
+        }
+        wasHovered = hovered;
         hoverAnim = AnimationHelper.lerp(hoverAnim, hovered ? 1f : 0f, 0.15f);
 
         int border = AnimationHelper.blendColors(borderColor, hoverBorderColor, hoverAnim);
@@ -61,6 +68,16 @@ public class BButton extends Button {
         int tx = getX() + (width - font.width(txt)) / 2;
         int ty = getY() + (height - font.lineHeight) / 2;
         g.drawString(font, txt, tx, ty, txtCol);
+    }
+
+    @Override
+    public void onPress() {
+        ClientSoundHandler.playGuiSound(ModSounds.GUI_BUTTON_CLICK);
+        super.onPress();
+    }
+
+    @Override
+    public void playDownSound(net.minecraft.client.sounds.SoundManager handler) {
     }
 
     public static void drawBorder(GuiGraphics g, int x, int y, int w, int h, int color) {

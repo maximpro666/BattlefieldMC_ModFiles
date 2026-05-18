@@ -156,24 +156,17 @@ public class TeamManager extends SavedData {
             if (team.isPlayable() && game.isPlaying()) {
                 MapConfig map = game.getCurrentMap();
                 if (map != null) {
-                    String worldKey = map.getMatchInstance();
-                    if (worldKey == null || worldKey.isEmpty()) {
-                        worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
-                    }
-                    if (!worldKey.isEmpty()) {
-                        ServerLevel target = server.getLevel(
-                            ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", worldKey)));
-                        if (target != null) {
-                            double x = 0.5, y = 65, z = 0.5;
-                            if (map.hasTeamSpawns()) {
-                                int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
-                                if (spawn != null && spawn.length >= 3) {
-                                    x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5;
-                                }
+                    ServerLevel target = server.getLevel(MapPoolManager.MAP_DIMENSION_KEY);
+                    if (target != null) {
+                        double x = 0.5, y = 65, z = 0.5;
+                        if (map.hasTeamSpawns()) {
+                            int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
+                            if (spawn != null && spawn.length >= 3) {
+                                x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5;
                             }
-                            player.teleportTo(target, x, y, z, 0, 0);
-                            player.fallDistance = 0;
                         }
+                        player.teleportTo(target, x, y, z, 0, 0);
+                        player.fallDistance = 0;
                     }
                 }
             } else {

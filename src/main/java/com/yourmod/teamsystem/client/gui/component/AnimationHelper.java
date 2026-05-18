@@ -1,5 +1,6 @@
 package com.yourmod.teamsystem.client.gui.component;
 
+import com.yourmod.teamsystem.client.ClientTeamData;
 import net.minecraft.util.Mth;
 
 public class AnimationHelper {
@@ -20,6 +21,13 @@ public class AnimationHelper {
         return a + (b - a) * t;
     }
 
+    public static float lerpAngle(float a, float b, float t) {
+        float diff = b - a;
+        while (diff > 180f) diff -= 360f;
+        while (diff < -180f) diff += 360f;
+        return a + diff * t;
+    }
+
     public static float smoothStep(float edge0, float edge1, float x) {
         float t = Mth.clamp((x - edge0) / (edge1 - edge0), 0.0F, 1.0F);
         return t * t * (3.0F - 2.0F * t);
@@ -31,7 +39,8 @@ public class AnimationHelper {
     }
 
     public static int withAlpha(int color, int alpha) {
-        return (alpha & 0xFF) << 24 | (color & 0xFFFFFF);
+        int a = Math.min(255, Math.max(0, (int)(alpha * ClientTeamData.guiOpacity)));
+        return (a & 0xFF) << 24 | (color & 0xFFFFFF);
     }
 
     public static int blendColors(int base, int overlay, float overlayAlpha) {

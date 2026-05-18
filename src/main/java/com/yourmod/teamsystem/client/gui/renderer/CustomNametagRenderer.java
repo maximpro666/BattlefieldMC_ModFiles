@@ -8,6 +8,7 @@ import com.yourmod.teamsystem.core.Rank;
 import com.yourmod.teamsystem.core.Team;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -51,11 +52,25 @@ public class CustomNametagRenderer {
         Minecraft mc = Minecraft.getInstance();
         int tw = mc.font.width(displayText);
 
-        mc.font.draw(poseStack, displayText, -tw / 2f, 0f, 0xFFFFFFFF);
+        mc.font.drawInBatch(displayText,
+            -tw / 2f, 0f,
+            0xFFFFFFFF, true,
+            poseStack.last().pose(),
+            bufferSource,
+            Font.DisplayMode.SEE_THROUGH,
+            0,
+            0xF000F0);
 
         if (!rankPrefix.isEmpty()) {
             String rankPart = "[" + rankPrefix + "]";
-            mc.font.draw(poseStack, rankPart, -tw / 2f, 0f, 0xFFE07B00);
+            mc.font.drawInBatch(rankPart,
+                -tw / 2f, 0f,
+                0xFFE07B00, true,
+                poseStack.last().pose(),
+                bufferSource,
+                Font.DisplayMode.SEE_THROUGH,
+                0,
+                0xF000F0);
         }
 
         poseStack.popPose();

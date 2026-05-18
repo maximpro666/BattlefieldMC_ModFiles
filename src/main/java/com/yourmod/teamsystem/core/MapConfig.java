@@ -28,7 +28,7 @@ public class MapConfig {
     private int baseRadius;
     private MapState state;
     private List<CapturePointEntry> capturePoints;
-    private transient String matchInstance;
+
 
     public static class CapturePointEntry {
         public String name;
@@ -101,9 +101,6 @@ public class MapConfig {
 
     public MapState getState() { return state; }
     public void setState(MapState state) { this.state = state; }
-
-    public String getMatchInstance() { return matchInstance; }
-    public void setMatchInstance(String matchInstance) { this.matchInstance = matchInstance; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -217,9 +214,13 @@ public class MapConfig {
 
     public static String sanitizeToResourcePath(String name) {
         if (name == null || name.isEmpty()) return "";
-        return name.toLowerCase()
+        String sanitized = name.toLowerCase()
             .replaceAll("\\s+", "_")
             .replaceAll("[^a-z0-9/._-]", "");
+        if (sanitized.isEmpty()) {
+            sanitized = "map_" + Math.abs(name.hashCode());
+        }
+        return sanitized;
     }
 
     public static MapConfig fromNBT(CompoundTag tag) {

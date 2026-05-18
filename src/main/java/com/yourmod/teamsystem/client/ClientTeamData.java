@@ -43,6 +43,9 @@ public class ClientTeamData {
     public static int matchTimeSeconds = 0;
     public static final List<String> speakingPlayers = new ArrayList<>();
     public static float guiVolume = 1.0f;
+    public static float guiScale = 1.0f;
+    public static float guiOpacity = 1.0f;
+    public static int maxTickets = 100;
 
     public static PlayerListEntry getPlayerData(UUID uuid) { return playerDataMap.get(uuid); }
     public static List<String> getSpeakingPlayers() { return Collections.unmodifiableList(speakingPlayers); }

@@ -5,6 +5,7 @@ import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import com.yourmod.teamsystem.client.gui.component.BProgressBar;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 
 public class CaptureNotificationOverlay {
@@ -47,8 +48,9 @@ public class CaptureNotificationOverlay {
             AnimationHelper.withAlpha(COLOR_BG, (int)(fadeAlpha * 200)));
 
         String label = "Capturing: " + captureLabel;
-        int tw = Minecraft.getInstance().font.width(label);
-        g.drawString(Minecraft.getInstance().font, label, x + BAR_W / 2 - tw / 2, y - 2,
+        Font font = Minecraft.getInstance().font;
+        int tw = font.width(label);
+        g.drawString(font, label, x + BAR_W / 2 - tw / 2, y - 2,
             AnimationHelper.withAlpha(COLOR_TEXT, (int)(fadeAlpha * 255)));
 
         if (bar == null) bar = new BProgressBar(x, y + 10, BAR_W, BAR_H, COLOR_PROGRESS);
@@ -56,7 +58,7 @@ public class CaptureNotificationOverlay {
         bar.render(g);
 
         String pct = (int)(smoothFraction * 100) + "%";
-        int pw = Minecraft.getInstance().font.width(pct);
+        int pw = font.width(pct);
         g.drawString(Minecraft.getInstance().font, pct, x + BAR_W / 2 - pw / 2, y + 20,
             AnimationHelper.withAlpha(COLOR_TEXT, (int)(fadeAlpha * 200)));
     }

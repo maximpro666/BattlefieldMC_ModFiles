@@ -8,12 +8,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.List;
 
 public class MapDimensionGenerator {
 
-    private static final String DIMENSION_TEMPLATE = """
+    private static final String MAP_DIMENSION = """
         {
           "type": "minecraft:overworld",
           "generator": {
@@ -73,7 +71,7 @@ public class MapDimensionGenerator {
         {
           "pack": {
             "pack_format": 15,
-            "description": "TeamSystem Lobby + Map Dimensions"
+            "description": "TeamSystem Dimensions"
           }
         }
         """;
@@ -83,15 +81,10 @@ public class MapDimensionGenerator {
 
         generatePackMeta(datapacksDir);
         generateLobbyDimension(datapacksDir);
-        generateMapDimensions(server, datapacksDir);
+        generateMapDimension(datapacksDir);
     }
 
-    private static void generateMapDimensions(MinecraftServer server, Path datapacksDir) {
-        MapPoolManager pool = TeamSystem.getMapPoolManager();
-        if (pool == null) return;
-
-        List<MapConfig> maps = pool.getMaps();
-
+    private static void generateMapDimension(Path datapacksDir) {
         Path dimDir = datapacksDir.resolve("data").resolve("teamsystem").resolve("dimension");
         try {
             Files.createDirectories(dimDir);
@@ -100,52 +93,15 @@ public class MapDimensionGenerator {
             return;
         }
 
-        // Delete dimension files for maps that no longer exist
-        try (var files = Files.list(dimDir)) {
-            for (Path file : (Iterable<Path>) files::iterator) {
-                if (!file.toString().endsWith(".json")) continue;
-                String fileName = file.getFileName().toString();
-                String keyName = fileName.substring(0, fileName.length() - 5);
-                if (keyName.equals("lobby")) continue;
-                boolean mapExists = maps.stream()
-                    .anyMatch(m -> MapConfig.sanitizeToResourcePath(m.getWorldFolder()).equals(keyName));
-                if (!mapExists) {
-                    Files.deleteIfExists(file);
-                    TeamSystem.LOGGER.info("Deleted stale dimension datapack: {}", fileName);
-                }
-            }
-        } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to clean stale dimension files: {}", e.getMessage());
-        }
-
-        for (MapConfig map : maps) {
-            String worldKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
-            if (worldKey.isEmpty() || worldKey.equals("overworld")) continue;
-
-            Path dimensionFile = dimDir.resolve(worldKey + ".json");
-            if (Files.exists(dimensionFile)) continue;
-
+        Path dimFile = dimDir.resolve("map.json");
+        if (!Files.exists(dimFile)) {
             try {
-                Files.writeString(dimensionFile, DIMENSION_TEMPLATE, StandardCharsets.UTF_8);
-                TeamSystem.LOGGER.info("Generated dimension datapack for map: {} -> {}",
-                    map.getName(), dimensionFile);
+                Files.writeString(dimFile, MAP_DIMENSION, StandardCharsets.UTF_8);
+                TeamSystem.LOGGER.info("Generated map dimension datapack");
             } catch (IOException e) {
-                TeamSystem.LOGGER.error("Failed to generate dimension for map {}: {}",
-                    map.getName(), e.getMessage());
+                TeamSystem.LOGGER.error("Failed to generate map dimension: {}", e.getMessage());
             }
         }
-
-        try {
-            server.getCommands().performPrefixedCommand(
-                server.createCommandSourceStack(),
-                "reload"
-            );
-            TeamSystem.LOGGER.info("Server datapacks reloaded");
-        } catch (Exception e) {
-            TeamSystem.LOGGER.warn("Could not auto-reload datapacks: {}", e.getMessage());
-        }
-
-        TeamSystem.LOGGER.info("Map dimension datapacks generated for {} maps", maps.size());
     }
 
     private static void generatePackMeta(Path datapacksDir) {
@@ -192,35 +148,5 @@ public class MapDimensionGenerator {
                 TeamSystem.LOGGER.error("Failed to generate lobby dimension: {}", e.getMessage());
             }
         }
-    }
-
-    public static void generateInstanceDatapack(MinecraftServer server, String instanceKey) {
-        Path instanceFile = getInstanceDimsDir(server).resolve(instanceKey + ".json");
-        try {
-            Files.createDirectories(instanceFile.getParent());
-            if (!Files.exists(instanceFile)) {
-                Files.writeString(instanceFile, DIMENSION_TEMPLATE, StandardCharsets.UTF_8);
-                TeamSystem.LOGGER.info("Generated instance dimension datapack: {}", instanceKey);
-            }
-        } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to generate instance datapack {}: {}", instanceKey, e.getMessage());
-        }
-    }
-
-    public static void removeInstanceDatapack(MinecraftServer server, String instanceKey) {
-        Path instanceFile = getInstanceDimsDir(server).resolve(instanceKey + ".json");
-        try {
-            if (Files.deleteIfExists(instanceFile)) {
-                TeamSystem.LOGGER.info("Removed instance dimension datapack: {}", instanceKey);
-            }
-        } catch (IOException e) {
-            TeamSystem.LOGGER.error("Failed to remove instance datapack {}: {}", instanceKey, e.getMessage());
-        }
-    }
-
-    public static Path getInstanceDimsDir(MinecraftServer server) {
-        return server.getWorldPath(LevelResource.ROOT)
-            .resolve("datapacks").resolve("teamsystem_maps")
-            .resolve("data").resolve("teamsystem").resolve("dimension");
     }
 }

@@ -199,5 +199,11 @@ public class PacketHandler {
             .encoder(KitSavePacket::toBytes)
             .consumerMainThread(KitSavePacket::handle)
             .add();
+
+        CHANNEL.messageBuilder(OpenTeamSelectionScreenPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(OpenTeamSelectionScreenPacket::new)
+            .encoder(OpenTeamSelectionScreenPacket::toBytes)
+            .consumerMainThread(OpenTeamSelectionScreenPacket::handle)
+            .add();
     }
 }

@@ -10,11 +10,9 @@ import net.minecraft.world.entity.player.Player;
 
 public class VitalsOverlay {
 
-    private static final int COLOR_BG     = UITheme.BG_HUD;
-    private static final int COLOR_BORDER = UITheme.BORDER;
-    private static final int COLOR_TEXT   = UITheme.TEXT_PRIMARY;
-    private static final int BAR_W        = 120;
-    private static final int BAR_H        = 8;
+    private static final int COLOR_TEXT   = UITheme.TEXT_SECONDARY;
+    private static final int BAR_W        = 80;
+    private static final int BAR_H        = 2;
 
     private BProgressBar hpBar;
     private float smoothHp = 1f;
@@ -30,15 +28,13 @@ public class VitalsOverlay {
         int hpColor = AnimationHelper.hpColor(smoothHp);
 
         int x = 8;
-        int y = screenHeight - 30;
+        int y = screenHeight - 10;
 
-        g.fill(x, y, x + BAR_W + 16, y + 22, AnimationHelper.withAlpha(COLOR_BG, 200));
-        g.fill(x, y, x + BAR_W + 16, y + 1, AnimationHelper.withAlpha(COLOR_BORDER, 180));
+        g.drawString(Minecraft.getInstance().font, "HP " + (int) hp,
+            x, y, AnimationHelper.withAlpha(COLOR_TEXT, 200));
 
-        g.drawString(Minecraft.getInstance().font, "HP  " + (int) hp,
-            x + 4, y + 5, AnimationHelper.withAlpha(COLOR_TEXT, 230));
-
-        if (hpBar == null) hpBar = new BProgressBar(x + 4, y + 14, BAR_W, BAR_H, hpColor);
+        if (hpBar == null) hpBar = new BProgressBar(x + 32, y + 2, BAR_W, BAR_H, hpColor);
+        hpBar.setPosition(x + 32, y + 2);
         hpBar.setFraction(smoothHp);
         hpBar.render(g);
     }

@@ -6,6 +6,7 @@ import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import com.yourmod.teamsystem.client.gui.component.BProgressBar;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 
 public class TicketOverlay {
@@ -19,7 +20,6 @@ public class TicketOverlay {
 
     private static final int BAR_W = 140;
     private static final int BAR_H = 6;
-    private static final int MAX_TICKETS = 500;
 
     private final BProgressBar natoBar;
     private final BProgressBar russiaBar;
@@ -37,21 +37,26 @@ public class TicketOverlay {
         int natoTickets   = ClientTeamData.getNatoTickets();
         int russiaTickets = ClientTeamData.getRussiaTickets();
         int timeSeconds   = ClientTeamData.matchTimeSeconds;
+        int maxTickets    = ClientTeamData.maxTickets;
 
-        natoSmooth   = AnimationHelper.lerp(natoSmooth,   natoTickets   / (float) MAX_TICKETS, 0.06f);
-        russiaSmooth = AnimationHelper.lerp(russiaSmooth, russiaTickets / (float) MAX_TICKETS, 0.06f);
+        natoSmooth   = AnimationHelper.lerp(natoSmooth,   natoTickets   / (float) maxTickets, 0.06f);
+        russiaSmooth = AnimationHelper.lerp(russiaSmooth, russiaTickets / (float) maxTickets, 0.06f);
 
         int cx = screenWidth / 2;
+        Font font = Minecraft.getInstance().font;
 
-        g.fill(cx - BAR_W - 8, 0, cx + BAR_W + 8, 26, COLOR_BG);
-        g.fill(cx - BAR_W - 8, 25, cx + BAR_W + 8, 26, COLOR_BORDER);
+        natoBar.setPosition(cx - BAR_W - 4, 6);
+        russiaBar.setPosition(cx + 4, 6);
+
+        g.fill(cx - BAR_W - 8, 0, cx + BAR_W + 8, 28, COLOR_BG);
+        g.fill(cx - BAR_W - 8, 27, cx + BAR_W + 8, 28, COLOR_BORDER);
 
         String natoText = "NATO  " + natoTickets;
-        g.drawString(null, natoText, cx - BAR_W - 4, 14, AnimationHelper.withAlpha(COLOR_TEXT, 220));
+        g.drawString(font, natoText, cx - BAR_W - 4, 16, AnimationHelper.withAlpha(COLOR_TEXT, 220));
 
         String rusText = russiaTickets + "  RUSSIA";
-        int rw = Minecraft.getInstance().font.width(rusText);
-        g.drawString(null, rusText, cx + BAR_W + 4 - rw, 14, AnimationHelper.withAlpha(COLOR_TEXT, 220));
+        int rw = font.width(rusText);
+        g.drawString(font, rusText, cx + BAR_W + 4 - rw, 16, AnimationHelper.withAlpha(COLOR_TEXT, 220));
 
         natoBar.setFraction(natoSmooth);
         natoBar.render(g);
@@ -61,8 +66,11 @@ public class TicketOverlay {
 
         int mins = timeSeconds / 60;
         int secs = timeSeconds % 60;
-        String timerStr = String.format("%02d:%02d", mins, secs);
-        int tw = Minecraft.getInstance().font.width(timerStr);
-        g.drawString(Minecraft.getInstance().font, timerStr, cx - tw / 2, 8, AnimationHelper.withAlpha(COLOR_ORANGE, 255));
+        String timerStr;
+        if (mins < 10) { timerStr = "0" + mins + ":" + (secs < 10 ? "0" + secs : Integer.toString(secs)); }
+        else { timerStr = Integer.toString(mins) + ":" + (secs < 10 ? "0" + secs : Integer.toString(secs)); }
+        int tw = font.width(timerStr);
+        g.drawString(font, timerStr, cx - tw / 2, 20, AnimationHelper.withAlpha(COLOR_ORANGE, 255));
     }
+
 }

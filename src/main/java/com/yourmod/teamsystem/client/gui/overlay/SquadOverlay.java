@@ -7,6 +7,7 @@ import com.yourmod.teamsystem.client.PlayerListEntry;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import com.yourmod.teamsystem.core.Rank;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.Map;
@@ -28,6 +29,8 @@ public class SquadOverlay {
         int x = 4;
         int idx = 0;
 
+        Font font = Minecraft.getInstance().font;
+
         for (Map.Entry<UUID, PlayerListEntry> entry : map.entrySet()) {
             PlayerListEntry ple = entry.getValue();
             if (!mySquad.equals(ple.squad())) continue;
@@ -36,10 +39,10 @@ public class SquadOverlay {
             g.fill(x, y, x + PANEL_W, y + ROW_H - 1, AnimationHelper.withAlpha(COLOR_BG, 180));
 
             Rank rank = Rank.fromOrdinal(ple.rank());
-            String prefix = rank != null ? rank.getPrefix(false) : "";
-            String callsign = ple.callsign() != null ? ple.callsign() : "Unknown";
-            String label = prefix + " " + callsign;
-            g.drawString(Minecraft.getInstance().font, label, x + 4, y + 6, AnimationHelper.withAlpha(COLOR_TEXT, 230));
+            String callsign = ple.callsign();
+            if (callsign == null) callsign = "Unknown";
+            String label = (rank != null ? rank.getPrefix(false) : "") + " " + callsign;
+            g.drawString(font, label, x + 4, y + 6, AnimationHelper.withAlpha(COLOR_TEXT, 230));
 
             idx++;
             if (idx >= 6) break;

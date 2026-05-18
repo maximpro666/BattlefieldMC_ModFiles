@@ -7,7 +7,10 @@ import com.yourmod.teamsystem.core.MapConfig;
 import com.yourmod.teamsystem.core.MarkerManager;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
+import com.yourmod.teamsystem.network.OpenTeamSelectionScreenPacket;
+import com.yourmod.teamsystem.network.PacketHandler;
 import net.minecraft.ChatFormatting;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -92,6 +95,8 @@ public class PlayerEventHandler {
                     game.setLobbyRespawn(player);
                 }
 
+                PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new OpenTeamSelectionScreenPacket());
+
                 if (game.isPlaying() || game.isVoting()) {
                     player.sendSystemMessage(Component.literal("§6=== Game in progress ===")
                         .withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD));
@@ -163,6 +168,9 @@ public class PlayerEventHandler {
                 if (team != null && team.isPlayable()) {
                     game.teleportPlayerToMapAtTeamSpawn(player, map, team);
                     game.setMapRespawn(player, map, team);
+                    PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+                        new com.yourmod.teamsystem.network.SoundPacket(
+                            com.yourmod.teamsystem.core.ModSounds.GUI_RESPAWN.get().getLocation().toString()));
                 } else {
                     game.teleportPlayerToLobby(player);
                     game.setLobbyRespawn(player);

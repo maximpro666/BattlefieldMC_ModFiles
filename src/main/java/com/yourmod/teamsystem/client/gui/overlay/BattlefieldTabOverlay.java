@@ -8,6 +8,7 @@ import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import com.yourmod.teamsystem.core.Rank;
 import com.yourmod.teamsystem.core.Team;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.Map;
@@ -73,41 +74,43 @@ public class BattlefieldTabOverlay {
         g.fill(x, y, x + TOTAL_W, y + ROW_H, AnimationHelper.withAlpha(COLOR_HEADER, a));
         g.fill(x, y, x + TOTAL_W, y + 2, AnimationHelper.withAlpha(COLOR_ORANGE, a));
 
+        Font font = Minecraft.getInstance().font;
         int[] cols = { COL_RANK, COL_CS, COL_NICK, COL_SQ, COL_KD, COL_PING };
         String[] headers = { "Rank", "Callsign", "Nick", "Sq", "K/D", "Ping" };
         int cx = x + 4;
         for (int i = 0; i < headers.length; i++) {
-            g.drawString(Minecraft.getInstance().font, headers[i], cx, y + 3,
-                AnimationHelper.withAlpha(COLOR_ORANGE, a));
+            g.drawString(font, headers[i], cx, y + 3, AnimationHelper.withAlpha(COLOR_ORANGE, a));
             cx += cols[i];
         }
     }
 
     private void drawPlayerRow(GuiGraphics g, int x, int y, PlayerListEntry ple, int a) {
-        Minecraft mc = Minecraft.getInstance();
+        Font font = Minecraft.getInstance().font;
         int cx = x + 4;
 
         Rank rank = Rank.fromOrdinal(ple.rank());
         String rankStr = rank != null ? rank.getDisplayName(ple.teamOrdinal() == Team.RUSSIA.ordinal()) : "-";
-        g.drawString(mc.font, rankStr, cx, y + 3, AnimationHelper.withAlpha(COLOR_TEXT, a));
+        g.drawString(font, rankStr, cx, y + 3, AnimationHelper.withAlpha(COLOR_TEXT, a));
         cx += COL_RANK;
 
-        g.drawString(mc.font, ple.callsign() != null ? ple.callsign() : "-", cx, y + 3,
-            AnimationHelper.withAlpha(COLOR_TEXT, a));
+        String callsign = ple.callsign();
+        if (callsign == null) callsign = "-";
+        g.drawString(font, callsign, cx, y + 3, AnimationHelper.withAlpha(COLOR_TEXT, a));
         cx += COL_CS;
 
-        g.drawString(mc.font, "...", cx, y + 3, AnimationHelper.withAlpha(COLOR_SUBTEXT, a));
+        g.drawString(font, "...", cx, y + 3, AnimationHelper.withAlpha(COLOR_SUBTEXT, a));
         cx += COL_NICK;
 
-        g.drawString(mc.font, ple.squad() != null ? ple.squad() : "-", cx, y + 3,
-            AnimationHelper.withAlpha(COLOR_SUBTEXT, a));
+        String squad = ple.squad();
+        if (squad == null) squad = "-";
+        g.drawString(font, squad, cx, y + 3, AnimationHelper.withAlpha(COLOR_SUBTEXT, a));
         cx += COL_SQ;
 
-        g.drawString(mc.font, ple.kills() + "/" + ple.deaths(), cx, y + 3,
+        g.drawString(font, ple.kills() + "/" + ple.deaths(), cx, y + 3,
             AnimationHelper.withAlpha(COLOR_TEXT, a));
         cx += COL_KD;
 
-        g.drawString(mc.font, "...", cx, y + 3, AnimationHelper.withAlpha(COLOR_SUBTEXT, a));
+        g.drawString(font, "...", cx, y + 3, AnimationHelper.withAlpha(COLOR_SUBTEXT, a));
     }
 
     private int countRows() {

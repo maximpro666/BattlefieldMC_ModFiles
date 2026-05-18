@@ -23,6 +23,8 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 
+import com.yourmod.teamsystem.network.OpenTeamSelectionScreenPacket;
+
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +40,7 @@ public class GameManager {
     private static final BlockPos LOBBY_SPAWN = new BlockPos(0, 64, 0);
     private static final int VOTE_SECONDS = 20;
     private static final int COUNTDOWN_SECONDS = 15;
+    private static final int MATCH_SECONDS = 1800;
     private static final int OVERTIME_TICKETS = 1;
     private static final int MAX_OVERTIME_TICKS = 20 * 60;
 
@@ -50,6 +53,7 @@ public class GameManager {
     private boolean overtime;
     private int overtimeTicks;
     private int captureTicks;
+    private int matchTimeRemaining;
     private boolean lastLiberateAttachment;
 
     public GameManager(MinecraftServer server) {
@@ -62,6 +66,7 @@ public class GameManager {
         this.overtime = false;
         this.overtimeTicks = 0;
         this.captureTicks = 0;
+        this.matchTimeRemaining = 0;
         this.lastLiberateAttachment = false;
     }
 
@@ -69,6 +74,7 @@ public class GameManager {
     public MinecraftServer getServer() { return server; }
     public Team getWinningTeam() { return winningTeam; }
     public boolean isPlaying() { return currentPhase == GamePhase.PLAYING; }
+    public int getMatchTimeRemaining() { return matchTimeRemaining; }
     public boolean isVoting() { return currentPhase == GamePhase.VOTING; }
     public boolean isLobby() { return currentPhase == GamePhase.LOBBY; }
     public boolean isOvertime() { return overtime; }
@@ -103,6 +109,7 @@ public class GameManager {
         currentMap = map;
         overtime = false;
         overtimeTicks = 0;
+        matchTimeRemaining = MATCH_SECONDS;
 
         TicketManager ticketMgr = TeamSystem.getTicketManager();
         if (ticketMgr != null) ticketMgr.resetTickets(map.getTickets());
@@ -224,7 +231,27 @@ public class GameManager {
 
         if (currentPhase == GamePhase.PLAYING) {
             captureTicks++;
+
+            TicketManager tm = TeamSystem.getTicketManager();
+
             if (captureTicks % 20 == 0) {
+                if (matchTimeRemaining > 0) {
+                    matchTimeRemaining--;
+                    if (matchTimeRemaining <= 0 && tm != null) {
+                        int nTk = tm.getTickets(Team.NATO);
+                        int rTk = tm.getTickets(Team.RUSSIA);
+                        if (nTk > 0 && rTk > 0 && !overtime) {
+                            overtime = true;
+                            overtimeTicks = 0;
+                            broadcast("OVERTIME!", CHAT_ACCENT, CHAT_EMPHASIS);
+                            matchTimeRemaining = 1;
+                        } else {
+                            Team winner = nTk > rTk ? Team.NATO : (rTk > nTk ? Team.RUSSIA : Team.SPECTATOR);
+                            endGame(winner);
+                        }
+                    }
+                }
+
                 CapturePointManager cp = TeamSystem.getCapturePointManager();
                 if (cp != null) {
                     MapConfig map = currentMap;
@@ -236,8 +263,10 @@ public class GameManager {
 
                 updateLiberateAttachment();
 
-                TicketManager tm = TeamSystem.getTicketManager();
-                if (tm != null) tm.tick();
+                if (tm != null) {
+                    tm.tick();
+                    tm.syncToAll();
+                }
 
                 if (!overtime) {
                     int natoTickets = tm != null ? tm.getTickets(Team.NATO) : 0;
@@ -265,20 +294,12 @@ public class GameManager {
     // ========== Match Lifecycle ==========
 
     private void finishMatchCycle() {
-        MapConfig map = currentMap;
         teleportAllToLobby();
 
         TeamManager tm = TeamSystem.getTeamManager();
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             tm.setPlayerTeam(p, Team.SPECTATOR);
             tm.updatePlayerDisplayName(p);
-        }
-
-        MapPoolManager pool = TeamSystem.getMapPoolManager();
-
-        if (map != null) {
-            pool.deleteLive(map);
-            broadcast("Map '" + map.getName() + "' instance cleaned up", CHAT_NEUTRAL);
         }
 
         startVoting();
@@ -560,33 +581,8 @@ public class GameManager {
         return w != null ? w : server.overworld();
     }
 
-    private static final ThreadLocal<Boolean> loadingDimension = ThreadLocal.withInitial(() -> false);
-
     private ServerLevel getMapWorldNoFallback(MapConfig map) {
-        String instanceKey = map.getMatchInstance();
-        if (instanceKey == null || instanceKey.isEmpty()) {
-            instanceKey = MapConfig.sanitizeToResourcePath(map.getWorldFolder());
-        }
-        if (instanceKey.isEmpty() || instanceKey.equals("overworld")) return null;
-        if (instanceKey.startsWith("overworld_")) return null;
-        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("teamsystem", instanceKey));
-        ServerLevel w = server.getLevel(key);
-        if (w == null && !loadingDimension.get()) {
-            loadingDimension.set(true);
-            try {
-                for (int attempt = 0; attempt < 3 && w == null; attempt++) {
-                    server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
-                        "execute in teamsystem:" + instanceKey + " run say Loading dimension " + instanceKey);
-                    w = server.getLevel(key);
-                }
-                if (w == null) {
-                    TeamSystem.LOGGER.error("FAILED to load dimension {} after 3 attempts", instanceKey);
-                }
-            } finally {
-                loadingDimension.set(false);
-            }
-        }
-        return w;
+        return server.getLevel(MapPoolManager.MAP_DIMENSION_KEY);
     }
 
     private ServerLevel getMapWorld(MapConfig map) {
@@ -616,6 +612,17 @@ public class GameManager {
             winningTeam != null ? winningTeam.ordinal() : -1);
         for (ServerPlayer p : server.getPlayerList().getPlayers())
             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p), pkt);
+
+        if (currentPhase == GamePhase.LOBBY || currentPhase == GamePhase.VOTING) {
+            TeamManager tm = TeamSystem.getTeamManager();
+            if (tm != null) {
+                OpenTeamSelectionScreenPacket openPkt = new OpenTeamSelectionScreenPacket();
+                for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                    if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == Team.SPECTATOR)
+                        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p), openPkt);
+                }
+            }
+        }
     }
 
     public void syncPhaseToPlayer(ServerPlayer p) {

@@ -24,13 +24,14 @@ public class VoiceIndicatorOverlay {
         int x = 4;
         int y = screenHeight - 60 - speaking.size() * (ENTRY_H + 2);
 
+        net.minecraft.client.gui.Font font = Minecraft.getInstance().font;
         for (String name : speaking) {
             g.fill(x, y, x + PANEL_W, y + ENTRY_H, AnimationHelper.withAlpha(COLOR_BG, 180));
 
             g.fill(x + 3, y + ENTRY_H / 2 - 3, x + 9, y + ENTRY_H / 2 + 3,
                 AnimationHelper.withAlpha(COLOR_ACTIVE, 255));
 
-            g.drawString(Minecraft.getInstance().font, name, x + 13, y + 3,
+            g.drawString(font, name, x + 13, y + 3,
                 AnimationHelper.withAlpha(COLOR_TEXT, 230));
 
             y += ENTRY_H + 2;

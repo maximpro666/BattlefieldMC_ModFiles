@@ -6,6 +6,7 @@ import com.yourmod.teamsystem.network.TeamTicketSyncPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;
 
+
 public class TicketManager {
     private static final int DEFAULT_TICKETS = 100;
     private static final int BLEED_INTERVAL = 20 * 5;
@@ -116,8 +117,13 @@ public class TicketManager {
     }
 
     public void syncToAll() {
-        TeamTicketSyncPacket packet = new TeamTicketSyncPacket(natoTickets, russiaTickets);
-        for (ServerPlayer player : TeamSystem.getGameManager().getServer().getPlayerList().getPlayers()) {
+        GameManager gm = TeamSystem.getGameManager();
+        if (gm == null || gm.getServer() == null) return;
+        int time = gm.getMatchTimeRemaining();
+        MapConfig map = gm.getCurrentMap();
+        int maxTickets = map != null ? map.getTickets() : 100;
+        TeamTicketSyncPacket packet = new TeamTicketSyncPacket(natoTickets, russiaTickets, time, maxTickets);
+        for (ServerPlayer player : gm.getServer().getPlayerList().getPlayers()) {
             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
         }
     }

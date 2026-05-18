@@ -7,6 +7,7 @@ import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TicketManager;
 import com.yourmod.teamsystem.network.CapturePointSyncPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -186,6 +187,9 @@ public class CaptureProcessor {
         List<Integer> owners = new ArrayList<>();
         List<String> names = new ArrayList<>();
         List<Integer> capturing = new ArrayList<>();
+        List<Double> xs = new ArrayList<>();
+        List<Double> ys = new ArrayList<>();
+        List<Double> zs = new ArrayList<>();
 
         for (CaptureZone z : zones) {
             ids.add(z.getId().hashCode());
@@ -193,9 +197,13 @@ public class CaptureProcessor {
             owners.add(z.getOwnerTeam().ordinal());
             names.add(z.getName());
             capturing.add(z.getCapturingTeam().ordinal());
+            BlockPos center = z.getCenter();
+            xs.add((double) center.getX());
+            ys.add((double) center.getY());
+            zs.add((double) center.getZ());
         }
 
-        CapturePointSyncPacket packet = new CapturePointSyncPacket(ids, progress, owners, names, capturing);
+        CapturePointSyncPacket packet = new CapturePointSyncPacket(ids, progress, owners, names, capturing, xs, ys, zs);
         for (ServerPlayer player : TeamSystem.getGameManager().getServer().getPlayerList().getPlayers()) {
             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
         }

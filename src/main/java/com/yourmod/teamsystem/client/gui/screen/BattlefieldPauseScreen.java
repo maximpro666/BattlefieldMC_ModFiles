@@ -1,11 +1,13 @@
 package com.yourmod.teamsystem.client.gui.screen;
 
+import com.yourmod.teamsystem.client.gui.I18n;
 import com.yourmod.teamsystem.client.gui.UITheme;
 
 import com.yourmod.teamsystem.client.gui.component.BButton;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -21,7 +23,7 @@ public class BattlefieldPauseScreen extends Screen {
     private float slideIn = 0f;
 
     public BattlefieldPauseScreen() {
-        super(Component.literal("Paused"));
+        super(Component.literal(I18n.get("teamsystem.ui.paused")));
     }
 
     @Override
@@ -34,20 +36,25 @@ public class BattlefieldPauseScreen extends Screen {
         int gap  = 6;
 
         addRenderableWidget(new BButton(cx - btnW / 2, startY, btnW, btnH,
-            Component.literal("Return to Battle"), btn -> onClose()));
+            Component.literal(I18n.get("teamsystem.ui.return_to_battle")), btn -> onClose()));
 
         addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap), btnW, btnH,
-            Component.literal("Team Selection"), btn -> {
+            Component.literal(I18n.get("teamsystem.ui.team_selection")), btn -> {
                 Minecraft.getInstance().setScreen(new TeamSelectionScreen());
             }));
 
         addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 2, btnW, btnH,
-            Component.literal("Settings"), btn -> {
+            Component.literal(I18n.get("teamsystem.ui.settings")), btn -> {
                 Minecraft.getInstance().setScreen(new SettingsMenuScreen());
             }));
 
         addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 3, btnW, btnH,
-            Component.literal("Disconnect"), btn -> {
+            Component.literal(I18n.get("teamsystem.ui.vanilla_settings")), btn -> {
+                Minecraft.getInstance().setScreen(new OptionsScreen(this, Minecraft.getInstance().options));
+            }));
+
+        addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 4, btnW, btnH,
+            Component.literal(I18n.get("teamsystem.ui.disconnect")), btn -> {
                 Minecraft.getInstance().level.disconnect();
                 Minecraft.getInstance().setScreen(new BattlefieldMainMenuScreen());
             }));
@@ -72,7 +79,7 @@ public class BattlefieldPauseScreen extends Screen {
         g.fill(panelX, panelY, panelX + panelW, panelY + 3,
             AnimationHelper.withAlpha(COLOR_ORANGE, (int)(fadeAlpha * 255)));
 
-        String paused = "PAUSED";
+        String paused = I18n.get("teamsystem.ui.paused_uppercase");
         int pw = font.width(paused);
         g.drawString(font, paused, panelX + panelW / 2 - pw / 2, panelY + 12,
             AnimationHelper.withAlpha(COLOR_ORANGE, (int)(fadeAlpha * 255)));
