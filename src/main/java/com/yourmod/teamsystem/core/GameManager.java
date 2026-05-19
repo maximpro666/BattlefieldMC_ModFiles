@@ -611,6 +611,7 @@ public class GameManager {
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             TeamManager tm = TeamSystem.getTeamManager();
             if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == Team.SPECTATOR) continue;
+            tm.syncKitConfig(p);
             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
                 new com.yourmod.teamsystem.network.OpenLoadoutScreenPacket());
         }

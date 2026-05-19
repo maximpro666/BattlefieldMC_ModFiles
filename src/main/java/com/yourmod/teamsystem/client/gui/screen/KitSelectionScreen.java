@@ -2,8 +2,7 @@ package com.yourmod.teamsystem.client.gui.screen;
 
 import com.yourmod.teamsystem.client.gui.UITheme;
 
-import com.yourmod.teamsystem.client.ClientTeamData;
-import com.yourmod.teamsystem.client.KitEntry;
+import com.yourmod.teamsystem.data.KitConfig;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.KitSelectPacket;
 import com.yourmod.teamsystem.client.gui.component.BButton;
@@ -14,7 +13,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import java.util.List;
+import java.util.*;
 
 public class KitSelectionScreen extends Screen {
 
@@ -30,7 +29,10 @@ public class KitSelectionScreen extends Screen {
     private static final int CELL_H  = 80;
     private static final int PADDING = 10;
 
-    private String selectedKit = null;
+    private final String classId;
+    private final List<Map.Entry<String, KitConfig.KitDef>> kitEntries = new ArrayList<>();
+
+    private String selectedKitId = null;
     private float fadeAlpha    = 0f;
     private long openTime;
     private BScrollPanel scrollPanel;
@@ -38,15 +40,16 @@ public class KitSelectionScreen extends Screen {
     private BButton customizeButton;
     private float[] hoverState;
 
-    public KitSelectionScreen() {
+    public KitSelectionScreen(String classId) {
         super(Component.literal("Kit Selection"));
+        this.classId = classId;
     }
 
     @Override
     protected void init() {
         openTime = System.currentTimeMillis();
-        List<KitEntry> kits = ClientTeamData.availableKits;
-        hoverState = new float[kits == null ? 0 : kits.size()];
+        loadKits();
+        hoverState = new float[kitEntries.size()];
 
         int panelW = COLS * (CELL_W + PADDING) + PADDING;
         int panelH = height - 80;
@@ -54,7 +57,7 @@ public class KitSelectionScreen extends Screen {
         int panelY = 40;
 
         scrollPanel = new BScrollPanel(panelX, panelY, panelW, panelH);
-        int rows = (kits == null || kits.isEmpty()) ? 1 : (kits.size() + COLS - 1) / COLS;
+        int rows = kitEntries.isEmpty() ? 1 : (kitEntries.size() + COLS - 1) / COLS;
         scrollPanel.setContentHeight(rows * (CELL_H + PADDING) + PADDING);
 
         confirmButton = addRenderableWidget(new BButton(
@@ -68,24 +71,35 @@ public class KitSelectionScreen extends Screen {
         ));
     }
 
+    private void loadKits() {
+        kitEntries.clear();
+        KitConfig cfg = KitConfig.get();
+        if (cfg == null) return;
+        KitConfig.ClassConfig cl = cfg.classes.get(classId);
+        if (cl == null) return;
+        for (Map.Entry<String, KitConfig.KitDef> entry : cl.kits.entrySet()) {
+            kitEntries.add(entry);
+        }
+    }
+
     private void confirmSelection() {
-        if (selectedKit != null) {
-            PacketHandler.CHANNEL.sendToServer(new KitSelectPacket(selectedKit));
-            SpawnScreenHelper.updateSelectedKit(selectedKit);
+        if (selectedKitId != null) {
+            String packageId = classId + ":" + selectedKitId;
+            PacketHandler.CHANNEL.sendToServer(new KitSelectPacket(packageId));
+            SpawnScreenHelper.updateSelectedKit(packageId);
             onClose();
         }
     }
 
     private void customizeKit() {
-        if (selectedKit != null) {
-            Minecraft.getInstance().setScreen(new KitLoadoutScreen(selectedKit));
+        if (selectedKitId != null) {
+            Minecraft.getInstance().setScreen(new KitLoadoutScreen(classId, selectedKitId));
         }
     }
 
     @Override
     public void render(GuiGraphics g, int mx, int my, float pt) {
-        float elapsed = (System.currentTimeMillis() - openTime) / 250f;
-        fadeAlpha = Math.min(1f, elapsed);
+        fadeAlpha = Math.min(1f, (System.currentTimeMillis() - openTime) / 250f);
 
         g.fill(0, 0, width, height, AnimationHelper.withAlpha(COLOR_BG, (int)(fadeAlpha * 0xCC)));
 
@@ -93,8 +107,7 @@ public class KitSelectionScreen extends Screen {
         int tw = font.width(title);
         g.drawString(font, title, width / 2 - tw / 2, 14, AnimationHelper.withAlpha(COLOR_SELECTED, (int)(fadeAlpha * 255)));
 
-        List<KitEntry> kits = ClientTeamData.availableKits;
-        if (kits != null && !kits.isEmpty()) {
+        if (!kitEntries.isEmpty()) {
             int panelW = COLS * (CELL_W + PADDING) + PADDING;
             int panelX = width / 2 - panelW / 2;
             int panelY = 40;
@@ -104,7 +117,7 @@ public class KitSelectionScreen extends Screen {
             float scrollOff = scrollPanel.getScrollOffset();
             g.enableScissor(panelX, panelY, panelX + panelW, panelY + scrollPanel.getHeight());
 
-            for (int i = 0; i < kits.size(); i++) {
+            for (int i = 0; i < kitEntries.size(); i++) {
                 int col = i % COLS;
                 int row = i / COLS;
                 int cx = panelX + PADDING + col * (CELL_W + PADDING);
@@ -115,8 +128,8 @@ public class KitSelectionScreen extends Screen {
                 boolean hov = mx >= cx && mx <= cx + CELL_W && my >= cy && my <= cy + CELL_H;
                 hoverState[i] = AnimationHelper.lerp(hoverState[i], hov ? 1f : 0f, 0.15f);
 
-                boolean sel = kits.get(i).id().equals(selectedKit);
-                drawKitCell(g, cx, cy, kits.get(i), sel, hoverState[i], fadeAlpha);
+                boolean sel = kitEntries.get(i).getKey().equals(selectedKitId);
+                drawKitCell(g, cx, cy, kitEntries.get(i), sel, hoverState[i], fadeAlpha);
             }
 
             g.disableScissor();
@@ -126,12 +139,13 @@ public class KitSelectionScreen extends Screen {
             g.drawString(font, none, width / 2 - nw / 2, height / 2, AnimationHelper.withAlpha(COLOR_SUBTEXT, (int)(fadeAlpha * 200)));
         }
 
-        customizeButton.visible = selectedKit != null;
-        customizeButton.active = selectedKit != null;
+        customizeButton.visible = selectedKitId != null;
+        customizeButton.active = selectedKitId != null;
         super.render(g, mx, my, pt);
     }
 
-    private void drawKitCell(GuiGraphics g, int x, int y, KitEntry kit, boolean selected, float hover, float alpha) {
+    private void drawKitCell(GuiGraphics g, int x, int y, Map.Entry<String, KitConfig.KitDef> entry, boolean selected, float hover, float alpha) {
+        KitConfig.KitDef kit = entry.getValue();
         int bgColor  = selected ? AnimationHelper.blendColors(UITheme.BG_SURFACE, UITheme.ACCENT, 0.15f)
                                 : AnimationHelper.withAlpha(COLOR_CARD, (int)(alpha * 0xDD));
         int brdColor = selected ? AnimationHelper.withAlpha(COLOR_SELECTED, (int)(alpha * 255))
@@ -143,36 +157,40 @@ public class KitSelectionScreen extends Screen {
         g.fill(x, y, x + 1, y + CELL_H, brdColor);
         g.fill(x + CELL_W - 1, y, x + CELL_W, y + CELL_H, brdColor);
 
-        String display = kit.name().toUpperCase();
+        String display = kit.display_name != null ? kit.display_name.toUpperCase() : entry.getKey().toUpperCase();
         int tw = font.width(display);
         g.drawString(font, display,
-            x + CELL_W / 2 - tw / 2, y + CELL_H / 2 - 4,
+            x + CELL_W / 2 - tw / 2, y + CELL_H / 2 - 8,
             AnimationHelper.withAlpha(COLOR_TEXT, (int)(alpha * 255)));
+
+        if (kit.description != null && !kit.description.isEmpty()) {
+            g.drawCenteredString(font, kit.description, x + CELL_W / 2, y + CELL_H / 2 + 8,
+                AnimationHelper.withAlpha(COLOR_SUBTEXT, (int)(alpha * 180)));
+        }
 
         if (selected) {
             String sel = "\u2713 SELECTED";
             int sw = font.width(sel);
-            g.drawString(font, sel, x + CELL_W / 2 - sw / 2, y + CELL_H / 2 + 8,
+            g.drawString(font, sel, x + CELL_W / 2 - sw / 2, y + CELL_H / 2 + 22,
                 AnimationHelper.withAlpha(COLOR_SELECTED, (int)(alpha * 255)));
         }
     }
 
     @Override
     public boolean mouseClicked(double mx, double my, int btn) {
-        List<KitEntry> kits = ClientTeamData.availableKits;
-        if (kits != null) {
+        if (!kitEntries.isEmpty()) {
             int panelW = COLS * (CELL_W + PADDING) + PADDING;
             int panelX = width / 2 - panelW / 2;
             int panelY = 40;
             float scrollOff = scrollPanel.getScrollOffset();
 
-            for (int i = 0; i < kits.size(); i++) {
+            for (int i = 0; i < kitEntries.size(); i++) {
                 int col = i % COLS;
                 int row = i / COLS;
                 int cx = panelX + PADDING + col * (CELL_W + PADDING);
                 int cy = panelY + PADDING + row * (CELL_H + PADDING) - (int)scrollOff;
                 if (mx >= cx && mx <= cx + CELL_W && my >= cy && my <= cy + CELL_H) {
-                    selectedKit = kits.get(i).id();
+                    selectedKitId = kitEntries.get(i).getKey();
                     return true;
                 }
             }

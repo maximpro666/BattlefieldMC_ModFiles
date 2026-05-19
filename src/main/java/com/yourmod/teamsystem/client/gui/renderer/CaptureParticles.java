@@ -52,25 +52,25 @@ public class CaptureParticles {
             float rotSpeed, extraPulse;
 
             if (isContested) {
-                ringColor = 0x55FF4444;
-                beamColor = 0x33FF4444;
+                ringColor = 0xBBFF4444;
+                beamColor = 0x99FF4444;
                 rotSpeed = 2.0f;
                 extraPulse = (float)(Math.sin(elapsed * 4.0) * 0.3 + 0.7);
             } else if (isCapturing) {
-                ringColor = 0x88E07B00;
-                beamColor = 0x44E07B00;
+                ringColor = 0xCCE07B00;
+                beamColor = 0xAAE07B00;
                 rotSpeed = 1.2f;
                 extraPulse = 1.0f;
             } else {
                 ringColor = switch (ownerOrdinal) {
-                    case 0 -> 0x551C5FAD;
-                    case 1 -> 0x55AD1C1C;
-                    default -> 0x55AAAAAA;
+                    case 0 -> 0xAA1C5FAD;
+                    case 1 -> 0xAAAD1C1C;
+                    default -> 0xAAAAAA;
                 };
                 beamColor = switch (ownerOrdinal) {
-                    case 0 -> 0x331C5FAD;
-                    case 1 -> 0x33AD1C1C;
-                    default -> 0x33AAAAAA;
+                    case 0 -> 0x991C5FAD;
+                    case 1 -> 0x99AD1C1C;
+                    default -> 0x99AAAAAA;
                 };
                 rotSpeed = 0.4f;
                 extraPulse = 0.6f;
@@ -130,12 +130,10 @@ public class CaptureParticles {
             float x2i = cos2 * (radius - halfT), z2i = sin2 * (radius - halfT);
             float x2o = cos2 * (radius + halfT), z2o = sin2 * (radius + halfT);
 
-            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
         }
 
         poseStack.popPose();
@@ -169,12 +167,10 @@ public class CaptureParticles {
             float x2i = cos2 * (radius - halfT), z2i = sin2 * (radius - halfT);
             float x2o = cos2 * (radius + halfT), z2o = sin2 * (radius + halfT);
 
-            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
         }
 
         poseStack.popPose();
@@ -318,12 +314,10 @@ public class CaptureParticles {
             float x2i = cos2 * (radius - halfT), z2i = sin2 * (radius - halfT);
             float x2o = cos2 * (radius + halfT), z2o = sin2 * (radius + halfT);
 
-            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
-            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
         }
 
         poseStack.popPose();

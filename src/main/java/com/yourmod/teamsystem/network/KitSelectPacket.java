@@ -2,6 +2,7 @@ package com.yourmod.teamsystem.network;
 
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.*;
+import com.yourmod.teamsystem.data.KitConfigServerHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
@@ -36,9 +37,21 @@ public class KitSelectPacket {
             if (kitName.isEmpty()) return;
             if (!PacketValidator.checkAndReject(player, PacketValidator.requireTeamPlayable(player))) return;
 
-            String result = TeamSystem.getKitManager().claimKit(player, kitName, TeamSystem.getTeamManager());
-            if (result != null) {
-                player.displayClientMessage(error(result), false);
+            // Check if modern format "classId:kitId" or old format "kitName"
+            if (kitName.contains(":")) {
+                String[] parts = kitName.split(":", 2);
+                String classId = parts[0];
+                String kitId = parts[1];
+                String result = KitConfigServerHelper.applyKit(player, classId, kitId);
+                if (result != null) {
+                    player.displayClientMessage(error(result), false);
+                }
+            } else {
+                // Old system: plain kit name
+                String result = TeamSystem.getKitManager().claimKit(player, kitName, TeamSystem.getTeamManager());
+                if (result != null) {
+                    player.displayClientMessage(error(result), false);
+                }
             }
         });
         return true;

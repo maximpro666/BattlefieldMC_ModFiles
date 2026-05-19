@@ -298,7 +298,7 @@ public class SpawnSelectionScreen extends Screen {
         int x = rx + PANEL_PAD;
         int y = PANEL_PAD + 10 + 46 + 30;
         if (mx >= x && my >= y && my < y + 22) {
-            minecraft.setScreen(new KitSelectionScreen());
+            minecraft.setScreen(new ClassSelectionScreen());
         }
     }
 

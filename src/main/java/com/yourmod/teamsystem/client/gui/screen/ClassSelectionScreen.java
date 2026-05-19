@@ -32,7 +32,7 @@ public class ClassSelectionScreen extends Screen {
     private float fadeAlpha = 0f;
     private long openTime;
     private BScrollPanel scrollPanel;
-    private String selectedClassId = null;
+    private String selectedClassId = "";
 
     public ClassSelectionScreen() {
         super(Component.literal("Class Selection"));
@@ -214,20 +214,26 @@ public class ClassSelectionScreen extends Screen {
     public boolean mouseClicked(double mx, double my, int btn) {
         if (classes.isEmpty()) return super.mouseClicked(mx, my, btn);
 
+        KitConfig cfg = KitConfig.get();
+        if (cfg == null) return super.mouseClicked(mx, my, btn);
+
         int panelX = width / 2 - (COLS * (CARD_W + GAP) + GAP) / 2;
         int panelY = 50;
         float scrollOff = scrollPanel.getScrollOffset();
 
-        for (int i = 0; i < classes.size(); i++) {
-            if (!lockStates.get(i).isSelectable()) continue;
+        int i = 0;
+        for (Map.Entry<String, KitConfig.ClassConfig> entry : cfg.classes.entrySet()) {
+            if (i >= lockStates.size()) break;
+            if (!lockStates.get(i).isSelectable()) { i++; continue; }
             int col = i % COLS;
             int row = i / COLS;
             int cx = panelX + GAP + col * (CARD_W + GAP);
             int cy = panelY + GAP + row * (CARD_H + GAP) - (int) scrollOff;
             if (mx >= cx && mx <= cx + CARD_W && my >= cy && my <= cy + CARD_H) {
-                Minecraft.getInstance().setScreen(new KitSelectionScreen());
+                Minecraft.getInstance().setScreen(new KitSelectionScreen(entry.getKey()));
                 return true;
             }
+            i++;
         }
         return super.mouseClicked(mx, my, btn);
     }

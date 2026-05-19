@@ -5,7 +5,7 @@ import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.client.gui.renderer.CaptureParticles;
 import com.yourmod.teamsystem.client.gui.renderer.CustomNametagRenderer;
 import com.yourmod.teamsystem.client.gui.renderer.WorldMarkerRenderer;
-import com.yourmod.teamsystem.client.gui.screen.KitSelectionScreen;
+import com.yourmod.teamsystem.client.gui.screen.ClassSelectionScreen;
 import com.yourmod.teamsystem.client.xaero.XaeroIntegration;
 import com.yourmod.teamsystem.core.GameManager;
 import net.minecraft.client.Camera;
@@ -65,7 +65,7 @@ public class ClientSetup {
                         return;
                     }
                 }
-                mc.setScreen(new KitSelectionScreen());
+                mc.setScreen(new ClassSelectionScreen());
             }
         }
     }

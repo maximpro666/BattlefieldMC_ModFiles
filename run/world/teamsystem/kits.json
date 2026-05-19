@@ -1,0 +1,155 @@
+{
+  "classes": {
+    "assault_nato": {
+      "display_name": "Assault",
+      "icon": "⚔",
+      "kits": {
+        "rifleman": {
+          "display_name": "Rifleman",
+          "description": "Standard Assault",
+          "weapons": {
+            "primary": ["tacz:m4a1", "tacz:m16a4", "tacz:scar_l", "tacz:hk416a5", "superbwarfare:m_4", "superbwarfare:hk_416"],
+            "secondary": ["tacz:glock_17", "tacz:m1911", "superbwarfare:m_1911", "superbwarfare:glock_17"],
+            "special": ["superbwarfare:m_79", "tacz:m67"],
+            "grenade": ["tacz:m67", "superbwarfare:hand_grenade"]
+          },
+          "requirements": { "rank": 1, "team": "NATO" }
+        },
+        "marksman": {
+          "display_name": "Marksman",
+          "description": "Designated Marksman",
+          "weapons": {
+            "primary": ["tacz:mk14", "tacz:m16a4", "superbwarfare:mk_14", "superbwarfare:m_98b"],
+            "secondary": ["tacz:glock_17", "superbwarfare:m_1911"],
+            "special": [],
+            "grenade": ["tacz:m67"]
+          },
+          "requirements": { "rank": 2, "team": "NATO" }
+        },
+        "medic": {
+          "display_name": "Medic",
+          "description": "Combat Medic",
+          "weapons": {
+            "primary": ["tacz:m4a1", "tacz:scar_l", "superbwarfare:mp_5", "superbwarfare:vector"],
+            "secondary": ["tacz:glock_17"],
+            "special": [],
+            "grenade": ["tacz:m67"]
+          },
+          "requirements": { "rank": 1, "team": "NATO" }
+        }
+      }
+    },
+    "support_nato": {
+      "display_name": "Support",
+      "icon": "🎯",
+      "kits": {
+        "machinegunner": {
+          "display_name": "Machinegunner",
+          "description": "Heavy Suppression",
+          "weapons": {
+            "primary": ["tacz:m249", "superbwarfare:m_60", "superbwarfare:rpk"],
+            "secondary": ["tacz:glock_17"],
+            "special": [],
+            "grenade": ["tacz:m67"]
+          },
+          "requirements": { "rank": 3, "team": "NATO" }
+        },
+        "engineer": {
+          "display_name": "Engineer",
+          "description": "Anti-vehicle",
+          "weapons": {
+            "primary": ["tacz:m4a1", "superbwarfare:m_4", "superbwarfare:rpg"],
+            "secondary": ["tacz:glock_17"],
+            "special": ["superbwarfare:rpg_rocket_standard"],
+            "grenade": ["tacz:m67"]
+          },
+          "requirements": { "rank": 3, "team": "NATO" }
+        }
+      }
+    },
+    "assault_rus": {
+      "display_name": "Штурмовик",
+      "icon": "⚔",
+      "kits": {
+        "rifleman": {
+          "display_name": "Стрелок",
+          "description": "Стандартный штурмовик",
+          "weapons": {
+            "primary": ["tacz:ak47", "maxstuff:ak12", "maxstuff:ak74m", "superbwarfare:ak_47", "superbwarfare:ak_12", "superbwarfare:qbz_95"],
+            "secondary": ["tacz:glock_17", "superbwarfare:mp_443", "maxstuff:mk23"],
+            "special": [],
+            "grenade": ["tacz:m67", "superbwarfare:rgo_grenade"]
+          },
+          "requirements": { "rank": 1, "team": "RUSSIA" }
+        },
+        "marksman": {
+          "display_name": "Снайпер",
+          "description": "Меткий стрелок",
+          "weapons": {
+            "primary": ["maxstuff:dragonuv_svd", "superbwarfare:svd", "superbwarfare:mosin_nagant", "tacz:ai_awp"],
+            "secondary": ["tacz:glock_17", "superbwarfare:mp_443"],
+            "special": [],
+            "grenade": ["tacz:m67"]
+          },
+          "requirements": { "rank": 2, "team": "RUSSIA" }
+        },
+        "medic": {
+          "display_name": "Медик",
+          "description": "Полевой медик",
+          "weapons": {
+            "primary": ["tacz:ak47", "maxstuff:aks74u", "superbwarfare:ak_47"],
+            "secondary": ["tacz:glock_17"],
+            "special": [],
+            "grenade": ["tacz:m67"]
+          },
+          "requirements": { "rank": 1, "team": "RUSSIA" }
+        }
+      }
+    },
+    "heavy_rus": {
+      "display_name": "Тяжёлый",
+      "icon": "💪",
+      "kits": {
+        "machinegunner": {
+          "display_name": "Пулемётчик",
+          "description": "Подавление огнём",
+          "weapons": {
+            "primary": ["tacz:rpk", "maxstuff:rpk_74m", "maxstuff:dp28", "superbwarfare:rpk"],
+            "secondary": ["tacz:glock_17", "superbwarfare:mp_443"],
+            "special": [],
+            "grenade": ["tacz:m67"]
+          },
+          "requirements": { "rank": 3, "team": "RUSSIA" }
+        },
+        "engineer": {
+          "display_name": "Сапёр",
+          "description": "Противотанковая",
+          "weapons": {
+            "primary": ["tacz:ak47", "superbwarfare:ak_47", "superbwarfare:rpg"],
+            "secondary": ["tacz:glock_17"],
+            "special": ["superbwarfare:rpg_rocket_tbg"],
+            "grenade": ["tacz:m67"]
+          },
+          "requirements": { "rank": 3, "team": "RUSSIA" }
+        }
+      }
+    },
+    "sniper_nato": {
+      "display_name": "Sniper",
+      "icon": "🎯",
+      "kits": {
+        "sniper": {
+          "display_name": "Sniper",
+          "description": "Long range elimination",
+          "weapons": {
+            "primary": ["tacz:ai_awp", "superbwarfare:awm", "superbwarfare:m_98b", "tacz:m107", "superbwarfare:ntw_20"],
+            "secondary": ["tacz:glock_17", "superbwarfare:m_1911"],
+            "special": [],
+            "grenade": ["tacz:m67"]
+          },
+          "requirements": { "rank": 4, "team": "NATO" }
+        }
+      }
+    }
+  }
+}

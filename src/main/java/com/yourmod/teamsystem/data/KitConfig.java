@@ -60,7 +60,7 @@ public class KitConfig {
         public String team = null;
     }
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static KitConfig INSTANCE;
 
     public static KitConfig get() { return INSTANCE; }
@@ -104,7 +104,7 @@ public class KitConfig {
         rifleman.display_name = "Rifleman";
         rifleman.description  = "Standard assault rifleman with AR and grenades.";
         rifleman.weapons.primary   = List.of("tacz:m4a1", "tacz:m16a4");
-        rifleman.weapons.secondary = List.of("tacz:g17");
+        rifleman.weapons.secondary = List.of("tacz:glock_17");
         rifleman.weapons.special   = List.of("tacz:m67");
         rifleman.weapons.grenade   = List.of("tacz:m67");
         rifleman.requirements.rank = 1;

@@ -24,9 +24,9 @@ import java.util.List;
 
 public class WorldMarkerRenderer {
 
-    private static final double MAX_DIST = 1.0E8;
-    private static final double BASE_MAX_DIST = 1.0E8;
-    private static final double FULL_VIS_DIST = 1.0E8;
+    private static final double MAX_DIST = 300.0;
+    private static final double BASE_MAX_DIST = 300.0;
+    private static final double FULL_VIS_DIST = 40.0;
 
     // State colors: fillColor, borderColor, bgColor
     private static final int   NEUTRAL_BORDER = 0xFF888888;
@@ -145,11 +145,10 @@ public class WorldMarkerRenderer {
         // Rise into sky when far away so icon is visible above terrain
         double rise = 0;
         if (dist > 50) {
-            rise = Math.min((dist - 50) * 0.5, 200.0);
+            rise = Math.min((dist - 50) * 0.75, 300.0);
         }
-        double sizeT = Math.min(dist / 450.0, 1.0);
-        float sizeMul = 1.0f + (float)(sizeT * 4.0f);
-        float scale = 0.015f * sizeMul;
+        double sizeT = Math.max(1.0, dist / 60.0);
+        float scale = (float)cfg.extraScale * (float)sizeT;
 
         poseStack.pushPose();
         double wy = cp.y() + 3.0 + bob + rise;
@@ -161,6 +160,8 @@ public class WorldMarkerRenderer {
 
         Font font = mc.font;
         String letter = cp.name().length() > 0 ? cp.name().substring(0, 1).toUpperCase() : "?";
+        int lw = font.width(letter);
+        int lh = font.lineHeight;
         float hs = (float)cfg.markerSize / 2f;
         float texAlpha = textAlpha(dist, MAX_DIST);
 
@@ -168,7 +169,7 @@ public class WorldMarkerRenderer {
         drawRect(poseStack, bufferSource, -hs, -hs, hs, hs,
             applyAlpha(bgColor, alpha));
 
-        // === Progress fill (full background, behind letter) ===
+        // === Progress fill ===
         if (prog > 0.01) {
             int pf;
             if (capturerOrdinal >= 0 && capturerOrdinal <= 1) {
@@ -178,12 +179,12 @@ public class WorldMarkerRenderer {
             } else {
                 pf = CAPTURE_FILL;
             }
-            float fillW = (float)(cfg.markerSize * Math.max(0.0, Math.min(1.0, prog)));
+            float fillW = (float)(hs * 2.0 * Math.max(0.0, Math.min(1.0, prog)));
             drawRect(poseStack, bufferSource, -hs, -hs, -hs + fillW, hs,
                 applyAlpha(pf, alpha));
         }
 
-        // === Border (thick, no pulse) ===
+        // === Border ===
         float bd = (float)cfg.borderWidth;
         int borderA = (int)(alpha * 0xFF);
         int ba = Math.min(0xFF, Math.max(0, borderA * 2 / 3));
@@ -198,28 +199,32 @@ public class WorldMarkerRenderer {
         drawRect(poseStack, bufferSource, -hs, -hs, -hs + bd, hs, borderArgb);
         drawRect(poseStack, bufferSource, hs - bd, -hs, hs, hs, borderArgb);
 
-        // === Progress edge line (no pulse) ===
+        // === Progress edge line ===
         if (prog > 0.01) {
-            float fillW = (float)(cfg.markerSize * Math.max(0.0, Math.min(1.0, prog)));
+            float fillW = (float)(hs * 2.0 * Math.max(0.0, Math.min(1.0, prog)));
             float edgeX = -hs + fillW;
             float ew = (float)cfg.progressEdgeWidth;
             int edgeColor = applyAlpha(0xFFFFFFFF, alpha * 0.6f);
             drawRect(poseStack, bufferSource, edgeX - ew, -hs, edgeX + ew, hs, edgeColor);
         }
 
-        // === Letter (centered) ===
+        // === Letter (scaled to fit) ===
         int letterColor = (int)(0xFF * texAlpha) << 24 | 0xFFFFFF;
-        int lw = font.width(letter);
+        float textScale = 1.8f;
+        poseStack.pushPose();
+        poseStack.translate(0, 0, 0.001f);
+        poseStack.scale(textScale, textScale, 1f);
         font.drawInBatch(letter,
-            -lw / 2f, -4f,
+            -lw / 2f, -lh / 2f,
             letterColor, true,
             poseStack.last().pose(),
             bufferSource,
             Font.DisplayMode.SEE_THROUGH,
             0, 0xF000F0);
+        poseStack.popPose();
 
         // === Distance suffix ===
-        if (cfg.showDistance && !lodFull && dist > FULL_VIS_DIST + 10) {
+        if (cfg.showDistance && dist > 60) {
             String distStr = (int)dist + "m";
             int dw = font.width(distStr);
             float ds = 0.5f;
@@ -300,9 +305,8 @@ public class WorldMarkerRenderer {
         if (dist > 50) {
             rise = Math.min((dist - 50) * 0.5, 200.0);
         }
-        double sizeT = Math.min(dist / 450.0, 1.0);
-        float sizeMul = 1.0f + (float)(sizeT * 4.0f);
-        float scale = 0.015f * sizeMul;
+        double sizeT = Math.max(1.0, dist / 60.0);
+        float scale = (float)VisualsConfig.get().capturePoint.extraScale * (float)sizeT;
 
         poseStack.pushPose();
         poseStack.translate(dx, y + 4.0 + bob + rise - camPos.y, dz);
@@ -312,7 +316,9 @@ public class WorldMarkerRenderer {
         poseStack.scale(-scale, -scale, scale);
 
         Font font = Minecraft.getInstance().font;
-        float hs = 6f;
+        String letter = label.length() > 0 ? label.substring(0, 1).toUpperCase() : "?";
+        int lw = font.width(letter);
+        float hs = Math.max(6f, lw / 2f + 2f) * 2f;
         float bd = 1.2f;
 
         drawRect(poseStack, bufferSource, -hs, -hs, hs, hs,
@@ -326,19 +332,16 @@ public class WorldMarkerRenderer {
         drawRect(poseStack, bufferSource, -hs, -hs, -hs + bd, hs, borderArgb);
         drawRect(poseStack, bufferSource, hs - bd, -hs, hs, hs, borderArgb);
 
-        String letter = label.length() > 0 ? label.substring(0, 1).toUpperCase() : "?";
         int letterColor = (int)(0xFF * alpha) << 24 | 0xFFFFFF;
-        int lw = font.width(letter);
         font.drawInBatch(letter,
-            -lw / 2f, -4f,
+            -lw / 2f, -font.lineHeight / 2f,
             letterColor, true,
             poseStack.last().pose(),
             bufferSource,
             Font.DisplayMode.SEE_THROUGH,
             0, 0xF000F0);
 
-        boolean lodFull = dist <= FULL_VIS_DIST;
-        if (!lodFull && dist > FULL_VIS_DIST + 10) {
+        if (dist > 60) {
             String distStr = (int)dist + "m";
             int dw = font.width(distStr);
             poseStack.pushPose();
@@ -365,13 +368,14 @@ public class WorldMarkerRenderer {
         double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (dist > MAX_DIST) return;
 
+        double sizeT = Math.max(1.0, dist / 60.0);
+        float scale = (float)VisualsConfig.get().capturePoint.extraScale * (float)sizeT;
+
         poseStack.pushPose();
         poseStack.translate(dx, dy, dz);
         poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
         poseStack.translate(0, 0, (float)(-dist * 0.0001));
-
-        float scale = 0.025f;
         poseStack.scale(-scale, -scale, scale);
 
         Minecraft mc = Minecraft.getInstance();

@@ -1,7 +1,10 @@
 package com.yourmod.teamsystem.core;
 
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.data.KitConfig;
+import com.yourmod.teamsystem.data.KitConfigServerHelper;
 import com.yourmod.teamsystem.network.CombatDataSyncPacket;
+import com.yourmod.teamsystem.network.KitConfigSyncPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.RankSyncPacket;
 import com.yourmod.teamsystem.network.TeamSyncPacket;
@@ -262,6 +265,7 @@ public class TeamManager extends SavedData {
         syncConfig(player);
         syncRank(player);
         syncKits(player);
+        syncKitConfig(player);
         syncVehicles(player);
         syncFOBs(player);
     }
@@ -296,6 +300,14 @@ public class TeamManager extends SavedData {
         com.yourmod.teamsystem.network.KitSyncPacket packet =
             new com.yourmod.teamsystem.network.KitSyncPacket(names, displayNames, minRanks);
         PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    public void syncKitConfig(ServerPlayer player) {
+        KitConfig cfg = KitConfig.get();
+        if (cfg == null) return;
+        String json = KitConfig.GSON.toJson(cfg);
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+            new KitConfigSyncPacket(json));
     }
 
     public void syncVehicles(ServerPlayer player) {

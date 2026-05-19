@@ -278,5 +278,11 @@ public class PacketHandler {
             .encoder(RespawnAtPointPacket::toBytes)
             .consumerMainThread(RespawnAtPointPacket::handle)
             .add();
+
+        CHANNEL.messageBuilder(KitConfigSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(KitConfigSyncPacket::new)
+            .encoder(KitConfigSyncPacket::toBytes)
+            .consumerMainThread(KitConfigSyncPacket::handle)
+            .add();
     }
 }
