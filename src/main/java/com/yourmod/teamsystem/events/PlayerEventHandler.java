@@ -80,7 +80,7 @@ public class PlayerEventHandler {
             GameManager game = TeamSystem.getGameManager();
             if (game != null) {
                 game.syncPhaseToPlayer(player);
-                if (game.isPlaying()) {
+                if (game.isPlaying() && game.isMapReady()) {
                     Team team = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
                     MapConfig map = game.getCurrentMap();
                     if (team != null && team.isPlayable() && map != null) {
@@ -90,6 +90,11 @@ public class PlayerEventHandler {
                         game.teleportPlayerToLobby(player);
                         game.setLobbyRespawn(player);
                     }
+                } else if (game.isPlaying()) {
+                    game.teleportPlayerToLobby(player);
+                    game.setLobbyRespawn(player);
+                    player.sendSystemMessage(Component.literal("§eMap is loading, please wait...")
+                        .withStyle(ChatFormatting.YELLOW));
                 } else {
                     game.teleportPlayerToLobby(player);
                     game.setLobbyRespawn(player);
@@ -127,6 +132,15 @@ public class PlayerEventHandler {
         if (event.getPlayer() instanceof ServerPlayer player) {
             net.minecraft.core.BlockPos pos = event.getPos();
             if (player.level().getBlockState(pos).getBlock() == TeamSystem.RESPAWN_BEACON_BLOCK.get()) {
+                // Check for player-placed beacon (has block entity with owner)
+                if (player.level().getBlockEntity(pos) instanceof com.yourmod.teamsystem.blockentity.RespawnBeaconBlockEntity beacon
+                        && beacon.getOwnerUUID() != null) {
+                    TeamSystem.getRespawnManager().onBeaconBroken(pos, beacon);
+                    String msg = "§c[BCN] " + beacon.getName() + " destroyed!";
+                    player.serverLevel().players().forEach(p ->
+                        p.displayClientMessage(net.minecraft.network.chat.Component.literal(msg), false));
+                }
+                // Check for FOB
                 String dim = player.serverLevel().dimension().location().toString();
                 com.yourmod.teamsystem.core.FOBManager.SavedFOB fob = TeamSystem.getFOBManager().getFOBAt(pos, dim);
                 if (fob != null) {

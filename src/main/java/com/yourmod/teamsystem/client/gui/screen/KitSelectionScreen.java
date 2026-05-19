@@ -71,6 +71,7 @@ public class KitSelectionScreen extends Screen {
     private void confirmSelection() {
         if (selectedKit != null) {
             PacketHandler.CHANNEL.sendToServer(new KitSelectPacket(selectedKit));
+            SpawnScreenHelper.updateSelectedKit(selectedKit);
             onClose();
         }
     }
@@ -188,6 +189,11 @@ public class KitSelectionScreen extends Screen {
     @Override
     public void tick() {
         scrollPanel.tick();
+    }
+
+    @Override
+    public void onClose() {
+        SpawnScreenHelper.reopen();
     }
 
     @Override

@@ -10,6 +10,8 @@ import java.util.UUID;
 import java.util.Collections;
 
 public class ClientTeamData {
+
+    public record ClientBeaconData(String name, double x, double y, double z, int teamOrdinal) {}
     private static Team localPlayerTeam = Team.SPECTATOR;
     private static int localPlayerKills = 0;
     private static int localPlayerDeaths = 0;
@@ -45,6 +47,8 @@ public class ClientTeamData {
     public static float guiScale = 1.0f;
     public static float guiOpacity = 1.0f;
     public static int maxTickets = 100;
+    public static List<ClientBeaconData> beacons = new ArrayList<>();
+    public static Map<UUID, Integer> squadmateStatuses = new HashMap<>();
 
     public static PlayerListEntry getPlayerData(UUID uuid) { return playerDataMap.get(uuid); }
     public static List<String> getSpeakingPlayers() { return Collections.unmodifiableList(speakingPlayers); }

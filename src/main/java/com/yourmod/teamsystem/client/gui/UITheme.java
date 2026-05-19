@@ -51,6 +51,9 @@ public final class UITheme {
     public static final int KILLFEED_KILLER   = ACCENT;
     public static final int KILLFEED_VICTIM   = TEXT_SECONDARY;
 
+    public static final int MAP_COOLDOWN     = 0xFFCC3030;
+    public static final int MAP_COOLDOWN_BG  = 0xAA550000;
+
     public static final int ALPHA_FULL        = 0xFF;
     public static final int ALPHA_HIGH        = 0xE0;
     public static final int ALPHA_MID         = 0xAA;

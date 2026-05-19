@@ -59,7 +59,8 @@ public class GameManager {
     private boolean lastLiberateAttachment;
     /** Match index used to determine team rotation parity */
     private int currentMatchIndex;
-    private final ChunkSnapshotManager snapshotManager = new ChunkSnapshotManager();
+    private boolean mapReady;
+    private BorderManager borderManager;
 
     public GameManager(MinecraftServer server) {
         this.server = server;
@@ -74,7 +75,11 @@ public class GameManager {
         this.matchTimeRemaining = 0;
         this.lastLiberateAttachment = false;
         this.currentMatchIndex = 0;
+        this.mapReady = false;
+        this.borderManager = new BorderManager();
     }
+
+    public boolean isMapReady() { return mapReady; }
 
     public GamePhase getCurrentPhase() { return currentPhase; }
     public MinecraftServer getServer() { return server; }
@@ -96,10 +101,6 @@ public class GameManager {
     // ========== Match Flow ==========
 
     public void startGame() {
-        if (!MapOffsetManager.isPreloadDone()) {
-            broadcast("Map data is still preloading, please wait...", CHAT_WARNING);
-            return;
-        }
         TeamManager teamManager = TeamSystem.getTeamManager();
         MapPoolManager mapPool = TeamSystem.getMapPoolManager();
 
@@ -114,6 +115,12 @@ public class GameManager {
             if (map == null) return;
         }
 
+        if (!mapPool.copyToLive(map)) {
+            broadcast("Failed to deploy map " + map.getName(), CHAT_ERROR);
+            return;
+        }
+
+        mapReady = false;
         currentPhase = GamePhase.PLAYING;
         phaseTimer = 0;
         winningTeam = null;
@@ -131,13 +138,10 @@ public class GameManager {
             econ.syncSPToAll();
         }
 
-                int mapIndex = MapOffsetManager.getMapIndex(map, TeamSystem.getMapPoolManager().getMaps());
-        int zOffset = MapOffsetManager.getZOffset(mapIndex);
-
         CapturePointManager cp = TeamSystem.getCapturePointManager();
         if (cp != null) {
             if (map.hasCapturePoints()) {
-                cp.loadFromMapConfig(map, zOffset);
+                cp.loadFromMapConfig(map, 0);
                 cp.setActive(true);
             } else {
                 cp.clearPoints();
@@ -162,32 +166,27 @@ public class GameManager {
         currentMatchIndex = TeamSystem.getMapPoolManager().nextMatchId();
         boolean swapped = map.isTeamRotation() && (currentMatchIndex % 2 == 1);
 
-        if (snapshotManager.hasSnapshot(map.getName())) {
-            snapshotManager.restoreSnapshot(mapLevel, map, zOffset);
-        } else {
-            // First time: take snapshot after teleport
-            clearEntitiesInZone(mapLevel, zOffset);
-        }
-        applyMapConfig(map, zOffset);
-        unloadChunksOutsideZone(mapLevel, zOffset);
-        autoAssignTeams(map);
-        teleportAllPlayersToMap(map, zOffset, swapped);
-        openLoadoutScreenForAllPlayers();
+        applyMapConfig(map, 0);
 
-        if (!snapshotManager.hasSnapshot(map.getName())) {
-            final ChunkSnapshotManager sm = snapshotManager;
-            final MapConfig finalMap = map;
-            final int finalZ = zOffset;
-            server.execute(() -> sm.takeSnapshot(mapLevel, finalMap, finalZ,
-                server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT)
-                    .resolve("teamsystem_sources")));
+        if (map.hasBorderZones()) {
+            borderManager.setZones(map.getBorderZones());
+            TeamSystem.LOGGER.info("Border zones set for map {}", map.getName());
+        } else {
+            borderManager.setZones(null);
         }
+
+        unloadChunksOutsideZone(mapLevel, 0);
+        autoAssignTeams(map);
+        teleportAllPlayersToMap(map, 0, swapped);
+        openLoadoutScreenForAllPlayers();
 
         gamerule(server.overworld(), "liberateAttachment", "false");
 
+        mapReady = true;
+
         broadcast("Game started on map: " + map.getName(), CHAT_SUCCESS, CHAT_EMPHASIS);
         syncPhaseToAll();
-        TeamSystem.LOGGER.info("Game started on map: {} (zOffset={})", map.getName(), zOffset);
+        TeamSystem.LOGGER.info("Game started on map: {}", map.getName());
     }
 
     public void endGame(Team winner) {
@@ -299,6 +298,11 @@ public class GameManager {
                     }
                 }
 
+                if (borderManager != null && borderManager.hasZones()) {
+                    ServerLevel mapLevel = getMapWorld(currentMap);
+                    if (mapLevel != null) borderManager.tick(mapLevel);
+                }
+
                 updateLiberateAttachment();
 
                 if (tm != null) {
@@ -333,9 +337,13 @@ public class GameManager {
 
     private void finishMatchCycle() {
         teleportAllToLobby();
+        borderManager.setZones(null);
 
-        ServerLevel mapLevel = server.getLevel(DynamicDimensionManager.getDimKey());
-        if (mapLevel != null) clearWorldEntities(mapLevel);
+        if (currentMap != null) {
+            TeamSystem.getMapPoolManager().copyToLive(currentMap);
+            TeamSystem.LOGGER.info("Map {} regenerated after match", currentMap.getName());
+        }
+
         currentDimKey = null;
 
         startVoting();
@@ -478,17 +486,13 @@ public class GameManager {
         if (l == null) return;
         gamerule(l, "naturalRegeneration", map.hasRegen() ? "true" : "false");
         gamerule(l, "doImmediateRespawn", map.hasRespawn() ? "false" : "true");
-        gamerule(l, "doMobSpawning", "true");
+        gamerule(l, "doMobSpawning", "false");
         gamerule(l, "mobGriefing", "false");
         gamerule(l, "doFireTick", "true");
         gamerule(l, "keepInventory", "false");
         gamerule(l, "fallDamage", "true");
-        if (map.hasWorldBorder()) {
-            l.getWorldBorder().setCenter(map.getWorldBorderCenterX(), map.getWorldBorderCenterZ() + zOffset);
-            l.getWorldBorder().setSize(map.getWorldBorderSize());
-        } else {
-            l.getWorldBorder().setSize(6.0E7);
-        }
+        l.getWorldBorder().setCenter(map.getWorldBorderCenterX(), map.getWorldBorderCenterZ() + zOffset);
+        l.getWorldBorder().setSize(3.0E7);
     }
 
     private void gamerule(ServerLevel l, String rule, String val) {
@@ -552,7 +556,7 @@ public class GameManager {
     }
 
     public void teleportAllPlayersToMap(MapConfig map, int zOffset) {
-        teleportAllPlayersToMap(map, zOffset, isSwapped());
+        teleportAllPlayersToMap(map, zOffset, false);
     }
 
     public void teleportAllPlayersToMap(MapConfig map, int zOffset, boolean swapped) {
@@ -563,7 +567,9 @@ public class GameManager {
             if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == Team.SPECTATOR) continue;
             Team team = tm.getOrCreatePlayerData(p.getUUID()).getTeam();
             Team spawnTeam = swapped ? (team == Team.NATO ? Team.RUSSIA : Team.NATO) : team;
-            double x = 0.5, y = 65, z = 0.5 + zOffset;
+            double x = map.getWorldBorderCenterX() + 0.5;
+            double y = 65;
+            double z = map.getWorldBorderCenterZ() + 0.5 + zOffset;
             if (map.hasTeamSpawns()) {
                 int[] spawn = spawnTeam == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
                 if (spawn != null && spawn.length >= 3) {
@@ -608,7 +614,9 @@ public class GameManager {
         Team spawnTeam = swapped ? (team == Team.NATO ? Team.RUSSIA : Team.NATO) : team;
         ServerLevel target = getMapWorld(currentMap);
         if (target == null) return;
-        double x = 0.5, y = 65, z = 0.5 + zOffset;
+        double x = currentMap.getWorldBorderCenterX() + 0.5;
+        double y = 65;
+        double z = currentMap.getWorldBorderCenterZ() + 0.5 + zOffset;
         if (currentMap.hasTeamSpawns()) {
             int[] spawn = spawnTeam == Team.NATO ? currentMap.getNatoSpawn() : currentMap.getRussiaSpawn();
             if (spawn != null && spawn.length >= 3) {
@@ -626,7 +634,9 @@ public class GameManager {
         Team spawnTeam = swapped ? (team == Team.NATO ? Team.RUSSIA : Team.NATO) : team;
         ServerLevel target = getMapWorld(currentMap);
         if (target == null) return;
-        int x = 0, y = 65, z = zOffset;
+        int x = currentMap.getWorldBorderCenterX();
+        int y = 65;
+        int z = currentMap.getWorldBorderCenterZ() + zOffset;
         if (currentMap.hasTeamSpawns()) {
             int[] spawn = spawnTeam == Team.NATO ? currentMap.getNatoSpawn() : currentMap.getRussiaSpawn();
             if (spawn != null && spawn.length >= 3) {

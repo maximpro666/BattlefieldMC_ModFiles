@@ -22,7 +22,6 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -200,6 +199,7 @@ public class MapPoolManager {
                         config.setTickets(100);
                         config.setLobbyWaitTime(30);
                         config.setState(MapState.AVAILABLE);
+                        autoDetectMapCenter(config);
                         found.add(config);
                     }
                 });
@@ -254,19 +254,36 @@ public class MapPoolManager {
             mapLevel.getPlayers(p -> true).forEach(p ->
                 teleportToLobby(p));
 
+            // Закрываем кеш region-файлов до save, чтобы save не открыл их снова
+            closeRegionFileCache(mapLevel);
+            forceGC();
+
             mapLevel.save(null, true, false);
 
-            // Закрываем все открытые RegionFile до удаления — иначе на Windows файлы заблокированы
+            // Повторно закрываем — save мог открыть файлы
             closeRegionFileCache(mapLevel);
+            forceGC();
 
             Path dimDir = getMapRegionDir().getParent();
-            if (Files.isDirectory(dimDir)) {
-                deleteDirectory(dimDir);
-            }
-            Files.createDirectories(dimDir);
-            copyDirectory(sourceDir, dimDir);
+            Path regionDir = dimDir.resolve("region");
 
+            TeamSystem.LOGGER.info("CopyToLive: source={}, target={}", sourceDir.resolve("region"), regionDir);
+
+            // Удаляем только регионы, data/ не трогаем
+            if (Files.isDirectory(regionDir)) {
+                deleteWithRetry(regionDir);
+            }
+            Files.createDirectories(regionDir);
+            copyRegionFiles(sourceDir.resolve("region"), regionDir);
+
+            // Тикаем chunk source чтобы выгрузить старые чанки
+            for (int i = 0; i < 20; i++) {
+                mapLevel.getChunkSource().tick(() -> true, true);
+            }
             clearChunkCache(mapLevel);
+            forceGC();
+
+            Files.createDirectories(dimDir.resolve("data"));
 
             saveConfig();
 
@@ -276,6 +293,16 @@ public class MapPoolManager {
             TeamSystem.LOGGER.error("Failed to deploy map {}: {}", map.getName(), e.getMessage());
             return false;
         }
+    }
+
+    private static void forceGC() {
+        try {
+            System.gc();
+            System.runFinalization();
+            Thread.sleep(300);
+            System.gc();
+            System.runFinalization();
+        } catch (InterruptedException ignored) {}
     }
 
     public boolean deleteLive(MapConfig map) {
@@ -448,15 +475,135 @@ public class MapPoolManager {
     }
 
 
-    private void copyDirectory(Path src, Path dst) throws IOException {
-        Files.createDirectories(dst);
-        try (var stream = Files.walk(src)) {
+    private void copyRegionFiles(Path srcDir, Path dstDir) throws IOException {
+        Files.createDirectories(dstDir);
+        try (var stream = Files.list(srcDir)) {
             for (Path source : (Iterable<Path>) stream::iterator) {
-                Path target = dst.resolve(src.relativize(source));
-                if (Files.isDirectory(source)) {
-                    Files.createDirectories(target);
-                } else {
-                    Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+                if (Files.isDirectory(source)) continue;
+                String fileName = source.getFileName().toString();
+                if (!fileName.endsWith(".mca")) continue;
+                Path target = dstDir.resolve(fileName);
+                copyFileForce(source, target);
+            }
+        }
+    }
+
+    private void copyFileForce(Path source, Path target) throws IOException {
+        byte[] data = Files.readAllBytes(source);
+        for (int attempt = 0; attempt < 10; attempt++) {
+            try {
+                Files.write(target, data, java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.TRUNCATE_EXISTING,
+                    java.nio.file.StandardOpenOption.WRITE);
+                return;
+            } catch (IOException e) {
+                if (attempt == 5) {
+                    try {
+                        try (var ch = java.nio.channels.FileChannel.open(target,
+                                java.nio.file.StandardOpenOption.WRITE,
+                                java.nio.file.StandardOpenOption.TRUNCATE_EXISTING,
+                                java.nio.file.StandardOpenOption.CREATE)) {
+                            ch.write(java.nio.ByteBuffer.wrap(data));
+                            return;
+                        }
+                    } catch (Exception e2) {
+                        if (attempt == 9) throw e2;
+                    }
+                }
+                try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+            }
+        }
+    }
+
+    private void autoDetectMapCenter(MapConfig map) {
+        String folderName = map.getWorldFolder();
+        if (folderName == null || folderName.isEmpty()) return;
+        Path sourceRegionDir = getSourcesPath().resolve(folderName).resolve("region");
+        if (!Files.isDirectory(sourceRegionDir)) return;
+
+        try {
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("^r\\.(-?\\d+)\\.(-?\\d+)\\.mca$");
+            java.util.List<Integer> xs = new java.util.ArrayList<>();
+            java.util.List<Integer> zs = new java.util.ArrayList<>();
+
+            try (var stream = java.nio.file.Files.list(sourceRegionDir)) {
+                stream.forEach(path -> {
+                    String name = path.getFileName().toString();
+                    var m = pattern.matcher(name);
+                    if (m.matches()) {
+                        xs.add(Integer.parseInt(m.group(1)));
+                        zs.add(Integer.parseInt(m.group(2)));
+                    }
+                });
+            }
+
+            if (xs.isEmpty()) return;
+
+            xs.sort(null);
+            zs.sort(null);
+            int medianX = xs.get(xs.size() / 2);
+            int medianZ = zs.get(zs.size() / 2);
+
+            int centerX = medianX * 512 + 256;
+            int centerZ = medianZ * 512 + 256;
+
+            map.setWorldBorderCenterX(centerX);
+            map.setWorldBorderCenterZ(centerZ);
+            map.setNatoSpawn(new int[]{centerX, 64, centerZ});
+            map.setRussiaSpawn(new int[]{centerX, 64, centerZ});
+
+            TeamSystem.LOGGER.info("Auto-detected map center for {} at ({}, {}), spawn set to y=64",
+                map.getName(), centerX, centerZ);
+        } catch (Exception e) {
+            TeamSystem.LOGGER.warn("Failed to auto-detect map center: {}", e.getMessage());
+        }
+    }
+
+    private void deleteWithRetry(Path dir) throws IOException {
+        if (!Files.isDirectory(dir)) return;
+        java.util.List<Path> failed = new java.util.ArrayList<>();
+        try (var stream = Files.walk(dir)) {
+            stream.sorted(java.util.Comparator.reverseOrder()).forEach(path -> {
+                for (int attempt = 0; attempt < 10; attempt++) {
+                    try {
+                        Files.deleteIfExists(path);
+                        failed.remove(path);
+                        break;
+                    } catch (java.nio.file.FileSystemException e) {
+                        if (attempt == 0) failed.add(path);
+                        // Попытка обнулить файл через FileChannel чтобы разорвать memory-mapping
+                        if (attempt == 5 && !Files.isDirectory(path)) {
+                            try {
+                                try (var ch = java.nio.channels.FileChannel.open(path,
+                                        java.nio.file.StandardOpenOption.WRITE,
+                                        java.nio.file.StandardOpenOption.TRUNCATE_EXISTING)) {
+                                    ch.write(java.nio.ByteBuffer.allocate(0));
+                                }
+                            } catch (Exception ignored) {}
+                        }
+                        try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+                    } catch (IOException e) {
+                        break;
+                    }
+                }
+            });
+        }
+        if (!failed.isEmpty()) {
+            TeamSystem.LOGGER.warn("Could not delete {} files in {} (Windows lock after retry + truncation)", failed.size(), dir);
+            for (Path p : failed) {
+                TeamSystem.LOGGER.warn("  Locked: {}", p);
+            }
+        }
+        // Если директория опустела — удаляем её
+        try (var remaining = Files.list(dir)) {
+            if (!remaining.findAny().isPresent()) {
+                for (int attempt = 0; attempt < 5; attempt++) {
+                    try {
+                        Files.deleteIfExists(dir);
+                        break;
+                    } catch (java.nio.file.FileSystemException e) {
+                        try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+                    }
                 }
             }
         }

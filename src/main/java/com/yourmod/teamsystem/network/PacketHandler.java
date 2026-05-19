@@ -229,5 +229,36 @@ public class PacketHandler {
             .encoder(KitAdminRequestPacket::toBytes)
             .consumerMainThread(KitAdminRequestPacket::handle)
             .add();
+
+        // ===== Spawn System Packets =====
+        CHANNEL.messageBuilder(RespawnBeaconSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(RespawnBeaconSyncPacket::new)
+            .encoder(RespawnBeaconSyncPacket::toBytes)
+            .consumerMainThread(RespawnBeaconSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(SquadmateStatusSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(SquadmateStatusSyncPacket::new)
+            .encoder(SquadmateStatusSyncPacket::toBytes)
+            .consumerMainThread(SquadmateStatusSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(OpenSpawnSelectionScreenPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(OpenSpawnSelectionScreenPacket::new)
+            .encoder(OpenSpawnSelectionScreenPacket::toBytes)
+            .consumerMainThread(OpenSpawnSelectionScreenPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(CloseSpawnScreenPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(CloseSpawnScreenPacket::new)
+            .encoder(CloseSpawnScreenPacket::toBytes)
+            .consumerMainThread(CloseSpawnScreenPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(RespawnAtPointPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(RespawnAtPointPacket::new)
+            .encoder(RespawnAtPointPacket::toBytes)
+            .consumerMainThread(RespawnAtPointPacket::handle)
+            .add();
     }
 }

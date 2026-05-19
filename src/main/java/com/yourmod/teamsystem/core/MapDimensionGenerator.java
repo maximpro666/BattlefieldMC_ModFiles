@@ -15,11 +15,12 @@ public class MapDimensionGenerator {
         {
           "type": "minecraft:overworld",
           "generator": {
-            "type": "minecraft:noise",
-            "settings": "minecraft:overworld",
-            "biome_source": {
-              "type": "minecraft:multi_noise",
-              "preset": "minecraft:overworld"
+            "type": "minecraft:flat",
+            "settings": {
+              "biome": "minecraft:the_void",
+              "layers": [],
+              "features": false,
+              "structure_overrides": []
             }
           }
         }

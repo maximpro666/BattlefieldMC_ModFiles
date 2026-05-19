@@ -70,13 +70,23 @@ public class MapOffsetManager {
                 int chunkShift = i * CHUNK_SHIFT;
 
                 try (var files = Files.list(sourceRegionDir)) {
-                    files.filter(f -> f.toString().endsWith(".mca")).forEach(srcPath -> {
+                    java.util.List<java.nio.file.Path> mcaFiles = files
+                        .filter(f -> f.toString().endsWith(".mca"))
+                        .collect(java.util.stream.Collectors.toList());
+                    TeamSystem.LOGGER.info("Preloading {} ({} region files, zOffset={})...",
+                        map.getName(), mcaFiles.size(), i * MAP_STRIDE);
+                    int processed = 0;
+                    for (var srcPath : mcaFiles) {
                         try {
                             rewriteRegionFile(srcPath, destDir, chunkShift);
+                            processed++;
+                            if (processed % 10 == 0 || processed == mcaFiles.size()) {
+                                TeamSystem.LOGGER.info("  [{}/{}] {} preloaded", processed, mcaFiles.size(), map.getName());
+                            }
                         } catch (Exception e) {
                             TeamSystem.LOGGER.error("Failed to process {}: {}", srcPath.getFileName(), e.getMessage());
                         }
-                    });
+                    }
                     loaded++;
                 } catch (IOException e) {
                     TeamSystem.LOGGER.error("Failed to scan {}: {}", map.getName(), e.getMessage());

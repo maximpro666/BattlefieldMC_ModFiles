@@ -45,6 +45,8 @@ public class TeamSystemConfig {
     private boolean teamBalancing = true;
     private int maxTeamDifference = 1;
     private int maxFOBsPerTeam = 3;
+    private int fobCostSP = 100;
+    private boolean beaconsEnabled = false;
 
     private Map<String, String> messages = new LinkedHashMap<>();
 
@@ -91,6 +93,8 @@ public class TeamSystemConfig {
     public boolean isTeamBalancing() { return teamBalancing; }
     public int getMaxTeamDifference() { return maxTeamDifference; }
     public int getMaxFOBsPerTeam() { return maxFOBsPerTeam; }
+    public int getFOBCost() { return fobCostSP; }
+    public boolean isBeaconsEnabled() { return beaconsEnabled; }
 
     public String getMessage(String key) { return translateColors(messages.getOrDefault(key, "&f" + key)); }
     public String getMessage(String key, Map<String, String> placeholders) {

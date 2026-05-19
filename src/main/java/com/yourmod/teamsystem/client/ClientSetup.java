@@ -6,6 +6,7 @@ import com.yourmod.teamsystem.client.gui.renderer.CaptureParticles;
 import com.yourmod.teamsystem.client.gui.renderer.CustomNametagRenderer;
 import com.yourmod.teamsystem.client.gui.renderer.WorldMarkerRenderer;
 import com.yourmod.teamsystem.client.gui.screen.KitSelectionScreen;
+import com.yourmod.teamsystem.client.xaero.XaeroIntegration;
 import com.yourmod.teamsystem.core.GameManager;
 import net.minecraft.client.Camera;
 import java.util.List;
@@ -22,6 +23,7 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import org.lwjgl.glfw.GLFW;
 
 @Mod.EventBusSubscriber(modid = "teamsystem", bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
@@ -41,6 +43,11 @@ public class ClientSetup {
         @SubscribeEvent
         public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
             event.register(OPEN_KIT_VEHICLE_KEY);
+        }
+
+        @SubscribeEvent
+        public static void onClientSetup(FMLClientSetupEvent event) {
+            XaeroIntegration.init();
         }
     }
 

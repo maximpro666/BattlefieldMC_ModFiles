@@ -1,16 +1,8 @@
 package com.yourmod.teamsystem.events;
 
 import com.yourmod.teamsystem.TeamSystem;
-import com.yourmod.teamsystem.core.ContributionManager;
-import com.yourmod.teamsystem.core.EconomyManager;
-import com.yourmod.teamsystem.core.GameManager;
-import com.yourmod.teamsystem.core.MapConfig;
-import com.yourmod.teamsystem.core.Rank;
-import com.yourmod.teamsystem.core.Team;
-import com.yourmod.teamsystem.core.TeamManager;
-import com.yourmod.teamsystem.core.TeamSystemConfig;
-import com.yourmod.teamsystem.core.TicketManager;
-import com.yourmod.teamsystem.core.VehicleManager;
+import com.yourmod.teamsystem.core.*;
+import com.yourmod.teamsystem.network.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
@@ -19,11 +11,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.lang.reflect.Method;
 import java.nio.file.Files;
@@ -41,6 +35,11 @@ import java.util.UUID;
 
 public class CombatEventHandler {
     private final TeamManager teamManager;
+    private static net.minecraft.server.MinecraftServer serverInstance;
+
+    public static void setServer(net.minecraft.server.MinecraftServer server) {
+        serverInstance = server;
+    }
 
     // Dedup kill credit across both handlers within the same tick
     private final Set<String> killsThisTick = new HashSet<>();
@@ -202,8 +201,11 @@ public class CombatEventHandler {
                 TeamSystem.LOGGER.debug("Blocked friendly fire from {} to {}",
                     attacker.getName().getString(),
                     victim.getName().getString());
+                return;
             }
         }
+
+        SquadmateRespawnCooldownManager.onPlayerAttacked(victim);
     }
 
     @SubscribeEvent
@@ -312,19 +314,67 @@ public class CombatEventHandler {
             player.setHealth(player.getMaxHealth());
             return;
         }
-        MapConfig map = game.getCurrentMap();
-        if (map == null) {
-            player.setHealth(player.getMaxHealth());
-            return;
-        }
         Team team = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
         player.setHealth(player.getMaxHealth());
-        if (team != null && team.isPlayable()) {
-            game.teleportPlayerToMapAtTeamSpawn(player, team);
-            game.setMapRespawn(player, team);
-        } else {
-            game.teleportPlayerToLobby(player);
+        player.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+
+        game.teleportPlayerToLobby(player);
+        openSpawnSelectionScreen(player, team);
+    }
+
+    private void openSpawnSelectionScreen(ServerPlayer player, Team team) {
+        if (serverInstance == null) return;
+        GameManager game = TeamSystem.getGameManager();
+        if (game == null || !game.isPlaying()) return;
+
+        List<OpenSpawnSelectionScreenPacket.SquadmateInfo> squadmates = new java.util.ArrayList<>();
+        SquadManager squadManager = TeamSystem.getSquadManager();
+        if (squadManager != null) {
+            Squad squad = squadManager.getPlayerSquad(player.getUUID());
+            if (squad != null) {
+                for (UUID memberId : squad.getMembers()) {
+                    if (memberId.equals(player.getUUID())) continue;
+                    ServerPlayer member = serverInstance.getPlayerList().getPlayer(memberId);
+                    if (member == null) continue;
+                    String callsign = teamManager.getOrCreatePlayerData(memberId).getCallsign();
+                    int memberTeam = teamManager.getOrCreatePlayerData(memberId).getTeam().ordinal();
+                    int cd = SquadmateRespawnCooldownManager.getSquadmateCooldownTicks(
+                            member.serverLevel(), memberId);
+                    squadmates.add(new OpenSpawnSelectionScreenPacket.SquadmateInfo(
+                            memberId, callsign, memberTeam, cd));
+                }
+            }
         }
+
+        List<com.yourmod.teamsystem.client.FOBData> fobList = new java.util.ArrayList<>();
+        FOBManager fobManager = TeamSystem.getFOBManager();
+        if (fobManager != null && team != null && team.isPlayable()) {
+            for (FOBManager.SavedFOB fob : fobManager.getFOBs()) {
+                if (fob.teamOrdinal == team.ordinal()) {
+                    fobList.add(new com.yourmod.teamsystem.client.FOBData(
+                            fob.fobId, fob.name, fob.x, fob.y, fob.z,
+                            fob.dimension, fob.teamOrdinal, fob.health));
+                }
+            }
+        }
+
+        List<OpenSpawnSelectionScreenPacket.BeaconInfo> beacons = new java.util.ArrayList<>();
+        RespawnManager respawnManager = TeamSystem.getRespawnManager();
+        if (respawnManager != null) {
+            for (RespawnManager.SavedBeacon b : respawnManager.getBeaconsInDimension(
+                    player.serverLevel().dimension().location().toString())) {
+                if (java.util.Objects.equals(b.uuid, player.getUUID().toString())) {
+                    beacons.add(new OpenSpawnSelectionScreenPacket.BeaconInfo(
+                            b.name, b.x, b.y, b.z, b.teamOrdinal));
+                }
+            }
+        }
+
+        int teamOrd = team != null ? team.ordinal() : 2;
+
+        PacketHandler.CHANNEL.send(
+                net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
+                new OpenSpawnSelectionScreenPacket(squadmates, fobList, beacons, teamOrd, ""));
     }
 
     @SubscribeEvent
@@ -386,6 +436,32 @@ public class CombatEventHandler {
         event.getExplosion().clearToBlow();
         for (net.minecraft.core.BlockPos pos : blocks) {
             level.destroyBlock(pos, false);
+        }
+    }
+
+    private int squadmateSyncTickCounter = 0;
+
+    @SubscribeEvent
+    public void onServerTick(ServerTickEvent event) {
+        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
+        squadmateSyncTickCounter++;
+        if (squadmateSyncTickCounter < 40) return;
+        squadmateSyncTickCounter = 0;
+
+        if (serverInstance == null) return;
+
+        List<SquadmateStatusSyncPacket.SyncEntry> entries = new java.util.ArrayList<>();
+        for (ServerPlayer player : serverInstance.getPlayerList().getPlayers()) {
+            int cd = SquadmateRespawnCooldownManager.getSquadmateCooldownTicks(
+                    player.serverLevel(), player.getUUID());
+            if (cd > 0) {
+                entries.add(new SquadmateStatusSyncPacket.SyncEntry(player.getUUID(), cd));
+            }
+        }
+        if (!entries.isEmpty()) {
+            PacketHandler.CHANNEL.send(
+                    PacketDistributor.ALL.noArg(),
+                    new SquadmateStatusSyncPacket(entries));
         }
     }
 }

@@ -56,6 +56,9 @@ public class RespawnManager {
     public void reloadConfig() { this.config = RespawnConfig.load(server); }
 
     public String placeBeacon(ServerPlayer player, String name) {
+        if (!TeamSystem.getConfig().isBeaconsEnabled()) {
+            return "Respawn beacons are not available on this server";
+        }
         UUID uuid = player.getUUID();
         BlockPos pos = player.blockPosition();
 

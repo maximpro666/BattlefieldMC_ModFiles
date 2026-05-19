@@ -134,8 +134,96 @@ Adding Libraries to Inheritance
 Reading Input: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\libs\teamsystem-1.0.0.jar
 Adding input to inheritance map
 Processing entries
-Conflicting propagated mapping for net/minecraft/world/entity/LivingEntity/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V from net/minecraft/world/entity/player/Player/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V: lambda$addAdditionalSaveData$3 -> m_219754_
+Conflicting propagated mapping for com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity/getUpdateTag()Lnet/minecraft/nbt/CompoundTag; from net/minecraft/world/level/block/entity/BlockEntity/getUpdateTag()Lnet/minecraft/nbt/CompoundTag;: getUpdateTag -> m_5995_
+Conflicting propagated mapping for com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity/load(Lnet/minecraft/nbt/CompoundTag;)V from net/minecraft/world/level/block/entity/BlockEntity/load(Lnet/minecraft/nbt/CompoundTag;)V: load -> m_142466_
+Conflicting propagated mapping for com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity/saveAdditional(Lnet/minecraft/nbt/CompoundTag;)V from net/minecraft/world/level/block/entity/BlockEntity/saveAdditional(Lnet/minecraft/nbt/CompoundTag;)V: saveAdditional -> m_183515_
+Conflicting propagated mapping for com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity/getUpdatePacket()Lnet/minecraft/network/protocol/Packet; from net/minecraft/world/level/block/entity/BlockEntity/getUpdatePacket()Lnet/minecraft/network/protocol/Packet;: getUpdatePacket -> m_58483_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BButton/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractButton/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BButton/onPress()V from net/minecraft/client/gui/components/Button/onPress()V: onPress -> m_5691_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BButton/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V from net/minecraft/client/gui/components/AbstractWidget/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V: playDownSound -> m_7435_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BSlider/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BSlider/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BSlider/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BSlider/onDrag(DDDD)V from net/minecraft/client/gui/components/AbstractWidget/onDrag(DDDD)V: onDrag -> m_7212_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BSlider/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V from net/minecraft/client/gui/components/AbstractWidget/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V: playDownSound -> m_7435_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldMainMenuScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldMainMenuScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldMainMenuScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/charTyped(CI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/charTyped(CI)Z: charTyped -> m_5534_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldPauseScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldPauseScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldPauseScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SettingsMenuScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SettingsMenuScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SettingsMenuScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SquadScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SquadScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SquadScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/TeamSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/TeamSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/TeamSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
 Conflicting propagated mapping for net/minecraft/client/gui/screens/OptionsScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
+Conflicting propagated mapping for net/minecraft/world/entity/LivingEntity/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V from net/minecraft/world/entity/player/Player/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V: lambda$addAdditionalSaveData$3 -> m_219754_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VoteScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VoteScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VoteScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VoteScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BCard/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BCard/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BCard/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BDropdown/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BDropdown/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BDropdown/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/yourmod/teamsystem/core/TeamManager/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag; from net/minecraft/world/level/saveddata/SavedData/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;: save -> m_7176_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BLockOverlay/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BLockOverlay/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BNumberInput/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BNumberInput/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BNumberInput/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BTag/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BToggle/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BTag/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BToggle/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BToggle/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/onRemove(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V from net/minecraft/world/level/block/state/BlockBehaviour/onRemove(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V: onRemove -> m_6810_
+Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/newBlockEntity(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/entity/BlockEntity; from net/minecraft/world/level/block/EntityBlock/newBlockEntity(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/entity/BlockEntity;: newBlockEntity -> m_142194_
+Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/getRenderShape(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/RenderShape; from net/minecraft/world/level/block/BaseEntityBlock/getRenderShape(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/RenderShape;: getRenderShape -> m_7514_
+Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/use(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult; from net/minecraft/world/level/block/state/BlockBehaviour/use(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;: use -> m_6227_
 Adding extras
 Sorting
 Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reobfJar\output.jar
@@ -184,6 +272,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/client/ClientSetup$ClientModBus.class
   com/yourmod/teamsystem/client/ClientSetup.class
   com/yourmod/teamsystem/client/ClientSoundHandler.class
+  com/yourmod/teamsystem/client/ClientTeamData$ClientBeaconData.class
   com/yourmod/teamsystem/client/ClientTeamData.class
   com/yourmod/teamsystem/client/ClientVoiceHandler.class
   com/yourmod/teamsystem/client/FOBData.class
@@ -232,6 +321,11 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen.class
   com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen.class
   com/yourmod/teamsystem/client/gui/screen/SettingsMenuScreen.class
+  com/yourmod/teamsystem/client/gui/screen/SpawnScreenHelper.class
+  com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen$1.class
+  com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen$SpawnCard.class
+  com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen$SpawnType.class
+  com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen.class
   com/yourmod/teamsystem/client/gui/screen/SquadScreen.class
   com/yourmod/teamsystem/client/gui/screen/TeamSelectionScreen.class
   com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen.class
@@ -244,6 +338,8 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/client/gui/widget/BWidgets$BTag.class
   com/yourmod/teamsystem/client/gui/widget/BWidgets$BToggle.class
   com/yourmod/teamsystem/client/gui/widget/BWidgets.class
+  com/yourmod/teamsystem/client/xaero/
+  com/yourmod/teamsystem/client/xaero/XaeroIntegration.class
   com/yourmod/teamsystem/commands/
   com/yourmod/teamsystem/commands/AdminCommand.class
   com/yourmod/teamsystem/commands/AdminNotifyCommand.class
@@ -268,6 +364,8 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/commands/TeamCommand.class
   com/yourmod/teamsystem/commands/VehicleCommand.class
   com/yourmod/teamsystem/core/
+  com/yourmod/teamsystem/core/BorderManager.class
+  com/yourmod/teamsystem/core/BorderZone.class
   com/yourmod/teamsystem/core/CaptureParticleManager.class
   com/yourmod/teamsystem/core/CapturePointManager.class
   com/yourmod/teamsystem/core/ChatHelper.class
@@ -306,6 +404,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/core/Squad.class
   com/yourmod/teamsystem/core/SquadManager$Invitation.class
   com/yourmod/teamsystem/core/SquadManager.class
+  com/yourmod/teamsystem/core/SquadmateRespawnCooldownManager.class
   com/yourmod/teamsystem/core/Team.class
   com/yourmod/teamsystem/core/TeamManager.class
   com/yourmod/teamsystem/core/TeamSystemColors.class
@@ -334,6 +433,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/network/
   com/yourmod/teamsystem/network/BCSyncPacket.class
   com/yourmod/teamsystem/network/CapturePointSyncPacket.class
+  com/yourmod/teamsystem/network/CloseSpawnScreenPacket.class
   com/yourmod/teamsystem/network/CombatDataSyncPacket.class
   com/yourmod/teamsystem/network/ConfigSyncPacket.class
   com/yourmod/teamsystem/network/FOBPlacePacket.class
@@ -351,13 +451,21 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/yourmod/teamsystem/network/NotificationPacket.class
   com/yourmod/teamsystem/network/OpenAdminPanelPacket.class
   com/yourmod/teamsystem/network/OpenLoadoutScreenPacket.class
+  com/yourmod/teamsystem/network/OpenSpawnSelectionScreenPacket$BeaconInfo.class
+  com/yourmod/teamsystem/network/OpenSpawnSelectionScreenPacket$SquadmateInfo.class
+  com/yourmod/teamsystem/network/OpenSpawnSelectionScreenPacket.class
   com/yourmod/teamsystem/network/OpenTeamSelectionScreenPacket.class
   com/yourmod/teamsystem/network/PacketHandler.class
   com/yourmod/teamsystem/network/RankSyncPacket.class
+  com/yourmod/teamsystem/network/RespawnAtPointPacket.class
+  com/yourmod/teamsystem/network/RespawnBeaconSyncPacket$BeaconData.class
+  com/yourmod/teamsystem/network/RespawnBeaconSyncPacket.class
   com/yourmod/teamsystem/network/SPSyncPacket.class
   com/yourmod/teamsystem/network/SoundPacket.class
   com/yourmod/teamsystem/network/SquadActionPacket.class
   com/yourmod/teamsystem/network/SquadSyncPacket.class
+  com/yourmod/teamsystem/network/SquadmateStatusSyncPacket$SyncEntry.class
+  com/yourmod/teamsystem/network/SquadmateStatusSyncPacket.class
   com/yourmod/teamsystem/network/TeamChangeRequestPacket.class
   com/yourmod/teamsystem/network/TeamSelectPacket.class
   com/yourmod/teamsystem/network/TeamSyncPacket.class

@@ -1,0 +1,16 @@
+[
+  {
+    "name": "noviy_mir",
+    "worldFolder": "noviy_mir",
+    "enabled": true,
+    "hasRespawn": true,
+    "hasCapturePoints": true,
+    "hasRegen": true,
+    "hasWorldBorder": true,
+    "worldBorderCenterX": 0,
+    "worldBorderCenterZ": 0,
+    "worldBorderSize": 1000,
+    "tickets": 100,
+    "lobbyWaitTime": 30
+  }
+]

@@ -104,19 +104,9 @@ public class TeamSystem {
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
+        CombatEventHandler.setServer(event.getServer());
         MapPoolManager temp = new MapPoolManager(event.getServer());
         temp.loadConfig();
-        java.util.List<MapConfig> maps = temp.getMaps();
-        MinecraftServer server = event.getServer();
-        Thread preloader = new Thread(() -> {
-            try {
-                MapOffsetManager.preloadAllMaps(server, maps);
-            } catch (Exception e) {
-                LOGGER.error("Map preload failed: {}", e.getMessage());
-            }
-        }, "MapPreloader");
-        preloader.setDaemon(true);
-        preloader.start();
     }
 
     @SubscribeEvent

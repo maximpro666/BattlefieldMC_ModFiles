@@ -48,20 +48,20 @@ public class FOBManager {
         load();
     }
 
-    public boolean canPlaceFOB(ServerPlayer player) {
+    public String canPlaceFOB(ServerPlayer player) {
         UUID uuid = player.getUUID();
         Team team = TeamSystem.getTeamManager().getOrCreatePlayerData(uuid).getTeam();
-        if (!team.isPlayable()) return false;
+        if (!team.isPlayable()) return "§cYou must be on a team";
 
         Squad squad = TeamSystem.getSquadManager().getPlayerSquad(uuid);
-        if (squad == null || !squad.isLeader(uuid)) return false;
+        if (squad == null || !squad.isLeader(uuid)) return "§cOnly squad leaders can place FOBs";
 
-        int maxFOBs = TeamSystem.getConfig().getMaxFOBsPerTeam();
+        int maxFOBs = getMaxFOBsForCurrentMap();
         long teamCount = fobs.stream().filter(f -> f.teamOrdinal == team.ordinal()).count();
-        if (teamCount >= maxFOBs) return false;
+        if (teamCount >= maxFOBs) return "§cTeam FOB limit reached (" + maxFOBs + ")";
 
         BlockPos pos = player.blockPosition();
-        return validatePosition(player.serverLevel(), pos, team.ordinal()) == null;
+        return validatePosition(player.serverLevel(), pos, team.ordinal());
     }
 
     public String placeFOB(ServerPlayer player, String name) {
@@ -72,13 +72,37 @@ public class FOBManager {
         Squad squad = TeamSystem.getSquadManager().getPlayerSquad(uuid);
         if (squad == null || !squad.isLeader(uuid)) return "§cOnly squad leaders can place FOBs";
 
-        int maxFOBs = TeamSystem.getConfig().getMaxFOBsPerTeam();
+        int maxFOBs = getMaxFOBsForCurrentMap();
         long teamCount = fobs.stream().filter(f -> f.teamOrdinal == team.ordinal()).count();
         if (teamCount >= maxFOBs) return "§cTeam FOB limit reached (" + maxFOBs + ")";
 
         BlockPos pos = player.blockPosition();
         String validation = validatePosition(player.serverLevel(), pos, team.ordinal());
         if (validation != null) return validation;
+
+        // Check economy cost
+        int fobCost = TeamSystem.getConfig().getFOBCost();
+        EconomyManager econ = TeamSystem.getEconomyManager();
+        if (fobCost > 0 && econ != null && econ.getSP(uuid) < fobCost) {
+            return "§cNot enough SP! FOB costs " + fobCost + " SP";
+        }
+
+        // If squad leader already has a FOB — remove old one first (move)
+        SavedFOB existing = fobs.stream()
+            .filter(f -> f.ownerUUID.equals(uuid.toString()))
+            .findFirst().orElse(null);
+        if (existing != null) {
+            removeFOBBlock(existing);
+            fobs.remove(existing);
+            broadcastToTeam(team, "§e[FOB] §f" + existing.name + " §eremoved by §f" + player.getName().getString());
+        }
+
+        // Deduct cost (refund half if moving)
+        if (fobCost > 0 && econ != null) {
+            int cost = existing != null ? fobCost / 2 : fobCost;
+            econ.addSP(uuid, -cost);
+            econ.syncAll(player);
+        }
 
         SavedFOB fob = new SavedFOB();
         fob.fobId = nextFobId++;
@@ -98,7 +122,8 @@ public class FOBManager {
         // Place beacon block as visual
         player.serverLevel().setBlock(pos, TeamSystem.RESPAWN_BEACON_BLOCK.get().defaultBlockState(), 3);
 
-        broadcastToTeam(team, "§a[FOB] §f" + name + " §aplaced by §f" + player.getName().getString());
+        String action = existing != null ? "moved" : "placed";
+        broadcastToTeam(team, "§a[FOB] §f" + name + " §a" + action + " by §f" + player.getName().getString());
         syncAll();
         return null;
     }
@@ -148,6 +173,17 @@ public class FOBManager {
         return null;
     }
 
+    private int getMaxFOBsForCurrentMap() {
+        GameManager game = TeamSystem.getGameManager();
+        if (game != null) {
+            MapConfig map = game.getCurrentMap();
+            if (map != null && map.getMaxFOBs() > 0) {
+                return map.getMaxFOBs();
+            }
+        }
+        return TeamSystem.getConfig().getMaxFOBsPerTeam();
+    }
+
     public boolean damageFOB(int fobId, float damage) {
         SavedFOB fob = getFOBById(fobId);
         if (fob == null) return false;
@@ -194,6 +230,10 @@ public class FOBManager {
                 level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             }
         }
+    }
+
+    public List<SavedFOB> getFOBs() {
+        return new ArrayList<>(fobs);
     }
 
     public List<SavedFOB> getFOBsForTeam(Team team) {

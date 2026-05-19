@@ -6,6 +6,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MapConfig {
@@ -29,9 +30,19 @@ public class MapConfig {
     private MapState state;
     private List<CapturePointEntry> capturePoints;
     private boolean teamRotation;
+    private int maxFOBs = -1;
+    private List<BorderZone> borderZones;
 
     public boolean isTeamRotation() { return teamRotation; }
     public void setTeamRotation(boolean v) { this.teamRotation = v; }
+    public int getMaxFOBs() { return maxFOBs; }
+    public void setMaxFOBs(int v) { maxFOBs = v; }
+
+    public List<BorderZone> getBorderZones() {
+        return borderZones != null ? borderZones : Collections.emptyList();
+    }
+    public void setBorderZones(List<BorderZone> zones) { this.borderZones = zones; }
+    public boolean hasBorderZones() { return borderZones != null && !borderZones.isEmpty(); }
 
     public static class CapturePointEntry {
         public String name;
@@ -216,6 +227,7 @@ public class MapConfig {
         tag.putInt("BaseRadius", baseRadius);
         tag.putString("State", state.name());
         tag.putBoolean("TeamRotation", teamRotation);
+        if (maxFOBs > 0) tag.putInt("MaxFOBs", maxFOBs);
         if (capturePoints != null && !capturePoints.isEmpty()) {
             var mainPoint = capturePoints.stream().filter(cp -> cp.main).findFirst();
             tag.putBoolean("HasMainPoint", mainPoint.isPresent());
@@ -255,6 +267,7 @@ public class MapConfig {
         config.baseRadius = tag.getInt("BaseRadius");
         config.state = MapState.valueOf(tag.getString("State"));
         config.teamRotation = tag.getBoolean("TeamRotation");
+        if (tag.contains("MaxFOBs")) config.maxFOBs = tag.getInt("MaxFOBs");
         return config;
     }
 

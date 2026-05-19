@@ -76,10 +76,17 @@ public class TeamManager extends SavedData {
         }
 
         boolean russian = "ru".equals(TeamSystem.getConfig().getLanguage());
-        Rank rank = Rank.fromOrdinal(data.getRankOrdinal());
-        String rankPrefix = rank.getPrefix(russian);
         String callsign = data.getCallsign();
         String actualName = player.getName().getString();
+
+        String rankPrefix = "";
+        try {
+            Rank rank = Rank.fromOrdinal(data.getRankOrdinal());
+            rankPrefix = rank.getPrefix(russian);
+            data.setRankPrefix(rankPrefix);
+        } catch (Exception e) {
+            TeamSystem.LOGGER.warn("Failed to load Rank enum: {}", e.getMessage());
+        }
 
         String fullName;
         if (!callsign.isEmpty()) {
@@ -88,7 +95,6 @@ public class TeamManager extends SavedData {
             fullName = rankPrefix + " " + actualName;
         }
 
-        data.setRankPrefix(rankPrefix);
         if (data.isAdmin()) {
             fullName = "§c[Admin] " + fullName;
         } else if (data.getDonatTier() > 0) {
@@ -158,9 +164,11 @@ public class TeamManager extends SavedData {
                 if (dimKey != null) {
                     MapConfig map = game.getCurrentMap();
                     ServerLevel target = server.getLevel(dimKey);
-                    if (target != null) {
-                        double x = 0.5, y = 65, z = 0.5;
-                        if (map != null && map.hasTeamSpawns()) {
+                    if (target != null && map != null) {
+                        double x = map.getWorldBorderCenterX() + 0.5;
+                        double y = 65;
+                        double z = map.getWorldBorderCenterZ() + 0.5;
+                        if (map.hasTeamSpawns()) {
                             int[] spawn = team == Team.NATO ? map.getNatoSpawn() : map.getRussiaSpawn();
                             if (spawn != null && spawn.length >= 3) {
                                 x = spawn[0] + 0.5; y = spawn[1]; z = spawn[2] + 0.5;
