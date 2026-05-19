@@ -93,17 +93,11 @@ public class CapturePointManager {
     }
 
     ResourceLocation getCurrentMapDimension() {
-        MapConfig map = TeamSystem.getMapPoolManager().getCurrentMap().orElse(null);
-        if (map != null && map.getWorldFolder() != null && !map.getWorldFolder().isEmpty()) {
-            return new ResourceLocation("teamsystem", MapConfig.sanitizeToResourcePath(map.getWorldFolder()));
-        }
-        return null;
+        return DynamicDimensionManager.getDimKey().location();
     }
 
     private ServerLevel getCurrentMapLevel() {
-        ResourceLocation dimId = getCurrentMapDimension();
-        if (dimId == null) return null;
         return TeamSystem.getGameManager().getServer().getLevel(
-            ResourceKey.create(Registries.DIMENSION, dimId));
+            DynamicDimensionManager.getDimKey());
     }
 }

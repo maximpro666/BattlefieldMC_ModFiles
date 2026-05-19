@@ -176,6 +176,17 @@ public class MapConfig {
     public int getBaseRadius() { return baseRadius; }
     public void setBaseRadius(int radius) { this.baseRadius = Math.max(1, radius); }
 
+    public boolean isPlayable() {
+        if (!enabled || state != MapState.AVAILABLE) return false;
+        if (name == null || name.isEmpty()) return false;
+        if (worldFolder == null || worldFolder.isEmpty()) return false;
+        if (!hasTeamSpawns()) return false;
+        if (natoSpawn[0] == russiaSpawn[0] && natoSpawn[1] == russiaSpawn[1] && natoSpawn[2] == russiaSpawn[2]) return false;
+        if (worldBorderSize <= 0) return false;
+        if (hasCapturePoints && (capturePoints == null || capturePoints.isEmpty())) return false;
+        return true;
+    }
+
     public List<CapturePointEntry> getCapturePoints() {
         return capturePoints != null ? capturePoints : new ArrayList<>();
     }

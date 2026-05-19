@@ -31,6 +31,8 @@ public class FOBManager {
 
     private final List<SavedFOB> fobs = new ArrayList<>();
     private int nextFobId = 0;
+    private static final long FOB_COOLDOWN_MS = 30_000;
+    private final Map<UUID, Long> lastFOBTime = new HashMap<>();
 
     public static class SavedFOB {
         public int fobId;
@@ -61,7 +63,7 @@ public class FOBManager {
         if (teamCount >= maxFOBs) return "§cTeam FOB limit reached (" + maxFOBs + ")";
 
         BlockPos pos = player.blockPosition();
-        return validatePosition(player.serverLevel(), pos, team.ordinal());
+        return validatePosition(player.serverLevel(), pos, team.ordinal(), uuid.toString());
     }
 
     public String placeFOB(ServerPlayer player, String name) {
@@ -77,30 +79,38 @@ public class FOBManager {
         if (teamCount >= maxFOBs) return "§cTeam FOB limit reached (" + maxFOBs + ")";
 
         BlockPos pos = player.blockPosition();
-        String validation = validatePosition(player.serverLevel(), pos, team.ordinal());
+        String validation = validatePosition(player.serverLevel(), pos, team.ordinal(), uuid.toString());
         if (validation != null) return validation;
+
+        // If squad leader already has a FOB on same team — remove old one first (move)
+        SavedFOB existing = fobs.stream()
+            .filter(f -> f.ownerUUID.equals(uuid.toString()) && f.teamOrdinal == team.ordinal())
+            .findFirst().orElse(null);
+
+        // Check cooldown
+        Long lastTime = lastFOBTime.get(uuid);
+        if (lastTime != null && System.currentTimeMillis() - lastTime < FOB_COOLDOWN_MS) {
+            int remain = (int) ((FOB_COOLDOWN_MS - (System.currentTimeMillis() - lastTime)) / 1000);
+            return "§cWait " + remain + "s before placing another FOB";
+        }
 
         // Check economy cost
         int fobCost = TeamSystem.getConfig().getFOBCost();
+        int requiredSP = existing != null ? fobCost / 2 : fobCost;
         EconomyManager econ = TeamSystem.getEconomyManager();
-        if (fobCost > 0 && econ != null && econ.getSP(uuid) < fobCost) {
-            return "§cNot enough SP! FOB costs " + fobCost + " SP";
+        if (requiredSP > 0 && econ != null && econ.getSP(uuid) < requiredSP) {
+            return "§cNot enough SP! FOB costs " + requiredSP + " SP";
         }
 
-        // If squad leader already has a FOB — remove old one first (move)
-        SavedFOB existing = fobs.stream()
-            .filter(f -> f.ownerUUID.equals(uuid.toString()))
-            .findFirst().orElse(null);
         if (existing != null) {
             removeFOBBlock(existing);
             fobs.remove(existing);
             broadcastToTeam(team, "§e[FOB] §f" + existing.name + " §eremoved by §f" + player.getName().getString());
         }
 
-        // Deduct cost (refund half if moving)
-        if (fobCost > 0 && econ != null) {
-            int cost = existing != null ? fobCost / 2 : fobCost;
-            econ.addSP(uuid, -cost);
+        // Deduct cost
+        if (requiredSP > 0 && econ != null) {
+            econ.addSP(uuid, -requiredSP);
             econ.syncAll(player);
         }
 
@@ -122,22 +132,25 @@ public class FOBManager {
         // Place beacon block as visual
         player.serverLevel().setBlock(pos, TeamSystem.RESPAWN_BEACON_BLOCK.get().defaultBlockState(), 3);
 
+        lastFOBTime.put(uuid, System.currentTimeMillis());
+
         String action = existing != null ? "moved" : "placed";
         broadcastToTeam(team, "§a[FOB] §f" + name + " §a" + action + " by §f" + player.getName().getString());
         syncAll();
         return null;
     }
 
-    private String validatePosition(ServerLevel level, BlockPos pos, int teamOrdinal) {
+    private String validatePosition(ServerLevel level, BlockPos pos, int teamOrdinal, String skipOwnerUUID) {
         TeamSystemConfig config = TeamSystem.getConfig();
         int minEnemy = config.getMinDistanceFromEnemyBase();
         int minOwn = config.getMinDistanceFromOwnBase();
 
         String dimStr = level.dimension().location().toString();
 
-        // Check distances from other FOBs
+        // Check distances from other FOBs (skip own FOB for move case)
         for (SavedFOB fob : fobs) {
             if (!fob.dimension.equals(dimStr)) continue;
+            if (skipOwnerUUID != null && fob.ownerUUID.equals(skipOwnerUUID)) continue;
             double dist = distanceTo(pos, fob.x, fob.z);
             if (fob.teamOrdinal == teamOrdinal && dist < minOwn) {
                 return "§cToo close to your team's FOB! (" + (int)dist + " blocks, min " + minOwn + ")";

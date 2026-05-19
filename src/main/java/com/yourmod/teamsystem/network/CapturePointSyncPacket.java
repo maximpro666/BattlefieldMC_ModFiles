@@ -99,14 +99,6 @@ public class CapturePointSyncPacket {
         }
         ClientTeamData.capturePoints = points;
         com.yourmod.teamsystem.client.xaero.XaeroIntegration.updateCapturePointWaypoints(points);
-
-        for (int i = 0; i < pointIds.size(); i++) {
-            com.yourmod.teamsystem.client.gui.ClientGuiHandler.updateCaptureNotification(
-                pointNames.get(i),
-                (float)(double) progressPercentages.get(i),
-                capturingTeamOrdinals.get(i),
-                ownerTeamOrdinals.get(i));
-        }
     }
 
     public List<Integer> getPointIds() { return pointIds; }

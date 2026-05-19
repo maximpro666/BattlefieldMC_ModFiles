@@ -154,15 +154,6 @@ public class MapPoolManager {
                 }
             }
 
-            for (MapConfig srcMap : scanSourcesFolder()) {
-                boolean exists = maps.stream()
-                    .anyMatch(m -> m.getWorldFolder().equals(srcMap.getWorldFolder()));
-                if (!exists) {
-                    srcMap.setState(MapState.AVAILABLE);
-                    maps.add(srcMap);
-                }
-            }
-
             saveConfig();
             TeamSystem.LOGGER.info("Loaded {} maps, next match id: {}", maps.size(), matchSequence);
         } catch (IOException e) {
@@ -200,6 +191,7 @@ public class MapPoolManager {
                         config.setLobbyWaitTime(30);
                         config.setState(MapState.AVAILABLE);
                         autoDetectMapCenter(config);
+                        config.setState(MapState.DISABLED);
                         found.add(config);
                     }
                 });
@@ -225,7 +217,7 @@ public class MapPoolManager {
     }
 
     private Path getConfigPath() {
-        return server.getServerDirectory().toPath().resolve(CONFIG_FILE);
+        return getServerRoot().resolve(CONFIG_FILE).normalize();
     }
 
     public void reloadConfig() {
@@ -281,6 +273,7 @@ public class MapPoolManager {
                 mapLevel.getChunkSource().tick(() -> true, true);
             }
             clearChunkCache(mapLevel);
+            clearAllEntities(mapLevel);
             forceGC();
 
             Files.createDirectories(dimDir.resolve("data"));
@@ -291,6 +284,9 @@ public class MapPoolManager {
             return true;
         } catch (IOException e) {
             TeamSystem.LOGGER.error("Failed to deploy map {}: {}", map.getName(), e.getMessage());
+            for (StackTraceElement ste : e.getStackTrace()) {
+                TeamSystem.LOGGER.error("  at {}", ste);
+            }
             return false;
         }
     }
@@ -454,6 +450,21 @@ public class MapPoolManager {
         }
     }
 
+    private void clearAllEntities(ServerLevel level) {
+        java.util.List<net.minecraft.world.entity.Entity> toRemove = new java.util.ArrayList<>();
+        for (net.minecraft.world.entity.Entity entity : level.getAllEntities()) {
+            if (!(entity instanceof ServerPlayer)) {
+                toRemove.add(entity);
+            }
+        }
+        for (net.minecraft.world.entity.Entity entity : toRemove) {
+            entity.remove(net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
+        }
+        if (!toRemove.isEmpty()) {
+            TeamSystem.LOGGER.info("Cleared {} entities from map dimension", toRemove.size());
+        }
+    }
+
     /** Reflection helper to find a method by name in class hierarchy */
     private java.lang.reflect.Method findMethod(Class<?> clazz, String name, Class<?>... paramTypes) {
         Class<?> current = clazz;
@@ -523,36 +534,42 @@ public class MapPoolManager {
 
         try {
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("^r\\.(-?\\d+)\\.(-?\\d+)\\.mca$");
-            java.util.List<Integer> xs = new java.util.ArrayList<>();
-            java.util.List<Integer> zs = new java.util.ArrayList<>();
+            java.util.Map<Integer, java.util.List<Integer>> regionMap = new java.util.HashMap<>();
 
             try (var stream = java.nio.file.Files.list(sourceRegionDir)) {
                 stream.forEach(path -> {
                     String name = path.getFileName().toString();
                     var m = pattern.matcher(name);
                     if (m.matches()) {
-                        xs.add(Integer.parseInt(m.group(1)));
-                        zs.add(Integer.parseInt(m.group(2)));
+                        int rx = Integer.parseInt(m.group(1));
+                        int rz = Integer.parseInt(m.group(2));
+                        regionMap.computeIfAbsent(rx, k -> new java.util.ArrayList<>()).add(rz);
                     }
                 });
             }
 
-            if (xs.isEmpty()) return;
+            if (regionMap.isEmpty()) return;
 
-            xs.sort(null);
-            zs.sort(null);
-            int medianX = xs.get(xs.size() / 2);
-            int medianZ = zs.get(zs.size() / 2);
+            int bestX = regionMap.entrySet().stream()
+                .max(java.util.Comparator.comparingInt(e -> e.getValue().size()))
+                .get().getKey();
 
-            int centerX = medianX * 512 + 256;
-            int centerZ = medianZ * 512 + 256;
+            java.util.List<Integer> zs = regionMap.get(bestX);
+            java.util.Map<Integer, Integer> zCount = new java.util.HashMap<>();
+            for (int z : zs) zCount.merge(z, 1, Integer::sum);
+            int bestZ = zCount.entrySet().stream()
+                .max(java.util.Comparator.comparingInt(java.util.Map.Entry::getValue))
+                .get().getKey();
+
+            int centerX = bestX * 512 + 256;
+            int centerZ = bestZ * 512 + 256;
 
             map.setWorldBorderCenterX(centerX);
             map.setWorldBorderCenterZ(centerZ);
             map.setNatoSpawn(new int[]{centerX, 64, centerZ});
             map.setRussiaSpawn(new int[]{centerX, 64, centerZ});
 
-            TeamSystem.LOGGER.info("Auto-detected map center for {} at ({}, {}), spawn set to y=64",
+            TeamSystem.LOGGER.info("Auto-detected map center for {} at ({}, {})",
                 map.getName(), centerX, centerZ);
         } catch (Exception e) {
             TeamSystem.LOGGER.warn("Failed to auto-detect map center: {}", e.getMessage());
@@ -642,12 +659,16 @@ public class MapPoolManager {
         return maps.stream().filter(m -> m.getState() == state).collect(Collectors.toList());
     }
 
+    public List<MapConfig> getPlayableMaps() {
+        return maps.stream().filter(MapConfig::isPlayable).collect(Collectors.toList());
+    }
+
     public boolean hasAvailableMaps() {
-        return maps.stream().anyMatch(m -> m.getState() == MapState.AVAILABLE);
+        return maps.stream().anyMatch(m -> m.getState() == MapState.AVAILABLE && m.isPlayable());
     }
 
     public int getAvailableCount() {
-        return (int) maps.stream().filter(m -> m.getState() == MapState.AVAILABLE).count();
+        return (int) maps.stream().filter(m -> m.getState() == MapState.AVAILABLE && m.isPlayable()).count();
     }
 
     // ========== Map Selection ==========
@@ -662,7 +683,7 @@ public class MapPoolManager {
     public boolean selectMap(String name) {
         for (int i = 0; i < maps.size(); i++) {
             if (maps.get(i).getName().equalsIgnoreCase(name)) {
-                if (maps.get(i).getState() != MapState.AVAILABLE) return false;
+                if (!maps.get(i).isPlayable()) return false;
                 currentMapIndex = i;
                 saveConfig();
                 return true;
@@ -673,14 +694,14 @@ public class MapPoolManager {
 
     public boolean selectMap(int index) {
         if (index < 0 || index >= maps.size()) return false;
-        if (maps.get(index).getState() != MapState.AVAILABLE) return false;
+        if (!maps.get(index).isPlayable()) return false;
         currentMapIndex = index;
         saveConfig();
         return true;
     }
 
     public MapConfig pickNextAvailable() {
-        List<MapConfig> available = getMapsByState(MapState.AVAILABLE);
+        List<MapConfig> available = getPlayableMaps();
         if (available.isEmpty()) return null;
 
         int weightedPick = random.nextInt(available.size());
@@ -769,6 +790,64 @@ public class MapPoolManager {
         }
     }
 
+    // ========== Pool Management ==========
+
+    public boolean addMap(String folderName) {
+        Path sourceDir = getSourcesPath().resolve(folderName);
+        if (!Files.isDirectory(sourceDir.resolve("region"))) {
+            TeamSystem.LOGGER.warn("Cannot add map '{}': source folder not found", folderName);
+            return false;
+        }
+        if (maps.stream().anyMatch(m -> m.getWorldFolder().equals(folderName))) {
+            TeamSystem.LOGGER.warn("Cannot add map '{}': already in pool", folderName);
+            return false;
+        }
+        MapConfig config = new MapConfig();
+        config.setName(folderName);
+        config.setWorldFolder(folderName);
+        config.setEnabled(true);
+        config.setHasRespawn(true);
+        config.setHasCapturePoints(true);
+        config.setHasRegen(true);
+        config.setHasWorldBorder(true);
+        config.setWorldBorderCenterX(0);
+        config.setWorldBorderCenterZ(0);
+        config.setWorldBorderSize(1000);
+        config.setTickets(100);
+        config.setLobbyWaitTime(30);
+        config.setState(MapState.AVAILABLE);
+        autoDetectMapCenter(config);
+        maps.add(config);
+        saveConfig();
+        TeamSystem.LOGGER.info("Map '{}' added to pool", folderName);
+        return true;
+    }
+
+    public boolean removeMap(String name) {
+        for (int i = 0; i < maps.size(); i++) {
+            if (maps.get(i).getName().equalsIgnoreCase(name)) {
+                maps.remove(i);
+                if (currentMapIndex == i) currentMapIndex = -1;
+                else if (currentMapIndex > i) currentMapIndex--;
+                saveConfig();
+                TeamSystem.LOGGER.info("Map '{}' removed from pool", name);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean setMapState(String name, MapState state) {
+        for (MapConfig m : maps) {
+            if (m.getName().equalsIgnoreCase(name)) {
+                m.setState(state);
+                saveConfig();
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ========== Helpers ==========
 
     public MinecraftServer getServer() { return server; }
@@ -787,7 +866,7 @@ public class MapPoolManager {
 
     public String getAvailableMapListFormatted() {
         StringBuilder sb = new StringBuilder();
-        List<MapConfig> avail = getMapsByState(MapState.AVAILABLE);
+        List<MapConfig> avail = getPlayableMaps();
         for (int i = 0; i < avail.size(); i++) {
             MapConfig m = avail.get(i);
             sb.append(i + 1).append(". ").append(m.getName()).append("\n");

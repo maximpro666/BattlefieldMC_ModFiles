@@ -25,7 +25,6 @@ public class ClientGuiHandler {
     private static final NotificationOverlay notifOverlay    = new NotificationOverlay();
     private static final HotbarOverlay       hotbarOverlay   = new HotbarOverlay();
     private static final BattlefieldTabOverlay tabOverlay    = new BattlefieldTabOverlay();
-    private static final CaptureNotificationOverlay captureOverlay = new CaptureNotificationOverlay();
     private static final VoiceIndicatorOverlay voiceOverlay  = new VoiceIndicatorOverlay();
 
     private static boolean hudRenderedThisFrame = false;
@@ -73,7 +72,6 @@ public class ClientGuiHandler {
         notifOverlay.render(g, w);
         hotbarOverlay.render(g, w, h);
         tabOverlay.render(g, w, h);
-        captureOverlay.render(g, w, h);
         voiceOverlay.render(g, w, h);
 
         if (Math.abs(scale - 1.0f) > 0.01f) {
@@ -98,12 +96,4 @@ public class ClientGuiHandler {
         }
     }
 
-    public static void updateCaptureNotification(String pointName, float progress, int capturingTeamOrdinal, int ownerTeamOrdinal) {
-        if (capturingTeamOrdinal >= 0 && capturingTeamOrdinal != ownerTeamOrdinal) {
-            captureOverlay.startCapture(pointName);
-            captureOverlay.updateProgress(progress);
-        } else {
-            captureOverlay.endCapture();
-        }
-    }
 }

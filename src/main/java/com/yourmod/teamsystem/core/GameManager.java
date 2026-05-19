@@ -25,8 +25,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 
 import com.yourmod.teamsystem.network.OpenTeamSelectionScreenPacket;
+import com.yourmod.teamsystem.network.TeamBaseSyncPacket;
+import com.yourmod.teamsystem.network.BorderSyncPacket;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class GameManager {
@@ -163,6 +166,8 @@ public class GameManager {
             return;
         }
 
+        clearWorldEntities(mapLevel);
+
         currentMatchIndex = TeamSystem.getMapPoolManager().nextMatchId();
         boolean swapped = map.isTeamRotation() && (currentMatchIndex % 2 == 1);
 
@@ -186,7 +191,46 @@ public class GameManager {
 
         broadcast("Game started on map: " + map.getName(), CHAT_SUCCESS, CHAT_EMPHASIS);
         syncPhaseToAll();
+        syncTeamBasesToAll(map);
+        syncBordersToAll(map);
+        if (cp != null && cp.isActive()) cp.syncToAll();
         TeamSystem.LOGGER.info("Game started on map: {}", map.getName());
+    }
+
+    private void syncTeamBasesToAll(MapConfig map) {
+        if (map == null || !map.hasTeamSpawns()) return;
+        int[] nato = map.getNatoSpawn();
+        int[] russia = map.getRussiaSpawn();
+        PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(),
+            new TeamBaseSyncPacket(
+                nato[0], nato[1], nato[2],
+                russia[0], russia[1], russia[2],
+                map.getBaseRadius()
+            ));
+    }
+
+    private void syncBordersToAll(MapConfig map) {
+        if (map == null || !map.hasBorderZones()) return;
+        List<BorderZone> zones = map.getBorderZones();
+        List<byte[]> types = new ArrayList<>();
+        List<double[]> data = new ArrayList<>();
+        for (BorderZone z : zones) {
+            if ("polygon".equals(z.getType())) {
+                types.add(new byte[]{(byte)1});
+                List<double[]> verts = z.getPolygon();
+                double[] arr = new double[verts.size() * 2];
+                for (int i = 0; i < verts.size(); i++) {
+                    arr[i * 2] = verts.get(i)[0];
+                    arr[i * 2 + 1] = verts.get(i)[1];
+                }
+                data.add(arr);
+            } else {
+                types.add(new byte[]{(byte)0});
+                data.add(new double[]{z.getMinX(), z.getMinZ(), z.getMaxX(), z.getMaxZ()});
+            }
+        }
+        PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(),
+            new BorderSyncPacket(types, data));
     }
 
     public void endGame(Team winner) {
@@ -358,9 +402,9 @@ public class GameManager {
         MapPoolManager pool = TeamSystem.getMapPoolManager();
         pool.clearVotes();
 
-        List<MapConfig> available = pool.getMapsByState(MapState.AVAILABLE);
+        List<MapConfig> available = pool.getPlayableMaps();
         if (available.isEmpty()) {
-            broadcast("No available maps!", CHAT_ERROR);
+            broadcast("No playable maps! Please configure maps and enable them.", CHAT_ERROR);
             currentPhase = GamePhase.LOBBY;
             phaseTimer = 0;
             returnToLobby();
@@ -428,7 +472,7 @@ public class GameManager {
         }
         MapPoolManager pool = TeamSystem.getMapPoolManager();
 
-        boolean found = pool.getMapsByState(MapState.AVAILABLE).stream()
+        boolean found = pool.getPlayableMaps().stream()
             .anyMatch(m -> m.getName().equalsIgnoreCase(mapName));
         if (!found) {
             player.sendSystemMessage(error("Map not available: " + mapName));
@@ -608,8 +652,7 @@ public class GameManager {
 
     public void teleportPlayerToMapAtTeamSpawn(ServerPlayer p, Team team) {
         if (currentMap == null) return;
-        int zOffset = MapOffsetManager.getZOffset(
-            MapOffsetManager.getMapIndex(currentMap, TeamSystem.getMapPoolManager().getMaps()));
+        int zOffset = 0;
         boolean swapped = isSwapped();
         Team spawnTeam = swapped ? (team == Team.NATO ? Team.RUSSIA : Team.NATO) : team;
         ServerLevel target = getMapWorld(currentMap);
@@ -628,8 +671,7 @@ public class GameManager {
 
     public void setMapRespawn(ServerPlayer p, Team team) {
         if (currentMap == null) return;
-        int zOffset = MapOffsetManager.getZOffset(
-            MapOffsetManager.getMapIndex(currentMap, TeamSystem.getMapPoolManager().getMaps()));
+        int zOffset = 0;
         boolean swapped = isSwapped();
         Team spawnTeam = swapped ? (team == Team.NATO ? Team.RUSSIA : Team.NATO) : team;
         ServerLevel target = getMapWorld(currentMap);

@@ -16,7 +16,7 @@ import net.minecraftforge.network.PacketDistributor;
 import java.util.*;
 
 public class CaptureProcessor {
-    private static final double BASE_SPEED = 1.0;
+    private static final double BASE_SPEED = 4.0;
     private static final double MAIN_MULTIPLIER = 1.5;
     private static final double DECAY_SPEED = 0.003;
 

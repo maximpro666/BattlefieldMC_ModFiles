@@ -1,6 +1,8 @@
 package com.yourmod.teamsystem.core;
 
 import com.yourmod.teamsystem.TeamSystem;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -15,12 +17,15 @@ import java.util.List;
 public class BorderManager {
 
     private final List<BorderZone> zones = new ArrayList<>();
-    private double warningDist = 5.0;
+    private double warningDist = 8.0;
     private double pushStrength = 0.3;
     private double teleportMargin = 3.0;
     private int tickCounter;
     private static final int WARNING_INTERVAL = 40;
     private static final int PUSH_INTERVAL = 2;
+    private static final int PARTICLE_INTERVAL = 5;
+    private static final int PARTICLE_COLUMNS = 3;
+    private static final int PARTICLE_PER_COLUMN = 4;
 
     public BorderManager() {}
 
@@ -71,6 +76,10 @@ public class BorderManager {
         if (!hasZones()) return;
         tickCounter++;
 
+        boolean doPush = tickCounter % PUSH_INTERVAL == 0;
+        boolean doWarning = tickCounter % WARNING_INTERVAL == 0;
+        boolean doParticles = tickCounter % PARTICLE_INTERVAL == 0;
+
         VehicleManager vm = TeamSystem.getVehicleManager();
 
         for (Entity entity : level.getAllEntities()) {
@@ -83,17 +92,23 @@ public class BorderManager {
             double z = entity.getZ();
 
             if (isInsideAny(x, z)) {
-                if (isPlayer && tickCounter % WARNING_INTERVAL == 0) {
+                if (isPlayer) {
                     ServerPlayer player = (ServerPlayer) entity;
                     double edgeDist = distanceToNearestEdge(x, z);
-                    if (edgeDist >= 0 && edgeDist < warningDist) {
+                    boolean nearEdge = edgeDist >= 0 && edgeDist < warningDist;
+                    if (doWarning && nearEdge) {
                         player.displayClientMessage(
                             Component.literal("§c\u26a0 You are approaching the battlefield border!"), true);
                         player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.MASTER, 1f, 0.5f);
                     }
+                    if (doParticles && nearEdge) {
+                        spawnBorderParticles(player, level, x, z);
+                    }
                 }
                 continue;
             }
+
+            if (!doPush) continue;
 
             double[] safe = nearestSafePoint(x, z);
             double outDist = Math.sqrt((x - safe[0]) * (x - safe[0]) + (z - safe[1]) * (z - safe[1]));
@@ -111,16 +126,36 @@ public class BorderManager {
                 continue;
             }
 
-            if (tickCounter % PUSH_INTERVAL == 0) {
-                Vec3 push = new Vec3(safe[0] - x, 0, safe[1] - z).normalize().scale(pushStrength);
-                entity.setDeltaMovement(entity.getDeltaMovement().add(push));
-                entity.hurtMarked = true;
-                if (isPlayer) {
-                    ServerPlayer player = (ServerPlayer) entity;
-                    player.displayClientMessage(
-                        Component.literal("§c\u26a0 Return to the battlefield!"), true);
-                    player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.MASTER, 1f, 0.5f);
-                }
+            Vec3 push = new Vec3(safe[0] - x, 0, safe[1] - z).normalize().scale(pushStrength);
+            entity.setDeltaMovement(entity.getDeltaMovement().add(push));
+            entity.hurtMarked = true;
+            if (isPlayer) {
+                ServerPlayer player = (ServerPlayer) entity;
+                player.displayClientMessage(
+                    Component.literal("§c\u26a0 Return to the battlefield!"), true);
+                player.playNotifySound(SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.MASTER, 1f, 0.5f);
+            }
+        }
+    }
+
+    private void spawnBorderParticles(ServerPlayer player, ServerLevel level, double px, double pz) {
+        double[] edge = nearestSafePoint(px, pz);
+        double dx = px - edge[0];
+        double dz = pz - edge[1];
+        double len = Math.sqrt(dx * dx + dz * dz);
+        if (len < 0.5) return;
+        double nx = dx / len;
+        double nz = dz / len;
+
+        for (int col = -PARTICLE_COLUMNS / 2; col <= PARTICLE_COLUMNS / 2; col++) {
+            double ox = nx * col;
+            double oz = nz * col;
+            for (int row = 0; row < PARTICLE_PER_COLUMN; row++) {
+                double yOff = 1.0 + row * 1.2;
+                level.sendParticles(player,
+                    ParticleTypes.FLAME, false,
+                    edge[0] + ox, yOff, edge[1] + oz,
+                    1, 0, 0, 0, 0);
             }
         }
     }

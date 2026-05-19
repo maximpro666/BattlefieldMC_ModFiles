@@ -50,6 +50,29 @@ public class ClientTeamData {
     public static List<ClientBeaconData> beacons = new ArrayList<>();
     public static Map<UUID, Integer> squadmateStatuses = new HashMap<>();
 
+    // Border zone data for client rendering (parallel lists)
+    public static List<byte[]> borderZoneTypes = new ArrayList<>();
+    public static List<double[]> borderZoneData = new ArrayList<>();
+
+    // Base spawn positions
+    private static int[] natoBasePos = null;
+    private static int[] russiaBasePos = null;
+    private static int baseRadius = 30;
+
+    public static void setNatoBase(int x, int y, int z) { natoBasePos = new int[]{x, y, z}; }
+    public static void setRussiaBase(int x, int y, int z) { russiaBasePos = new int[]{x, y, z}; }
+    public static void setBaseRadius(int r) { baseRadius = r; }
+
+    public static int[] getNatoBasePos() { return natoBasePos; }
+    public static int[] getRussiaBasePos() { return russiaBasePos; }
+    public static int getBaseRadius() { return baseRadius; }
+
+    public static void clearBases() {
+        natoBasePos = null;
+        russiaBasePos = null;
+        baseRadius = 30;
+    }
+
     public static PlayerListEntry getPlayerData(UUID uuid) { return playerDataMap.get(uuid); }
     public static List<String> getSpeakingPlayers() { return Collections.unmodifiableList(speakingPlayers); }
 
@@ -109,6 +132,9 @@ public class ClientTeamData {
 
     public static void setGamePhase(int phase) {
         gamePhase = phase;
+        if (phase == 0 || phase == 1 || phase == 3) {
+            clearBases();
+        }
     }
 
     public static int getGamePhase() {

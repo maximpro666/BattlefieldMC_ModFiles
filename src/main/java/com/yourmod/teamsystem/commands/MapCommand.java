@@ -9,6 +9,10 @@ import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.MapConfig;
 import com.yourmod.teamsystem.core.MapPoolManager;
 import com.yourmod.teamsystem.core.MapState;
+import com.yourmod.teamsystem.core.BorderZone;
+import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.network.ReloadVisualsPacket;
+import java.nio.file.Path;
 import static com.yourmod.teamsystem.core.ChatHelper.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -77,12 +81,101 @@ public class MapCommand {
                     .requires(source -> source.hasPermission(2))
                     .executes(context -> runMaintenance(context))
                 )
+                .then(Commands.literal("add")
+                    .requires(source -> source.hasPermission(2))
+                    .then(Commands.argument("folder", StringArgumentType.greedyString())
+                        .suggests((ctx, builder) -> {
+                            MapPoolManager pool = TeamSystem.getMapPoolManager();
+                            Path sourcesDir = pool.getSourcesPath();
+                            if (java.nio.file.Files.isDirectory(sourcesDir)) {
+                                try {
+                                    return net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                        java.nio.file.Files.list(sourcesDir)
+                                            .filter(java.nio.file.Files::isDirectory)
+                                            .map(p -> p.getFileName().toString())
+                                            .filter(name -> pool.getMaps().stream().noneMatch(m -> m.getWorldFolder().equals(name))),
+                                        builder);
+                                } catch (java.io.IOException ignored) {}
+                            }
+                            return builder.buildFuture();
+                        })
+                        .executes(context -> addMap(context))
+                    )
+                )
+                .then(Commands.literal("remove")
+                    .requires(source -> source.hasPermission(2))
+                    .then(Commands.argument("name", StringArgumentType.greedyString())
+                        .suggests((ctx, builder) -> {
+                            MapPoolManager pool = TeamSystem.getMapPoolManager();
+                            return net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                pool.getMaps().stream().map(MapConfig::getName),
+                                builder);
+                        })
+                        .executes(context -> removeMap(context))
+                    )
+                )
+                .then(Commands.literal("enable")
+                    .requires(source -> source.hasPermission(2))
+                    .then(Commands.argument("name", StringArgumentType.greedyString())
+                        .suggests((ctx, builder) -> {
+                            MapPoolManager pool = TeamSystem.getMapPoolManager();
+                            return net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                pool.getMaps().stream().map(MapConfig::getName),
+                                builder);
+                        })
+                        .executes(context -> setMapState(context, MapState.AVAILABLE))
+                    )
+                )
+                .then(Commands.literal("disable")
+                    .requires(source -> source.hasPermission(2))
+                    .then(Commands.argument("name", StringArgumentType.greedyString())
+                        .suggests((ctx, builder) -> {
+                            MapPoolManager pool = TeamSystem.getMapPoolManager();
+                            return net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                pool.getMaps().stream().map(MapConfig::getName),
+                                builder);
+                        })
+                        .executes(context -> setMapState(context, MapState.DISABLED))
+                    )
+                )
                 .then(Commands.literal("setspawn")
                     .requires(source -> source.hasPermission(2))
                     .then(Commands.argument("team", StringArgumentType.word())
                         .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
                             new String[]{"nato", "russia"}, builder))
                         .executes(context -> setSpawn(context))
+                    )
+                )
+                .then(Commands.literal("border")
+                    .requires(source -> source.hasPermission(2))
+                    .then(Commands.argument("x1", IntegerArgumentType.integer())
+                        .then(Commands.argument("z1", IntegerArgumentType.integer())
+                            .then(Commands.argument("x2", IntegerArgumentType.integer())
+                                .then(Commands.argument("z2", IntegerArgumentType.integer())
+                                    .executes(context -> setBorder(context))
+                                )
+                            )
+                        )
+                    )
+                )
+                .then(Commands.literal("border_clear")
+                    .requires(source -> source.hasPermission(2))
+                    .executes(context -> clearBorder(context))
+                )
+                .then(Commands.literal("reloadvisuals")
+                    .requires(source -> source.hasPermission(2))
+                    .executes(context -> reloadVisuals(context))
+                )
+                .then(Commands.literal("tickets")
+                    .requires(source -> source.hasPermission(2))
+                    .then(Commands.argument("count", IntegerArgumentType.integer(1, 99999))
+                        .executes(context -> setTickets(context))
+                    )
+                )
+                .then(Commands.literal("baseradius")
+                    .requires(source -> source.hasPermission(2))
+                    .then(Commands.argument("radius", IntegerArgumentType.integer(1, 500))
+                        .executes(context -> setBaseRadius(context))
                     )
                 )
         );
@@ -185,6 +278,45 @@ public class MapCommand {
         return 1;
     }
 
+    private static int addMap(CommandContext<CommandSourceStack> context) {
+        String folder = StringArgumentType.getString(context, "folder");
+        MapPoolManager pool = TeamSystem.getMapPoolManager();
+        if (pool.addMap(folder)) {
+            context.getSource().sendSuccess(() ->
+                success("Map '" + folder + "' added to pool"), true);
+        } else {
+            context.getSource().sendFailure(
+                error("Failed to add map '" + folder + "'. Check folder exists and not already added."));
+        }
+        return 1;
+    }
+
+    private static int removeMap(CommandContext<CommandSourceStack> context) {
+        String name = StringArgumentType.getString(context, "name");
+        MapPoolManager pool = TeamSystem.getMapPoolManager();
+        if (pool.removeMap(name)) {
+            context.getSource().sendSuccess(() ->
+                success("Map '" + name + "' removed from pool"), true);
+        } else {
+            context.getSource().sendFailure(
+                error("Map '" + name + "' not found in pool"));
+        }
+        return 1;
+    }
+
+    private static int setMapState(CommandContext<CommandSourceStack> context, MapState state) {
+        String name = StringArgumentType.getString(context, "name");
+        MapPoolManager pool = TeamSystem.getMapPoolManager();
+        if (pool.setMapState(name, state)) {
+            context.getSource().sendSuccess(() ->
+                success("Map '" + name + "' set to " + state.name()), true);
+        } else {
+            context.getSource().sendFailure(
+                error("Map '" + name + "' not found in pool"));
+        }
+        return 1;
+    }
+
     private static int setSpawn(CommandContext<CommandSourceStack> context) {
         ServerPlayer player = context.getSource().getPlayer();
         if (player == null) return 0;
@@ -214,6 +346,78 @@ public class MapCommand {
 
         TeamSystem.getMapPoolManager().saveConfig();
         return 1;
+    }
+
+    private static int setBorder(CommandContext<CommandSourceStack> context) {
+        MapConfig map = getCurrentMap(context);
+        if (map == null) return 0;
+        int x1 = IntegerArgumentType.getInteger(context, "x1");
+        int z1 = IntegerArgumentType.getInteger(context, "z1");
+        int x2 = IntegerArgumentType.getInteger(context, "x2");
+        int z2 = IntegerArgumentType.getInteger(context, "z2");
+        java.util.List<BorderZone> zones = new java.util.ArrayList<>();
+        zones.add(BorderZone.rect(x1, z1, x2, z2));
+        map.setBorderZones(zones);
+        TeamSystem.getMapPoolManager().saveConfig();
+        context.getSource().sendSuccess(() ->
+            success("Border zone set: (" + x1 + "," + z1 + ") to (" + x2 + "," + z2 + ")"), true);
+        return 1;
+    }
+
+    private static int clearBorder(CommandContext<CommandSourceStack> context) {
+        MapConfig map = getCurrentMap(context);
+        if (map == null) return 0;
+        map.setBorderZones(null);
+        TeamSystem.getMapPoolManager().saveConfig();
+        context.getSource().sendSuccess(() ->
+            success("Border zones cleared"), true);
+        return 1;
+    }
+
+    private static int reloadVisuals(CommandContext<CommandSourceStack> context) {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        PacketHandler.CHANNEL.send(
+            net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
+            new ReloadVisualsPacket()
+        );
+        context.getSource().sendSuccess(() ->
+            success("Visuals config reloaded"), true);
+        return 1;
+    }
+
+    private static int setTickets(CommandContext<CommandSourceStack> context) {
+        MapConfig map = getCurrentMap(context);
+        if (map == null) return 0;
+        int count = IntegerArgumentType.getInteger(context, "count");
+        map.setTickets(count);
+        TeamSystem.getMapPoolManager().saveConfig();
+        context.getSource().sendSuccess(() ->
+            success("Tickets set to " + count + " for current map"), true);
+        return 1;
+    }
+
+    private static int setBaseRadius(CommandContext<CommandSourceStack> context) {
+        MapConfig map = getCurrentMap(context);
+        if (map == null) return 0;
+        int radius = IntegerArgumentType.getInteger(context, "radius");
+        map.setBaseRadius(radius);
+        TeamSystem.getMapPoolManager().saveConfig();
+        context.getSource().sendSuccess(() ->
+            success("Base radius set to " + radius + " for current map"), true);
+        return 1;
+    }
+
+    private static MapConfig getCurrentMap(CommandContext<CommandSourceStack> context) {
+        GameManager game = TeamSystem.getGameManager();
+        MapConfig map = game.getCurrentMap();
+        if (map == null) {
+            map = TeamSystem.getMapPoolManager().getCurrentMap().orElse(null);
+        }
+        if (map == null) {
+            context.getSource().sendFailure(error("No map selected! Use /map select or /map vote first."));
+            return null;
+        }
+        return map;
     }
 
     private static int voteMap(CommandContext<CommandSourceStack> context) {

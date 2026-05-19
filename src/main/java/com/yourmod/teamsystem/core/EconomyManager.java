@@ -48,7 +48,7 @@ public class EconomyManager {
     }
 
     public void addSP(UUID playerUUID, int amount) {
-        setSP(playerUUID, getSP(playerUUID) + Math.max(0, amount));
+        setSP(playerUUID, getSP(playerUUID) + amount);
     }
 
     public void resetSP() {

@@ -138,6 +138,24 @@ public class PacketHandler {
             .consumerMainThread(NotificationPacket::handle)
             .add();
 
+        CHANNEL.messageBuilder(TeamBaseSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(TeamBaseSyncPacket::new)
+            .encoder(TeamBaseSyncPacket::toBytes)
+            .consumerMainThread(TeamBaseSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(BorderSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(BorderSyncPacket::new)
+            .encoder(BorderSyncPacket::toBytes)
+            .consumerMainThread(BorderSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(ReloadVisualsPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(ReloadVisualsPacket::new)
+            .encoder(ReloadVisualsPacket::toBytes)
+            .consumerMainThread(ReloadVisualsPacket::handle)
+            .add();
+
         // ===== C2S packets =====
         CHANNEL.messageBuilder(TeamChangeRequestPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
             .decoder(TeamChangeRequestPacket::new)
