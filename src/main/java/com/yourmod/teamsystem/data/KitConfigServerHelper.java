@@ -1,5 +1,6 @@
 package com.yourmod.teamsystem.data;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.yourmod.teamsystem.TeamSystem;
@@ -7,6 +8,8 @@ import com.yourmod.teamsystem.core.KitManager;
 import com.yourmod.teamsystem.core.PlayerCombatData;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -14,13 +17,6 @@ import java.util.*;
 
 public class KitConfigServerHelper {
 
-    /**
-     * Apply a KitConfig-based kit to a player.
-     * @param player target player
-     * @param classId class key from KitConfig.classes
-     * @param kitId kit key from ClassConfig.kits
-     * @return error message or null on success
-     */
     public static String applyKit(ServerPlayer player, String classId, String kitId) {
         KitConfig cfg = KitConfig.get();
         if (cfg == null) return "Kit config not loaded";
@@ -34,7 +30,6 @@ public class KitConfigServerHelper {
         TeamManager teamManager = TeamSystem.getTeamManager();
         PlayerCombatData data = teamManager.getOrCreatePlayerData(player.getUUID());
 
-        // Check requirements
         if (kit.requirements != null) {
             if (data.getRankOrdinal() < kit.requirements.rank)
                 return "Rank too low, need " + kit.requirements.rank;
@@ -44,13 +39,13 @@ public class KitConfigServerHelper {
 
         if (!player.isAlive()) return "You are dead";
 
-        // Read player's loadout config
+        // Parse loadout
         PlayerLoadout loadout = parseLoadout(data.getLoadoutConfig(), kit);
         loadout.player_uuid = player.getUUID().toString();
         loadout.classId = classId;
         loadout.kitId = kitId;
 
-        // Build items from loadout
+        // Resolve weapon items
         List<ItemStack> hotbarItems = new ArrayList<>();
         ItemStack primary = resolveFirst(kit.weapons.primary, loadout.loadout.primary != null ? loadout.loadout.primary.id : null);
         ItemStack secondary = resolveFirst(kit.weapons.secondary, loadout.loadout.secondary != null ? loadout.loadout.secondary.id : null);
@@ -62,7 +57,13 @@ public class KitConfigServerHelper {
         if (!special.isEmpty()) hotbarItems.add(special);
         if (!grenade.isEmpty()) hotbarItems.add(grenade);
 
-        // Clear inventory and apply
+        // Resolve armor items
+        ItemStack helmet = resolveFirst(kit.armor.helmet, loadout.loadout.helmet);
+        ItemStack chestplate = resolveFirst(kit.armor.chestplate, loadout.loadout.chestplate);
+        ItemStack backpack = resolveFirst(kit.armor.backpack, loadout.loadout.backpack);
+        ItemStack shoulderpads = resolveFirst(kit.armor.shoulderpads, loadout.loadout.shoulderpads);
+
+        // Clear everything
         player.getInventory().clearContent();
         player.getInventory().armor.set(0, ItemStack.EMPTY);
         player.getInventory().armor.set(1, ItemStack.EMPTY);
@@ -71,25 +72,96 @@ public class KitConfigServerHelper {
         player.getInventory().offhand.set(0, ItemStack.EMPTY);
         KitManager.clearCuriosSlots(player);
 
-        // Place items in hotbar slots 0-3 (primary, secondary, special, grenade)
+        // Place weapons in hotbar slots 0-3
         for (int i = 0; i < hotbarItems.size() && i < 9; i++) {
             player.getInventory().setItem(i, hotbarItems.get(i));
         }
 
+        // Apply armor
+        if (!helmet.isEmpty())   player.getInventory().armor.set(3, helmet);
+        if (!chestplate.isEmpty()) player.getInventory().armor.set(2, chestplate);
+        if (!backpack.isEmpty()) KitManager.setCurioSlotByType(player, "back", backpack);
+        if (!shoulderpads.isEmpty()) KitManager.setCurioSlotByType(player, "body", shoulderpads);
+
+        // Auto-ammo for Superb Warfare weapons (TACZ guns carry their own mags)
+        int ammoSlot = 4;
+        for (ItemStack stack : hotbarItems) {
+            ItemStack ammo = getAmmoFor(stack);
+            if (!ammo.isEmpty() && ammoSlot < 9) {
+                player.getInventory().setItem(ammoSlot, ammo);
+                ammoSlot++;
+            }
+        }
+
         player.inventoryMenu.broadcastChanges();
-        return null; // success
+        return null;
+    }
+
+    private static ItemStack getAmmoFor(ItemStack stack) {
+        if (stack.isEmpty()) return ItemStack.EMPTY;
+        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+
+        // TACZ guns already have magazines, skip ammo
+        if (id.equals("tacz:modern_kinetic_gun")) return ItemStack.EMPTY;
+
+        // Superb Warfare ammo mapping
+        if (!id.startsWith("superbwarfare:")) return ItemStack.EMPTY;
+
+        String path = id.substring("superbwarfare:".length());
+
+        // RPG / launchers
+        if (path.equals("rpg") || path.equals("javelin") || path.equals("igla_9k38")) {
+            return resolveDirect("superbwarfare:heavy_ammo");
+        }
+
+        // Handguns
+        if (path.contains("glock") || path.contains("m_1911") || path.contains("mp_443")
+            || path.contains("deagle") || path.contains("cz75") || path.contains("taser")
+            || path.contains("vector")) {
+            return resolveDirect("superbwarfare:handgun_ammo_box");
+        }
+
+        // Shotguns
+        if (path.contains("m_870") || path.contains("aa_12") || path.contains("m_79")) {
+            return resolveDirect("superbwarfare:shotgun_ammo_box");
+        }
+
+        // Snipers
+        if (path.contains("awm") || path.contains("mosin") || path.contains("ntw")
+            || path.contains("m_98b") || path.contains("svd") || path.contains("sks")
+            || path.contains("bocek") || path.contains("k_98") || path.contains("mk_14")
+            || path.contains("marlin") || path.contains("hunting_rifle")) {
+            return resolveDirect("superbwarfare:sniper_ammo_box");
+        }
+
+        // Rifles (default)
+        if (path.contains("rpk") || path.contains("m_60") || path.contains("m_2_hb")
+            || path.contains("minigun")) {
+            return resolveDirect("superbwarfare:rifle_ammo_box");
+        }
+
+        return resolveDirect("superbwarfare:rifle_ammo_box");
+    }
+
+    private static ItemStack resolveDirect(String id) {
+        try {
+            ResourceLocation rl = new ResourceLocation(id);
+            net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(rl);
+            if (item != null && item != net.minecraft.world.item.Items.AIR) {
+                return new ItemStack(item);
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return ItemStack.EMPTY;
     }
 
     private static ItemStack resolveFirst(List<String> options, String preferred) {
         if (options == null || options.isEmpty()) return ItemStack.EMPTY;
-
-        // Try preferred weapon first
         if (preferred != null && !preferred.isEmpty() && options.contains(preferred)) {
             ItemStack stack = ItemResolver.resolve(preferred);
             if (!stack.isEmpty()) return stack;
         }
-
-        // Fallback to first available option
         for (String opt : options) {
             ItemStack stack = ItemResolver.resolve(opt);
             if (!stack.isEmpty()) return stack;
@@ -111,7 +183,6 @@ public class KitConfigServerHelper {
             String specialStr = obj.has("Special") ? obj.get("Special").getAsString() : "";
             String grenadeStr = obj.has("Grenade") ? obj.get("Grenade").getAsString() : "";
 
-            // Validate choices against kit options
             if (!primaryStr.isEmpty() && kit.weapons.primary.contains(primaryStr)) {
                 loadout.loadout.primary = new PlayerLoadout.WeaponSlot(primaryStr);
             }
@@ -124,6 +195,28 @@ public class KitConfigServerHelper {
             if (!grenadeStr.isEmpty() && kit.weapons.grenade.contains(grenadeStr)) {
                 loadout.loadout.grenade = grenadeStr;
             }
+
+            // Parse armor
+            if (obj.has("Helmet") && kit.armor.helmet.contains(obj.get("Helmet").getAsString())) {
+                loadout.loadout.helmet = obj.get("Helmet").getAsString();
+            }
+            if (obj.has("Chestplate") && kit.armor.chestplate.contains(obj.get("Chestplate").getAsString())) {
+                loadout.loadout.chestplate = obj.get("Chestplate").getAsString();
+            }
+            if (obj.has("Backpack") && kit.armor.backpack.contains(obj.get("Backpack").getAsString())) {
+                loadout.loadout.backpack = obj.get("Backpack").getAsString();
+            }
+            if (obj.has("Shoulderpads") && kit.armor.shoulderpads.contains(obj.get("Shoulderpads").getAsString())) {
+                loadout.loadout.shoulderpads = obj.get("Shoulderpads").getAsString();
+            }
+
+            // Parse attachments
+            if (obj.has("Attachments") && obj.get("Attachments").isJsonObject()) {
+                JsonObject attObj = obj.getAsJsonObject("Attachments");
+                for (Map.Entry<String, JsonElement> entry : attObj.entrySet()) {
+                    loadout.loadout.attachments.put(entry.getKey(), entry.getValue().getAsString());
+                }
+            }
         } catch (Exception e) {
             TeamSystem.LOGGER.warn("Failed to parse loadout JSON: {}", e.getMessage());
         }
@@ -131,9 +224,6 @@ public class KitConfigServerHelper {
         return loadout;
     }
 
-    /**
-     * Get available classes for a player (filtered by team).
-     */
     public static Map<String, KitConfig.ClassConfig> getClassesForPlayer(ServerPlayer player) {
         KitConfig cfg = KitConfig.get();
         if (cfg == null) return Map.of();

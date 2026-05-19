@@ -47,4 +47,16 @@ public class I18n {
         }
         return template;
     }
+
+    /**
+     * Returns localized text from a bilingual string "English // Русский".
+     * If no " // " separator is found, returns the text as-is.
+     */
+    public static String localize(String bilingual) {
+        if (bilingual == null || bilingual.isEmpty()) return "";
+        int sep = bilingual.indexOf(" // ");
+        if (sep < 0) return bilingual;
+        boolean isRussian = "ru".equals(ClientTeamData.language);
+        return isRussian ? bilingual.substring(sep + 4) : bilingual.substring(0, sep);
+    }
 }

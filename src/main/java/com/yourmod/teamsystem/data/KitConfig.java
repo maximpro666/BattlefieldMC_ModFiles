@@ -21,8 +21,16 @@ public class KitConfig {
         public String display_name;
         public String description;
         public KitWeapons weapons = new KitWeapons();
+        public KitArmor armor = new KitArmor();
         public Map<String, AttachmentLimit> attachment_limits = new HashMap<>();
         public KitRequirements requirements = new KitRequirements();
+    }
+
+    public static class KitArmor {
+        public List<String> helmet = new ArrayList<>();
+        public List<String> chestplate = new ArrayList<>();
+        public List<String> backpack = new ArrayList<>();
+        public List<String> shoulderpads = new ArrayList<>();
     }
 
     public static class KitWeapons {

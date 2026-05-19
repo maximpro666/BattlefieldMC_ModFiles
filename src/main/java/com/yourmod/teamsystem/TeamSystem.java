@@ -10,6 +10,7 @@ import com.yourmod.teamsystem.core.*;
 import com.yourmod.teamsystem.core.ModSounds;
 import com.yourmod.teamsystem.events.CombatEventHandler;
 import com.yourmod.teamsystem.events.PlayerEventHandler;
+import com.yourmod.teamsystem.data.KitConfig;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.proxy.ProxyMessenger;
 import net.minecraft.core.registries.Registries;
@@ -35,6 +36,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -122,6 +124,8 @@ public class TeamSystem {
             );
 
         config = TeamSystemConfig.load(event.getServer());
+
+        KitConfig.loadOrCreate(event.getServer().getWorldPath(LevelResource.ROOT));
 
         mapPoolManager = new MapPoolManager(event.getServer());
         mapPoolManager.loadConfig();

@@ -30,8 +30,14 @@ public class KitConfigSyncPacket {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 ClientTeamData.receivedKitConfigJson = configJson;
                 if (configJson != null && !configJson.isEmpty()) {
-                    KitConfig cfg = KitConfig.GSON.fromJson(configJson, KitConfig.class);
-                    KitConfig.set(cfg);
+                    try {
+                        KitConfig cfg = KitConfig.GSON.fromJson(configJson, KitConfig.class);
+                        if (cfg != null) {
+                            KitConfig.set(cfg);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         });

@@ -131,6 +131,29 @@ public class KitManager {
         }
     }
 
+    /**
+     * Set a curio slot by type name (e.g. "back", "body").
+     * Only sets the first slot of that type.
+     */
+    public static void setCurioSlotByType(ServerPlayer player, String slotType, ItemStack stack) {
+        if (!curiosDetected) return;
+        try {
+            Map<String, ?> curios = getCuriosMap(player);
+            Object curioType = curios.get(slotType);
+            if (curioType == null) {
+                TeamSystem.LOGGER.warn("Curios slot type '{}' not found on player", slotType);
+                return;
+            }
+            Object stacks = curiosGetStacksFromType.invoke(curioType);
+            if (stacks == null) return;
+            // Set first non-empty or first available slot
+            ItemStack existing = (ItemStack) curiosGetStackInSlot.invoke(stacks, 0);
+            curiosSetStackInSlot.invoke(stacks, 0, stack);
+        } catch (Exception e) {
+            TeamSystem.LOGGER.warn("Failed to set curio slot '{}': {}", slotType, e.getMessage());
+        }
+    }
+
     public void loadKits() {
         try {
             Path configPath = Paths.get(KITS_FILE);

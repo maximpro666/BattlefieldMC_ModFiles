@@ -1,5 +1,6 @@
 package com.yourmod.teamsystem.client.gui.screen;
 
+import com.yourmod.teamsystem.client.gui.I18n;
 import com.yourmod.teamsystem.client.gui.UITheme;
 
 import com.yourmod.teamsystem.data.KitConfig;
@@ -136,7 +137,10 @@ public class KitLoadoutScreen extends Screen {
         g.fill(panelX, panelY, panelX + panelW, panelY + panelH, AnimationHelper.withAlpha(COLOR_PANEL, (int)(fadeAlpha * 0xDD)));
         g.fill(panelX, panelY, panelX + panelW, panelY + 3, AnimationHelper.withAlpha(COLOR_ORANGE, (int)(fadeAlpha * 255)));
 
-        String title = kitId.toUpperCase() + " LOADOUT";
+        KitConfig cfgL = KitConfig.get();
+        KitConfig.KitDef currentKit = cfgL != null && cfgL.classes.containsKey(classId) ? cfgL.classes.get(classId).kits.get(kitId) : null;
+        String titleName = currentKit != null && currentKit.display_name != null ? I18n.localize(currentKit.display_name).toUpperCase() : kitId.toUpperCase();
+        String title = titleName + " LOADOUT";
         int tw = font.width(title);
         g.drawString(font, title, width / 2 - tw / 2, panelY + 8, AnimationHelper.withAlpha(COLOR_ORANGE, (int)(fadeAlpha * 255)));
 

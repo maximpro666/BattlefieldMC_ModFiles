@@ -1,5 +1,6 @@
 package com.yourmod.teamsystem.client.gui.screen;
 
+import com.yourmod.teamsystem.client.gui.I18n;
 import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.gui.component.BScrollPanel;
@@ -68,7 +69,6 @@ public class ClassSelectionScreen extends Screen {
 
             for (Map.Entry<String, KitConfig.ClassConfig> entry : classMap.entrySet()) {
                 classes.add(entry.getValue());
-                selectedClassId = null;
 
                 boolean anyKitAvailable = false;
                 String lockReason = null;
@@ -177,7 +177,7 @@ public class ClassSelectionScreen extends Screen {
                        : AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, (int)(alpha * 255)));
         }
 
-        String displayName = cl.display_name != null ? cl.display_name.toUpperCase() : "CLASS";
+        String displayName = cl.display_name != null ? I18n.localize(cl.display_name).toUpperCase() : "CLASS";
         int dw = font.width(displayName);
         g.drawString(font, displayName, x + CARD_W / 2 - dw / 2, y + CARD_H / 2 - 4,
             locked ? AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(alpha * 180))
@@ -246,6 +246,13 @@ public class ClassSelectionScreen extends Screen {
 
     @Override
     public void tick() {
+        if (classes.isEmpty()) {
+            KitConfig cfg = KitConfig.get();
+            if (cfg != null && !cfg.classes.isEmpty()) {
+                init();
+                return;
+            }
+        }
         scrollPanel.tick();
     }
 

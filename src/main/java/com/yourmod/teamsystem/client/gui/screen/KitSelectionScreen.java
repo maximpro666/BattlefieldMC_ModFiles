@@ -1,5 +1,6 @@
 package com.yourmod.teamsystem.client.gui.screen;
 
+import com.yourmod.teamsystem.client.gui.I18n;
 import com.yourmod.teamsystem.client.gui.UITheme;
 
 import com.yourmod.teamsystem.data.KitConfig;
@@ -93,7 +94,7 @@ public class KitSelectionScreen extends Screen {
 
     private void customizeKit() {
         if (selectedKitId != null) {
-            Minecraft.getInstance().setScreen(new KitLoadoutScreen(classId, selectedKitId));
+            Minecraft.getInstance().setScreen(new KitCustomizationScreen(classId, selectedKitId));
         }
     }
 
@@ -157,14 +158,14 @@ public class KitSelectionScreen extends Screen {
         g.fill(x, y, x + 1, y + CELL_H, brdColor);
         g.fill(x + CELL_W - 1, y, x + CELL_W, y + CELL_H, brdColor);
 
-        String display = kit.display_name != null ? kit.display_name.toUpperCase() : entry.getKey().toUpperCase();
+        String display = kit.display_name != null ? I18n.localize(kit.display_name).toUpperCase() : entry.getKey().toUpperCase();
         int tw = font.width(display);
         g.drawString(font, display,
             x + CELL_W / 2 - tw / 2, y + CELL_H / 2 - 8,
             AnimationHelper.withAlpha(COLOR_TEXT, (int)(alpha * 255)));
 
         if (kit.description != null && !kit.description.isEmpty()) {
-            g.drawCenteredString(font, kit.description, x + CELL_W / 2, y + CELL_H / 2 + 8,
+            g.drawCenteredString(font, I18n.localize(kit.description), x + CELL_W / 2, y + CELL_H / 2 + 8,
                 AnimationHelper.withAlpha(COLOR_SUBTEXT, (int)(alpha * 180)));
         }
 

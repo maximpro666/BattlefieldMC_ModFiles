@@ -28,6 +28,11 @@ public class PlayerLoadout {
         public WeaponSlot secondary;
         public String special;
         public String grenade;
+        public String helmet;
+        public String chestplate;
+        public String backpack;
+        public String shoulderpads;
+        public Map<String, String> attachments = new HashMap<>();
     }
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
