@@ -33,6 +33,7 @@ public class CaptureParticles {
         if (points == null || points.isEmpty()) return;
 
         for (CapturePointData cp : points) {
+            float zoneRad = (float)(cp.radius() > 0 ? cp.radius() : cfg.capturePoint.zoneRadius);
             double dx = cp.x() - camX;
             double dy = cp.y() - camY;
             double dz = cp.z() - camZ;
@@ -80,17 +81,17 @@ public class CaptureParticles {
             // === Outer ring (dashed) ===
             renderDashedRing(poseStack, bufferSource,
                 cp.x() - camX, cp.y() - camY + 0.06, cp.z() - camZ,
-                (float)ringCfg.outerRadius, 2, elapsed * 0.125f, ringColor, extraPulse * alpha);
+                zoneRad, (float)ringCfg.outerThickness, elapsed * 0.125f, ringColor, extraPulse * alpha);
 
             // === Inner ring (solid) ===
             renderSolidRing(poseStack, bufferSource,
-                cp.x() - camX, cp.y() - camY + 0.06, cp.z() - camZ,
-                (float)ringCfg.innerRadius, 3, -elapsed * 0.083f, ringColor, extraPulse * alpha * 1.4f);
+                cp.x() - camX, cp.y() - camY + 0.05, cp.z() - camZ,
+                zoneRad * 0.7f, (float)ringCfg.innerThickness, -elapsed * 0.083f, ringColor, extraPulse * alpha * 1.4f);
 
             // === Dots on outer ring ===
             renderRingDots(poseStack, bufferSource,
-                cp.x() - camX, cp.y() - camY + 0.06, cp.z() - camZ,
-                (float)ringCfg.ringDotsRadius, ringCfg.ringDotsCount, elapsed * 0.125f, ringColor, extraPulse * alpha);
+                cp.x() - camX, cp.y() - camY + 0.07, cp.z() - camZ,
+                zoneRad, ringCfg.ringDotsCount, elapsed * 0.125f, ringColor, extraPulse * alpha);
 
             // === Beam removed per request ===
         }
@@ -98,11 +99,11 @@ public class CaptureParticles {
 
     private void renderDashedRing(PoseStack poseStack, MultiBufferSource bufferSource,
                                   double ox, double oy, double oz,
-                                  float radius, int strokePx, float rotation,
+                                  float radius, float thickness, float rotation,
                                   int color, float alpha) {
         poseStack.pushPose();
         poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
+        VertexConsumer vc = bufferSource.getBuffer(RenderType.translucent());
         Matrix4f mat = poseStack.last().pose();
 
         float r = ((color >> 16) & 0xFF) / 255f;
@@ -110,29 +111,31 @@ public class CaptureParticles {
         float b = (color & 0xFF) / 255f;
         float a = ((color >> 24) & 0xFF) / 255f * alpha;
 
-        float dashLen = 0.4f;
-        float gapLen = 0.2f;
+        float dashLen = 0.6f;
+        float gapLen = 0.3f;
         float arcLen = dashLen + gapLen;
         float circumference = (float)(Math.PI * 2.0 * radius);
         int segments = (int)(circumference / arcLen);
         float segAngle = (float)(Math.PI * 2.0 / segments);
+        float halfT = thickness / 2f;
 
-        float strokeStep = 0.06f;
-        int strokeLines = Math.max(1, strokePx / 2);
-        float strokeStart = -(strokeLines - 1) * strokeStep / 2f;
+        for (int i = 0; i < segments; i += 2) {
+            float a1 = i * segAngle + rotation;
+            float a2 = (i + 1) * segAngle + rotation;
+            float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
+            float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
 
-        for (int s = 0; s < strokeLines; s++) {
-            float rad = radius + strokeStart + s * strokeStep;
-            for (int i = 0; i < segments; i += 2) {
-                float a1 = i * segAngle + rotation;
-                float a2 = (i + 1) * segAngle + rotation;
-                float x1 = (float)(Math.cos(a1) * rad);
-                float z1 = (float)(Math.sin(a1) * rad);
-                float x2 = (float)(Math.cos(a2) * rad);
-                float z2 = (float)(Math.sin(a2) * rad);
-                vc.vertex(mat, x1, 0, z1).color(r, g, b, a).normal(0, 1, 0).endVertex();
-                vc.vertex(mat, x2, 0, z2).color(r, g, b, a).normal(0, 1, 0).endVertex();
-            }
+            float x1i = cos1 * (radius - halfT), z1i = sin1 * (radius - halfT);
+            float x1o = cos1 * (radius + halfT), z1o = sin1 * (radius + halfT);
+            float x2i = cos2 * (radius - halfT), z2i = sin2 * (radius - halfT);
+            float x2o = cos2 * (radius + halfT), z2o = sin2 * (radius + halfT);
+
+            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).endVertex();
         }
 
         poseStack.popPose();
@@ -140,11 +143,11 @@ public class CaptureParticles {
 
     private void renderSolidRing(PoseStack poseStack, MultiBufferSource bufferSource,
                                  double ox, double oy, double oz,
-                                 float radius, int strokePx, float rotation,
+                                 float radius, float thickness, float rotation,
                                  int color, float alpha) {
         poseStack.pushPose();
         poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
+        VertexConsumer vc = bufferSource.getBuffer(RenderType.translucent());
         Matrix4f mat = poseStack.last().pose();
 
         float r = ((color >> 16) & 0xFF) / 255f;
@@ -152,22 +155,26 @@ public class CaptureParticles {
         float b = (color & 0xFF) / 255f;
         float a = ((color >> 24) & 0xFF) / 255f * alpha;
 
-        float strokeStep = 0.06f;
-        int strokeLines = Math.max(1, strokePx / 2);
-        float strokeStart = -(strokeLines - 1) * strokeStep / 2f;
+        int segments = 48;
+        float halfT = thickness / 2f;
 
-        for (int s = 0; s < strokeLines; s++) {
-            float rad = radius + strokeStart + s * strokeStep;
-            for (int i = 0; i < RING_SEGMENTS; i++) {
-                float a1 = (float)(i / (double) RING_SEGMENTS * Math.PI * 2.0) + rotation;
-                float a2 = (float)((i + 1) / (double) RING_SEGMENTS * Math.PI * 2.0) + rotation;
-                float x1 = (float)(Math.cos(a1) * rad);
-                float z1 = (float)(Math.sin(a1) * rad);
-                float x2 = (float)(Math.cos(a2) * rad);
-                float z2 = (float)(Math.sin(a2) * rad);
-                vc.vertex(mat, x1, 0, z1).color(r, g, b, a).normal(0, 1, 0).endVertex();
-                vc.vertex(mat, x2, 0, z2).color(r, g, b, a).normal(0, 1, 0).endVertex();
-            }
+        for (int i = 0; i < segments; i++) {
+            float a1 = (float)(i / (double) segments * Math.PI * 2.0) + rotation;
+            float a2 = (float)((i + 1) / (double) segments * Math.PI * 2.0) + rotation;
+            float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
+            float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
+
+            float x1i = cos1 * (radius - halfT), z1i = sin1 * (radius - halfT);
+            float x1o = cos1 * (radius + halfT), z1o = sin1 * (radius + halfT);
+            float x2i = cos2 * (radius - halfT), z2i = sin2 * (radius - halfT);
+            float x2o = cos2 * (radius + halfT), z2o = sin2 * (radius + halfT);
+
+            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).endVertex();
         }
 
         poseStack.popPose();
@@ -247,7 +254,7 @@ public class CaptureParticles {
             double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
             if (dist <= maxDist) {
                 renderBaseRing(poseStack, bufferSource, dx, nato[1] - camY, dz,
-                    radius, 0x661C5FAD, 0x331C5FAD, elapsed, dist, brCfg);
+                    radius, 0x661C5FAD, elapsed, dist, brCfg);
             }
         }
         if (russia != null) {
@@ -257,57 +264,34 @@ public class CaptureParticles {
             double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
             if (dist <= maxDist) {
                 renderBaseRing(poseStack, bufferSource, dx, russia[1] - camY, dz,
-                    radius, 0x66AD1C1C, 0x33AD1C1C, elapsed, dist, brCfg);
+                    radius, 0x66AD1C1C, elapsed, dist, brCfg);
             }
         }
     }
 
     private void renderBaseRing(PoseStack poseStack, MultiBufferSource bufferSource,
                                 double ox, double oy, double oz,
-                                int baseRadius, int color, int beamColor,
+                                int baseRadius, int color,
                                 float elapsed, double dist,
                                 VisualsConfig.BaseRingVisual brCfg) {
         float alpha = calcAlpha(dist, brCfg.maxDist);
         float rot = elapsed * 0.05f;
 
-        renderBaseDashedRing(poseStack, bufferSource, ox, oy, oz,
-            baseRadius, (int)brCfg.outerRingStroke, rot, color, alpha);
+        float ringRad = (float)(baseRadius * brCfg.radiusMultiplier);
+        renderBaseDashedRing(poseStack, bufferSource, ox, oy + 0.06, oz,
+            ringRad, (float)brCfg.outerThickness, rot, color, alpha);
 
-        renderBaseDashedRing(poseStack, bufferSource, ox, oy, oz,
-            (float)(baseRadius * brCfg.innerRingScale), (int)brCfg.innerRingStroke, rot + 0.5f, color, alpha * 0.35f);
-
-        float beamPulse = (float)(Math.sin(elapsed * Math.PI / 1.5) * 0.15 + 0.35);
-        float beamR = ((beamColor >> 16) & 0xFF) / 255f;
-        float beamG = ((beamColor >> 8) & 0xFF) / 255f;
-        float beamB = (beamColor & 0xFF) / 255f;
-        float beamA = ((beamColor >> 24) & 0xFF) / 255f * alpha * beamPulse;
-
-        poseStack.pushPose();
-        poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
-        Matrix4f mat = poseStack.last().pose();
-
-        float bh = (float)(brCfg.beamHeight + Math.sin(elapsed * 0.8) * 1.0);
-        float bw = 0.3f;
-        int beamCount = (int)brCfg.beamCount;
-        for (int i = 0; i < beamCount; i++) {
-            float angle = (float)(i / (double)beamCount * Math.PI * 2.0) + rot;
-            float nx = (float)(Math.cos(angle) * bw);
-            float nz = (float)(Math.sin(angle) * bw);
-            vc.vertex(mat, nx, 0.06f, nz).color(beamR, beamG, beamB, beamA).normal(0, 1, 0).endVertex();
-            vc.vertex(mat, nx, bh, nz).color(beamR, beamG, beamB, beamA * 0.1f).normal(0, 1, 0).endVertex();
-        }
-
-        poseStack.popPose();
+        renderBaseDashedRing(poseStack, bufferSource, ox, oy + 0.05, oz,
+            ringRad * (float)brCfg.innerRingScale, (float)brCfg.innerThickness, rot + 0.5f, color, alpha * 0.35f);
     }
 
     private void renderBaseDashedRing(PoseStack poseStack, MultiBufferSource bufferSource,
                                       double ox, double oy, double oz,
-                                      float radius, int strokePx, float rotation,
+                                      float radius, float thickness, float rotation,
                                       int color, float alpha) {
         poseStack.pushPose();
         poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
+        VertexConsumer vc = bufferSource.getBuffer(RenderType.translucent());
         Matrix4f mat = poseStack.last().pose();
 
         float r = ((color >> 16) & 0xFF) / 255f;
@@ -315,29 +299,31 @@ public class CaptureParticles {
         float b = (color & 0xFF) / 255f;
         float a = ((color >> 24) & 0xFF) / 255f * alpha;
 
-        float dashLen = 0.6f;
-        float gapLen = 0.3f;
+        float dashLen = 0.8f;
+        float gapLen = 0.4f;
         float arcLen = dashLen + gapLen;
         float circumference = (float)(Math.PI * 2.0 * radius);
         int segments = (int)(circumference / arcLen);
         float segAngle = (float)(Math.PI * 2.0 / segments);
+        float halfT = thickness / 2f;
 
-        float strokeStep = 0.08f;
-        int strokeLines = Math.max(1, strokePx / 2);
-        float strokeStart = -(strokeLines - 1) * strokeStep / 2f;
+        for (int i = 0; i < segments; i += 2) {
+            float a1 = i * segAngle + rotation;
+            float a2 = (i + 1) * segAngle + rotation;
+            float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
+            float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
 
-        for (int s = 0; s < strokeLines; s++) {
-            float rad = radius + strokeStart + s * strokeStep;
-            for (int i = 0; i < segments; i += 2) {
-                float a1 = i * segAngle + rotation;
-                float a2 = (i + 1) * segAngle + rotation;
-                float x1 = (float)(Math.cos(a1) * rad);
-                float z1 = (float)(Math.sin(a1) * rad);
-                float x2 = (float)(Math.cos(a2) * rad);
-                float z2 = (float)(Math.sin(a2) * rad);
-                vc.vertex(mat, x1, 0, z1).color(r, g, b, a).normal(0, 1, 0).endVertex();
-                vc.vertex(mat, x2, 0, z2).color(r, g, b, a).normal(0, 1, 0).endVertex();
-            }
+            float x1i = cos1 * (radius - halfT), z1i = sin1 * (radius - halfT);
+            float x1o = cos1 * (radius + halfT), z1o = sin1 * (radius + halfT);
+            float x2i = cos2 * (radius - halfT), z2i = sin2 * (radius - halfT);
+            float x2o = cos2 * (radius + halfT), z2o = sin2 * (radius + halfT);
+
+            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).endVertex();
+            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).endVertex();
         }
 
         poseStack.popPose();
@@ -420,10 +406,10 @@ public class CaptureParticles {
             float edgeFade = (float)(1.0 - Math.abs(t - 0.5) * 0.2);
             float a = Math.max(0.08f, alpha * edgeFade);
 
-            vc.vertex(mat, wx1, (float)(yBase - camY), wz1).color(r, g, b, a * 0.8f).endVertex();
-            vc.vertex(mat, wx1, (float)(yBase + bh - camY), wz1).color(r, g, b, a * 0.04f).endVertex();
-            vc.vertex(mat, wx2, (float)(yBase - camY), wz2).color(r, g, b, a * 0.8f).endVertex();
-            vc.vertex(mat, wx2, (float)(yBase + bh - camY), wz2).color(r, g, b, a * 0.04f).endVertex();
+            vc.vertex(mat, wx1, (float)(yBase - camY), wz1).color(r, g, b, a * 0.8f).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, wx1, (float)(yBase + bh - camY), wz1).color(r, g, b, a * 0.04f).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, wx2, (float)(yBase - camY), wz2).color(r, g, b, a * 0.8f).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, wx2, (float)(yBase + bh - camY), wz2).color(r, g, b, a * 0.04f).normal(0, 1, 0).endVertex();
         }
     }
 

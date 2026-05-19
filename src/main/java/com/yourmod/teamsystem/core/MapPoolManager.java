@@ -225,7 +225,10 @@ public class MapPoolManager {
     }
 
     // ========== Source → Live Copy & Delete ==========
+    // LEGACY: single-server mode. In multi-server mode (teamsystem.mode=match),
+    // the match server has a pre-loaded world from the template and copyToLive is not needed.
 
+    @Deprecated
     public boolean copyToLive(MapConfig map) {
         String folderName = map.getWorldFolder();
         if (folderName == null || folderName.isEmpty()) return false;
@@ -291,6 +294,7 @@ public class MapPoolManager {
         }
     }
 
+    @Deprecated
     private static void forceGC() {
         try {
             System.gc();
@@ -331,6 +335,7 @@ public class MapPoolManager {
         }
     }
 
+    @Deprecated
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void clearChunkCache(ServerLevel level) {
         try {
@@ -503,27 +508,18 @@ public class MapPoolManager {
         byte[] data = Files.readAllBytes(source);
         for (int attempt = 0; attempt < 10; attempt++) {
             try {
-                Files.write(target, data, java.nio.file.StandardOpenOption.CREATE,
-                    java.nio.file.StandardOpenOption.TRUNCATE_EXISTING,
-                    java.nio.file.StandardOpenOption.WRITE);
+                try (var ch = java.nio.channels.FileChannel.open(target,
+                        java.nio.file.StandardOpenOption.WRITE,
+                        java.nio.file.StandardOpenOption.CREATE)) {
+                    ch.write(java.nio.ByteBuffer.wrap(data));
+                    try { ch.truncate(data.length); } catch (Exception ignored) {}
+                }
                 return;
             } catch (IOException e) {
-                if (attempt == 5) {
-                    try {
-                        try (var ch = java.nio.channels.FileChannel.open(target,
-                                java.nio.file.StandardOpenOption.WRITE,
-                                java.nio.file.StandardOpenOption.TRUNCATE_EXISTING,
-                                java.nio.file.StandardOpenOption.CREATE)) {
-                            ch.write(java.nio.ByteBuffer.wrap(data));
-                            return;
-                        }
-                    } catch (Exception e2) {
-                        if (attempt == 9) throw e2;
-                    }
-                }
                 try { Thread.sleep(200); } catch (InterruptedException ignored) {}
             }
         }
+        throw new IOException("Failed to write " + target + " after 10 attempts");
     }
 
     private void autoDetectMapCenter(MapConfig map) {

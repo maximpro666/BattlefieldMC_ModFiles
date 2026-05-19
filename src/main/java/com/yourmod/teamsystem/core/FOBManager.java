@@ -50,6 +50,10 @@ public class FOBManager {
         load();
     }
 
+    public void clearPlayerCooldown(UUID uuid) {
+        lastFOBTime.remove(uuid);
+    }
+
     public String canPlaceFOB(ServerPlayer player) {
         UUID uuid = player.getUUID();
         Team team = TeamSystem.getTeamManager().getOrCreatePlayerData(uuid).getTeam();

@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation files('lib/velocity-3.4.0.jar')
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+}
+
+jar {
+    archiveFileName = 'teamsystem-proxy-1.0.0.jar'
+}

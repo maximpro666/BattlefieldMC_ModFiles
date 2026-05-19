@@ -11,6 +11,7 @@ import com.yourmod.teamsystem.core.ModSounds;
 import com.yourmod.teamsystem.events.CombatEventHandler;
 import com.yourmod.teamsystem.events.PlayerEventHandler;
 import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.proxy.ProxyMessenger;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -128,6 +129,8 @@ public class TeamSystem {
 
         MapDimensionGenerator.generateDimensionDatapacks(event.getServer());
 
+        ProxyMessenger.init(event.getServer());
+
         gameManager = new GameManager(event.getServer());
         MinecraftForge.EVENT_BUS.register(gameManager);
         gameManager.startInitialCountdown();
@@ -183,6 +186,7 @@ public class TeamSystem {
         com.yourmod.teamsystem.commands.AdminCommand.register(event.getDispatcher());
         com.yourmod.teamsystem.commands.KitAdminCommand.register(event.getDispatcher());
         com.yourmod.teamsystem.commands.RedeployCommand.register(event.getDispatcher());
+        com.yourmod.teamsystem.commands.StartMatchCommand.register(event.getDispatcher());
 
     }
 

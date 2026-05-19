@@ -120,4 +120,9 @@ public class EconomyManager {
             battleCredits.put(entryTag.getUUID("UUID"), entryTag.getInt("BC"));
         }
     }
+
+    public void clearPlayer(UUID uuid) {
+        battleCredits.remove(uuid);
+        scorePoints.remove(uuid);
+    }
 }

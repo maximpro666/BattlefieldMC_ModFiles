@@ -22,8 +22,8 @@ public class VisualsConfig {
     public BaseRingVisual baseRings = new BaseRingVisual();
 
     public static class PointVisual {
-        public double markerSize = 24.0;
-        public double borderWidth = 1.2;
+        public double markerSize = 3.0;
+        public double borderWidth = 0.3;
         public double progressEdgeWidth = 1.0;
         public double riseHeight = 6.0;
         public double extraScale = 0.06;
@@ -31,11 +31,12 @@ public class VisualsConfig {
         public double bobAmplitude = 5.0;
         public double bobPeriod = 3.0;
         public boolean showDistance = true;
+        public double zoneRadius = 38.0;
     }
 
     public static class BaseVisual {
-        public double width = 78.0;
-        public double height = 28.0;
+        public double width = 40.0;
+        public double height = 14.0;
         public double borderWidth = 1.2;
         public double riseHeight = 6.0;
         public double extraScale = 0.06;
@@ -57,9 +58,11 @@ public class VisualsConfig {
     }
 
     public static class RingVisual {
-        public double outerRadius = 3.8;
-        public double innerRadius = 2.6;
-        public double ringDotsRadius = 3.8;
+        public double outerRadius = 38.0;
+        public double innerRadius = 26.0;
+        public double outerThickness = 0.5;
+        public double innerThickness = 0.3;
+        public double ringDotsRadius = 38.0;
         public int ringDotsCount = 6;
         public double maxRingDist = 80.0;
         public double maxBeamDist = 80.0;
@@ -68,10 +71,13 @@ public class VisualsConfig {
     public static class BaseRingVisual {
         public double outerRingStroke = 3;
         public double innerRingStroke = 1;
+        public double outerThickness = 0.8;
+        public double innerThickness = 0.5;
         public double innerRingScale = 0.7;
         public double beamCount = 10;
         public double beamHeight = 8.0;
         public double maxDist = 240.0;
+        public double radiusMultiplier = 10.0;
     }
 
     public static VisualsConfig get() {

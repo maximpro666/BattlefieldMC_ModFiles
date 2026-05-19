@@ -1,0 +1,8 @@
+{
+    "id": "teamsystem-proxy",
+    "name": "TeamSystem Proxy",
+    "version": "1.0.0",
+    "authors": ["maska"],
+    "description": "Manages disposable match server lifecycle and player routing",
+    "main": "com.yourmod.teamsystem.proxy.TeamSystemProxy"
+}

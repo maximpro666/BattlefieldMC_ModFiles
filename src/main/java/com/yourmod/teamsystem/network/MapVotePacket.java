@@ -1,6 +1,7 @@
 package com.yourmod.teamsystem.network;
 
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
@@ -26,7 +27,13 @@ public class MapVotePacket {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
             ServerPlayer player = context.getSender();
-            if (player == null || mapName.isEmpty()) return;
+            if (player == null) return;
+
+            if (!RateLimiter.checkAndThrottle(player)) return;
+            if (!PacketValidator.checkAndReject(player, PacketValidator.checkStringLength(mapName, 128))) return;
+            if (mapName.isEmpty()) return;
+            if (!PacketValidator.checkAndReject(player, PacketValidator.requireVoting(TeamSystem.getGameManager()))) return;
+
             TeamSystem.getGameManager().voteMap(player, mapName);
         });
         return true;

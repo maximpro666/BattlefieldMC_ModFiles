@@ -142,4 +142,13 @@ public class SquadManager {
         invitations.forEach((uuid, invites) -> invites.removeIf(Invitation::isExpired));
         invitations.entrySet().removeIf(e -> e.getValue().isEmpty());
     }
+
+    public void removePlayer(UUID playerId) {
+        leaveSquad(playerId);
+        invitations.remove(playerId);
+        for (Set<Invitation> invites : invitations.values()) {
+            invites.removeIf(inv -> inv.inviterUUID.equals(playerId));
+        }
+        invitations.entrySet().removeIf(e -> e.getValue().isEmpty());
+    }
 }

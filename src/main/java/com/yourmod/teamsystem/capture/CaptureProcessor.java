@@ -26,14 +26,20 @@ public class CaptureProcessor {
         List<CaptureZone> zones = data.getZones(dimId);
         if (zones.isEmpty()) return;
 
+        // Pre-cache team data once per tick to avoid repeated NBT lookups
+        Map<UUID, Team> teamCache = new HashMap<>();
+        for (ServerPlayer p : level.players()) {
+            teamCache.put(p.getUUID(),
+                TeamSystem.getTeamManager().getOrCreatePlayerData(p.getUUID()).getTeam());
+        }
+
         boolean changed = false;
         double natoOwned = 0;
         double russiaOwned = 0;
 
         for (CaptureZone zone : zones) {
             Team prevCapturing = zone.getCapturingTeam();
-            Map<Team, Integer> counts = countPlayersInZone(level, zone);
-
+            Map<Team, Integer> counts = countPlayersInZone(level, zone, teamCache);
             if (counts.isEmpty()) {
                 if (zone.getOwnerTeam().isPlayable() && zone.getProgress() < 1.0f) {
                     zone.addProgress((float) -DECAY_SPEED);
@@ -142,12 +148,12 @@ public class CaptureProcessor {
         if (changed) syncToAll(level, zones);
     }
 
-    private static Map<Team, Integer> countPlayersInZone(ServerLevel level, CaptureZone zone) {
+    private static Map<Team, Integer> countPlayersInZone(ServerLevel level, CaptureZone zone, Map<UUID, Team> teamCache) {
         Map<Team, Integer> counts = new HashMap<>();
         for (ServerPlayer player : level.players()) {
             if (!zone.contains(player)) continue;
-            Team team = TeamSystem.getTeamManager().getOrCreatePlayerData(player.getUUID()).getTeam();
-            if (team.isPlayable()) counts.merge(team, 1, Integer::sum);
+            Team team = teamCache.get(player.getUUID());
+            if (team != null && team.isPlayable()) counts.merge(team, 1, Integer::sum);
         }
         return counts;
     }
@@ -197,6 +203,7 @@ public class CaptureProcessor {
         List<Double> xs = new ArrayList<>();
         List<Double> ys = new ArrayList<>();
         List<Double> zs = new ArrayList<>();
+        List<Double> radii = new ArrayList<>();
 
         for (CaptureZone z : zones) {
             ids.add(z.getId().hashCode());
@@ -208,9 +215,11 @@ public class CaptureProcessor {
             xs.add((double) center.getX());
             ys.add((double) center.getY());
             zs.add((double) center.getZ());
+            double half = (z.getMax().getX() - z.getMin().getX()) / 2.0;
+            radii.add(half);
         }
 
-        CapturePointSyncPacket packet = new CapturePointSyncPacket(ids, progress, owners, names, capturing, xs, ys, zs);
+        CapturePointSyncPacket packet = new CapturePointSyncPacket(ids, progress, owners, names, capturing, xs, ys, zs, radii);
         for (ServerPlayer player : TeamSystem.getGameManager().getServer().getPlayerList().getPlayers()) {
             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
         }

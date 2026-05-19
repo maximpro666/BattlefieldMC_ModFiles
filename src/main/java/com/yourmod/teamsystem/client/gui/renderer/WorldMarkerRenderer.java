@@ -9,6 +9,7 @@ import com.yourmod.teamsystem.client.CapturePointData;
 import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.client.gui.VisualsConfig;
 import com.yourmod.teamsystem.core.MarkerData;
+import com.yourmod.teamsystem.core.Team;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -23,9 +24,9 @@ import java.util.List;
 
 public class WorldMarkerRenderer {
 
-    private static final double MAX_DIST = 240.0;
-    private static final double BASE_MAX_DIST = 240.0;
-    private static final double FULL_VIS_DIST = 40.0;
+    private static final double MAX_DIST = 1.0E8;
+    private static final double BASE_MAX_DIST = 1.0E8;
+    private static final double FULL_VIS_DIST = 1.0E8;
 
     // State colors: fillColor, borderColor, bgColor
     private static final int   NEUTRAL_BORDER = 0xFF888888;
@@ -141,16 +142,21 @@ public class WorldMarkerRenderer {
             bob = (float)(Math.sin(elapsed * Math.PI * 2.0 / 1.5) * 4f / 16f);
         }
 
-        // Rise+scale with distance
-        double t = Math.min(1.0, dist / MAX_DIST);
-        double rise = t * cfg.riseHeight;
-        float scale = 0.035f + (float)(t * cfg.extraScale);
+        // Rise into sky when far away so icon is visible above terrain
+        double rise = 0;
+        if (dist > 50) {
+            rise = Math.min((dist - 50) * 0.5, 200.0);
+        }
+        double sizeT = Math.min(dist / 450.0, 1.0);
+        float sizeMul = 1.0f + (float)(sizeT * 4.0f);
+        float scale = 0.015f * sizeMul;
 
         poseStack.pushPose();
         double wy = cp.y() + 3.0 + bob + rise;
         poseStack.translate(cp.x() - camPos.x, wy - camPos.y, cp.z() - camPos.z);
         poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        poseStack.translate(0, 0, (float)(-dist * 0.0001));
         poseStack.scale(-scale, -scale, scale);
 
         Font font = mc.font;
@@ -235,29 +241,36 @@ public class WorldMarkerRenderer {
 
     private void drawRect(PoseStack poseStack, MultiBufferSource bufferSource,
                           float x1, float y1, float x2, float y2, int color) {
+        drawRectDepth(poseStack, bufferSource, x1, y1, x2, y2, color, 0);
+    }
+
+    private void drawRectDepth(PoseStack poseStack, MultiBufferSource bufferSource,
+                          float x1, float y1, float x2, float y2, int color, float z) {
         VertexConsumer vc = bufferSource.getBuffer(RenderType.gui());
         Matrix4f mat = poseStack.last().pose();
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;
         float b = (color & 0xFF) / 255f;
         float a = ((color >> 24) & 0xFF) / 255f;
-        vc.vertex(mat, x1, y2, 0).color(r, g, b, a).endVertex();
-        vc.vertex(mat, x2, y2, 0).color(r, g, b, a).endVertex();
-        vc.vertex(mat, x2, y1, 0).color(r, g, b, a).endVertex();
-        vc.vertex(mat, x1, y1, 0).color(r, g, b, a).endVertex();
+        vc.vertex(mat, x1, y2, z).color(r, g, b, a).endVertex();
+        vc.vertex(mat, x2, y2, z).color(r, g, b, a).endVertex();
+        vc.vertex(mat, x2, y1, z).color(r, g, b, a).endVertex();
+        vc.vertex(mat, x1, y1, z).color(r, g, b, a).endVertex();
     }
 
     private void renderBases(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera, Vec3 camPos) {
+        Team playerTeam = ClientTeamData.getLocalPlayerTeam();
+        if (playerTeam == Team.SPECTATOR) return;
         int[] nato = ClientTeamData.getNatoBasePos();
         int[] russia = ClientTeamData.getRussiaBasePos();
         if (nato == null && russia == null) return;
         float elapsed = (System.currentTimeMillis() - startTime) / 1000f;
 
-        if (nato != null) {
+        if (playerTeam == Team.NATO && nato != null) {
             renderBaseMarker(poseStack, bufferSource, camera, camPos,
                 nato[0], nato[1], nato[2], "NATO", UITheme.TEAM_NATO, elapsed);
         }
-        if (russia != null) {
+        if (playerTeam == Team.RUSSIA && russia != null) {
             renderBaseMarker(poseStack, bufferSource, camera, camPos,
                 russia[0], russia[1], russia[2], "RUSSIA", UITheme.TEAM_RUSSIA, elapsed);
         }
@@ -272,70 +285,65 @@ public class WorldMarkerRenderer {
         double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (dist > BASE_MAX_DIST) return;
 
-        VisualsConfig.BaseVisual cfg = VisualsConfig.get().base;
-
-        // Proximity fade using base radius
         int baseRadius = ClientTeamData.getBaseRadius();
         float proxAlpha = 1.0f;
-        if (cfg.proximityFade > 0 && dist < baseRadius) {
+        if (baseRadius > 0 && dist < baseRadius) {
             proxAlpha = (float)(dist / baseRadius);
         }
 
         float alpha = calcAlpha(dist, BASE_MAX_DIST) * proxAlpha;
         if (alpha < 0.01) return;
 
-        float bob = (float)(Math.sin(elapsed * Math.PI * 2.0 / cfg.bobPeriod) * cfg.bobAmplitude / 16f);
+        float bob = (float)(Math.sin(elapsed * Math.PI * 2.0 / 3.0) * 5f / 16f);
 
-        // Rise+scale with distance
-        double t = Math.min(1.0, dist / BASE_MAX_DIST);
-        double rise = t * cfg.riseHeight;
-        float scale = 0.035f + (float)(t * cfg.extraScale);
+        double rise = 0;
+        if (dist > 50) {
+            rise = Math.min((dist - 50) * 0.5, 200.0);
+        }
+        double sizeT = Math.min(dist / 450.0, 1.0);
+        float sizeMul = 1.0f + (float)(sizeT * 4.0f);
+        float scale = 0.015f * sizeMul;
 
         poseStack.pushPose();
         poseStack.translate(dx, y + 4.0 + bob + rise - camPos.y, dz);
         poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        poseStack.translate(0, 0, (float)(-dist * 0.0001));
         poseStack.scale(-scale, -scale, scale);
 
         Font font = Minecraft.getInstance().font;
-        float hw = (float)cfg.width / 2f;
-        float hh = (float)cfg.height / 2f;
+        float hs = 6f;
+        float bd = 1.2f;
 
-        // Background
-        drawRect(poseStack, bufferSource, -hw, -hh, hw, hh,
-            ((int)(0x99 * alpha) << 24) | 0x0A0A0A);
-        // Team fill
-        drawRect(poseStack, bufferSource, -hw, -hh, hw, hh,
-            ((int)(0x77 * alpha) << 24) | (teamColor & 0x00FFFFFF));
-        // Border
+        drawRect(poseStack, bufferSource, -hs, -hs, hs, hs,
+            applyAlpha(0xCC0A0A0A, alpha));
+        drawRect(poseStack, bufferSource, -hs, -hs, hs, hs,
+            applyAlpha(teamColor, alpha * 0.55f));
+
         int borderArgb = ((int)(0xFF * alpha) << 24) | (teamColor & 0x00FFFFFF);
-        float bd = (float)cfg.borderWidth;
-        drawRect(poseStack, bufferSource, -hw, -hh, hw, -hh + bd, borderArgb);
-        drawRect(poseStack, bufferSource, -hw, hh - bd, hw, hh, borderArgb);
-        drawRect(poseStack, bufferSource, -hw, -hh, -hw + bd, hh, borderArgb);
-        drawRect(poseStack, bufferSource, hw - bd, -hh, hw, hh, borderArgb);
+        drawRect(poseStack, bufferSource, -hs, -hs, hs, -hs + bd, borderArgb);
+        drawRect(poseStack, bufferSource, -hs, hs - bd, hs, hs, borderArgb);
+        drawRect(poseStack, bufferSource, -hs, -hs, -hs + bd, hs, borderArgb);
+        drawRect(poseStack, bufferSource, hs - bd, -hs, hs, hs, borderArgb);
 
-        // Label
-        float texAlpha = textAlpha(dist, BASE_MAX_DIST);
-        int labelColor = (int)(0xFF * texAlpha) << 24 | 0xFFFFFF;
-        int lw = font.width(label);
-        font.drawInBatch(label,
+        String letter = label.length() > 0 ? label.substring(0, 1).toUpperCase() : "?";
+        int letterColor = (int)(0xFF * alpha) << 24 | 0xFFFFFF;
+        int lw = font.width(letter);
+        font.drawInBatch(letter,
             -lw / 2f, -4f,
-            labelColor, true,
+            letterColor, true,
             poseStack.last().pose(),
             bufferSource,
             Font.DisplayMode.SEE_THROUGH,
             0, 0xF000F0);
 
-        // Distance suffix
         boolean lodFull = dist <= FULL_VIS_DIST;
-        if (cfg.showDistance && !lodFull && dist > FULL_VIS_DIST + 10) {
+        if (!lodFull && dist > FULL_VIS_DIST + 10) {
             String distStr = (int)dist + "m";
             int dw = font.width(distStr);
-            float ds = 0.5f;
             poseStack.pushPose();
-            poseStack.translate(0, hh + 2, 0);
-            poseStack.scale(ds, ds, 1);
+            poseStack.translate(0, hs + 2, 0);
+            poseStack.scale(0.5f, 0.5f, 1);
             font.drawInBatch(distStr,
                 -dw / 2f, 0f,
                 (int)(0x88 * alpha) << 24 | 0xCCCCCC, true,
@@ -361,6 +369,7 @@ public class WorldMarkerRenderer {
         poseStack.translate(dx, dy, dz);
         poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        poseStack.translate(0, 0, (float)(-dist * 0.0001));
 
         float scale = 0.025f;
         poseStack.scale(-scale, -scale, scale);

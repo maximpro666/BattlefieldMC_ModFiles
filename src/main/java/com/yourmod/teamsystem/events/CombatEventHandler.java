@@ -37,6 +37,25 @@ public class CombatEventHandler {
     private final TeamManager teamManager;
     private static net.minecraft.server.MinecraftServer serverInstance;
 
+    private static final Map<Class<?>, Map<String, Method>> REFLECT_METHOD_CACHE = new HashMap<>();
+
+    private static Method resolveMethod(Class<?> clazz, String name) {
+        Map<String, Method> classCache = REFLECT_METHOD_CACHE.get(clazz);
+        if (classCache != null) {
+            Method m = classCache.get(name);
+            if (m != null) return m;
+            if (classCache.containsKey(name)) return null;
+        }
+        try {
+            Method m = clazz.getMethod(name);
+            REFLECT_METHOD_CACHE.computeIfAbsent(clazz, k -> new HashMap<>()).put(name, m);
+            return m;
+        } catch (NoSuchMethodException e) {
+            REFLECT_METHOD_CACHE.computeIfAbsent(clazz, k -> new HashMap<>()).put(name, null);
+            return null;
+        }
+    }
+
     public static void setServer(net.minecraft.server.MinecraftServer server) {
         serverInstance = server;
     }
@@ -134,11 +153,12 @@ public class CombatEventHandler {
      */
     private ServerPlayer tryCommonOwnerGetters(Entity entity, ServerLevel level) {
         String[] methodNames = {"getOwner", "getShooter", "getOwnerEntity"};
+        Class<?> clazz = entity.getClass();
 
         for (String methodName : methodNames) {
             try {
-                Method method = entity.getClass().getMethod(methodName);
-                method.setAccessible(false);
+                Method method = resolveMethod(clazz, methodName);
+                if (method == null) continue;
                 Object result = method.invoke(entity);
 
                 if (result instanceof ServerPlayer) {
@@ -148,23 +168,20 @@ public class CombatEventHandler {
                     return level.getServer().getPlayerList().getPlayer((UUID) result);
                 }
             } catch (Exception ignored) {
-                // Method not found or invocation failed; continue
             }
         }
 
         return null;
     }
 
-    /**
-     * Attempts to find owner via reflection on less-common methods (getOwnerUUID, getOwnerId, getCreator, etc.).
-     */
     private ServerPlayer tryReflectionOwnerDetection(Entity entity, ServerLevel level) {
         String[] methodNames = {"getOwnerUUID", "getOwnerId", "getCreator"};
+        Class<?> clazz = entity.getClass();
 
         for (String methodName : methodNames) {
             try {
-                Method method = entity.getClass().getMethod(methodName);
-                method.setAccessible(false);
+                Method method = resolveMethod(clazz, methodName);
+                if (method == null) continue;
                 Object result = method.invoke(entity);
 
                 if (result instanceof UUID) {
@@ -172,7 +189,6 @@ public class CombatEventHandler {
                     if (owner != null) return owner;
                 }
             } catch (Exception ignored) {
-                // Method not found or invocation failed; continue
             }
         }
 

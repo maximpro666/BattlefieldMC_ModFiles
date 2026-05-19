@@ -51,6 +51,11 @@ public class MarkerManager {
         TeamSystem.LOGGER.info("All markers cleared");
     }
 
+    public void removePlayerMarkers(UUID creatorUUID) {
+        boolean removed = markers.removeIf(m -> creatorUUID.equals(m.getCreatorUUID()));
+        if (removed) syncToAll();
+    }
+
     public List<MarkerData> getMarkers() {
         return Collections.unmodifiableList(markers);
     }

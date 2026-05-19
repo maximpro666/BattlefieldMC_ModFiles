@@ -1,12 +1,15 @@
 package com.yourmod.teamsystem.network;
 
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.UUID;
 import java.util.function.Supplier;
+
+import static com.yourmod.teamsystem.core.ChatHelper.*;
 
 public class SquadActionPacket {
     private final String action;
@@ -31,28 +34,45 @@ public class SquadActionPacket {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
             ServerPlayer player = context.getSender();
-            if (player == null || action.isEmpty()) return;
+            if (player == null) return;
+
+            if (!RateLimiter.checkAndThrottle(player)) return;
+            if (!PacketValidator.checkAndReject(player, PacketValidator.checkStringLength(action, 32))) return;
+            if (action.isEmpty()) return;
+
             var squadManager = TeamSystem.getSquadManager();
             if (squadManager == null) return;
-            switch (action.toUpperCase()) {
+
+            String normalized = action.toUpperCase();
+
+            switch (normalized) {
                 case "CREATE" -> {
+                    if (!PacketValidator.checkAndReject(player, PacketValidator.requirePlaying(TeamSystem.getGameManager()))) return;
+                    if (!PacketValidator.checkAndReject(player, PacketValidator.requireTeamPlayable(player))) return;
                     var team = TeamSystem.getTeamManager().getOrCreatePlayerData(player.getUUID()).getTeam();
                     squadManager.createSquad(player.getScoreboardName() + "'s Squad", team, player.getUUID());
                 }
-                case "LEAVE" -> squadManager.leaveSquad(player.getUUID());
+                case "LEAVE" -> {
+                    if (!PacketValidator.checkAndReject(player, PacketValidator.requireSquadMember(player))) return;
+                    squadManager.leaveSquad(player.getUUID());
+                }
                 case "INVITE" -> {
-                    if (target != null) {
-                        var squad = squadManager.getPlayerSquad(player.getUUID());
-                        if (squad != null) squadManager.invitePlayer(target, squad);
-                    }
+                    if (!PacketValidator.checkAndReject(player, PacketValidator.requireSquadMember(player))) return;
+                    if (target == null) return;
+                    var squad = squadManager.getPlayerSquad(player.getUUID());
+                    if (squad != null) squadManager.invitePlayer(target, squad);
                 }
                 case "KICK" -> {
-                    if (target != null) squadManager.kickMember(player.getUUID(), target);
+                    if (!PacketValidator.checkAndReject(player, PacketValidator.requireSquadLeader(player))) return;
+                    if (target == null) return;
+                    squadManager.kickMember(player.getUUID(), target);
                 }
                 case "PROMOTE" -> {
-                    if (target != null) squadManager.promoteLeader(player.getUUID(), target);
+                    if (!PacketValidator.checkAndReject(player, PacketValidator.requireSquadLeader(player))) return;
+                    if (target == null) return;
+                    squadManager.promoteLeader(player.getUUID(), target);
                 }
-                default -> TeamSystem.LOGGER.warn("Unknown squad action: {}", action);
+                default -> player.sendSystemMessage(error("Unknown squad action"));
             }
         });
         return true;

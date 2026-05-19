@@ -1,11 +1,14 @@
 package com.yourmod.teamsystem.network;
 
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
+
+import static com.yourmod.teamsystem.core.ChatHelper.*;
 
 public class FOBPlacePacket {
     private final String name;
@@ -27,9 +30,16 @@ public class FOBPlacePacket {
         context.enqueueWork(() -> {
             ServerPlayer player = context.getSender();
             if (player == null) return;
+
+            if (!RateLimiter.checkAndThrottle(player)) return;
+            if (!PacketValidator.checkAndReject(player, PacketValidator.checkStringLength(name, 64))) return;
+            if (!PacketValidator.checkAndReject(player, PacketValidator.requirePlaying(TeamSystem.getGameManager()))) return;
+            if (!PacketValidator.checkAndReject(player, PacketValidator.requireTeamPlayable(player))) return;
+            if (!PacketValidator.checkAndReject(player, PacketValidator.requireSquadLeader(player))) return;
+
             String result = TeamSystem.getFOBManager().placeFOB(player, name);
             if (result != null) {
-                player.displayClientMessage(net.minecraft.network.chat.Component.literal(result), false);
+                player.displayClientMessage(error(result), false);
             }
         });
         return true;

@@ -1,12 +1,7 @@
 package com.yourmod.teamsystem.events;
 
 import com.yourmod.teamsystem.TeamSystem;
-import com.yourmod.teamsystem.core.EconomyManager;
-import com.yourmod.teamsystem.core.GameManager;
-import com.yourmod.teamsystem.core.MapConfig;
-import com.yourmod.teamsystem.core.MarkerManager;
-import com.yourmod.teamsystem.core.Team;
-import com.yourmod.teamsystem.core.TeamManager;
+import com.yourmod.teamsystem.core.*;
 import com.yourmod.teamsystem.network.OpenTeamSelectionScreenPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
 import net.minecraft.ChatFormatting;
@@ -23,13 +18,13 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public class PlayerEventHandler {
     private final TeamManager teamManager;
@@ -200,6 +195,28 @@ public class PlayerEventHandler {
             }
 
             teamManager.fullSyncPlayer(player);
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            UUID uuid = player.getUUID();
+            RateLimiter.removePlayer(uuid);
+            EconomyManager econ = TeamSystem.getEconomyManager();
+            if (econ != null) econ.clearPlayer(uuid);
+            KitManager km = TeamSystem.getKitManager();
+            if (km != null) km.clearPlayerCooldowns(uuid);
+            SquadManager sm = TeamSystem.getSquadManager();
+            if (sm != null) sm.removePlayer(uuid);
+            MarkerManager mm = TeamSystem.getMarkerManager();
+            if (mm != null) mm.removePlayerMarkers(uuid);
+            VehicleManager vm = TeamSystem.getVehicleManager();
+            if (vm != null) vm.unregisterPlayerVehicles(uuid);
+            FOBManager fm = TeamSystem.getFOBManager();
+            if (fm != null) fm.clearPlayerCooldown(uuid);
+            AttachmentEventHandler.clearPlayerAttachments(player);
+            TeamSystem.LOGGER.info("Cleaned up player data: {}", player.getName().getString());
         }
     }
 

@@ -49,6 +49,13 @@ public class RespawnAtPointPacket {
             ServerPlayer player = context.getSender();
             if (player == null) return;
 
+            if (!RateLimiter.checkAndThrottle(player)) return;
+            if (!PacketValidator.checkAndReject(player, PacketValidator.checkStringLength(type, 32))) return;
+
+            GameManager game = TeamSystem.getGameManager();
+            if (!PacketValidator.checkAndReject(player, PacketValidator.requirePlaying(game))) return;
+            if (!PacketValidator.checkAndReject(player, PacketValidator.requireTeamPlayable(player))) return;
+
             ServerLevel level = player.serverLevel();
 
             switch (type) {

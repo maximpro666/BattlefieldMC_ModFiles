@@ -217,4 +217,8 @@ public class KitManager {
     }
 
     public Map<String, Kit> getKits() { return kits; }
+
+    public void clearPlayerCooldowns(UUID playerId) {
+        cooldowns.remove(playerId);
+    }
 }

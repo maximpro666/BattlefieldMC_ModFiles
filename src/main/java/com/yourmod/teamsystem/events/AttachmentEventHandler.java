@@ -52,6 +52,12 @@ public class AttachmentEventHandler {
         }
     }
 
+    public static void clearPlayerAttachments(ServerPlayer player) {
+        TeamSystem.getTeamManager()
+            .getOrCreatePlayerData(player.getUUID()).getSavedAttachments().clear();
+        TeamSystem.getTeamManager().setDirty();
+    }
+
     public static void clearKitAttachments(ServerPlayer player, String kitName) {
         Map<String, CompoundTag> saved = TeamSystem.getTeamManager()
             .getOrCreatePlayerData(player.getUUID()).getSavedAttachments();

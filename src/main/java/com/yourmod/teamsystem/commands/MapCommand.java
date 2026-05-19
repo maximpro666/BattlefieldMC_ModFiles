@@ -375,7 +375,11 @@ public class MapCommand {
     }
 
     private static int reloadVisuals(CommandContext<CommandSourceStack> context) {
-        ServerPlayer player = context.getSource().getPlayerOrException();
+        ServerPlayer player = context.getSource().getPlayer();
+        if (player == null) {
+            context.getSource().sendFailure(error("Player only"));
+            return 0;
+        }
         PacketHandler.CHANNEL.send(
             net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
             new ReloadVisualsPacket()

@@ -22,22 +22,7 @@ public class OpenAdminPanelPacket {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                try {
-                    Class<?> mcClazz = Class.forName("net.minecraft.client.Minecraft");
-                    Object mc = mcClazz.getMethod("getInstance").invoke(null);
-                    Object mcLevel = mcClazz.getMethod("getLevel").invoke(mc);
-                    Object mcPlayer = mcClazz.getMethod("getPlayer").invoke(mc);
-                    if (mcPlayer == null || mcLevel == null) return;
-
-                    Object screen = Class.forName("com.yourmod.teamsystem.client.gui.screen.AdminPanel")
-                        .getConstructor().newInstance();
-
-                    mcClazz.getMethod("setScreen",
-                        Class.forName("net.minecraft.client.gui.screens.Screen"))
-                        .invoke(mc, screen);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                ClientScreenAccessor.openAdminPanel();
             });
         });
         return true;

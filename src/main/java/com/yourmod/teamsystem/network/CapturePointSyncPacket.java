@@ -24,11 +24,13 @@ public class CapturePointSyncPacket {
     private List<Double> pointXs;
     private List<Double> pointYs;
     private List<Double> pointZs;
+    private List<Double> pointRadii;
 
     public CapturePointSyncPacket(List<Integer> pointIds, List<Double> progressPercentages,
                                   List<Integer> ownerTeamOrdinals, List<String> pointNames,
                                   List<Integer> capturingTeamOrdinals,
-                                  List<Double> pointXs, List<Double> pointYs, List<Double> pointZs) {
+                                  List<Double> pointXs, List<Double> pointYs, List<Double> pointZs,
+                                  List<Double> pointRadii) {
         this.pointIds = pointIds;
         this.progressPercentages = progressPercentages;
         this.ownerTeamOrdinals = ownerTeamOrdinals;
@@ -37,6 +39,7 @@ public class CapturePointSyncPacket {
         this.pointXs = pointXs;
         this.pointYs = pointYs;
         this.pointZs = pointZs;
+        this.pointRadii = pointRadii;
     }
 
     public CapturePointSyncPacket(FriendlyByteBuf buf) {
@@ -49,6 +52,7 @@ public class CapturePointSyncPacket {
         this.pointXs = new ArrayList<>();
         this.pointYs = new ArrayList<>();
         this.pointZs = new ArrayList<>();
+        this.pointRadii = new ArrayList<>();
 
         for (int i = 0; i < pointCount; i++) {
             pointIds.add(buf.readInt());
@@ -59,6 +63,7 @@ public class CapturePointSyncPacket {
             pointXs.add(buf.readDouble());
             pointYs.add(buf.readDouble());
             pointZs.add(buf.readDouble());
+            pointRadii.add(buf.readDouble());
         }
     }
 
@@ -73,6 +78,7 @@ public class CapturePointSyncPacket {
             buf.writeDouble(pointXs.get(i));
             buf.writeDouble(pointYs.get(i));
             buf.writeDouble(pointZs.get(i));
+            buf.writeDouble(pointRadii.get(i));
         }
     }
 
@@ -80,7 +86,7 @@ public class CapturePointSyncPacket {
         NetworkEvent.Context context = supplier.get();
         context.enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () ->
-                handleClientSide(pointIds, progressPercentages, ownerTeamOrdinals, pointNames, capturingTeamOrdinals, pointXs, pointYs, pointZs));
+                handleClientSide(pointIds, progressPercentages, ownerTeamOrdinals, pointNames, capturingTeamOrdinals, pointXs, pointYs, pointZs, pointRadii));
         });
         return true;
     }
@@ -88,14 +94,16 @@ public class CapturePointSyncPacket {
     private static void handleClientSide(List<Integer> pointIds, List<Double> progressPercentages,
                                           List<Integer> ownerTeamOrdinals, List<String> pointNames,
                                           List<Integer> capturingTeamOrdinals,
-                                          List<Double> pointXs, List<Double> pointYs, List<Double> pointZs) {
+                                          List<Double> pointXs, List<Double> pointYs, List<Double> pointZs,
+                                          List<Double> pointRadii) {
         List<CapturePointData> points = new ArrayList<>();
         for (int i = 0; i < pointIds.size(); i++) {
             points.add(new CapturePointData(
                 pointIds.get(i), progressPercentages.get(i),
                 ownerTeamOrdinals.get(i), pointNames.get(i),
                 capturingTeamOrdinals.get(i),
-                pointXs.get(i), pointYs.get(i), pointZs.get(i)));
+                pointXs.get(i), pointYs.get(i), pointZs.get(i),
+                pointRadii.get(i)));
         }
         ClientTeamData.capturePoints = points;
         com.yourmod.teamsystem.client.xaero.XaeroIntegration.updateCapturePointWaypoints(points);

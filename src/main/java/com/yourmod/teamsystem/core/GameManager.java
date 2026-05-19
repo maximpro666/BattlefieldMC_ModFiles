@@ -3,6 +3,7 @@ package com.yourmod.teamsystem.core;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.network.GameStateSyncPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.proxy.ProxyMessenger;
 import static com.yourmod.teamsystem.core.ChatHelper.*;
 import static com.yourmod.teamsystem.core.TeamSystemColors.*;
 
@@ -270,6 +271,9 @@ public class GameManager {
         CapturePointManager cp = TeamSystem.getCapturePointManager();
         if (cp != null) cp.setActive(false);
 
+        ContributionManager contrib = TeamSystem.getContributionManager();
+        if (contrib != null) contrib.resetMatch();
+
         captureTicks = 0;
         overtime = false;
         overtimeTicks = 0;
@@ -380,12 +384,25 @@ public class GameManager {
     // ========== Match Lifecycle ==========
 
     private void finishMatchCycle() {
+        if (ProxyMessenger.isMatchServer()) {
+            ProxyMessenger.send("end_match");
+            server.execute(() -> {
+                try { Thread.sleep(3000); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
+                server.halt(false);
+            });
+            return;
+        }
+
         teleportAllToLobby();
         borderManager.setZones(null);
 
         if (currentMap != null) {
-            TeamSystem.getMapPoolManager().copyToLive(currentMap);
-            TeamSystem.LOGGER.info("Map {} regenerated after match", currentMap.getName());
+            TeamSystem.LOGGER.info("Map {} finished. Will deploy fresh on next match start", currentMap.getName());
+            try {
+                TeamSystem.getMapPoolManager().copyToLive(currentMap);
+            } catch (Exception e) {
+                TeamSystem.LOGGER.warn("World restore skipped: {} (next match will deploy fresh)", e.getMessage());
+            }
         }
 
         currentDimKey = null;

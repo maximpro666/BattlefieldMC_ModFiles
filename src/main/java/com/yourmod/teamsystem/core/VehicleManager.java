@@ -25,29 +25,27 @@ public class VehicleManager {
     private final Map<UUID, UUID> vehicleToOwner = new HashMap<>();
     private final Set<UUID> playersHidingPlaques = new HashSet<>();
     private final Map<String, Long> cooldowns = new HashMap<>();
-    private static Class<?> superbVehicleClass = null;
-    private static boolean superbChecked = false;
+    private static final Class<?> SUPERB_VEHICLE_CLASS;
+
+    static {
+        Class<?> cls = null;
+        try {
+            cls = Class.forName("com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity");
+            TeamSystem.LOGGER.info("Superb Warfare vehicle system detected");
+        } catch (ClassNotFoundException e) {
+            cls = null;
+        }
+        SUPERB_VEHICLE_CLASS = cls;
+    }
 
     public VehicleManager() {
         loadVehicles();
         loadCooldowns();
-        tryDetectSuperbClass();
-    }
-
-    private static void tryDetectSuperbClass() {
-        if (superbChecked) return;
-        superbChecked = true;
-        try {
-            superbVehicleClass = Class.forName("com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity");
-            TeamSystem.LOGGER.info("Superb Warfare vehicle system detected");
-        } catch (ClassNotFoundException e) {
-            superbVehicleClass = null;
-        }
     }
 
     public static boolean isSuperbVehicleEntity(Entity entity) {
-        if (superbVehicleClass == null) return false;
-        return superbVehicleClass.isAssignableFrom(entity.getClass());
+        if (SUPERB_VEHICLE_CLASS == null) return false;
+        return SUPERB_VEHICLE_CLASS.isAssignableFrom(entity.getClass());
     }
 
     public void registerSpawnedVehicle(Entity ent, UUID ownerUUID) {
@@ -79,6 +77,19 @@ public class VehicleManager {
     public void unregisterSpawnedVehicle(UUID entityUUID) {
         spawnedVehicles.remove(entityUUID);
         vehicleToOwner.remove(entityUUID);
+    }
+
+    public void unregisterPlayerVehicles(UUID ownerUUID) {
+        List<UUID> toRemove = new ArrayList<>();
+        for (Map.Entry<UUID, UUID> entry : vehicleToOwner.entrySet()) {
+            if (ownerUUID.equals(entry.getValue())) {
+                toRemove.add(entry.getKey());
+            }
+        }
+        for (UUID entUUID : toRemove) {
+            spawnedVehicles.remove(entUUID);
+            vehicleToOwner.remove(entUUID);
+        }
     }
 
     public int countActiveVehicles(Team team) {

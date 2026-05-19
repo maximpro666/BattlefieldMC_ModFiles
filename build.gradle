@@ -75,3 +75,73 @@ tasks.withType(ProcessResources).configureEach {
         expand replaceProperties + [project: project]
     }
 }
+
+// ========== Auto Deploy Pipeline ==========
+// Usage:
+//   gradlew deployToServer       — copy jar to main server mods
+//   gradlew deployToClient       — copy jar to Prism client mods
+//   gradlew deployToLobby        — copy jar to lobby server mods
+//   gradlew deployToTemplate     — copy jar to match-template mods
+//   gradlew deployAll            — all of the above (skips unconfigured)
+//   gradlew buildAndDeploy       — build + deployAll
+
+ext {
+    deployDirs = [
+        server  : project.findProperty('deployServerDir') ?: '',
+        lobby   : project.findProperty('deployLobbyDir') ?: '',
+        template: project.findProperty('deployMatchTemplateDir') ?: '',
+        client  : project.findProperty('deployClientDir') ?: ''
+    ]
+}
+
+private void deployJar(String targetKey) {
+    def dir = deployDirs[targetKey]
+    if (!dir) {
+        logger.lifecycle("  [{}] SKIPPED — path not configured", targetKey)
+        return
+    }
+    def modsDir = new File(dir, 'mods')
+    if (!modsDir.exists()) {
+        modsDir.mkdirs()
+    }
+
+    def jarFile = tasks.jar.archiveFile.get().asFile
+    def jarName = jarFile.name
+
+    // Delete old versions
+    fileTree(modsDir).include('teamsystem-*.jar').each { oldJar ->
+        if (oldJar.name != jarName) {
+            delete oldJar
+            logger.lifecycle("  [{}] removed old: {}", targetKey, oldJar.name)
+        }
+    }
+
+    // Copy new jar
+    copy {
+        from jarFile
+        into modsDir
+    }
+    logger.lifecycle("  [{}] deployed: {} → {}", targetKey, jarName, modsDir)
+}
+
+['server', 'lobby', 'template', 'client'].each { key ->
+    def taskName = "deployTo${key.capitalize()}"
+    tasks.register(taskName) {
+        group = 'deploy'
+        description = "Copy jar to ${key} server mods"
+        dependsOn 'jar'
+        doLast { deployJar(key) }
+    }
+}
+
+tasks.register('deployAll') {
+    group = 'deploy'
+    description = 'Deploy jar to all configured targets'
+    dependsOn tasks.matching { it.name.startsWith('deployTo') && it.name != 'deployAll' }
+}
+
+tasks.register('buildAndDeploy') {
+    group = 'deploy'
+    description = 'Full build + deploy to all configured targets'
+    dependsOn 'build', 'deployAll'
+}
