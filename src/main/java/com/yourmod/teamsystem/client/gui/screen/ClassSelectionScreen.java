@@ -34,6 +34,7 @@ public class ClassSelectionScreen extends Screen {
     private long openTime;
     private BScrollPanel scrollPanel;
     private String selectedClassId = "";
+    private com.yourmod.teamsystem.client.gui.component.BButton backButton;
 
     public ClassSelectionScreen() {
         super(Component.literal("Class Selection"));
@@ -52,6 +53,11 @@ public class ClassSelectionScreen extends Screen {
         scrollPanel = new BScrollPanel(panelX, panelY, panelW, panelH);
         int rows = classes.isEmpty() ? 1 : (classes.size() + COLS - 1) / COLS;
         scrollPanel.setContentHeight(rows * (CARD_H + GAP) + GAP);
+
+        backButton = addRenderableWidget(new com.yourmod.teamsystem.client.gui.component.BButton(
+            width / 2 - 45, height - 28, 90, 20,
+            Component.literal("\u2190 Back"), btn -> onClose()
+        ));
     }
 
     private void loadClasses() {
@@ -254,6 +260,11 @@ public class ClassSelectionScreen extends Screen {
             }
         }
         scrollPanel.tick();
+    }
+
+    @Override
+    public void onClose() {
+        SpawnScreenHelper.reopen();
     }
 
     @Override

@@ -2,9 +2,6 @@ package com.yourmod.teamsystem.network;
 
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.data.KitConfig;
-import com.yourmod.teamsystem.data.KitConfig.KitDef;
-import com.yourmod.teamsystem.data.KitConfig.ClassConfig;
-import com.yourmod.teamsystem.data.KitConfig.AttachmentLimit;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.storage.LevelResource;
@@ -59,6 +56,10 @@ public class KitAdminSavePacket {
 
                 player.sendSystemMessage(
                     net.minecraft.network.chat.Component.literal("§aKit config saved successfully"));
+
+                KitConfigSyncPacket syncAll = new KitConfigSyncPacket(configJson);
+                com.yourmod.teamsystem.network.PacketHandler.CHANNEL.send(
+                    net.minecraftforge.network.PacketDistributor.ALL.noArg(), syncAll);
 
                 KitAdminConfigSyncPacket syncBack = new KitAdminConfigSyncPacket(configJson);
                 com.yourmod.teamsystem.network.PacketHandler.CHANNEL.send(

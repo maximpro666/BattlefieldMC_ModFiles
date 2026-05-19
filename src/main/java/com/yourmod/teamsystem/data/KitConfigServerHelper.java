@@ -9,6 +9,7 @@ import com.yourmod.teamsystem.core.PlayerCombatData;
 import com.yourmod.teamsystem.core.Team;
 import com.yourmod.teamsystem.core.TeamManager;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -97,32 +98,120 @@ public class KitConfigServerHelper {
         return null;
     }
 
+    private static final Map<String, String> TACZ_CALIBER_MAP = Map.ofEntries(
+        // Assault Rifles
+        Map.entry("tacz:m4a1", "tacz:556x45"),
+        Map.entry("tacz:hk416a5", "tacz:556x45"),
+        Map.entry("tacz:hk416d", "tacz:556x45"),
+        Map.entry("tacz:scar_l", "tacz:556x45"),
+        Map.entry("tacz:m16a4", "tacz:556x45"),
+        Map.entry("tacz:m16a1", "tacz:556x45"),
+        Map.entry("tacz:aug", "tacz:556x45"),
+        Map.entry("tacz:g36k", "tacz:556x45"),
+        Map.entry("tacz:ak47", "tacz:762x39"),
+        Map.entry("tacz:rpk", "tacz:762x39"),
+        Map.entry("tacz:type_81", "tacz:762x39"),
+        Map.entry("tacz:sks_tactical", "tacz:762x39"),
+        Map.entry("tacz:qbz_95", "tacz:58x42"),
+        Map.entry("tacz:qbz_191", "tacz:58x42"),
+        // DMRs / Battle Rifles
+        Map.entry("tacz:mk14", "tacz:308"),
+        Map.entry("tacz:scar_h", "tacz:308"),
+        Map.entry("tacz:hk_g3", "tacz:308"),
+        Map.entry("tacz:fn_fal", "tacz:308"),
+        Map.entry("tacz:fn_evolys", "tacz:308"),
+        // Snipers
+        Map.entry("tacz:ai_awp", "tacz:338"),
+        Map.entry("tacz:m107", "tacz:50bmg"),
+        Map.entry("tacz:m95", "tacz:50bmg"),
+        Map.entry("tacz:m700", "tacz:30_06"),
+        Map.entry("tacz:lonetrail", "tacz:30_06"),
+        Map.entry("tacz:kar98", "tacz:792x57"),
+        Map.entry("tacz:spr15hb", "tacz:556x45"),
+        // SMGs
+        Map.entry("tacz:hk_mp5a5", "tacz:9mm"),
+        Map.entry("tacz:uzi", "tacz:9mm"),
+        Map.entry("tacz:b93r", "tacz:9mm"),
+        Map.entry("tacz:vector45", "tacz:45acp"),
+        Map.entry("tacz:ump45", "tacz:45acp"),
+        Map.entry("tacz:p90", "tacz:57x28"),
+        // Pistols
+        Map.entry("tacz:glock_17", "tacz:9mm"),
+        Map.entry("tacz:cz75", "tacz:9mm"),
+        Map.entry("tacz:m9a4", "tacz:9mm"),
+        Map.entry("tacz:p320", "tacz:45acp"),
+        Map.entry("tacz:m1911", "tacz:45acp"),
+        Map.entry("tacz:hk_mk23", "tacz:45acp"),
+        Map.entry("tacz:deagle", "tacz:50ae"),
+        Map.entry("tacz:timeless50", "tacz:50ae"),
+        Map.entry("tacz:rhino357", "tacz:357mag"),
+        Map.entry("tacz:taurus500", "tacz:500mag"),
+        Map.entry("tacz:taurus943", "tacz:22wmr"),
+        Map.entry("tacz:springfield1873", "tacz:45_70"),
+        // Shotguns
+        Map.entry("tacz:aa12", "tacz:12g"),
+        Map.entry("tacz:m1014", "tacz:12g"),
+        Map.entry("tacz:spas_12", "tacz:12g"),
+        Map.entry("tacz:m870", "tacz:12g"),
+        Map.entry("tacz:db_long", "tacz:12g"),
+        Map.entry("tacz:db_short", "tacz:12g"),
+        // LMGs
+        Map.entry("tacz:m249", "tacz:556x45"),
+        Map.entry("tacz:minigun", "tacz:308"),
+        // Launchers
+        Map.entry("tacz:rpg7", "tacz:rpg_rocket"),
+        Map.entry("tacz:m320", "tacz:40mm")
+    );
+
     private static ItemStack getAmmoFor(ItemStack stack) {
         if (stack.isEmpty()) return ItemStack.EMPTY;
         String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
 
-        // TACZ guns already have magazines, skip ammo
-        if (id.equals("tacz:modern_kinetic_gun")) return ItemStack.EMPTY;
+        // TACZ guns use caliber-based ammo
+        if (id.equals("tacz:modern_kinetic_gun")) {
+            CompoundTag tag = stack.getTag();
+            if (tag != null && tag.contains("GunId")) {
+                String gunId = tag.getString("GunId");
+                String caliber = TACZ_CALIBER_MAP.get(gunId);
+                if (caliber != null) {
+                    return resolveCaliberAmmo(caliber);
+                }
+            }
+            return ItemStack.EMPTY;
+        }
 
         // Superb Warfare ammo mapping
         if (!id.startsWith("superbwarfare:")) return ItemStack.EMPTY;
 
         String path = id.substring("superbwarfare:".length());
 
+        // Throwables & tools that don't need ammo
+        if (path.equals("hand_grenade") || path.equals("rgo_grenade")
+            || path.equals("c4_bomb") || path.equals("taser")
+            || path.equals("repair_tool") || path.equals("smoke_grenade")
+            || path.equals("claymore") || path.equals("anti_tank_mine")) {
+            return ItemStack.EMPTY;
+        }
+
         // RPG / launchers
-        if (path.equals("rpg") || path.equals("javelin") || path.equals("igla_9k38")) {
+        if (path.equals("rpg") || path.equals("javelin") || path.equals("igla_9k38")
+            || path.equals("m_79")) {
             return resolveDirect("superbwarfare:heavy_ammo");
         }
 
         // Handguns
         if (path.contains("glock") || path.contains("m_1911") || path.contains("mp_443")
-            || path.contains("deagle") || path.contains("cz75") || path.contains("taser")
-            || path.contains("vector")) {
+            || path.contains("deagle") || path.contains("cz75")) {
+            return resolveDirect("superbwarfare:handgun_ammo_box");
+        }
+
+        // SMGs (use handgun ammo - both are pistol caliber)
+        if (path.contains("mp_5") || path.contains("vector")) {
             return resolveDirect("superbwarfare:handgun_ammo_box");
         }
 
         // Shotguns
-        if (path.contains("m_870") || path.contains("aa_12") || path.contains("m_79")) {
+        if (path.contains("m_870") || path.contains("aa_12")) {
             return resolveDirect("superbwarfare:shotgun_ammo_box");
         }
 
@@ -134,13 +223,37 @@ public class KitConfigServerHelper {
             return resolveDirect("superbwarfare:sniper_ammo_box");
         }
 
-        // Rifles (default)
-        if (path.contains("rpk") || path.contains("m_60") || path.contains("m_2_hb")
-            || path.contains("minigun")) {
+        // Rifles / LMGs
+        if (path.contains("m_4") || path.contains("hk_416") || path.contains("ak_47")
+            || path.contains("ak_12") || path.contains("qbz") || path.contains("rpk")
+            || path.contains("m_60") || path.contains("m_2_hb") || path.contains("minigun")) {
             return resolveDirect("superbwarfare:rifle_ammo_box");
         }
 
-        return resolveDirect("superbwarfare:rifle_ammo_box");
+        // Warborn Explosives grenades (no ammo needed - consumable)
+        if (id.startsWith("warbornexplosives:")) {
+            return ItemStack.EMPTY;
+        }
+
+        // Warborn armor (no ammo needed)
+        if (id.startsWith("warborn:")) {
+            return ItemStack.EMPTY;
+        }
+
+        return ItemStack.EMPTY;
+    }
+
+    private static ItemStack resolveCaliberAmmo(String caliberId) {
+        try {
+            ResourceLocation rl = new ResourceLocation(caliberId);
+            net.minecraft.world.item.Item item = BuiltInRegistries.ITEM.get(rl);
+            if (item != null && item != net.minecraft.world.item.Items.AIR) {
+                return new ItemStack(item);
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return ItemStack.EMPTY;
     }
 
     private static ItemStack resolveDirect(String id) {

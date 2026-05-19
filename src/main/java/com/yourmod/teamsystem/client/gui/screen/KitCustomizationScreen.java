@@ -7,8 +7,10 @@ import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import com.yourmod.teamsystem.client.gui.component.BScrollPanel;
 import com.yourmod.teamsystem.data.ItemResolver;
 import com.yourmod.teamsystem.data.KitConfig;
+import com.yourmod.teamsystem.data.TaczAttachmentResolver;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.KitSavePacket;
+import com.yourmod.teamsystem.network.KitSelectPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -154,6 +156,7 @@ public class KitCustomizationScreen extends Screen {
     }
 
     private void resetScrollContent() {
+        if (scrollPanel == null) return;
         int contentH = 0;
         contentH += slotKeys.size() * (SLOT_H + SLOT_GAP) + SLOT_GAP;
         String activeWeapon = selections.getOrDefault(activeSlot, "");
@@ -168,6 +171,7 @@ public class KitCustomizationScreen extends Screen {
     }
 
     private boolean hasAttachmentLimits(String weaponId) {
+        if (TaczAttachmentResolver.hasAttachments(weaponId)) return true;
         KitConfig cfg = KitConfig.get();
         if (cfg == null) return false;
         KitConfig.ClassConfig cl = cfg.classes.get(classId);
@@ -178,6 +182,8 @@ public class KitCustomizationScreen extends Screen {
     }
 
     private List<String> getAttachmentCategories(String weaponId) {
+        List<String> taczCats = TaczAttachmentResolver.getCategories(weaponId);
+        if (!taczCats.isEmpty()) return taczCats;
         KitConfig cfg = KitConfig.get();
         if (cfg == null) return List.of();
         KitConfig.ClassConfig cl = cfg.classes.get(classId);
@@ -198,6 +204,8 @@ public class KitCustomizationScreen extends Screen {
     }
 
     private List<String> getAttachmentOptions(String weaponId, String category) {
+        List<String> taczOpts = TaczAttachmentResolver.getOptions(weaponId, category);
+        if (!taczOpts.isEmpty()) return taczOpts;
         KitConfig cfg = KitConfig.get();
         if (cfg == null) return List.of();
         KitConfig.ClassConfig cl = cfg.classes.get(classId);
@@ -375,18 +383,10 @@ public class KitCustomizationScreen extends Screen {
 
         String sel = selections.getOrDefault(slotKey, "");
         String displayName = sel.isEmpty() ? "-" : ItemResolver.getDisplayName(sel);
-
-        g.drawString(font, slotKey, x + 8, y + 6,
-            AnimationHelper.withAlpha(active ? UITheme.ACCENT : UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 255)));
-        g.drawString(font, displayName, x + 8, y + 22,
+        int tw = font.width(displayName);
+        g.drawString(font, displayName, x + w / 2 - tw / 2, y + SLOT_H / 2 - 4,
             AnimationHelper.withAlpha(sel.isEmpty() ? UITheme.TEXT_MUTED : UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 255)));
 
-        if (hover) {
-            String nav = "\u25C0 \u25B6";
-            int nw = font.width(nav);
-            g.drawString(font, nav, x + w - nw - 6, y + SLOT_H / 2 - 4,
-                AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 200)));
-        }
     }
 
     private void renderConfigPanel(GuiGraphics g) {
@@ -545,6 +545,7 @@ public class KitCustomizationScreen extends Screen {
     @Override
     public boolean mouseClicked(double mx, double my, int btn) {
         if (btn != 0) return super.mouseClicked(mx, my, btn);
+        if (scrollPanel == null) return super.mouseClicked(mx, my, btn);
         int cx = configX;
         int cw = configW;
         float soff = scrollPanel.getScrollOffset();
@@ -646,7 +647,7 @@ public class KitCustomizationScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
-        if (mx >= configX && mx <= configX + configW) {
+        if (scrollPanel != null && mx >= configX && mx <= configX + configW) {
             scrollPanel.onScroll((int) mx, (int) my, delta);
         }
         return true;
@@ -654,7 +655,9 @@ public class KitCustomizationScreen extends Screen {
 
     @Override
     public void tick() {
-        scrollPanel.tick();
+        if (scrollPanel != null) {
+            scrollPanel.tick();
+        }
     }
 
     private void saveAndDeploy() {
@@ -689,8 +692,13 @@ public class KitCustomizationScreen extends Screen {
         }
 
         sb.append("}");
-        PacketHandler.CHANNEL.sendToServer(new KitSavePacket(classId + ":" + kitId, sb.toString()));
-        onClose();
+        String packageId = classId + ":" + kitId;
+        PacketHandler.CHANNEL.sendToServer(new KitSavePacket(packageId, sb.toString()));
+        PacketHandler.CHANNEL.sendToServer(new KitSelectPacket(packageId));
+        SpawnScreenHelper.updateSelectedKit(packageId);
+        if (minecraft != null) {
+            minecraft.setScreen(null);
+        }
     }
 
     private static String escapeJson(String s) {

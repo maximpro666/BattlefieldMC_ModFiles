@@ -6,7 +6,6 @@ import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.data.KitConfig;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.KitSelectPacket;
-import com.yourmod.teamsystem.client.gui.component.BButton;
 import com.yourmod.teamsystem.client.gui.component.BScrollPanel;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import net.minecraft.client.Minecraft;
@@ -37,8 +36,9 @@ public class KitSelectionScreen extends Screen {
     private float fadeAlpha    = 0f;
     private long openTime;
     private BScrollPanel scrollPanel;
-    private BButton confirmButton;
-    private BButton customizeButton;
+    private com.yourmod.teamsystem.client.gui.component.BButton confirmButton;
+    private com.yourmod.teamsystem.client.gui.component.BButton customizeButton;
+    private com.yourmod.teamsystem.client.gui.component.BButton backButton;
     private float[] hoverState;
 
     public KitSelectionScreen(String classId) {
@@ -61,13 +61,17 @@ public class KitSelectionScreen extends Screen {
         int rows = kitEntries.isEmpty() ? 1 : (kitEntries.size() + COLS - 1) / COLS;
         scrollPanel.setContentHeight(rows * (CELL_H + PADDING) + PADDING);
 
-        confirmButton = addRenderableWidget(new BButton(
-            width / 2 - 60, height - 28, 120, 20,
+        int btnY = height - 28;
+        backButton = addRenderableWidget(new com.yourmod.teamsystem.client.gui.component.BButton(
+            width / 2 - 190, btnY, 60, 20,
+            Component.literal("\u2190 Back"), btn -> backToClasses()
+        ));
+        confirmButton = addRenderableWidget(new com.yourmod.teamsystem.client.gui.component.BButton(
+            width / 2 - 60, btnY, 120, 20,
             Component.literal("Select Kit"), btn -> confirmSelection()
         ));
-
-        customizeButton = addRenderableWidget(new BButton(
-            width / 2 + 66, height - 28, 120, 20,
+        customizeButton = addRenderableWidget(new com.yourmod.teamsystem.client.gui.component.BButton(
+            width / 2 + 66, btnY, 120, 20,
             Component.literal("Customize"), btn -> customizeKit()
         ));
     }
@@ -140,8 +144,10 @@ public class KitSelectionScreen extends Screen {
             g.drawString(font, none, width / 2 - nw / 2, height / 2, AnimationHelper.withAlpha(COLOR_SUBTEXT, (int)(fadeAlpha * 200)));
         }
 
-        customizeButton.visible = selectedKitId != null;
+        confirmButton.active = selectedKitId != null;
+        confirmButton.visible = selectedKitId != null;
         customizeButton.active = selectedKitId != null;
+        customizeButton.visible = selectedKitId != null;
         super.render(g, mx, my, pt);
     }
 
@@ -191,12 +197,21 @@ public class KitSelectionScreen extends Screen {
                 int cx = panelX + PADDING + col * (CELL_W + PADDING);
                 int cy = panelY + PADDING + row * (CELL_H + PADDING) - (int)scrollOff;
                 if (mx >= cx && mx <= cx + CELL_W && my >= cy && my <= cy + CELL_H) {
-                    selectedKitId = kitEntries.get(i).getKey();
+                    if (btn == 1) {
+                        selectedKitId = kitEntries.get(i).getKey();
+                        customizeKit();
+                    } else {
+                        selectedKitId = kitEntries.get(i).getKey();
+                    }
                     return true;
                 }
             }
         }
         return super.mouseClicked(mx, my, btn);
+    }
+
+    private void backToClasses() {
+        Minecraft.getInstance().setScreen(new ClassSelectionScreen());
     }
 
     @Override
