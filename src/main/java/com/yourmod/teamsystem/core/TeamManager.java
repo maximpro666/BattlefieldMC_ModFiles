@@ -244,6 +244,8 @@ public class TeamManager extends SavedData {
 
     public void syncPlayerData(ServerPlayer player) {
         PlayerCombatData data = getOrCreatePlayerData(player.getUUID());
+        Squad squad = squadManager.getPlayerSquad(player.getUUID());
+        String squadName = squad != null ? squad.getName() : "";
         CombatDataSyncPacket packet = new CombatDataSyncPacket(
             player.getUUID(),
             data.getTeam().ordinal(),
@@ -253,7 +255,8 @@ public class TeamManager extends SavedData {
             data.getSuffix(),
             data.getDisplayName(),
             data.getCallsign(),
-            data.getRankOrdinal()
+            data.getRankOrdinal(),
+            squadName
         );
         PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
     }

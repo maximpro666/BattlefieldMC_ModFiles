@@ -148,6 +148,7 @@ public class RespawnAtPointPacket {
         PlayerCombatData pcd = tm.getOrCreatePlayerData(player.getUUID());
         String kitName = pcd.getSelectedKit();
         if (kitName == null || kitName.isEmpty() || !kitName.contains(":")) return;
+        player.setHealth(player.getMaxHealth());
         String[] parts = kitName.split(":", 2);
         KitConfigServerHelper.applyKit(player, parts[0], parts[1]);
     }

@@ -20,8 +20,9 @@ public class CombatDataSyncPacket {
     private final String displayName;
     private final String callsign;
     private final int rankOrdinal;
+    private final String squadName;
 
-    public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal) {
+    public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName) {
         this.playerId = playerId;
         this.teamOrdinal = teamOrdinal;
         this.kills = kills;
@@ -31,6 +32,7 @@ public class CombatDataSyncPacket {
         this.displayName = displayName != null ? displayName : "";
         this.callsign = callsign != null ? callsign : "";
         this.rankOrdinal = rankOrdinal;
+        this.squadName = squadName != null ? squadName : "";
     }
 
     public static void encode(CombatDataSyncPacket msg, FriendlyByteBuf buf) {
@@ -43,13 +45,14 @@ public class CombatDataSyncPacket {
         buf.writeUtf(msg.displayName);
         buf.writeUtf(msg.callsign);
         buf.writeInt(msg.rankOrdinal);
+        buf.writeUtf(msg.squadName);
     }
 
     public static CombatDataSyncPacket decode(FriendlyByteBuf buf) {
         return new CombatDataSyncPacket(
             buf.readUUID(), buf.readInt(), buf.readInt(), buf.readInt(),
             buf.readUtf(), buf.readUtf(), buf.readUtf(),
-            buf.readUtf(), buf.readInt()
+            buf.readUtf(), buf.readInt(), buf.readUtf(256)
         );
     }
 
@@ -63,7 +66,7 @@ public class CombatDataSyncPacket {
                 );
             }
             ClientTeamData.playerDataMap.put(msg.playerId, new PlayerListEntry(
-                msg.rankOrdinal, msg.callsign, "", msg.kills, msg.deaths, msg.teamOrdinal
+                msg.rankOrdinal, msg.callsign, "", msg.kills, msg.deaths, msg.teamOrdinal, msg.squadName
             ));
         });
         ctx.get().setPacketHandled(true);

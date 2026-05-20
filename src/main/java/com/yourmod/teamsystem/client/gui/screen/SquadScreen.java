@@ -93,7 +93,9 @@ public class SquadScreen extends Screen {
         if (inSquad && ClientTeamData.playerDataMap != null) {
             int memberCount = 0;
             for (var entry : ClientTeamData.playerDataMap.entrySet()) {
-                if (squad.equals(entry.getValue().squad())) memberCount++;
+                String ps = entry.getValue().squadName();
+                if (ps == null || ps.isEmpty()) ps = entry.getValue().squad();
+                if (squad.equals(ps)) memberCount++;
             }
             int bx = cx + sw / 2 + 6;
             int by = panelY + 23;
@@ -139,7 +141,8 @@ public class SquadScreen extends Screen {
             g.fill(x, y, x + w, y + 22, AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, (int)(hover * 0x0A)));
         }
 
-        String badge = "[" + (ple.squad() != null ? ple.squad() : "-") + "]";
+        String sq = ple.squadName() != null && !ple.squadName().isEmpty() ? ple.squadName() : ple.squad();
+        String badge = "[" + (sq != null ? sq : "-") + "]";
         g.drawString(font, badge, x + 2, y + 6, AnimationHelper.withAlpha(COLOR_ORANGE, (int)(fadeAlpha * 200)));
 
         String name = ple.callsign() != null ? ple.callsign() : "Unknown";

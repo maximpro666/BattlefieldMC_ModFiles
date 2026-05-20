@@ -211,50 +211,36 @@ public class KitConfigPanel {
 
         int bg = active ? AnimationHelper.blendColors(UITheme.BG_SLOT, UITheme.ACCENT, 0.12f)
                 : AnimationHelper.withAlpha(UITheme.BG_SLOT, (int)(fade * 0xDD));
-        int border = active ? AnimationHelper.withAlpha(UITheme.ACCENT, alpha)
-                : AnimationHelper.withAlpha(UITheme.BORDER, (int)(fade * (hover ? 0xAA : 0x55)));
-
         g.fill(x, y, x + w, y + SLOT_H, bg);
-        g.fill(x, y, x + w, y + 1, border);
-        g.fill(x, y + SLOT_H - 1, x + w, y + SLOT_H, border);
-
-        if (active) {
-            g.fill(x, y, x + 3, y + SLOT_H, AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
-        }
+        g.fill(x, y, x + w, y + 1, AnimationHelper.withAlpha(active ? UITheme.ACCENT : UITheme.BORDER, (int)(fade * (active ? alpha : 0x66))));
+        g.fill(x, y + SLOT_H - 1, x + w, y + SLOT_H, AnimationHelper.withAlpha(active ? UITheme.ACCENT : UITheme.BORDER, (int)(fade * (active ? alpha : 0x66))));
 
         g.drawString(font, icon, x + 8, y + 8,
                 AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
-        g.drawString(font, key, x + 28, y + 4,
+        g.drawString(font, key, x + 28, y + 6,
                 AnimationHelper.withAlpha(active ? UITheme.ACCENT : UITheme.TEXT_MUTED, (int)(fade * 180)));
 
         String sel = selections.getOrDefault(key, "");
-        String display = sel.isEmpty() ? "\u2014" : displayName(sel);
+        String display = sel.isEmpty() ? "" : displayName(sel);
         g.drawString(font, display, x + 28, y + 18,
                 AnimationHelper.withAlpha(sel.isEmpty() ? UITheme.TEXT_MUTED : UITheme.TEXT_PRIMARY, alpha));
 
         List<String> opts = weaponOptions.get(key);
-        boolean canCycle = opts != null && opts.size() > 1;
-        int idx = selectionIndex.getOrDefault(key, 0);
-        int arrowY = y + SLOT_H / 2 - 4;
-        int leftX = x + w - 40;
-
-        g.drawString(font, "\u2039", leftX, arrowY,
-                AnimationHelper.withAlpha(canCycle ? UITheme.ACCENT : UITheme.TEXT_MUTED, (int)(fade * (canCycle ? 200 : 80))));
-        g.drawString(font, (idx + 1) + "/" + opts.size(), leftX + 12, arrowY,
-                AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
-        g.drawString(font, "\u203A", leftX + 30, arrowY,
-                AnimationHelper.withAlpha(canCycle ? UITheme.ACCENT : UITheme.TEXT_MUTED, (int)(fade * (canCycle ? 200 : 80))));
+        if (opts != null && opts.size() > 1) {
+            int arrowY = y + SLOT_H / 2 - 4;
+            int leftX = x + w - 28;
+            g.drawString(font, "\u2039", leftX, arrowY,
+                    AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fade * 200)));
+            g.drawString(font, "\u203A", leftX + 12, arrowY,
+                    AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fade * 200)));
+        }
     }
 
     private void renderArmorRow(GuiGraphics g, int x, int y, int w, String key, net.minecraft.client.gui.Font font) {
-        boolean hover = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + SLOT_H;
-
         int bg = AnimationHelper.withAlpha(UITheme.BG_SLOT, (int)(fade * 0xDD));
-        int border = AnimationHelper.withAlpha(UITheme.BORDER, (int)(fade * (hover ? 0xAA : 0x55)));
-
         g.fill(x, y, x + w, y + SLOT_H, bg);
-        g.fill(x, y, x + w, y + 1, border);
-        g.fill(x, y + SLOT_H - 1, x + w, y + SLOT_H, border);
+        g.fill(x, y, x + w, y + 1, AnimationHelper.withAlpha(UITheme.BORDER, (int)(fade * 0x66)));
+        g.fill(x, y + SLOT_H - 1, x + w, y + SLOT_H, AnimationHelper.withAlpha(UITheme.BORDER, (int)(fade * 0x66)));
 
         // Render actual item icon
         String sel = armorSelections.getOrDefault(key, "");
@@ -269,24 +255,21 @@ public class KitConfigPanel {
                     AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
         }
 
-        g.drawString(font, key, x + 32, y + 4,
+        g.drawString(font, key, x + 32, y + 6,
                 AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 180)));
-        String display = sel.isEmpty() ? "\u2014" : displayName(sel);
+        String display = sel.isEmpty() ? "" : displayName(sel);
         g.drawString(font, display, x + 32, y + 18,
                 AnimationHelper.withAlpha(sel.isEmpty() ? UITheme.TEXT_MUTED : UITheme.TEXT_PRIMARY, alpha));
 
         List<String> opts = armorOptions.get(key);
-        boolean canCycle = opts != null && opts.size() > 1;
-        int idx = armorIndex.getOrDefault(key, 0);
-        int arrowY = y + SLOT_H / 2 - 4;
-        int leftX = x + w - 40;
-
-        g.drawString(font, "\u2039", leftX, arrowY,
-                AnimationHelper.withAlpha(canCycle ? UITheme.ACCENT : UITheme.TEXT_MUTED, (int)(fade * (canCycle ? 200 : 80))));
-        g.drawString(font, (idx + 1) + "/" + (opts != null ? opts.size() : 1), leftX + 12, arrowY,
-                AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
-        g.drawString(font, "\u203A", leftX + 30, arrowY,
-                AnimationHelper.withAlpha(canCycle ? UITheme.ACCENT : UITheme.TEXT_MUTED, (int)(fade * (canCycle ? 200 : 80))));
+        if (opts != null && opts.size() > 1) {
+            int arrowY = y + SLOT_H / 2 - 4;
+            int leftX = x + w - 28;
+            g.drawString(font, "\u2039", leftX, arrowY,
+                    AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fade * 200)));
+            g.drawString(font, "\u203A", leftX + 12, arrowY,
+                    AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fade * 200)));
+        }
     }
 
     public String handleConfigClick(double mx, double my, int width, int height) {

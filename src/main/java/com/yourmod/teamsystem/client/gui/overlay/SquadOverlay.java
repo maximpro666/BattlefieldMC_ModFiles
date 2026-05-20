@@ -33,7 +33,8 @@ public class SquadOverlay {
 
         for (Map.Entry<UUID, PlayerListEntry> entry : map.entrySet()) {
             PlayerListEntry ple = entry.getValue();
-            if (!mySquad.equals(ple.squad())) continue;
+            String ps = ple.squadName() != null && !ple.squadName().isEmpty() ? ple.squadName() : ple.squad();
+            if (!mySquad.equals(ps)) continue;
             int y = startY + idx * ROW_H;
 
             g.fill(x, y, x + PANEL_W, y + ROW_H - 1, AnimationHelper.withAlpha(COLOR_BG, 180));

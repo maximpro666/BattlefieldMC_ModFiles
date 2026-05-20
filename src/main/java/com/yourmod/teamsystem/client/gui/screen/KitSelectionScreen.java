@@ -86,6 +86,9 @@ public class KitSelectionScreen extends Screen {
         lockStates.clear();
         lockReasons.clear();
 
+        com.yourmod.teamsystem.core.Team team = com.yourmod.teamsystem.client.ClientTeamData.getLocalPlayerTeam();
+        if (team == com.yourmod.teamsystem.core.Team.SPECTATOR) return;
+
         KitConfig cfg = KitConfig.get();
         if (cfg == null) return;
         KitConfig.ClassConfig cl = cfg.classes.get(classId);
@@ -93,7 +96,7 @@ public class KitSelectionScreen extends Screen {
 
         LockChecker.Context ctx = new LockChecker.Context();
         ctx.playerRank = com.yourmod.teamsystem.client.ClientTeamData.localPlayerRank;
-        ctx.playerTeam = com.yourmod.teamsystem.client.ClientTeamData.getLocalPlayerTeam().name();
+        ctx.playerTeam = team.name();
         ctx.playerSP = com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP;
         ctx.playerBC = com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC;
 
@@ -296,20 +299,12 @@ public class KitSelectionScreen extends Screen {
                 {"Grenade", active.weapons != null && active.weapons.grenade != null && !active.weapons.grenade.isEmpty() ? active.weapons.grenade.get(0) : null},
         };
 
+        int iconX = x;
         for (var slot : weaponSlots) {
             if (slot[1] == null) continue;
-            int sy = y;
-            g.fill(x, sy, x + w, sy + 30,
-                    AnimationHelper.withAlpha(UITheme.BG_SURFACE, (int)(fade * 0xDD)));
-            g.fill(x, sy, x + 3, sy + 30,
-                    AnimationHelper.withAlpha(UITheme.BORDER, (int)(fade * 0x88)));
-
-            g.drawString(font, slot[0], x + 10, sy + 3,
-                    AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 180)));
-            g.drawString(font, displayName(slot[1]), x + 10, sy + 15,
+            g.drawString(font, displayName(slot[1]), iconX, y,
                     AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, alpha));
-
-            y += 34;
+            y += 12;
         }
 
         // Buttons

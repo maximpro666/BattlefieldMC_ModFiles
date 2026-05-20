@@ -80,4 +80,22 @@ public final class UITheme {
     public static final int ALPHA_MID         = 0xAA;
     public static final int ALPHA_LOW         = 0x66;
     public static final int ALPHA_GHOST       = 0x26;
+
+    public static final int RANK_GOLD = 0xFFE8750A;
+    public static final int RANK_GOLD_DIM = 0xFFC8A050;
+    public static final int RANK_SILVER = 0xFF8090A0;
+    public static final int RANK_SILVER_DIM = 0xFF607080;
+    public static final int DONATE_VIP = 0xFFE8750A;
+    public static final int DONATE_ELITE_A = 0xFFA080E0;
+    public static final int DONATE_ELITE_B = 0xFF3090D0;
+    public static final int DONATE_GENERAL = 0xFFE07B00;
+    public static final int SQUAD_LABEL = ACCENT;
+    public static final int SQUAD_LINE = 0x40E07B00;
+    public static final int SELF_BG = 0x26E07B00;
+    public static final int SELF_BORDER = ACCENT;
+    public static final int PING_LOW = 0xFF50B050;
+    public static final int PING_MID = 0xFFCCA030;
+    public static final int PING_HIGH = 0xFFCC3030;
+    public static final int NAMETAG_BAR_BG = 0x40000000;
+    public static final int NAMETAG_BAR_BASE = 0xFF808080;
 }

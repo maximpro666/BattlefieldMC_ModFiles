@@ -513,7 +513,9 @@ public class KitCustomizationScreen extends Screen {
         PacketHandler.CHANNEL.sendToServer(new KitSavePacket(packageId, buildLoadoutJson()));
         PacketHandler.CHANNEL.sendToServer(new KitSelectPacket(packageId));
         SpawnScreenHelper.updateSelectedKit(packageId);
-        onClose();
+        if (minecraft != null) {
+            SpawnScreenHelper.reopen();
+        }
     }
 
     private static String escapeJson(String s) {

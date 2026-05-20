@@ -68,9 +68,15 @@ public class ClassSelectionScreen extends Screen {
         KitConfig cfg = KitConfig.get();
         if (cfg == null || cfg.classes == null) return;
 
+        com.yourmod.teamsystem.core.Team team = com.yourmod.teamsystem.client.ClientTeamData.getLocalPlayerTeam();
+        if (team == com.yourmod.teamsystem.core.Team.SPECTATOR) {
+            hoverState = new float[0];
+            return;
+        }
+
         LockChecker.Context ctx = new LockChecker.Context();
         ctx.playerRank = com.yourmod.teamsystem.client.ClientTeamData.localPlayerRank;
-        ctx.playerTeam = com.yourmod.teamsystem.client.ClientTeamData.getLocalPlayerTeam().name();
+        ctx.playerTeam = team.name();
         ctx.playerSP = com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP;
         ctx.playerBC = com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC;
 
@@ -167,7 +173,10 @@ public class ClassSelectionScreen extends Screen {
                 AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fadeAlpha * 150)));
 
         if (classes.isEmpty()) {
-            String msg = "No classes available";
+            String msg = com.yourmod.teamsystem.client.ClientTeamData.getLocalPlayerTeam()
+                == com.yourmod.teamsystem.core.Team.SPECTATOR
+                ? "Select a team first"
+                : "No classes available";
             int mw = font.width(msg);
             g.drawString(font, msg, width / 2 - mw / 2, height / 2,
                     AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 200)));
