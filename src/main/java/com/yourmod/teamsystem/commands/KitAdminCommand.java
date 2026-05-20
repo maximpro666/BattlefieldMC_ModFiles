@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.yourmod.teamsystem.data.KitConfig;
 import com.yourmod.teamsystem.network.KitAdminConfigSyncPacket;
+import com.yourmod.teamsystem.network.KitConfigSyncPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -86,7 +87,9 @@ public class KitAdminCommand {
             Files.createDirectories(dir);
             Files.writeString(dir.resolve("kits.json"), gson.toJson(parsed));
             KitConfig.set(parsed);
-            player.sendSystemMessage(Component.literal("§aKit config saved to disk"));
+            KitConfigSyncPacket syncAll = new KitConfigSyncPacket(gson.toJson(parsed));
+            PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), syncAll);
+            player.sendSystemMessage(Component.literal("§aKit config saved to disk and broadcast to all players"));
         } catch (Exception e) {
             player.sendSystemMessage(Component.literal("§cError: " + e.getMessage()));
         }

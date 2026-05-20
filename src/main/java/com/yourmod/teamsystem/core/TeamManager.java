@@ -264,10 +264,11 @@ public class TeamManager extends SavedData {
         updatePlayerDisplayName(player);
         syncConfig(player);
         syncRank(player);
-        syncKits(player);
         syncKitConfig(player);
         syncVehicles(player);
         syncFOBs(player);
+        EconomyManager econ = TeamSystem.getEconomyManager();
+        if (econ != null) econ.syncAll(player);
     }
 
     public void syncConfig(ServerPlayer player) {

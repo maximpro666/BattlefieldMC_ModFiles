@@ -9,6 +9,8 @@ public final class LockChecker {
     public static class Context {
         public int    playerRank;
         public String playerTeam;
+        public int    playerSP;
+        public int    playerBC;
         public String currentMap;
         public String selectedClass;
         public String selectedKit;
@@ -20,6 +22,10 @@ public final class LockChecker {
         if (ctx.playerRank < req.rank) return LockState.LOCKED_RANK;
         if (req.team != null && !req.team.equalsIgnoreCase(ctx.playerTeam))
             return LockState.LOCKED_TEAM;
+        if (req.sp_cost > 0 && ctx.playerSP < req.sp_cost)
+            return LockState.LOCKED_COST;
+        if (req.bc_cost > 0 && ctx.playerBC < req.bc_cost)
+            return LockState.LOCKED_COST;
         return LockState.AVAILABLE;
     }
 

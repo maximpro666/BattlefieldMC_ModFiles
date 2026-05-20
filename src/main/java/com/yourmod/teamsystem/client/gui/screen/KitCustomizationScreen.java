@@ -287,11 +287,12 @@ public class KitCustomizationScreen extends Screen {
     private void renderHeader(GuiGraphics g) {
         KitConfig cfg = KitConfig.get();
         String title;
+        KitConfig.KitDef kit = null;
         if (cfg != null && cfg.classes.containsKey(classId)) {
             KitConfig.ClassConfig cl = cfg.classes.get(classId);
-            KitConfig.KitDef k = cl.kits.get(kitId);
-            if (k != null && k.display_name != null) {
-                title = I18n.localize(k.display_name).toUpperCase();
+            kit = cl.kits.get(kitId);
+            if (kit != null && kit.display_name != null) {
+                title = I18n.localize(kit.display_name).toUpperCase();
             } else {
                 title = kitId.toUpperCase();
             }
@@ -301,6 +302,28 @@ public class KitCustomizationScreen extends Screen {
         int tw = font.width(title);
         g.drawString(font, title, panelX + panelW / 2 - tw / 2, panelY + 10,
             AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 255)));
+
+        if (kit != null && kit.requirements != null) {
+            int costX = panelX + panelW - 4;
+            int costY = panelY + 10;
+            if (kit.requirements.sp_cost > 0) {
+                String spStr = "SP " + kit.requirements.sp_cost;
+                int cw = font.width(spStr);
+                costX -= cw;
+                boolean canAfford = com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP >= kit.requirements.sp_cost;
+                int col = canAfford ? 0xFFAA00 : 0xFF4444;
+                g.drawString(font, spStr, costX, costY, AnimationHelper.withAlpha(col, (int)(fadeAlpha * 255)));
+                costX -= 12;
+            }
+            if (kit.requirements.bc_cost > 0) {
+                String bcStr = "BC " + kit.requirements.bc_cost;
+                int cw = font.width(bcStr);
+                costX -= cw;
+                boolean canAfford = com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC >= kit.requirements.bc_cost;
+                int col = canAfford ? 0x55FF55 : 0xFF4444;
+                g.drawString(font, bcStr, costX, costY, AnimationHelper.withAlpha(col, (int)(fadeAlpha * 255)));
+            }
+        }
     }
 
     private void renderPreviewPanel(GuiGraphics g) {
@@ -432,7 +455,8 @@ public class KitCustomizationScreen extends Screen {
                 int chipX = cx + CONFIG_PAD + font.width(capitalize(cat) + ": ") + 8;
                 for (String opt : opts) {
                     boolean selected = opt.equals(sel);
-                    int chipW = font.width(formatAttachName(opt)) + 16;
+                    String optDisplay = ItemResolver.getDisplayName(opt);
+                    int chipW = font.width(optDisplay) + 16;
                     int chipH = 22;
 
                     boolean chipHov = mouseX >= chipX && mouseX <= chipX + chipW
@@ -453,7 +477,7 @@ public class KitCustomizationScreen extends Screen {
                         g.fill(chipX, curY, chipX + chipW, curY + 1, 0xFFFFFFFF);
                     }
 
-                    g.drawString(font, formatAttachName(opt), chipX + 8, curY + 6,
+                    g.drawString(font, optDisplay, chipX + 8, curY + 6,
                         chipTxt);
 
                     chipX += chipW + 4;
@@ -531,7 +555,26 @@ public class KitCustomizationScreen extends Screen {
 
         String sel = armorSelections.getOrDefault(armorKey, "");
         String displayName = sel.isEmpty() ? "None" : ItemResolver.getDisplayName(sel);
-        g.drawString(font, displayName, x + 10, y + 22,
+
+        // Render item icon
+        int iconX = x + 10;
+        int iconY = y + 18;
+        int textX = x + 28;
+        if (!sel.isEmpty()) {
+            ItemStack stack = ItemResolver.resolve(sel);
+            if (!stack.isEmpty()) {
+                PoseStack pose = g.pose();
+                pose.pushPose();
+                pose.translate(iconX, iconY, 0);
+                float iconScale = 0.85f;
+                pose.scale(iconScale, iconScale, 1);
+                g.renderItem(stack, 0, 0);
+                pose.popPose();
+                textX = x + 28 + 18;
+            }
+        }
+
+        g.drawString(font, displayName, textX, y + 22,
             AnimationHelper.withAlpha(sel.isEmpty() ? UITheme.TEXT_MUTED : UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 255)));
 
         String left = "\u25C0";
@@ -548,10 +591,15 @@ public class KitCustomizationScreen extends Screen {
         if (scrollPanel == null) return super.mouseClicked(mx, my, btn);
         int cx = configX;
         int cw = configW;
+        int scrollTop = panelY + HEADER_H + 8;
+        int scrollH = panelH - HEADER_H - FOOTER_H - 16;
+        int scrollBot = scrollTop + scrollH;
         float soff = scrollPanel.getScrollOffset();
-        int baseY = panelY + HEADER_H + 8;
+        int baseY = scrollTop;
         int scrollContentStart = baseY - (int) soff + 4;
 
+        // Only handle config panel clicks if mouse is within the visible scroll area
+        if (my >= scrollTop && my <= scrollBot) {
         // Click on config panel slot cards
         int curY = scrollContentStart;
         for (String key : slotKeys) {
@@ -613,7 +661,8 @@ public class KitCustomizationScreen extends Screen {
                 List<String> opts = getAttachmentOptions(activeWeapon, cat);
                 int chipX = cx + CONFIG_PAD + font.width(capitalize(cat) + ": ") + 8;
                 for (String opt : opts) {
-                    int chipW = font.width(formatAttachName(opt)) + 16;
+                    String optDisp = ItemResolver.getDisplayName(opt);
+                    int chipW = font.width(optDisp) + 16;
                     int chipH = 22;
                     if (mx >= chipX && mx <= chipX + chipW && my >= curY && my <= curY + chipH) {
                         setAttachmentSelection(activeWeapon, cat, opt);
@@ -625,6 +674,7 @@ public class KitCustomizationScreen extends Screen {
                 curY += 26;
             }
         }
+        } // end scroll-bounds check
 
         // Click on preview panel slot cards
         int renderY = panelY + HEADER_H + 10;

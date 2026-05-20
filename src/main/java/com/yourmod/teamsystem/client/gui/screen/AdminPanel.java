@@ -332,9 +332,9 @@ public class AdminPanel extends Screen {
             int editorY = Math.max(ry2 + 4, contentY + contentH - 260);
 
             if (mx >= rightX + 4 && mx <= rightX + (contentW - leftW - 4) && my >= editorY + 2 && my <= editorY + 150) {
-                String[] fieldKeys = {"display_name", "description", "requirements.rank",
-                    null, "weapons.primary", "weapons.secondary", "weapons.special", "weapons.grenade"};
-                int[] yOffsets = {2, 18, 34, 54, 70, 86, 102, 118};
+            String[] fieldKeys = {"display_name", "description", "requirements.rank", "requirements.sp_cost", "requirements.bc_cost",
+                null, "weapons.primary", "weapons.secondary", "weapons.special", "weapons.grenade"};
+            int[] yOffsets = {2, 18, 34, 50, 66, 86, 102, 118, 134, 150};
 
                 for (int i = 0; i < fieldKeys.length; i++) {
                     int yStart = editorY + yOffsets[i];
@@ -362,6 +362,16 @@ public class AdminPanel extends Screen {
                 if (kitObj.has("requirements") && kitObj.getAsJsonObject("requirements").has("rank"))
                     return String.valueOf(kitObj.getAsJsonObject("requirements").get("rank").getAsInt());
                 return "1";
+            }
+            case "requirements.sp_cost": {
+                if (kitObj.has("requirements") && kitObj.getAsJsonObject("requirements").has("sp_cost"))
+                    return String.valueOf(kitObj.getAsJsonObject("requirements").get("sp_cost").getAsInt());
+                return "0";
+            }
+            case "requirements.bc_cost": {
+                if (kitObj.has("requirements") && kitObj.getAsJsonObject("requirements").has("bc_cost"))
+                    return String.valueOf(kitObj.getAsJsonObject("requirements").get("bc_cost").getAsInt());
+                return "0";
             }
             default: {
                 if (fieldKey.startsWith("weapons.")) {
@@ -419,6 +429,24 @@ public class AdminPanel extends Screen {
                         ? kitObj.getAsJsonObject("requirements")
                         : new com.google.gson.JsonObject();
                     reqObj.addProperty("rank", rank);
+                    kitObj.add("requirements", reqObj);
+                } catch (NumberFormatException ignored) {}
+            } else if (fieldPath.equals("requirements.sp_cost")) {
+                try {
+                    int sp = Integer.parseInt(newValue.trim());
+                    com.google.gson.JsonObject reqObj = kitObj.has("requirements")
+                        ? kitObj.getAsJsonObject("requirements")
+                        : new com.google.gson.JsonObject();
+                    reqObj.addProperty("sp_cost", sp);
+                    kitObj.add("requirements", reqObj);
+                } catch (NumberFormatException ignored) {}
+            } else if (fieldPath.equals("requirements.bc_cost")) {
+                try {
+                    int bc = Integer.parseInt(newValue.trim());
+                    com.google.gson.JsonObject reqObj = kitObj.has("requirements")
+                        ? kitObj.getAsJsonObject("requirements")
+                        : new com.google.gson.JsonObject();
+                    reqObj.addProperty("bc_cost", bc);
                     kitObj.add("requirements", reqObj);
                 } catch (NumberFormatException ignored) {}
             } else if (fieldPath.startsWith("weapons.")) {

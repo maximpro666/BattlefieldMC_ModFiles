@@ -82,9 +82,33 @@ public class KitSelectionScreen extends Screen {
         if (cfg == null) return;
         KitConfig.ClassConfig cl = cfg.classes.get(classId);
         if (cl == null) return;
+        List<Map.Entry<String, KitConfig.KitDef>> affordable = new ArrayList<>();
+        List<Map.Entry<String, KitConfig.KitDef>> locked = new ArrayList<>();
         for (Map.Entry<String, KitConfig.KitDef> entry : cl.kits.entrySet()) {
-            kitEntries.add(entry);
+            KitConfig.KitDef kit = entry.getValue();
+            if (kit.requirements == null ||
+                (kit.requirements.sp_cost <= com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP &&
+                 kit.requirements.bc_cost <= com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC)) {
+                affordable.add(entry);
+            } else {
+                locked.add(entry);
+            }
         }
+        kitEntries.addAll(affordable);
+        kitEntries.addAll(locked);
+    }
+
+    private boolean canAffordSelected() {
+        if (selectedKitId == null) return false;
+        KitConfig cfg = KitConfig.get();
+        if (cfg == null) return false;
+        KitConfig.ClassConfig cl = cfg.classes.get(classId);
+        if (cl == null) return false;
+        KitConfig.KitDef kit = cl.kits.get(selectedKitId);
+        if (kit == null || kit.requirements == null) return true;
+        if (kit.requirements.sp_cost > 0 && com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP < kit.requirements.sp_cost) return false;
+        if (kit.requirements.bc_cost > 0 && com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC < kit.requirements.bc_cost) return false;
+        return true;
     }
 
     private void confirmSelection() {
@@ -144,7 +168,7 @@ public class KitSelectionScreen extends Screen {
             g.drawString(font, none, width / 2 - nw / 2, height / 2, AnimationHelper.withAlpha(COLOR_SUBTEXT, (int)(fadeAlpha * 200)));
         }
 
-        confirmButton.active = selectedKitId != null;
+        confirmButton.active = selectedKitId != null && canAffordSelected();
         confirmButton.visible = selectedKitId != null;
         customizeButton.active = selectedKitId != null;
         customizeButton.visible = selectedKitId != null;
@@ -180,6 +204,27 @@ public class KitSelectionScreen extends Screen {
             int sw = font.width(sel);
             g.drawString(font, sel, x + CELL_W / 2 - sw / 2, y + CELL_H / 2 + 22,
                 AnimationHelper.withAlpha(COLOR_SELECTED, (int)(alpha * 255)));
+        }
+
+        if (kit.requirements != null) {
+            int lineY = y + 4;
+            if (kit.requirements.sp_cost > 0) {
+                boolean canAfford = com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP >= kit.requirements.sp_cost;
+                int c = canAfford ? AnimationHelper.withAlpha(0xFFAA00, (int)(alpha * 255))
+                                  : AnimationHelper.withAlpha(0xFF4444, (int)(alpha * 255));
+                String s = "SP " + kit.requirements.sp_cost;
+                int cw = font.width(s);
+                g.drawString(font, s, x + CELL_W - cw - 4, lineY, c);
+                lineY += 10;
+            }
+            if (kit.requirements.bc_cost > 0) {
+                boolean canAfford = com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC >= kit.requirements.bc_cost;
+                int c = canAfford ? AnimationHelper.withAlpha(0x55FF55, (int)(alpha * 255))
+                                  : AnimationHelper.withAlpha(0xFF4444, (int)(alpha * 255));
+                String s = "BC " + kit.requirements.bc_cost;
+                int cw = font.width(s);
+                g.drawString(font, s, x + CELL_W - cw - 4, lineY, c);
+            }
         }
     }
 

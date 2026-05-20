@@ -6,6 +6,7 @@ public enum LockState {
     LOCKED_KIT,
     LOCKED_TEAM,
     LOCKED_MAP,
+    LOCKED_COST,
     INCOMPATIBLE;
 
     public String tooltip(String detail) {
@@ -14,6 +15,7 @@ public enum LockState {
             case LOCKED_KIT   -> "Requires Kit: "  + detail;
             case LOCKED_TEAM  -> detail + " only";
             case LOCKED_MAP   -> "Not on this map";
+            case LOCKED_COST  -> "Not enough " + detail;
             case INCOMPATIBLE -> "Not compatible with " + detail;
             default           -> "";
         };

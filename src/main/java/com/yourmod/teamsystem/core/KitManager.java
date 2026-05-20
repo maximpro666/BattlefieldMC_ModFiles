@@ -94,7 +94,8 @@ public class KitManager {
             for (int i = 0; i < 100; i++) {
                 try {
                     ItemStack stack = (ItemStack) curiosGetStackInSlot.invoke(stacks, i);
-                    if (stack == null || stack.isEmpty()) break;
+                    if (stack == null) break;
+                    if (stack.isEmpty()) continue;
                     result.add(stack);
                 } catch (Exception e) { break; }
             }
@@ -107,7 +108,8 @@ public class KitManager {
             for (int i = 0; i < 100; i++) {
                 try {
                     ItemStack s = (ItemStack) curiosGetStackInSlot.invoke(stacks, i);
-                    if (s == null || s.isEmpty()) break;
+                    if (s == null) break;
+                    if (s.isEmpty()) continue;
                     curiosSetStackInSlot.invoke(stacks, i, ItemStack.EMPTY);
                 } catch (Exception e) { break; }
             }

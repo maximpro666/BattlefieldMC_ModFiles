@@ -27,6 +27,7 @@ public class PlayerCombatData {
     private int donatTier = 0;
     private String playerTitle = "";
     private String loadoutConfig = "";
+    private String selectedKit = "";
 
     private boolean hasChosenTeam = false;
 
@@ -164,6 +165,8 @@ public class PlayerCombatData {
     public void setPlayerTitle(String playerTitle) { this.playerTitle = playerTitle != null ? playerTitle : ""; }
     public String getLoadoutConfig() { return loadoutConfig; }
     public void setLoadoutConfig(String loadoutConfig) { this.loadoutConfig = loadoutConfig != null ? loadoutConfig : ""; }
+    public String getSelectedKit() { return selectedKit; }
+    public void setSelectedKit(String selectedKit) { this.selectedKit = selectedKit != null ? selectedKit : ""; }
 
     public void reset() {
         this.team = Team.SPECTATOR;
@@ -180,6 +183,7 @@ public class PlayerCombatData {
         this.donatTier = 0;
         this.playerTitle = "";
         this.loadoutConfig = "";
+        this.selectedKit = "";
     }
 
     // ===== NBT Serialization =====
@@ -201,6 +205,7 @@ public class PlayerCombatData {
         tag.putInt("DonatTier", donatTier);
         tag.putString("PlayerTitle", playerTitle);
         tag.putString("LoadoutConfig", loadoutConfig);
+        tag.putString("SelectedKit", selectedKit);
         {
             CompoundTag attTag = new CompoundTag();
             for (Map.Entry<String, CompoundTag> e : savedAttachments.entrySet()) {
@@ -234,6 +239,7 @@ public class PlayerCombatData {
         this.donatTier = tag.getInt("DonatTier");
         this.playerTitle = tag.getString("PlayerTitle");
         this.loadoutConfig = tag.contains("LoadoutConfig") ? tag.getString("LoadoutConfig") : "";
+        this.selectedKit = tag.contains("SelectedKit") ? tag.getString("SelectedKit") : "";
         if (tag.contains("SavedAttachments")) {
             CompoundTag attTag = tag.getCompound("SavedAttachments");
             savedAttachments.clear();

@@ -72,6 +72,8 @@ public class ClassSelectionScreen extends Screen {
             LockChecker.Context ctx = new LockChecker.Context();
             ctx.playerRank = ClientTeamData.localPlayerRank;
             ctx.playerTeam = ClientTeamData.getLocalPlayerTeam().name();
+            ctx.playerSP = ClientTeamData.localPlayerSP;
+            ctx.playerBC = ClientTeamData.localPlayerBC;
 
             for (Map.Entry<String, KitConfig.ClassConfig> entry : classMap.entrySet()) {
                 classes.add(entry.getValue());
@@ -88,7 +90,16 @@ public class ClassSelectionScreen extends Screen {
                     }
                     if (ks.ordinal() > worstLock.ordinal()) {
                         worstLock = ks;
-                        lockReason = ks.tooltip(String.valueOf(kit.requirements.rank));
+                        String detail;
+                        if (ks == LockState.LOCKED_COST) {
+                            if (kit.requirements.sp_cost > 0 && ctx.playerSP < kit.requirements.sp_cost)
+                                detail = "SP: need " + kit.requirements.sp_cost;
+                            else
+                                detail = "BC: need " + kit.requirements.bc_cost;
+                        } else {
+                            detail = String.valueOf(kit.requirements.rank);
+                        }
+                        lockReason = ks.tooltip(detail);
                     }
                 }
 

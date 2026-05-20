@@ -7,6 +7,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import java.util.function.Supplier;
 
 public class KitConfigSyncPacket {
@@ -17,11 +21,33 @@ public class KitConfigSyncPacket {
     }
 
     public KitConfigSyncPacket(FriendlyByteBuf buf) {
-        this.configJson = buf.readUtf(65535);
+        int len = buf.readVarInt();
+        byte[] compressed = new byte[len];
+        buf.readBytes(compressed);
+        String json;
+        try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(compressed))) {
+            json = new String(gzip.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            json = "";
+            e.printStackTrace();
+        }
+        this.configJson = json;
     }
 
     public void toBytes(FriendlyByteBuf buf) {
-        buf.writeUtf(configJson);
+        try {
+            byte[] input = configJson.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (GZIPOutputStream gzip = new GZIPOutputStream(baos)) {
+                gzip.write(input);
+            }
+            byte[] compressed = baos.toByteArray();
+            buf.writeVarInt(compressed.length);
+            buf.writeBytes(compressed);
+        } catch (Exception e) {
+            e.printStackTrace();
+            buf.writeVarInt(0);
+        }
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> supplier) {

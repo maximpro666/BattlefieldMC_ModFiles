@@ -2,34 +2,12 @@ package com.yourmod.teamsystem.data;
 
 import com.yourmod.teamsystem.TeamSystem;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public class ItemResolver {
-
-    private static final String TACZ_GUN_ITEM_ID = "tacz:modern_kinetic_gun";
-
-    private static Boolean taczGunItemChecked = false;
-    private static Item taczGunItem = null;
-
-    private static Item getTaczGunItem() {
-        if (!taczGunItemChecked) {
-            taczGunItemChecked = true;
-            try {
-                Item found = BuiltInRegistries.ITEM.get(new ResourceLocation(TACZ_GUN_ITEM_ID));
-                if (found != null && found != Items.AIR) {
-                    taczGunItem = found;
-                }
-            } catch (Exception e) {
-                TeamSystem.LOGGER.warn("TACZ modern_kinetic_gun not found, TACZ guns disabled");
-            }
-        }
-        return taczGunItem;
-    }
 
     public static ItemStack resolve(String weaponId) {
         if (weaponId == null || weaponId.isEmpty()) return ItemStack.EMPTY;
@@ -41,24 +19,12 @@ public class ItemResolver {
             return ItemStack.EMPTY;
         }
 
-        // Try direct registry lookup (Superb Warfare, other mods)
         Item directItem = BuiltInRegistries.ITEM.get(rl);
         if (directItem != null && directItem != Items.AIR) {
             return new ItemStack(directItem);
         }
 
-        // Try as TACZ gun (modern_kinetic_gun with GunId NBT)
-        Item taczItem = getTaczGunItem();
-        if (taczItem != null) {
-            ItemStack stack = new ItemStack(taczItem);
-            CompoundTag tag = new CompoundTag();
-            tag.putString("GunId", weaponId);
-            tag.putString("GunFireMode", "AUTO");
-            stack.setTag(tag);
-            return stack;
-        }
-
-        TeamSystem.LOGGER.warn("Cannot resolve weapon ID: {} (no direct item, no TACZ)", weaponId);
+        TeamSystem.LOGGER.warn("Cannot resolve weapon ID: {}", weaponId);
         return ItemStack.EMPTY;
     }
 

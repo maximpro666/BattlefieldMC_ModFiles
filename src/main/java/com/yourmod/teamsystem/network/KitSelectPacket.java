@@ -45,6 +45,13 @@ public class KitSelectPacket {
                 String result = KitConfigServerHelper.applyKit(player, classId, kitId);
                 if (result != null) {
                     player.displayClientMessage(error(result), false);
+                } else {
+                    TeamManager tm = TeamSystem.getTeamManager();
+                    if (tm != null) {
+                        PlayerCombatData pcd = tm.getOrCreatePlayerData(player.getUUID());
+                        pcd.setSelectedKit(kitName);
+                        tm.setDirty();
+                    }
                 }
             } else {
                 // Old system: plain kit name

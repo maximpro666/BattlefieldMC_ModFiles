@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.EconomyManager;
 import com.yourmod.teamsystem.core.KitManager;
 import com.yourmod.teamsystem.core.PlayerCombatData;
 import com.yourmod.teamsystem.core.Team;
@@ -31,11 +32,22 @@ public class KitConfigServerHelper {
         TeamManager teamManager = TeamSystem.getTeamManager();
         PlayerCombatData data = teamManager.getOrCreatePlayerData(player.getUUID());
 
+        EconomyManager econ = TeamSystem.getEconomyManager();
         if (kit.requirements != null) {
             if (data.getRankOrdinal() < kit.requirements.rank)
                 return "Rank too low, need " + kit.requirements.rank;
             if (kit.requirements.team != null && !kit.requirements.team.equalsIgnoreCase(data.getTeam().name()))
                 return "Wrong team for this kit";
+            if (kit.requirements.bc_cost > 0) {
+                if (econ == null || econ.getBC(player.getUUID()) < kit.requirements.bc_cost)
+                    return "Not enough BC, need " + kit.requirements.bc_cost;
+                econ.deductBC(player.getUUID(), kit.requirements.bc_cost);
+            }
+            if (kit.requirements.sp_cost > 0) {
+                if (econ == null || econ.getSP(player.getUUID()) < kit.requirements.sp_cost)
+                    return "Not enough SP, need " + kit.requirements.sp_cost;
+                econ.addSP(player.getUUID(), -kit.requirements.sp_cost);
+            }
         }
 
         if (!player.isAlive()) return "You are dead";
@@ -99,7 +111,7 @@ public class KitConfigServerHelper {
     }
 
     private static final Map<String, String> TACZ_CALIBER_MAP = Map.ofEntries(
-        // Assault Rifles
+        // ══ TACZ Assault Rifles ══
         Map.entry("tacz:m4a1", "tacz:556x45"),
         Map.entry("tacz:hk416a5", "tacz:556x45"),
         Map.entry("tacz:hk416d", "tacz:556x45"),
@@ -108,34 +120,34 @@ public class KitConfigServerHelper {
         Map.entry("tacz:m16a1", "tacz:556x45"),
         Map.entry("tacz:aug", "tacz:556x45"),
         Map.entry("tacz:g36k", "tacz:556x45"),
+        Map.entry("tacz:spr15hb", "tacz:556x45"),
         Map.entry("tacz:ak47", "tacz:762x39"),
         Map.entry("tacz:rpk", "tacz:762x39"),
         Map.entry("tacz:type_81", "tacz:762x39"),
         Map.entry("tacz:sks_tactical", "tacz:762x39"),
         Map.entry("tacz:qbz_95", "tacz:58x42"),
         Map.entry("tacz:qbz_191", "tacz:58x42"),
-        // DMRs / Battle Rifles
+        // ══ TACZ DMRs / Battle Rifles ══
         Map.entry("tacz:mk14", "tacz:308"),
         Map.entry("tacz:scar_h", "tacz:308"),
         Map.entry("tacz:hk_g3", "tacz:308"),
         Map.entry("tacz:fn_fal", "tacz:308"),
         Map.entry("tacz:fn_evolys", "tacz:308"),
-        // Snipers
+        // ══ TACZ Snipers ══
         Map.entry("tacz:ai_awp", "tacz:338"),
         Map.entry("tacz:m107", "tacz:50bmg"),
         Map.entry("tacz:m95", "tacz:50bmg"),
         Map.entry("tacz:m700", "tacz:30_06"),
         Map.entry("tacz:lonetrail", "tacz:30_06"),
         Map.entry("tacz:kar98", "tacz:792x57"),
-        Map.entry("tacz:spr15hb", "tacz:556x45"),
-        // SMGs
+        // ══ TACZ SMGs ══
         Map.entry("tacz:hk_mp5a5", "tacz:9mm"),
         Map.entry("tacz:uzi", "tacz:9mm"),
         Map.entry("tacz:b93r", "tacz:9mm"),
         Map.entry("tacz:vector45", "tacz:45acp"),
         Map.entry("tacz:ump45", "tacz:45acp"),
         Map.entry("tacz:p90", "tacz:57x28"),
-        // Pistols
+        // ══ TACZ Pistols ══
         Map.entry("tacz:glock_17", "tacz:9mm"),
         Map.entry("tacz:cz75", "tacz:9mm"),
         Map.entry("tacz:m9a4", "tacz:9mm"),
@@ -148,16 +160,116 @@ public class KitConfigServerHelper {
         Map.entry("tacz:taurus500", "tacz:500mag"),
         Map.entry("tacz:taurus943", "tacz:22wmr"),
         Map.entry("tacz:springfield1873", "tacz:45_70"),
-        // Shotguns
+        // ══ TACZ Shotguns ══
         Map.entry("tacz:aa12", "tacz:12g"),
         Map.entry("tacz:m1014", "tacz:12g"),
         Map.entry("tacz:spas_12", "tacz:12g"),
         Map.entry("tacz:m870", "tacz:12g"),
         Map.entry("tacz:db_long", "tacz:12g"),
         Map.entry("tacz:db_short", "tacz:12g"),
-        // LMGs
+        // ══ TACZ LMGs ══
         Map.entry("tacz:m249", "tacz:556x45"),
         Map.entry("tacz:minigun", "tacz:308"),
+        // ══ MaxStuff ══
+        Map.entry("maxstuff:mk18", "tacz:556x45"),
+        Map.entry("maxstuff:sr15", "tacz:556x45"),
+        Map.entry("maxstuff:sr16", "tacz:556x45"),
+        Map.entry("maxstuff:ar10", "tacz:308"),
+        Map.entry("maxstuff:colt_933", "tacz:556x45"),
+        Map.entry("maxstuff:ak12", "tacz:545x39"),
+        Map.entry("maxstuff:ak15", "tacz:545x39"),
+        Map.entry("maxstuff:ak19", "tacz:545x39"),
+        Map.entry("maxstuff:ak74", "tacz:545x39"),
+        Map.entry("maxstuff:ak74m", "tacz:545x39"),
+        Map.entry("maxstuff:aks74u", "tacz:545x39"),
+        Map.entry("maxstuff:ak_alpha", "tacz:545x39"),
+        Map.entry("maxstuff:ak_delta", "tacz:545x39"),
+        Map.entry("maxstuff:ak107", "tacz:545x39"),
+        Map.entry("maxstuff:ak108", "tacz:545x39"),
+        Map.entry("maxstuff:ak109", "tacz:545x39"),
+        Map.entry("maxstuff:rpk16", "tacz:545x39"),
+        Map.entry("maxstuff:rpk_74", "tacz:545x39"),
+        Map.entry("maxstuff:mk11", "tacz:308"),
+        Map.entry("maxstuff:mk47", "tacz:762x39"),
+        Map.entry("maxstuff:scar_ssr", "tacz:308"),
+        Map.entry("maxstuff:scar_hamr", "tacz:308"),
+        Map.entry("maxstuff:beowulf_ecr", "tacz:556x45"),
+        Map.entry("maxstuff:beowulf_tcr", "tacz:556x45"),
+        Map.entry("maxstuff:mrad", "tacz:308"),
+        Map.entry("maxstuff:msr", "tacz:308"),
+        Map.entry("maxstuff:dragonuv_svd", "tacz:762x54"),
+        Map.entry("maxstuff:dragonuv_svdm", "tacz:762x54"),
+        Map.entry("maxstuff:dragonuv_svds", "tacz:762x54"),
+        Map.entry("maxstuff:dp28", "tacz:762x54"),
+        Map.entry("maxstuff:ai_awp", "tacz:338"),
+        Map.entry("maxstuff:ai_aws", "tacz:338"),
+        Map.entry("maxstuff:bfg50", "tacz:50bmg"),
+        Map.entry("maxstuff:gm6_lynx", "tacz:50bmg"),
+        Map.entry("maxstuff:m82a2", "tacz:50bmg"),
+        Map.entry("maxstuff:thunderbird", "tacz:50bmg"),
+        Map.entry("maxstuff:thunderbird_short", "tacz:50bmg"),
+        Map.entry("maxstuff:excaliber", "tacz:50bmg"),
+        Map.entry("maxstuff:hk_mp5k", "tacz:9mm"),
+        Map.entry("maxstuff:hk_mp5sd", "tacz:9mm"),
+        Map.entry("maxstuff:mp7", "tacz:46x30"),
+        Map.entry("maxstuff:udp9", "tacz:9mm"),
+        Map.entry("maxstuff:ump9", "tacz:9mm"),
+        Map.entry("maxstuff:vector9", "tacz:9mm"),
+        Map.entry("maxstuff:vityas", "tacz:9mm"),
+        Map.entry("maxstuff:hk416c", "tacz:556x45"),
+        Map.entry("maxstuff:hk417", "tacz:308"),
+        Map.entry("maxstuff:hk_g33", "tacz:556x45"),
+        Map.entry("maxstuff:honey_badger", "tacz:762x39"),
+        Map.entry("maxstuff:saiga12", "tacz:12g"),
+        Map.entry("maxstuff:saiga9", "tacz:9mm"),
+        Map.entry("maxstuff:m870t", "tacz:12g"),
+        Map.entry("maxstuff:genesis12", "tacz:12g"),
+        Map.entry("maxstuff:genesis12_fl", "tacz:12g"),
+        Map.entry("maxstuff:genesis12_dragons_breath", "tacz:12g"),
+        Map.entry("maxstuff:sks_golden", "tacz:762x39"),
+        Map.entry("maxstuff:sks_wooden", "tacz:762x39"),
+        Map.entry("maxstuff:glock_18c", "tacz:9mm"),
+        Map.entry("maxstuff:glock_54", "tacz:9mm"),
+        Map.entry("maxstuff:m17", "tacz:9mm"),
+        Map.entry("maxstuff:mk23", "tacz:45acp"),
+        Map.entry("maxstuff:af2011", "tacz:9mm"),
+        Map.entry("maxstuff:scar_15p", "tacz:556x45"),
+        Map.entry("maxstuff:scar_pdw", "tacz:556x45"),
+        Map.entry("maxstuff:scar_sbr", "tacz:556x45"),
+        Map.entry("maxstuff:qbz_97", "tacz:58x42"),
+        // ══ Daffas Arsenal ══
+        Map.entry("daffas_arsenal:hk416", "tacz:556x45"),
+        Map.entry("daffas_arsenal:hk416_sup", "tacz:556x45"),
+        Map.entry("daffas_arsenal:hk417", "tacz:308"),
+        Map.entry("daffas_arsenal:g36", "tacz:556x45"),
+        Map.entry("daffas_arsenal:g36c", "tacz:556x45"),
+        Map.entry("daffas_arsenal:g36c_commando", "tacz:556x45"),
+        Map.entry("daffas_arsenal:sg550", "tacz:556x45"),
+        Map.entry("daffas_arsenal:sg552", "tacz:556x45"),
+        Map.entry("daffas_arsenal:sl8", "tacz:556x45"),
+        Map.entry("daffas_arsenal:sgputer", "tacz:556x45"),
+        Map.entry("daffas_arsenal:sgputer2", "tacz:556x45"),
+        Map.entry("daffas_arsenal:ak47", "tacz:762x39"),
+        Map.entry("daffas_arsenal:aksopmod", "tacz:762x39"),
+        Map.entry("daffas_arsenal:ss1_v2", "tacz:762x39"),
+        Map.entry("daffas_arsenal:ss1_v5", "tacz:762x39"),
+        Map.entry("daffas_arsenal:ss1_v5g", "tacz:762x39"),
+        Map.entry("daffas_arsenal:ssg69", "tacz:762x54"),
+        Map.entry("daffas_arsenal:ssg69s", "tacz:762x54"),
+        Map.entry("daffas_arsenal:spasi15", "tacz:50bmg"),
+        Map.entry("daffas_arsenal:mp5k", "tacz:9mm"),
+        Map.entry("daffas_arsenal:hk45", "tacz:45acp"),
+        Map.entry("daffas_arsenal:hk45_sup", "tacz:45acp"),
+        Map.entry("daffas_arsenal:p99_hak", "tacz:9mm"),
+        Map.entry("daffas_arsenal:p99_nohak", "tacz:9mm"),
+        Map.entry("daffas_arsenal:gerosa", "tacz:9mm"),
+        Map.entry("daffas_arsenal:harpa9", "tacz:9mm"),
+        Map.entry("daffas_arsenal:apacoba9", "tacz:9mm"),
+        Map.entry("daffas_arsenal:apacoba9_sup", "tacz:9mm"),
+        Map.entry("daffas_arsenal:makten_single", "tacz:12g"),
+        Map.entry("daffas_arsenal:makten_single_taktis", "tacz:12g"),
+        Map.entry("daffas_arsenal:migraine3", "tacz:9mm"),
+        Map.entry("daffas_arsenal:samula3", "tacz:9mm"),
         // Launchers
         Map.entry("tacz:rpg7", "tacz:rpg_rocket"),
         Map.entry("tacz:m320", "tacz:40mm")
@@ -180,24 +292,32 @@ public class KitConfigServerHelper {
             return ItemStack.EMPTY;
         }
 
-        // Superb Warfare ammo mapping
+        // Throwables / tools / mines that don't need ammo
+        String[] noAmmoPaths = {"hand_grenade", "rgo_grenade", "c4_bomb", "taser",
+            "repair_tool", "m18_smoke_grenade", "claymore_mine", "blu_43_mine", "lunge_mine", "m_79"};
+        for (String p : noAmmoPaths) {
+            if (id.endsWith(p)) return ItemStack.EMPTY;
+        }
+
+        // RPG ammo
+        if (id.equals("superbwarfare:rpg")) {
+            return resolveDirect("superbwarfare:rpg_rocket_standard");
+        }
+
+        // Javelin ammo
+        if (id.equals("superbwarfare:javelin")) {
+            return resolveDirect("superbwarfare:javelin_missile");
+        }
+
+        // Igla MANPADS ammo (anti-air missile)
+        if (id.equals("superbwarfare:igla_9k38")) {
+            return resolveDirect("superbwarfare:medium_anti_air_missile");
+        }
+
+        // Superb Warfare conventional ammo
         if (!id.startsWith("superbwarfare:")) return ItemStack.EMPTY;
 
         String path = id.substring("superbwarfare:".length());
-
-        // Throwables & tools that don't need ammo
-        if (path.equals("hand_grenade") || path.equals("rgo_grenade")
-            || path.equals("c4_bomb") || path.equals("taser")
-            || path.equals("repair_tool") || path.equals("smoke_grenade")
-            || path.equals("claymore") || path.equals("anti_tank_mine")) {
-            return ItemStack.EMPTY;
-        }
-
-        // RPG / launchers
-        if (path.equals("rpg") || path.equals("javelin") || path.equals("igla_9k38")
-            || path.equals("m_79")) {
-            return resolveDirect("superbwarfare:heavy_ammo");
-        }
 
         // Handguns
         if (path.contains("glock") || path.contains("m_1911") || path.contains("mp_443")

@@ -388,9 +388,10 @@ public class CombatEventHandler {
 
         int teamOrd = team != null ? team.ordinal() : 2;
 
+        String selectedKit = TeamSystem.getTeamManager().getOrCreatePlayerData(player.getUUID()).getSelectedKit();
         PacketHandler.CHANNEL.send(
                 net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
-                new OpenSpawnSelectionScreenPacket(squadmates, fobList, beacons, teamOrd, ""));
+                new OpenSpawnSelectionScreenPacket(squadmates, fobList, beacons, teamOrd, selectedKit));
     }
 
     @SubscribeEvent
