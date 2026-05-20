@@ -36,6 +36,10 @@ public class ClientGuiHandler {
     private static final KillFeedOverlay     killFeedOverlay = new KillFeedOverlay();
     private static final CaptureNotificationOverlay captureNotifOverlay = new CaptureNotificationOverlay();
 
+    public static BattlefieldTabOverlay getTabOverlay() {
+        return tabOverlay;
+    }
+
     private static boolean hudRenderedThisFrame = false;
 
     @SubscribeEvent
@@ -53,7 +57,8 @@ public class ClientGuiHandler {
             event.getOverlay() == VanillaGuiOverlay.PLAYER_HEALTH.type() ||
             event.getOverlay() == VanillaGuiOverlay.ARMOR_LEVEL.type() ||
             event.getOverlay() == VanillaGuiOverlay.AIR_LEVEL.type() ||
-            event.getOverlay() == VanillaGuiOverlay.EXPERIENCE_BAR.type()) {
+            event.getOverlay() == VanillaGuiOverlay.EXPERIENCE_BAR.type() ||
+            event.getOverlay() == VanillaGuiOverlay.PLAYER_LIST.type()) {
             event.setCanceled(true);
         }
     }
@@ -63,7 +68,6 @@ public class ClientGuiHandler {
         if (hudRenderedThisFrame) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
-        // Hide HUD when any screen is open (loading screen is an Overlay, not a Screen)
         if (mc.screen != null) return;
         hudRenderedThisFrame = true;
         GuiGraphics g = event.getGuiGraphics();
@@ -79,15 +83,20 @@ public class ClientGuiHandler {
             g.pose().scale(scale, scale, 1f);
         }
 
-        ticketOverlay.render(g, w, event.getPartialTick());
-        squadOverlay.render(g, h);
-        vitalsOverlay.render(g, w, h);
-        notifOverlay.render(g, w);
-        hotbarOverlay.render(g, w, h);
+        boolean tabVisible = tabOverlay.isVisible();
+
+        if (!tabVisible) {
+            ticketOverlay.render(g, w, event.getPartialTick());
+            squadOverlay.render(g, h);
+            vitalsOverlay.render(g, w, h);
+            notifOverlay.render(g, w);
+            hotbarOverlay.render(g, w, h);
+            voiceOverlay.render(g, w, h);
+            killFeedOverlay.render(g, w);
+            captureNotifOverlay.render(g, w, h);
+        }
+
         tabOverlay.render(g, w, h);
-        voiceOverlay.render(g, w, h);
-        killFeedOverlay.render(g, w);
-        captureNotifOverlay.render(g, w, h);
 
         if (Math.abs(scale - 1.0f) > 0.01f) {
             g.pose().popPose();

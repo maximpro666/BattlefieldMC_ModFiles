@@ -2,10 +2,12 @@ package com.yourmod.teamsystem.client.gui.component;
 
 import com.yourmod.teamsystem.client.gui.I18n;
 import com.yourmod.teamsystem.client.gui.UITheme;
+import com.yourmod.teamsystem.data.ItemResolver;
 import com.yourmod.teamsystem.data.KitConfig;
 import com.yourmod.teamsystem.data.LockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.item.ItemStack;
 
 public class ClassCard {
 
@@ -49,15 +51,20 @@ public class ClassCard {
         var font = Minecraft.getInstance().font;
 
         if (cl.icon != null && !cl.icon.isEmpty()) {
-            int iw = font.width(cl.icon);
-            g.drawString(font, cl.icon, x + CARD_W / 2 - iw / 2, y + 16,
-                locked ? AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 180))
-                       : AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, alpha));
+            ItemStack stack = ItemResolver.resolve(cl.icon);
+            if (!stack.isEmpty()) {
+                g.renderItem(stack, x + CARD_W / 2 - 8, y + 16);
+            }
         }
 
         String displayName = cl.display_name != null
             ? I18n.localize(cl.display_name).toUpperCase()
             : key.toUpperCase();
+        int maxNameW = CARD_W - 16;
+        if (font.width(displayName) > maxNameW) {
+            int ellipsisW = font.width("...");
+            displayName = font.plainSubstrByWidth(displayName, maxNameW - ellipsisW) + "...";
+        }
         int dw = font.width(displayName);
         g.drawString(font, displayName, x + CARD_W / 2 - dw / 2, y + CARD_H / 2 + 2,
             locked ? AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 180))

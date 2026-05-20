@@ -133,6 +133,9 @@ public class GameManager {
         overtimeTicks = 0;
         matchTimeRemaining = MATCH_SECONDS;
 
+        var fobMgr = TeamSystem.getFOBManager();
+        if (fobMgr != null) fobMgr.clearAll();
+
         TicketManager ticketMgr = TeamSystem.getTicketManager();
         if (ticketMgr != null) ticketMgr.resetTickets(map.getTickets());
 
@@ -612,6 +615,9 @@ public class GameManager {
             TeamManager tm = TeamSystem.getTeamManager();
             if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == Team.SPECTATOR) continue;
             tm.syncKitConfig(p);
+            tm.syncRank(p);
+            EconomyManager econ = TeamSystem.getEconomyManager();
+            if (econ != null) econ.syncAll(p);
             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
                 new com.yourmod.teamsystem.network.OpenLoadoutScreenPacket());
         }

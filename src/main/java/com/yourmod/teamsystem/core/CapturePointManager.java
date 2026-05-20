@@ -9,6 +9,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -90,6 +91,14 @@ public class CapturePointManager {
         if (zones.isEmpty()) return;
         ServerLevel level = getCurrentMapLevel();
         if (level != null) CaptureProcessor.syncToAll(level, zones);
+    }
+
+    public void syncToPlayer(ServerPlayer player) {
+        ResourceLocation dimId = getCurrentMapDimension();
+        if (dimId == null) return;
+        List<CaptureZone> zones = zoneData.getZones(dimId.toString());
+        if (zones.isEmpty()) return;
+        CaptureProcessor.syncToPlayer(player, zones);
     }
 
     ResourceLocation getCurrentMapDimension() {

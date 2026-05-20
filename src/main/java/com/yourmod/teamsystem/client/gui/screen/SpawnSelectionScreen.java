@@ -1,8 +1,10 @@
 package com.yourmod.teamsystem.client.gui.screen;
 
+import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.FOBData;
 import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.client.gui.component.*;
+import com.yourmod.teamsystem.data.KitConfig;
 import com.yourmod.teamsystem.network.OpenSpawnSelectionScreenPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.RespawnAtPointPacket;
@@ -63,13 +65,16 @@ public class SpawnSelectionScreen extends Screen {
 
     private void buildEntries() {
         entries.clear();
-        entries.add(new SpawnEntry("base_main", "MAIN BASE", "BASE", teamOrdinal, 0, true, "Base"));
+        int[] basePos = teamOrdinal == 0 ? ClientTeamData.getNatoBasePos() : ClientTeamData.getRussiaBasePos();
+        double baseX = basePos != null ? basePos[0] : 0;
+        double baseZ = basePos != null ? basePos[2] : 0;
+        entries.add(new SpawnEntry("base_main", "MAIN BASE", "BASE", teamOrdinal, 0, true, "Base", null, baseX, baseZ));
         for (var sm : squadmates)
             entries.add(new SpawnEntry("sm_" + sm.uuid(), sm.callsign(), "SQUADMATE", sm.teamOrdinal(), sm.cooldownTicks(), sm.cooldownTicks() == 0, "Squadmate", sm.uuid()));
         for (var fob : fobs)
-            entries.add(new SpawnEntry("fob_" + fob.fobId(), fob.name(), "FOB", fob.teamOrdinal(), 0, fob.health() > 0, "FOB"));
+            entries.add(new SpawnEntry("fob_" + fob.fobId(), fob.name(), "FOB", fob.teamOrdinal(), 0, fob.health() > 0, fob.name(), null, fob.x(), fob.z()));
         for (var b : beacons)
-            entries.add(new SpawnEntry("beacon_" + b.name(), b.name(), "BEACON", b.teamOrdinal(), 0, true, "Beacon"));
+            entries.add(new SpawnEntry("beacon_" + b.name(), b.name(), "BEACON", b.teamOrdinal(), 0, true, "Beacon", null, b.x(), b.z()));
     }
 
     @Override
@@ -178,7 +183,12 @@ public class SpawnSelectionScreen extends Screen {
         int dw = font.width(dist);
         g.drawString(font, dist, x + w - dw - 10, y + 8,
             AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, alpha));
-        if (!e.safe) {
+        if (e.cooldown > 0) {
+            int secs = e.cooldown / 20;
+            String cdText = secs + "s";
+            g.drawString(font, cdText, x + w - font.width(cdText) - 10, y + 21,
+                AnimationHelper.withAlpha(UITheme.STATUS_WARN, alpha));
+        } else if (!e.safe) {
             String contested = "CONTESTED";
             g.drawString(font, contested, x + w - font.width(contested) - 10, y + 21,
                 AnimationHelper.withAlpha(UITheme.STATUS_DANGER, alpha));
@@ -256,6 +266,33 @@ public class SpawnSelectionScreen extends Screen {
         int btnWSmall = (rw - 8) / 3;
         int btnWBig = btnWSmall * 2;
 
+        // Determine kit cost for deploy button
+        String costLabel = null;
+        boolean canAfford = true;
+        if (!selectedKit.isEmpty() && selectedKit.contains(":")) {
+            String[] parts = selectedKit.split(":", 2);
+            KitConfig cfg = KitConfig.get();
+            if (cfg != null) {
+                KitConfig.ClassConfig cl = cfg.classes.get(parts[0]);
+                if (cl != null) {
+                    KitConfig.KitDef kit = cl.kits.get(parts[1]);
+                    if (kit != null && kit.requirements != null) {
+                        int sp = kit.requirements.sp_cost;
+                        int bc = kit.requirements.bc_cost;
+                        if (sp > 0 || bc > 0) {
+                            StringBuilder sb = new StringBuilder("КУПИТЬ ЗА");
+                            if (sp > 0) { sb.append(" ").append(sp).append("SP"); }
+                            if (bc > 0) { if (sp > 0) sb.append(" +"); sb.append(" ").append(bc).append("BC"); }
+                            costLabel = "> " + sb.toString();
+                            int playerSP = com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP;
+                            int playerBC = com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC;
+                            canAfford = (sp <= playerSP) && (bc <= playerBC);
+                        }
+                    }
+                }
+            }
+        }
+
         boolean clsHov = mx >= rx && mx < rx + btnWSmall && my >= y && my < y + btnH;
         int clsBg = clsHov ? AnimationHelper.withAlpha(UITheme.BG_SURFACE, (int)(fade * 0xDD)) : 0x00000000;
         if ((clsBg & 0xFF000000) != 0) g.fill(rx, y, rx + btnWSmall, y + btnH, clsBg);
@@ -266,13 +303,21 @@ public class SpawnSelectionScreen extends Screen {
 
         int btnX = rx + btnWSmall + 8;
         boolean spHov = mx >= btnX && mx < btnX + btnWBig && my >= y && my < y + btnH;
-        int btnBg = AnimationHelper.blendColors(UITheme.ACCENT, 0xFFFF8C0A, spHov ? 1f : 0f);
+        int btnBg;
+        if (costLabel != null && !canAfford) {
+            btnBg = AnimationHelper.blendColors(0xFF551111, 0xFF331111, spHov ? 1f : 0f);
+        } else {
+            btnBg = AnimationHelper.blendColors(UITheme.ACCENT, 0xFFFF8C0A, spHov ? 1f : 0f);
+        }
         g.fill(btnX, y, btnX + btnWBig, y + btnH,
             AnimationHelper.withAlpha(btnBg, alpha));
         g.fill(btnX, y, btnX + 2, y + btnH, AnimationHelper.withAlpha(0x33000000, alpha));
-        String spLabel = "> SPAWN HERE";
+        String spLabel = costLabel != null ? costLabel : "> SPAWN HERE";
+        int spLabelColor = costLabel != null
+            ? (canAfford ? UITheme.STATUS_OK : UITheme.STATUS_DANGER)
+            : 0xFFFFFFFF;
         g.drawString(font, spLabel, btnX + btnWBig / 2 - font.width(spLabel) / 2, y + 9,
-            AnimationHelper.withAlpha(0xFF000000, alpha));
+            AnimationHelper.withAlpha(spLabelColor, alpha));
     }
 
     @Override
@@ -309,7 +354,6 @@ public class SpawnSelectionScreen extends Screen {
         for (var e : entries) {
             if (mx >= x && mx < x + maxW && my >= ly && my < ly + CARD_H) {
                 selectedId = e.id;
-                if (e.cooldown == 0 && e.safe) sendRespawn(e);
                 return true;
             }
             ly += CARD_H + CARD_GAP;
@@ -330,9 +374,7 @@ public class SpawnSelectionScreen extends Screen {
     @Override
     public boolean keyPressed(int key, int scan, int mods) {
         if (key == 256) {
-            for (var e : entries) {
-                if (e.cooldown == 0 && e.safe) { sendRespawn(e); break; }
-            }
+            Minecraft.getInstance().setScreen(null);
             return true;
         }
         return super.keyPressed(key, scan, mods);
@@ -372,13 +414,29 @@ public class SpawnSelectionScreen extends Screen {
         @Nullable final UUID squadUuid;
 
         SpawnEntry(String id, String displayName, String type, int team, int cooldown, boolean safe, String targetName) {
-            this(id, displayName, type, team, cooldown, safe, targetName, null);
+            this(id, displayName, type, team, cooldown, safe, targetName, null, 0, 0);
         }
 
         SpawnEntry(String id, String displayName, String type, int team, int cooldown, boolean safe, String targetName, @Nullable UUID squadUuid) {
+            this(id, displayName, type, team, cooldown, safe, targetName, squadUuid, 0, 0);
+        }
+
+        SpawnEntry(String id, String displayName, String type, int team, int cooldown, boolean safe, String targetName, @Nullable UUID squadUuid, double x, double z) {
             this.id = id; this.displayName = displayName; this.type = type; this.team = team;
             this.cooldown = cooldown; this.safe = safe; this.targetName = targetName; this.squadUuid = squadUuid;
-            this.distance = type.equals("BASE") ? "\u2014" : (type.equals("SQUADMATE") ? "180m" : "420m");
+            if (type.equals("BASE")) {
+                this.distance = "\u2014";
+            } else {
+                var player = Minecraft.getInstance().player;
+                if (player != null) {
+                    double dx = player.getX() - x;
+                    double dz = player.getZ() - z;
+                    int dist = (int) Math.round(Math.sqrt(dx * dx + dz * dz));
+                    this.distance = dist + "m";
+                } else {
+                    this.distance = "?m";
+                }
+            }
         }
     }
 }

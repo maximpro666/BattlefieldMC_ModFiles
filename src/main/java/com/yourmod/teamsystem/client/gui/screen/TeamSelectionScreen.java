@@ -64,12 +64,9 @@ public class TeamSelectionScreen extends Screen {
     }
 
     private void selectTeam(Team team) {
+        ClientTeamData.setLocalPlayerTeam(team);
         PacketHandler.CHANNEL.sendToServer(new TeamSelectPacket(team.ordinal()));
-        if (team != Team.SPECTATOR) {
-            Minecraft.getInstance().setScreen(new ClassSelectionScreen());
-        } else {
-            onClose();
-        }
+        onClose();
     }
 
     @Override

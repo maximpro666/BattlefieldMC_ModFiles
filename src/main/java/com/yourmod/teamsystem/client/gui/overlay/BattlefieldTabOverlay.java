@@ -7,8 +7,16 @@ public class BattlefieldTabOverlay {
 
     private final ScoreboardRenderer scoreboardRenderer = new ScoreboardRenderer();
 
+    public boolean isVisible() {
+        return scoreboardRenderer.isVisible();
+    }
+
     public void setVisible(boolean v) {
         scoreboardRenderer.setVisible(v);
+    }
+
+    public void scrollBy(int delta) {
+        scoreboardRenderer.scrollBy(delta);
     }
 
     public void tick() {

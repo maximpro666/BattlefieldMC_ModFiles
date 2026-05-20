@@ -45,7 +45,11 @@ public class VitalsOverlay {
         g.drawString(Minecraft.getInstance().font, "HP " + (int) hp,
             x, y, AnimationHelper.withAlpha(COLOR_TEXT, 220));
 
-        if (hpBar == null) hpBar = new BProgressBar(x + 32, y, BAR_W, BAR_H, hpColor);
+        if (hpBar == null) {
+            hpBar = new BProgressBar(x + 32, y, BAR_W, BAR_H, hpColor);
+            hpBar.setShowBorder(false);
+        }
+        hpBar.setFillColor(hpColor);
         hpBar.setPosition(x + 32, y);
         hpBar.setFraction(smoothHp);
         hpBar.render(g);
@@ -53,7 +57,10 @@ public class VitalsOverlay {
         g.drawString(Minecraft.getInstance().font, "AR " + (int)(armorVal),
             x, y + 8, AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, 180));
 
-        if (armorBar == null) armorBar = new BProgressBar(x + 32, y + 8, ARMOR_BAR_W, ARMOR_BAR_H, UITheme.TEXT_MUTED);
+        if (armorBar == null) {
+            armorBar = new BProgressBar(x + 32, y + 8, ARMOR_BAR_W, ARMOR_BAR_H, UITheme.TEXT_MUTED);
+            armorBar.setShowBorder(false);
+        }
         armorBar.setPosition(x + 32, y + 8);
         armorBar.setFraction(smoothArmor);
         armorBar.render(g);

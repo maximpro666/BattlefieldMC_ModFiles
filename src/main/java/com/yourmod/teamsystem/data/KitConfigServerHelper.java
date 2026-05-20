@@ -101,11 +101,44 @@ public class KitConfigServerHelper {
 
         // Auto-ammo for Superb Warfare weapons (TACZ guns carry their own mags)
         int ammoSlot = 4;
+        String firstCaliber = null;
         for (ItemStack stack : hotbarItems) {
             ItemStack ammo = getAmmoFor(stack);
             if (!ammo.isEmpty() && ammoSlot < 9) {
                 player.getInventory().setItem(ammoSlot, ammo);
                 ammoSlot++;
+            }
+            // Track first TACZ caliber for ammo box filling
+            if (firstCaliber == null) {
+                String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+                if (id.equals("tacz:modern_kinetic_gun") && stack.getTag() != null) {
+                    String gunId = stack.getTag().getString("GunId");
+                    if (!gunId.isEmpty()) firstCaliber = TACZ_CALIBER_MAP.get(gunId);
+                }
+            }
+        }
+
+        // Fill or give tacz ammo box with matching caliber
+        if (firstCaliber != null) {
+            ItemStack ammoBox = null;
+            for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+                ItemStack s = player.getInventory().getItem(i);
+                if (!s.isEmpty() && BuiltInRegistries.ITEM.getKey(s.getItem()).toString().equals("tacz:ammo_box")) {
+                    ammoBox = s;
+                    break;
+                }
+            }
+            if (ammoBox == null && ammoSlot < 9) {
+                ammoBox = resolveDirect("tacz:ammo_box");
+                if (!ammoBox.isEmpty()) {
+                    player.getInventory().setItem(ammoSlot, ammoBox);
+                }
+            }
+            if (ammoBox != null && !ammoBox.isEmpty()) {
+                CompoundTag tag = ammoBox.getOrCreateTag();
+                tag.putString("AmmoId", firstCaliber);
+                tag.putInt("AmmoCount", 240);
+                tag.putInt("Level", 1);
             }
         }
 

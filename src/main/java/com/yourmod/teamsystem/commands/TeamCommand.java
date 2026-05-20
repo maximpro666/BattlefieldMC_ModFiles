@@ -6,11 +6,9 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.yourmod.teamsystem.TeamSystem;
-import com.yourmod.teamsystem.core.PlayerCombatData;
-import com.yourmod.teamsystem.core.Team;
-import com.yourmod.teamsystem.core.TeamManager;
-import com.yourmod.teamsystem.core.TeamSystemConfig;
-import com.yourmod.teamsystem.core.TicketManager;
+import com.yourmod.teamsystem.core.*;
+import com.yourmod.teamsystem.network.OpenLoadoutScreenPacket;
+import com.yourmod.teamsystem.network.PacketHandler;
 import static com.yourmod.teamsystem.core.ChatHelper.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -19,6 +17,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.Arrays;
 
@@ -181,6 +180,11 @@ public class TeamCommand {
             .append(team.getColoredName());
 
         manager.getServer().getPlayerList().broadcastSystemMessage(announcement, false);
+
+        if (team.isPlayable()) {
+            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+                new OpenLoadoutScreenPacket());
+        }
 
         return 1;
     }

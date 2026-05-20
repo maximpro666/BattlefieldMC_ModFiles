@@ -10,22 +10,21 @@ import com.yourmod.teamsystem.client.gui.scoreboard.data.RankDefinition;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 
 import java.util.Map;
 import java.util.UUID;
 
 public class CustomNametagRenderer {
 
-    private static final int MAX_DIST = 32;
-    private static final int ICON_SIZE = 16;
-    private static final int BAR_W = 40;
-    private static final int BAR_H = 2;
-    private static final int LINE_GAP = 2;
-    private static final int BAR_OFFSET = 4;
+    private static final int MAX_DIST = 48;
+    private static final int ICON_SIZE = 12;
+    private static final int PADDING = 4;
+    private static final int LINE_GAP = 1;
 
     public void renderNametag(PoseStack poseStack, MultiBufferSource bufferSource,
                                 Player player, Camera camera) {
@@ -37,24 +36,6 @@ public class CustomNametagRenderer {
         PlayerListEntry ple = map.get(uuid);
         if (ple == null) return;
 
-        RankDefinition rankDef = RankDefinition.get(ple.rank());
-        String callsign = ple.callsign() != null ? ple.callsign() : player.getName().getString();
-
-        Minecraft mc = Minecraft.getInstance();
-        Font font = mc.font;
-
-        String nick = player.getName().getString();
-        float kd = ple.deaths() == 0 ? ple.kills() : (float) ple.kills() / (float) ple.deaths();
-        String kdStr = String.format("K/D: %.2f", kd);
-
-        String firstLine = rankDef.shortName + " " + callsign;
-        int firstW = font.width(firstLine);
-        String secondLine = nick;
-        int secondW = font.width(secondLine);
-        int kdW = font.width(kdStr);
-        int totalW = Math.max(firstW, secondW + kdW + 8);
-        totalW = Math.max(totalW, BAR_W);
-
         Vec3 camPos = camera.getPosition();
         double dx = player.getX() - camPos.x;
         double dy = player.getY() + player.getBbHeight() + 0.5 - camPos.y;
@@ -62,61 +43,129 @@ public class CustomNametagRenderer {
         double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (dist > MAX_DIST) return;
 
+        float alpha = calcAlpha(dist);
+        if (alpha < 0.02f) return;
+
+        RankDefinition rankDef = RankDefinition.get(ple.rank());
+        String callsign = ple.callsign() != null && !ple.callsign().isEmpty() ? ple.callsign() : player.getName().getString();
+        String nick = player.getName().getString();
+        Minecraft mc = Minecraft.getInstance();
+        Font font = mc.font;
+
+        String rankAndCallsign = rankDef.shortName + " " + callsign;
+        int rankCW = font.width(rankAndCallsign);
+        int nickW = font.width(nick);
+
+        int donatColor = getDonateColor(ple.donatTier());
+        String donatStr = getDonateLabel(ple.donatTier());
+        boolean hasDonate = donatColor != 0;
+        int donatW = hasDonate ? font.width(donatStr) + 2 : 0;
+
+        int textW = Math.max(rankCW, nickW + donatW);
+        int panelW = textW + PADDING * 2;
+        int iconArea = ICON_SIZE + 2;
+        if (panelW < iconArea + textW + PADDING) panelW = iconArea + textW + PADDING;
+        int lineCount = 2;
+        if (hasDonate) lineCount++;
+        int panelH = lineCount * font.lineHeight + (lineCount - 1) * LINE_GAP + PADDING * 2;
+
+        float scale = computeScale(dist);
+        int centerX = 0;
+        int panelX = -(panelW / 2);
+        int panelY = -panelH;
+        int panelZ = 0;
+
         poseStack.pushPose();
         poseStack.translate(dx, dy, dz);
         poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
         poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
-
-        float scale = 0.025f;
         poseStack.scale(-scale, -scale, scale);
 
-        int centerX = 0;
-        int textY = 0;
+        int bgColor = ((int)(0xCC * alpha) << 24) | 0x0A0A0A;
+        drawRect(poseStack, bufferSource, panelX, panelY, panelX + panelW, panelY + panelH, bgColor);
 
-        int iconX = centerX - totalW / 2;
-        drawIcon(poseStack, iconX, textY - 2, rankDef);
+        int borderColor = ((int)(0x33 * alpha) << 24) | 0x808080;
+        drawRect(poseStack, bufferSource, panelX, panelY, panelX + panelW, panelY + 1, borderColor);
 
-        font.drawInBatch(rankDef.shortName + " " + callsign,
-            centerX - firstW / 2f, textY,
-            0xFFFFFFFF, true,
-            poseStack.last().pose(),
-            bufferSource,
-            Font.DisplayMode.SEE_THROUGH,
-            0, 0xF000F0);
+        int textAlpha = (int)(0xFF * alpha);
+        int primaryColor = (textAlpha << 24) | 0xFFFFFF;
+        int secondaryColor = (textAlpha << 24) | 0xB0B0B0;
+        int mutedColor = (textAlpha << 24) | 0x808080;
 
-        font.drawInBatch(kdStr,
-            centerX + secondW / 2f + 4, textY + 12,
-            0xFFB0B0B0, true,
-            poseStack.last().pose(),
-            bufferSource,
-            Font.DisplayMode.SEE_THROUGH,
-            0, 0xF000F0);
+        int iy = panelY + PADDING + (font.lineHeight - ICON_SIZE) / 2;
+        drawIcon(poseStack, panelX + PADDING, iy, rankDef, alpha);
 
-        font.drawInBatch(nick,
-            centerX - totalW / 2f, textY + 12,
-            0xFF808080, true,
-            poseStack.last().pose(),
-            bufferSource,
-            Font.DisplayMode.SEE_THROUGH,
-            0, 0xF000F0);
+        int cx = panelX + PADDING + ICON_SIZE + 2;
+        font.drawInBatch(rankDef.shortName, cx, panelY + PADDING, rankDef.color & 0x00FFFFFF | (textAlpha << 24), true,
+            poseStack.last().pose(), bufferSource, Font.DisplayMode.SEE_THROUGH, 0, 0xF000F0);
+        cx += font.width(rankDef.shortName) + 4;
 
-        int barX = centerX - BAR_W / 2;
-        int barY = textY + font.lineHeight * 2 + LINE_GAP + BAR_OFFSET;
-        drawBar(poseStack, barX, barY);
+        font.drawInBatch(callsign, cx, panelY + PADDING, primaryColor, true,
+            poseStack.last().pose(), bufferSource, Font.DisplayMode.SEE_THROUGH, 0, 0xF000F0);
+
+        int nickY = panelY + PADDING + font.lineHeight + LINE_GAP;
+        font.drawInBatch(nick, panelX + PADDING, nickY, secondaryColor, true,
+            poseStack.last().pose(), bufferSource, Font.DisplayMode.SEE_THROUGH, 0, 0xF000F0);
+
+        if (hasDonate) {
+            int donY = nickY + font.lineHeight + LINE_GAP;
+            font.drawInBatch(donatStr, panelX + PADDING, donY, donatColor & 0x00FFFFFF | (textAlpha << 24), true,
+                poseStack.last().pose(), bufferSource, Font.DisplayMode.SEE_THROUGH, 0, 0xF000F0);
+
+            if (ple.donatTier() == 3) {
+                double pulse = Math.sin(System.currentTimeMillis() / 300.0) * 0.3 + 0.7;
+                int glowA = (int)(pulse * 40 * alpha);
+                if (glowA > 0) {
+                    String full = "\u2B21 GENERAL";
+                    int fw = font.width(full);
+                    int glowColor = (glowA << 24) | (UITheme.DONATE_GENERAL & 0x00FFFFFF);
+                    drawRect(poseStack, bufferSource, panelX + PADDING - 1, donY - 1,
+                        panelX + PADDING + fw + 1, donY + font.lineHeight + 1, glowColor);
+                }
+            }
+        }
 
         poseStack.popPose();
     }
 
-    private void drawIcon(PoseStack poseStack, int x, int y, RankDefinition rankDef) {
+    private static float calcAlpha(double dist) {
+        if (dist <= 16) return 1.0f;
+        if (dist >= MAX_DIST) return 0.1f;
+        return (float)(1.0 - (dist - 16) / (MAX_DIST - 16) * 0.9);
+    }
+
+    private static float computeScale(double dist) {
+        return 0.025f;
+    }
+
+    private static int getDonateColor(int donatTier) {
+        return switch (donatTier) {
+            case 1 -> UITheme.DONATE_VIP;
+            case 2 -> UITheme.DONATE_ELITE_A;
+            case 3 -> UITheme.DONATE_GENERAL;
+            default -> 0;
+        };
+    }
+
+    private static String getDonateLabel(int donatTier) {
+        return switch (donatTier) {
+            case 1 -> "VIP";
+            case 2 -> "ELITE";
+            case 3 -> "GENERAL";
+            default -> "";
+        };
+    }
+
+    private void drawIcon(PoseStack poseStack, int x, int y, RankDefinition rankDef, float alpha) {
         RenderSystem.setShaderTexture(0, rankDef.iconTexture);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getPositionTexShader);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
         float u0 = 0f;
         float v0 = rankDef.getIconVOffset() / 160f;
         float u1 = 1f;
-        float v1 = (rankDef.getIconVOffset() + ICON_SIZE) / 160f;
+        float v1 = (rankDef.getIconVOffset() + 16) / 160f;
 
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
@@ -128,27 +177,17 @@ public class CustomNametagRenderer {
         tessellator.end();
     }
 
-    private void drawBar(PoseStack poseStack, int x, int y) {
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        drawColoredQuad(buffer, poseStack, x, y, BAR_W, BAR_H, 0x40, 0, 0, 0);
-        tessellator.end();
-
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        drawColoredQuad(buffer, poseStack, x, y, BAR_W, BAR_H, 0xFF, 0x80, 0x80, 0x80);
-        tessellator.end();
-    }
-
-    private void drawColoredQuad(BufferBuilder buffer, PoseStack poseStack, int x, int y, int w, int h, int a, int r, int g, int b) {
-        buffer.vertex(poseStack.last().pose(), x, y + h, 0).color(r, g, b, a).endVertex();
-        buffer.vertex(poseStack.last().pose(), x + w, y + h, 0).color(r, g, b, a).endVertex();
-        buffer.vertex(poseStack.last().pose(), x + w, y, 0).color(r, g, b, a).endVertex();
-        buffer.vertex(poseStack.last().pose(), x, y, 0).color(r, g, b, a).endVertex();
+    private void drawRect(PoseStack poseStack, MultiBufferSource bufferSource,
+                          float x1, float y1, float x2, float y2, int color) {
+        VertexConsumer vc = bufferSource.getBuffer(RenderType.gui());
+        Matrix4f mat = poseStack.last().pose();
+        float r = ((color >> 16) & 0xFF) / 255f;
+        float g = ((color >> 8) & 0xFF) / 255f;
+        float b = (color & 0xFF) / 255f;
+        float a = ((color >> 24) & 0xFF) / 255f;
+        vc.vertex(mat, x1, y2, 0).color(r, g, b, a).endVertex();
+        vc.vertex(mat, x2, y2, 0).color(r, g, b, a).endVertex();
+        vc.vertex(mat, x2, y1, 0).color(r, g, b, a).endVertex();
+        vc.vertex(mat, x1, y1, 0).color(r, g, b, a).endVertex();
     }
 }

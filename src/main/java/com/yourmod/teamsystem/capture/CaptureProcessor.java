@@ -195,6 +195,18 @@ public class CaptureProcessor {
     }
 
     public static void syncToAll(ServerLevel level, List<CaptureZone> zones) {
+        CapturePointSyncPacket packet = buildPacket(zones);
+        for (ServerPlayer player : TeamSystem.getGameManager().getServer().getPlayerList().getPlayers()) {
+            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+        }
+    }
+
+    public static void syncToPlayer(ServerPlayer player, List<CaptureZone> zones) {
+        CapturePointSyncPacket packet = buildPacket(zones);
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    private static CapturePointSyncPacket buildPacket(List<CaptureZone> zones) {
         List<Integer> ids = new ArrayList<>();
         List<Double> progress = new ArrayList<>();
         List<Integer> owners = new ArrayList<>();
@@ -219,9 +231,6 @@ public class CaptureProcessor {
             radii.add(half);
         }
 
-        CapturePointSyncPacket packet = new CapturePointSyncPacket(ids, progress, owners, names, capturing, xs, ys, zs, radii);
-        for (ServerPlayer player : TeamSystem.getGameManager().getServer().getPlayerList().getPlayers()) {
-            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
-        }
+        return new CapturePointSyncPacket(ids, progress, owners, names, capturing, xs, ys, zs, radii);
     }
 }

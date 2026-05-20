@@ -28,6 +28,7 @@ public class ScoreboardDataProvider {
             data.rankId = ple.rank();
             data.callsign = ple.callsign() != null ? ple.callsign() : "";
             data.squad = ple.squadName() != null && !ple.squadName().isEmpty() ? ple.squadName() : ple.squad();
+            data.teamOrdinal = ple.teamOrdinal();
             data.kills = ple.kills();
             data.deaths = ple.deaths();
             data.isSelf = uuid.equals(localUuid);
@@ -41,7 +42,12 @@ public class ScoreboardDataProvider {
                 data.pingMs = 0;
             }
 
-            data.donateLevel = PlayerScoreboardData.DonateLevel.NONE;
+            data.donateLevel = switch (ple.donatTier()) {
+                case 1 -> PlayerScoreboardData.DonateLevel.VIP;
+                case 2 -> PlayerScoreboardData.DonateLevel.ELITE;
+                case 3 -> PlayerScoreboardData.DonateLevel.GENERAL;
+                default -> PlayerScoreboardData.DonateLevel.NONE;
+            };
             data.donateBarProgress = 0f;
 
             result.add(data);

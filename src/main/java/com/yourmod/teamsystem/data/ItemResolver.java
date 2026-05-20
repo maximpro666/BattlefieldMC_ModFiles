@@ -2,13 +2,28 @@ package com.yourmod.teamsystem.data;
 
 import com.yourmod.teamsystem.TeamSystem;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class ItemResolver {
+
+    private static final Set<String> warnedIds = new HashSet<>();
+    private static final Set<String> tacZNamespaces = Set.of("tacz", "maxstuff", "daffas_arsenal");
+    private static Item cachedTacZGunItem;
+
+    private static Item getTacZGunItem() {
+        if (cachedTacZGunItem == null) {
+            cachedTacZGunItem = BuiltInRegistries.ITEM.get(new ResourceLocation("tacz", "modern_kinetic_gun"));
+        }
+        return cachedTacZGunItem;
+    }
 
     public static ItemStack resolve(String weaponId) {
         if (weaponId == null || weaponId.isEmpty()) return ItemStack.EMPTY;
@@ -25,7 +40,22 @@ public class ItemResolver {
             return new ItemStack(directItem);
         }
 
-        TeamSystem.LOGGER.warn("Cannot resolve weapon ID: {}", weaponId);
+        // Fallback for TaCZ gun pack items: use tacz:modern_kinetic_gun with GunId NBT
+        if (tacZNamespaces.contains(rl.getNamespace())) {
+            Item tacZGun = getTacZGunItem();
+            if (tacZGun != null && tacZGun != Items.AIR) {
+                ItemStack stack = new ItemStack(tacZGun);
+                CompoundTag tag = new CompoundTag();
+                tag.putString("GunId", weaponId);
+                tag.putInt("SelectFire", 1); // default to full-auto
+                stack.setTag(tag);
+                return stack;
+            }
+        }
+
+        if (warnedIds.add(weaponId)) {
+            TeamSystem.LOGGER.warn("Cannot resolve weapon ID: {} (not registered on this side)", weaponId);
+        }
         return ItemStack.EMPTY;
     }
 

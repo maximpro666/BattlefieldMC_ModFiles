@@ -23,6 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import java.util.*;
 
@@ -151,10 +152,20 @@ public class TeamManager extends SavedData {
         syncPlayerTeam(player);
         syncPlayerData(player);
         updatePlayerDisplayName(player);
+        syncRank(player);
+        EconomyManager econ = TeamSystem.getEconomyManager();
+        if (econ != null) econ.syncAll(player);
 
         // Clear inventory on team change
         if (oldTeam != null && oldTeam != team) {
             player.getInventory().clearContent();
+        }
+
+        // Set game mode based on team
+        if (team.isPlayable()) {
+            player.setGameMode(GameType.SURVIVAL);
+        } else {
+            player.setGameMode(GameType.SPECTATOR);
         }
 
         setDirty();
@@ -246,6 +257,9 @@ public class TeamManager extends SavedData {
         PlayerCombatData data = getOrCreatePlayerData(player.getUUID());
         Squad squad = squadManager.getPlayerSquad(player.getUUID());
         String squadName = squad != null ? squad.getName() : "";
+        EconomyManager econ = TeamSystem.getEconomyManager();
+        int sp = econ != null ? econ.getSP(player.getUUID()) : data.getScorePoints();
+        int bc = econ != null ? econ.getBC(player.getUUID()) : data.getBattleCredits();
         CombatDataSyncPacket packet = new CombatDataSyncPacket(
             player.getUUID(),
             data.getTeam().ordinal(),
@@ -256,7 +270,10 @@ public class TeamManager extends SavedData {
             data.getDisplayName(),
             data.getCallsign(),
             data.getRankOrdinal(),
-            squadName
+            squadName,
+            sp,
+            bc,
+            data.getDonatTier()
         );
         PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
     }

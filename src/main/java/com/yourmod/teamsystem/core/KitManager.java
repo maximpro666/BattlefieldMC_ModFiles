@@ -21,7 +21,7 @@ public class KitManager {
 
     private static boolean curiosDetected = false;
     private static Method curiosGetCurios;
-    private static Method curiosGetStacksFromType;
+    private static Method curiosGetStacks;
     private static Method curiosGetStackInSlot;
     private static Method curiosSetStackInSlot;
     private static Method curiosGetInventory;
@@ -30,10 +30,10 @@ public class KitManager {
         try {
             Class<?> apiClass = Class.forName("top.theillusivec4.curios.api.CuriosApi");
             curiosGetInventory = apiClass.getMethod("getCuriosInventory", Class.forName("net.minecraft.world.entity.LivingEntity"));
-            Class<?> handlerClass = Class.forName("top.theillusivec4.curios.api.type.inventory.ICuriosItemHandler");
+            Class<?> handlerClass = Class.forName("top.theillusivec4.curios.api.type.capability.ICuriosItemHandler");
             curiosGetCurios = handlerClass.getMethod("getCurios");
-            Class<?> curioTypeClass = Class.forName("top.theillusivec4.curios.api.type.ICurioType");
-            curiosGetStacksFromType = curioTypeClass.getMethod("getStacks");
+            Class<?> stacksHandlerClass = Class.forName("top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler");
+            curiosGetStacks = stacksHandlerClass.getMethod("getStacks");
             Class<?> invClass = Class.forName("top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler");
             curiosGetStackInSlot = invClass.getMethod("getStackInSlot", int.class);
             curiosSetStackInSlot = invClass.getMethod("setStackInSlot", int.class, ItemStack.class);
@@ -50,9 +50,12 @@ public class KitManager {
         try {
             Object result = curiosGetInventory.invoke(null, player);
             if (result instanceof Optional<?> o) return o;
-        } catch (Exception e) {
-            TeamSystem.LOGGER.warn("Failed to get curios handler: {}", e.getMessage());
-        }
+            if (result != null) {
+                Method resolve = result.getClass().getMethod("resolve");
+                Object resolved = resolve.invoke(result);
+                if (resolved instanceof Optional<?> o) return o;
+            }
+        } catch (Exception ignored) {}
         return Optional.empty();
     }
 
@@ -77,7 +80,7 @@ public class KitManager {
         Map<String, ?> curios = getCuriosMap(player);
         for (Object curioType : curios.values()) {
             try {
-                Object stacks = curiosGetStacksFromType.invoke(curioType);
+                Object stacks = curiosGetStacks.invoke(curioType);
                 if (stacks != null) stackHandlers.add(stacks);
             } catch (Exception e) {
                 TeamSystem.LOGGER.warn("Failed to get stacks from curio type: {}", e.getMessage());
@@ -146,7 +149,7 @@ public class KitManager {
                 TeamSystem.LOGGER.warn("Curios slot type '{}' not found on player", slotType);
                 return;
             }
-            Object stacks = curiosGetStacksFromType.invoke(curioType);
+            Object stacks = curiosGetStacks.invoke(curioType);
             if (stacks == null) return;
             // Set first non-empty or first available slot
             ItemStack existing = (ItemStack) curiosGetStackInSlot.invoke(stacks, 0);

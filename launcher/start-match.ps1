@@ -23,16 +23,16 @@ Remove-Item -Recurse -Force (Join-Path $temp "logs") -ErrorAction SilentlyContin
 Remove-Item -Recurse -Force (Join-Path $temp "crash-reports") -ErrorAction SilentlyContinue
 Remove-Item -Force (Join-Path $temp ".ready") -ErrorAction SilentlyContinue
 
-$jvmArgs = Get-Content (Join-Path $temp "user_jvm_args.txt") -Raw
-$forgeJar = Get-ChildItem (Join-Path $temp "libraries\net\minecraftforge\forge\1.20.1-47.3.0\*") -Filter "*.jar" | Where-Object { $_.Name -notlike "*-shim-*" } | Select-Object -First 1
+$argsFile = "libraries/net/minecraftforge/forge/1.20.1-47.3.0/win_args.txt"
+$fullArgsFile = Join-Path $temp $argsFile.Replace("/", "\")
 
-if (-not $forgeJar) {
-    Write-Error "[launcher] forge.jar not found in template"
+if (-not (Test-Path $fullArgsFile)) {
+    Write-Error "[launcher] win_args.txt not found at $fullArgsFile"
     exit 1
 }
 
 Write-Host "[launcher] Starting Forge server..."
-$proc = Start-Process -FilePath "java" -ArgumentList "@user_jvm_args.txt -Dteamsystem.mode=match -jar $($forgeJar.Name) nogui" -WorkingDirectory $temp -NoNewWindow -PassThru -WindowStyle Hidden
+$proc = Start-Process -FilePath "java" -ArgumentList "@user_jvm_args.txt -Dteamsystem.mode=match @$argsFile nogui" -WorkingDirectory $temp -NoNewWindow -PassThru -WindowStyle Hidden
 
 $logFile = Join-Path $temp "logs\latest.log"
 $elapsed = 0

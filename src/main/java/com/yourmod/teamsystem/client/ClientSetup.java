@@ -2,6 +2,7 @@ package com.yourmod.teamsystem.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.client.gui.ClientGuiHandler;
 import com.yourmod.teamsystem.client.gui.renderer.CaptureParticles;
 import com.yourmod.teamsystem.client.gui.renderer.CustomNametagRenderer;
 import com.yourmod.teamsystem.client.gui.renderer.WorldMarkerRenderer;
@@ -53,6 +54,17 @@ public class ClientSetup {
 
     @SubscribeEvent
     public static void onKeyInput(InputEvent.Key event) {
+        int key = event.getKey();
+        int action = event.getAction();
+
+        if (key == GLFW.GLFW_KEY_TAB) {
+            if (action == GLFW.GLFW_PRESS) {
+                ClientGuiHandler.getTabOverlay().setVisible(true);
+            } else if (action == GLFW.GLFW_RELEASE) {
+                ClientGuiHandler.getTabOverlay().setVisible(false);
+            }
+        }
+
         if (OPEN_KIT_VEHICLE_KEY.consumeClick()) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.player != null && mc.level != null) {
@@ -67,6 +79,15 @@ public class ClientSetup {
                 }
                 mc.setScreen(new ClassSelectionScreen());
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
+        if (ClientGuiHandler.getTabOverlay().isVisible()) {
+            double delta = event.getScrollDelta();
+            ClientGuiHandler.getTabOverlay().scrollBy((int) -delta * 15);
+            event.setCanceled(true);
         }
     }
 

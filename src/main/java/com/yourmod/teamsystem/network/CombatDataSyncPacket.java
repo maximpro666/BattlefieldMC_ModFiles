@@ -21,8 +21,19 @@ public class CombatDataSyncPacket {
     private final String callsign;
     private final int rankOrdinal;
     private final String squadName;
+    private final int scorePoints;
+    private final int battleCredits;
+    private final int donatTier;
 
     public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName) {
+        this(playerId, teamOrdinal, kills, deaths, prefix, suffix, displayName, callsign, rankOrdinal, squadName, 0, 0, 0);
+    }
+
+    public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName, int scorePoints, int battleCredits) {
+        this(playerId, teamOrdinal, kills, deaths, prefix, suffix, displayName, callsign, rankOrdinal, squadName, scorePoints, battleCredits, 0);
+    }
+
+    public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName, int scorePoints, int battleCredits, int donatTier) {
         this.playerId = playerId;
         this.teamOrdinal = teamOrdinal;
         this.kills = kills;
@@ -33,6 +44,9 @@ public class CombatDataSyncPacket {
         this.callsign = callsign != null ? callsign : "";
         this.rankOrdinal = rankOrdinal;
         this.squadName = squadName != null ? squadName : "";
+        this.scorePoints = scorePoints;
+        this.battleCredits = battleCredits;
+        this.donatTier = donatTier;
     }
 
     public static void encode(CombatDataSyncPacket msg, FriendlyByteBuf buf) {
@@ -46,13 +60,17 @@ public class CombatDataSyncPacket {
         buf.writeUtf(msg.callsign);
         buf.writeInt(msg.rankOrdinal);
         buf.writeUtf(msg.squadName);
+        buf.writeInt(msg.scorePoints);
+        buf.writeInt(msg.battleCredits);
+        buf.writeInt(msg.donatTier);
     }
 
     public static CombatDataSyncPacket decode(FriendlyByteBuf buf) {
         return new CombatDataSyncPacket(
             buf.readUUID(), buf.readInt(), buf.readInt(), buf.readInt(),
             buf.readUtf(), buf.readUtf(), buf.readUtf(),
-            buf.readUtf(), buf.readInt(), buf.readUtf(256)
+            buf.readUtf(), buf.readInt(), buf.readUtf(256),
+            buf.readInt(), buf.readInt(), buf.readInt()
         );
     }
 
@@ -64,9 +82,12 @@ public class CombatDataSyncPacket {
                     Team.fromOrdinal(msg.teamOrdinal), msg.kills, msg.deaths,
                     msg.prefix, msg.suffix, msg.displayName
                 );
+                ClientTeamData.localPlayerRank = msg.rankOrdinal;
+                ClientTeamData.localPlayerSP = msg.scorePoints;
+                ClientTeamData.localPlayerBC = msg.battleCredits;
             }
             ClientTeamData.playerDataMap.put(msg.playerId, new PlayerListEntry(
-                msg.rankOrdinal, msg.callsign, "", msg.kills, msg.deaths, msg.teamOrdinal, msg.squadName
+                msg.rankOrdinal, msg.callsign, "", msg.kills, msg.deaths, msg.teamOrdinal, msg.squadName, msg.donatTier
             ));
         });
         ctx.get().setPacketHandled(true);

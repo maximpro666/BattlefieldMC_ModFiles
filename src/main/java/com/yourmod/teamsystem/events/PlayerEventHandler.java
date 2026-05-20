@@ -110,6 +110,10 @@ public class PlayerEventHandler {
             if (mm != null) {
                 mm.syncToPlayer(player);
             }
+            CapturePointManager cp = TeamSystem.getCapturePointManager();
+            if (cp != null) {
+                cp.syncToPlayer(player);
+            }
             var pcd = teamManager.getOrCreatePlayerData(player.getUUID());
             if (pcd.getDisplayName().isEmpty() && pcd.getCallsign().isEmpty()) {
                 player.sendSystemMessage(Component.literal("§6=== Добро пожаловать! ===")
@@ -135,18 +139,14 @@ public class PlayerEventHandler {
                     player.serverLevel().players().forEach(p ->
                         p.displayClientMessage(net.minecraft.network.chat.Component.literal(msg), false));
                 }
-                // Check for FOB
+                // Check for FOB — remove from manager on block break
                 String dim = player.serverLevel().dimension().location().toString();
                 com.yourmod.teamsystem.core.FOBManager.SavedFOB fob = TeamSystem.getFOBManager().getFOBAt(pos, dim);
                 if (fob != null) {
-                    Team attackerTeam = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
-                    if (attackerTeam.ordinal() != fob.teamOrdinal) {
-                        TeamSystem.getFOBManager().damageFOB(fob.fobId, 50.0f);
-                        String msg = "§c[FOB] " + fob.name + " is under attack!";
-                        for (ServerPlayer teamPlayer : teamManager.getPlayersByTeam(com.yourmod.teamsystem.core.Team.fromOrdinal(fob.teamOrdinal))) {
-                            teamPlayer.displayClientMessage(net.minecraft.network.chat.Component.literal(msg), false);
-                        }
-                    }
+                    TeamSystem.getFOBManager().removeFOB(fob.fobId);
+                    String msg = "§c[FOB] " + fob.name + " destroyed!";
+                    player.serverLevel().players().forEach(p ->
+                        p.displayClientMessage(net.minecraft.network.chat.Component.literal(msg), false));
                 }
             }
         }
@@ -155,6 +155,7 @@ public class PlayerEventHandler {
     @SubscribeEvent
     public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            player.setHealth(player.getMaxHealth());
             GameManager game = TeamSystem.getGameManager();
 
             if (game == null) {

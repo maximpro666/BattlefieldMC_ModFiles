@@ -5,6 +5,7 @@ import com.yourmod.teamsystem.core.Team;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
@@ -31,6 +32,8 @@ public class TeamSelectPacket {
             Team team = Team.fromOrdinal(teamOrdinal);
             if (team == Team.SPECTATOR) return;
             TeamSystem.getTeamManager().setPlayerTeam(player, team);
+            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+                new OpenLoadoutScreenPacket());
         });
         return true;
     }

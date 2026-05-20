@@ -53,20 +53,20 @@ public class BButton extends Button {
             case PRIMARY:
                 fillColor = AnimationHelper.blendColors(UITheme.ACCENT, 0xFFFF8C0A, hoverAnim);
                 borderColor = fillColor;
-                textColor = 0xFF000000;
-                drawAccent = false;
+                textColor = 0xFFFFFFFF;
+                drawAccent = true;
                 break;
             case GHOST:
                 fillColor = AnimationHelper.withAlpha(UITheme.ACCENT_GHOST, (int)(0x26 * hoverAnim));
                 borderColor = 0x00000000;
                 textColor = AnimationHelper.blendColors(UITheme.TEXT_SECONDARY, UITheme.ACCENT, hoverAnim);
-                drawAccent = false;
+                drawAccent = true;
                 break;
             case DANGER:
                 fillColor = AnimationHelper.blendColors(0x00000000, 0x223A1010, (int)(hoverAnim * 255));
                 borderColor = AnimationHelper.blendColors(UITheme.BORDER, UITheme.STATUS_DANGER, hoverAnim);
                 textColor = AnimationHelper.blendColors(UITheme.TEXT_SECONDARY, UITheme.STATUS_DANGER, hoverAnim);
-                drawAccent = false;
+                drawAccent = true;
                 break;
             default:
                 fillColor = AnimationHelper.blendColors(0x00000000, UITheme.BG_SURFACE, (int)(hoverAnim * 0xDD));

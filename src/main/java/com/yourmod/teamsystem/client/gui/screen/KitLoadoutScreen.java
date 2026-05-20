@@ -147,7 +147,7 @@ public class KitLoadoutScreen extends Screen {
             g.fill(btnX, contentY, btnX + btnW, contentY + 32,
                 AnimationHelper.withAlpha(UITheme.STATUS_OK, (int)(fadeAlpha * 0xDD)));
             String svTxt = "\u2713 Loadout Saved";
-            g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, contentY + 11, 0xFF000000);
+            g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, contentY + 11, 0xFFFFFFFF);
         } else {
             int btnBg = AnimationHelper.blendColors(UITheme.ACCENT, 0xFFFF8C0A, btnHov ? 1f : 0f);
             g.fill(btnX, contentY, btnX + btnW, contentY + 32,
@@ -155,7 +155,7 @@ public class KitLoadoutScreen extends Screen {
             g.fill(btnX, contentY, btnX + 2, contentY + 32,
                 AnimationHelper.withAlpha(0x33000000, alpha));
             String svTxt = "Save Loadout";
-            g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, contentY + 11, 0xFF000000);
+            g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, contentY + 11, 0xFFFFFFFF);
         }
 
         super.render(g, mx, my, pt);

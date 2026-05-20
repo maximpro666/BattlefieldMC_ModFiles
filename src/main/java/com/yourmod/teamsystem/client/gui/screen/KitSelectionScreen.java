@@ -317,7 +317,7 @@ public class KitSelectionScreen extends Screen {
         g.fill(x, btnY, x + btnW, btnY + 26, AnimationHelper.withAlpha(selBg, alpha));
         g.fill(x, btnY, x + 2, btnY + 26, AnimationHelper.withAlpha(0x33000000, alpha));
         String selTxt = "Deploy Kit";
-        g.drawString(font, selTxt, x + btnW / 2 - font.width(selTxt) / 2, btnY + 9, 0xFF000000);
+        g.drawString(font, selTxt, x + btnW / 2 - font.width(selTxt) / 2, btnY + 9, 0xFFFFFFFF);
 
         // Customize button
         int btnX2 = x + btnW + 8;

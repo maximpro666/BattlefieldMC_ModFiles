@@ -41,6 +41,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
+import org.spongepowered.asm.mixin.Mixins;
 
 @Mod("teamsystem")
 public class TeamSystem {
@@ -90,6 +91,7 @@ public class TeamSystem {
     private static CaptureParticleManager captureParticleManager;
 
     public TeamSystem() {
+        Mixins.addConfiguration("mixins.teamsystem.json");
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
@@ -137,7 +139,10 @@ public class TeamSystem {
 
         gameManager = new GameManager(event.getServer());
         MinecraftForge.EVENT_BUS.register(gameManager);
-        gameManager.startInitialCountdown();
+        // Only auto-start on match server; lobby waits for /startmatch
+        if (ProxyMessenger.isMatchServer()) {
+            gameManager.startInitialCountdown();
+        }
 
         markerManager = new MarkerManager();
         respawnManager = new RespawnManager(event.getServer());
@@ -191,6 +196,7 @@ public class TeamSystem {
         com.yourmod.teamsystem.commands.KitAdminCommand.register(event.getDispatcher());
         com.yourmod.teamsystem.commands.RedeployCommand.register(event.getDispatcher());
         com.yourmod.teamsystem.commands.StartMatchCommand.register(event.getDispatcher());
+        com.yourmod.teamsystem.commands.GiveCoinsCommand.register(event.getDispatcher());
 
     }
 

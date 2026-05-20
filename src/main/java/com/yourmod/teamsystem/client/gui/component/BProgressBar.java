@@ -49,6 +49,8 @@ public class BProgressBar {
         this.height = h;
     }
 
+    public void setFillColor(int color) { this.fillColor = color; }
+    public void setShowBorder(boolean v) { this.showBorder = v; }
     public void setShowLabel(boolean v) { this.showLabel = v; }
 
     public void tick() {
@@ -62,13 +64,14 @@ public class BProgressBar {
     }
 
     public void render(GuiGraphics g) {
-        int drawW = (int)(width * currentFraction);
+        int drawW = (int)(width * targetFraction);
         int pulseEdge = pulse ? (int)(width * pulsePhase) : -1;
 
         g.fill(x, y, x + width, y + height, backgroundColor);
 
         if (drawW > 0) {
-            g.fill(x, y, x + drawW, y + height,
+            int useW = Math.min(drawW, x + width - this.x);
+            g.fill(x, y, x + useW, y + height,
                 pulse ? AnimationHelper.withAlpha(fillColor, (int)(0xCC + 0x33 * Math.sin(pulsePhase * Math.PI)))
                       : fillColor);
         }

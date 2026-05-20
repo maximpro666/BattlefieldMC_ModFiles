@@ -217,7 +217,7 @@ public class KitCustomizationScreen extends Screen {
         g.fill(btnX, 8, btnX + btnW, 32, AnimationHelper.withAlpha(svBg, alpha));
         g.fill(btnX, 8, btnX + 2, 32, AnimationHelper.withAlpha(0x33000000, alpha));
         String svTxt = "Save";
-        g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, 17, 0xFF000000);
+        g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, 17, 0xFFFFFFFF);
 
         // Deploy button
         int dpX = btnX + btnW + 8;
@@ -226,7 +226,7 @@ public class KitCustomizationScreen extends Screen {
         g.fill(dpX, 8, dpX + btnW, 32, AnimationHelper.withAlpha(dpBg, alpha));
         g.fill(dpX, 8, dpX + 2, 32, AnimationHelper.withAlpha(0x33000000, alpha));
         String dpTxt = "Deploy";
-        g.drawString(font, dpTxt, dpX + btnW / 2 - font.width(dpTxt) / 2, 17, 0xFF000000);
+        g.drawString(font, dpTxt, dpX + btnW / 2 - font.width(dpTxt) / 2, 17, 0xFFFFFFFF);
     }
 
     // ── PREVIEW PANEL ──────────────────────────────────
@@ -266,11 +266,6 @@ public class KitCustomizationScreen extends Screen {
             pose.scale(scale, scale, 1);
             g.renderItem(stack, -8, -8);
             pose.popPose();
-
-            String displayName = stack.getHoverName().getString();
-            int dw = font.width(displayName);
-            g.drawString(font, displayName, rx + (PREVIEW_W - 16) / 2 - dw / 2, ry + rh + 4,
-                    AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, alpha));
         } else {
             g.drawString(font, "\uD83D\uDD2B", rx + (PREVIEW_W - 16) / 2 - 9, ry + rh / 2 - 8,
                     AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
@@ -279,12 +274,27 @@ public class KitCustomizationScreen extends Screen {
                     AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
         }
 
+        // Kit description
+        KitConfig.KitDef kitDef = getKit();
+        if (kitDef != null && kitDef.description != null && !kitDef.description.isEmpty()) {
+            String desc = I18n.localize(kitDef.description);
+            int maxDescW = PREVIEW_W - 24;
+            if (font.width(desc) > maxDescW) {
+                int ellipsisW = font.width("...");
+                desc = font.plainSubstrByWidth(desc, maxDescW - ellipsisW) + "...";
+            }
+            g.drawString(font, desc, rx + (PREVIEW_W - 16) / 2 - font.width(desc) / 2, ry + rh + 4,
+                    AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 180)));
+        }
+
         // Accent line under render area
-        g.fill(rx, ry + rh + 28, rx + PREVIEW_W - 16, ry + rh + 30,
+        int descOffset = (kitDef != null && kitDef.description != null && !kitDef.description.isEmpty()) ? 16 : 0;
+        int accentY = ry + rh + 20 + descOffset;
+        g.fill(rx, accentY, rx + PREVIEW_W - 16, accentY + 2,
                 AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fade * 0xCC)));
 
         // Weapon slot list
-        int sy = ry + rh + 38;
+        int sy = accentY + 10;
         for (String key : slotKeys) {
             if (!weaponOptions.containsKey(key)) continue;
             boolean isActive = key.equals(activeSlot);

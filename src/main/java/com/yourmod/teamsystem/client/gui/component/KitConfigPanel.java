@@ -282,17 +282,17 @@ public class KitConfigPanel {
         float soff = scrollPanel.getScrollOffset();
         int curY = cy - (int) soff + 4;
 
-        curY += 14;
+        curY += 4;
         for (String key : slotKeys) {
-            if (!weaponOptions.containsKey(key)) { curY += SLOT_H + SLOT_GAP; continue; }
+            if (!weaponOptions.containsKey(key)) continue;
             int sx = PREVIEW_W + 16;
             int sy = curY;
             int sw = cw - 16;
             if (mx >= sx && mx <= sx + sw && my >= sy && my <= sy + SLOT_H) {
-                int leftX = sx + sw - 40;
+                int leftX = sx + sw - 28;
                 if (mx >= leftX && mx <= leftX + 10) {
                     cycleWeapon(key, -1);
-                } else if (mx >= leftX + 30 && mx <= leftX + 40) {
+                } else if (mx >= leftX + 12 && mx <= leftX + 22) {
                     cycleWeapon(key, 1);
                 } else {
                     activeSlot = key;
@@ -306,7 +306,7 @@ public class KitConfigPanel {
         curY += SLOT_GAP;
         String activeWeapon = selections.getOrDefault(activeSlot, "");
         if (hasAttachments(activeWeapon)) {
-            curY += 14;
+            curY += 4;
             List<String> cats = getAttachmentCategories(activeWeapon);
             for (String cat : cats) {
                 List<String> opts = getAttachmentOptions(activeWeapon, cat);
@@ -328,17 +328,17 @@ public class KitConfigPanel {
         }
 
         if (!armorOptions.isEmpty()) {
-            curY += 18;
+            curY += 4;
             for (String key : armorKeys) {
-                if (!armorOptions.containsKey(key)) { curY += SLOT_H + SLOT_GAP; continue; }
+                if (!armorOptions.containsKey(key)) continue;
                 int sx = PREVIEW_W + 16;
                 int sy = curY;
                 int sw = cw - 16;
                 if (mx >= sx && mx <= sx + sw && my >= sy && my <= sy + SLOT_H) {
-                    int leftX = sx + sw - 40;
+                    int leftX = sx + sw - 28;
                     if (mx >= leftX && mx <= leftX + 10) {
                         cycleArmor(key, -1);
-                    } else if (mx >= leftX + 30 && mx <= leftX + 40) {
+                    } else if (mx >= leftX + 12 && mx <= leftX + 22) {
                         cycleArmor(key, 1);
                     }
                     if (onDataChanged != null) onDataChanged.run();

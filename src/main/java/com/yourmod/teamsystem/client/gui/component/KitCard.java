@@ -77,9 +77,10 @@ public class KitCard {
             if (kit.requirements.bc_cost > 0) { if (req.length()>0) req.append(" "); req.append(kit.requirements.bc_cost).append("BC"); }
             if (req.length() > 0) {
                 String rs = req.toString();
+                int costColor = lockState == LockState.LOCKED_COST ? UITheme.STATUS_DANGER : UITheme.STATUS_OK;
                 g.drawString(font, rs,
                     x + CARD_W / 2 - font.width(rs) / 2, y + CARD_H - 16,
-                    AnimationHelper.withAlpha(UITheme.STATUS_WARN, (int)(fade * 180)));
+                    AnimationHelper.withAlpha(costColor, (int)(fade * 180)));
             }
         }
 

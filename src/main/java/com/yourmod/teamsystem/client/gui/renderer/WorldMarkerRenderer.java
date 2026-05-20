@@ -1,5 +1,6 @@
 package com.yourmod.teamsystem.client.gui.renderer;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -50,6 +51,8 @@ public class WorldMarkerRenderer {
     private long startTime = System.currentTimeMillis();
 
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera, float partialTick) {
+        RenderSystem.disableDepthTest();
+
         Minecraft mc = Minecraft.getInstance();
         Vec3 camPos = camera.getPosition();
 
@@ -80,6 +83,8 @@ public class WorldMarkerRenderer {
         }
 
         renderBases(poseStack, bufferSource, camera, camPos);
+
+        RenderSystem.enableDepthTest();
     }
 
     private static class CapturePointRender {

@@ -15,6 +15,8 @@ public class BattlefieldMainMenuScreen extends Screen {
         new ResourceLocation("teamsystem", "textures/gui/bg_0.png"),
         new ResourceLocation("teamsystem", "textures/gui/bg_1.png"),
         new ResourceLocation("teamsystem", "textures/gui/bg_2.png"),
+        new ResourceLocation("teamsystem", "textures/gui/bg_main_0.png"),
+        new ResourceLocation("teamsystem", "textures/gui/bg_main_1.png"),
     };
 
     private int    bgIndex      = 0;

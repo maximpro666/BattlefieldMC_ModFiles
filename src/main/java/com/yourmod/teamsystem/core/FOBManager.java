@@ -185,6 +185,15 @@ public class FOBManager {
                     return "§cToo close to enemy base!";
                 }
             }
+
+            // Check distances from capture points
+            int minCapture = config.getMinDistanceFromCapturePoint();
+            for (MapConfig.CapturePointEntry cp : map.getCapturePoints()) {
+                double dist = distanceTo(pos, cp.x, cp.z);
+                if (dist < minCapture) {
+                    return "§cToo close to a capture point! (" + (int)dist + " blocks, min " + minCapture + ")";
+                }
+            }
         }
 
         return null;

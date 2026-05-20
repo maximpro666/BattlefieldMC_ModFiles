@@ -23,9 +23,10 @@ public class BattlefieldPauseScreen extends Screen {
     protected void init() {
         openTime = System.currentTimeMillis();
         int panelW = 260;
-        int panelH = 300;
+        int panelH = Math.max(240, Math.min(300, height - 80));
+        int panelY = Math.max(20, height / 2 - panelH / 2);
         int cx = width / 2;
-        int startY = height / 2 - panelH / 2 + 60;
+        int startY = panelY + 36;
         int btnW = panelW - 40;
         int btnH = 26;
         int gap = 6;
@@ -68,9 +69,9 @@ public class BattlefieldPauseScreen extends Screen {
         g.fill(0, 0, width, height, overlayColor);
 
         int panelW = 260;
-        int panelH = 300;
+        int panelH = Math.max(240, Math.min(300, height - 80));
         int panelX = width / 2 - panelW / 2;
-        int panelY = Math.max(40, height / 2 - panelH / 2);
+        int panelY = Math.max(20, height / 2 - panelH / 2);
         float slideOffset = (1f - AnimationHelper.easeOutCubic(slideIn)) * 40f;
 
         g.pose().pushPose();

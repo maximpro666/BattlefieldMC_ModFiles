@@ -60,8 +60,8 @@ public class VisualsConfig {
     public static class RingVisual {
         public double outerRadius = 38.0;
         public double innerRadius = 26.0;
-        public double outerThickness = 0.5;
-        public double innerThickness = 0.3;
+        public double outerThickness = 1.0;
+        public double innerThickness = 0.6;
         public double ringDotsRadius = 38.0;
         public int ringDotsCount = 6;
         public double maxRingDist = 80.0;
@@ -71,8 +71,8 @@ public class VisualsConfig {
     public static class BaseRingVisual {
         public double outerRingStroke = 3;
         public double innerRingStroke = 1;
-        public double outerThickness = 0.8;
-        public double innerThickness = 0.5;
+        public double outerThickness = 1.2;
+        public double innerThickness = 0.8;
         public double innerRingScale = 0.7;
         public double beamCount = 10;
         public double beamHeight = 8.0;

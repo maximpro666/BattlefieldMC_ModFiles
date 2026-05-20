@@ -4,8 +4,11 @@ import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.*;
 import com.yourmod.teamsystem.data.KitConfigServerHelper;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
@@ -84,20 +87,20 @@ public class RespawnAtPointPacket {
     }
 
     private void handleSquadmate(ServerPlayer player, ServerLevel level) {
-        if (!SquadmateRespawnCooldownManager.canSpawnOnPlayer(level, targetUUID)) {
-            int cdTicks = SquadmateRespawnCooldownManager.getSquadmateCooldownTicks(level, targetUUID);
-            int cdSecs  = (cdTicks + 19) / 20;
-            player.sendSystemMessage(error("This squadmate is under fire! Wait " + cdSecs + "s"));
-            return;
-        }
         ServerPlayer squadmate = level.getServer().getPlayerList().getPlayer(targetUUID);
         if (squadmate == null) {
             player.sendSystemMessage(error("Squadmate is no longer available."));
             return;
         }
+        if (!SquadmateRespawnCooldownManager.canSpawnOnPlayer(squadmate.serverLevel(), targetUUID)) {
+            int cdTicks = SquadmateRespawnCooldownManager.getSquadmateCooldownTicks(squadmate.serverLevel(), targetUUID);
+            int cdSecs  = (cdTicks + 19) / 20;
+            player.sendSystemMessage(error("This squadmate is under fire! Wait " + cdSecs + "s"));
+            return;
+        }
         player.setGameMode(GameType.SURVIVAL);
-        player.teleportTo(level,
-                squadmate.getX(), squadmate.getY(), squadmate.getZ(),
+        player.teleportTo(squadmate.serverLevel(),
+                squadmate.getX(), squadmate.getY() + 1, squadmate.getZ(),
                 squadmate.getYRot(), squadmate.getXRot());
         applySelectedKit(player);
         closeScreen(player);
@@ -107,9 +110,11 @@ public class RespawnAtPointPacket {
         FOBManager fobManager = TeamSystem.getFOBManager();
         if (fobManager == null) return;
 
+        Team playerTeam = TeamSystem.getTeamManager().getOrCreatePlayerData(player.getUUID()).getTeam();
+
         FOBManager.SavedFOB target = null;
         for (FOBManager.SavedFOB fob : fobManager.getFOBs()) {
-            if (fob.name.equals(targetName)) {
+            if (fob.name.equals(targetName) && fob.teamOrdinal == playerTeam.ordinal()) {
                 target = fob;
                 break;
             }
@@ -119,15 +124,22 @@ public class RespawnAtPointPacket {
             return;
         }
 
-        if (!SquadmateRespawnCooldownManager.canSpawnOnFOB(level, target.fobId)) {
-            int cdTicks = SquadmateRespawnCooldownManager.getFobCooldownTicks(level, target.fobId);
+        ServerLevel dest = level.getServer().getLevel(
+                ResourceKey.create(Registries.DIMENSION, new ResourceLocation(target.dimension)));
+        if (dest == null) {
+            player.sendSystemMessage(error("Cannot reach FOB dimension"));
+            return;
+        }
+
+        if (!SquadmateRespawnCooldownManager.canSpawnOnFOB(dest, target.fobId)) {
+            int cdTicks = SquadmateRespawnCooldownManager.getFobCooldownTicks(dest, target.fobId);
             int cdSecs  = (cdTicks + 19) / 20;
             player.sendSystemMessage(error("This FOB is under attack! Wait " + cdSecs + "s"));
             return;
         }
 
         player.setGameMode(GameType.SURVIVAL);
-        player.teleportTo(level, target.x + 0.5, target.y + 1, target.z + 0.5,
+        player.teleportTo(dest, target.x + 0.5, target.y + 1, target.z + 0.5,
                 player.getYRot(), player.getXRot());
         applySelectedKit(player);
         closeScreen(player);

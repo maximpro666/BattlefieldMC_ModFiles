@@ -52,28 +52,28 @@ public class CaptureParticles {
             float rotSpeed, extraPulse;
 
             if (isContested) {
-                ringColor = 0xBBFF4444;
+                ringColor = 0xDDFF4444;
                 beamColor = 0x99FF4444;
                 rotSpeed = 2.0f;
                 extraPulse = (float)(Math.sin(elapsed * 4.0) * 0.3 + 0.7);
             } else if (isCapturing) {
-                ringColor = 0xCCE07B00;
+                ringColor = 0xEEE07B00;
                 beamColor = 0xAAE07B00;
                 rotSpeed = 1.2f;
                 extraPulse = 1.0f;
             } else {
                 ringColor = switch (ownerOrdinal) {
-                    case 0 -> 0xAA1C5FAD;
-                    case 1 -> 0xAAAD1C1C;
-                    default -> 0xAAAAAA;
+                    case 0 -> 0xCC1C5FAD;
+                    case 1 -> 0xCCAD1C1C;
+                    default -> 0xAA888888;
                 };
                 beamColor = switch (ownerOrdinal) {
                     case 0 -> 0x991C5FAD;
                     case 1 -> 0x99AD1C1C;
-                    default -> 0x99AAAAAA;
+                    default -> 0x99888888;
                 };
                 rotSpeed = 0.4f;
-                extraPulse = 0.6f;
+                extraPulse = 0.85f;
             }
 
             float alpha = calcAlpha(dist, ringCfg.maxBeamDist);
@@ -103,7 +103,7 @@ public class CaptureParticles {
                                   int color, float alpha) {
         poseStack.pushPose();
         poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.translucent());
+        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
         Matrix4f mat = poseStack.last().pose();
 
         float r = ((color >> 16) & 0xFF) / 255f;
@@ -111,29 +111,23 @@ public class CaptureParticles {
         float b = (color & 0xFF) / 255f;
         float a = ((color >> 24) & 0xFF) / 255f * alpha;
 
-        float dashLen = 0.6f;
-        float gapLen = 0.3f;
-        float arcLen = dashLen + gapLen;
-        float circumference = (float)(Math.PI * 2.0 * radius);
-        int segments = (int)(circumference / arcLen);
-        float segAngle = (float)(Math.PI * 2.0 / segments);
-        float halfT = thickness / 2f;
+        int segments = 64;
+        int lineLoops = Math.max(1, (int)(thickness * 8));
 
-        for (int i = 0; i < segments; i += 2) {
-            float a1 = i * segAngle + rotation;
-            float a2 = (i + 1) * segAngle + rotation;
-            float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
-            float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
-
-            float x1i = cos1 * (radius - halfT), z1i = sin1 * (radius - halfT);
-            float x1o = cos1 * (radius + halfT), z1o = sin1 * (radius + halfT);
-            float x2i = cos2 * (radius - halfT), z2i = sin2 * (radius - halfT);
-            float x2o = cos2 * (radius + halfT), z2o = sin2 * (radius + halfT);
-
-            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+        for (int t = 0; t < lineLoops; t++) {
+            float loopRadius = radius - thickness * 0.5f + (t + 0.5f) * thickness / lineLoops;
+            for (int i = 0; i < segments; i += 4) {
+                for (int j = 0; j < 3; j++) {
+                    int idx = i + j;
+                    if (idx >= segments) break;
+                    float a1 = (float)(idx / (double)segments * Math.PI * 2.0) + rotation;
+                    float a2 = (float)((idx + 1) / (double)segments * Math.PI * 2.0) + rotation;
+                    float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
+                    float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
+                    vc.vertex(mat, cos1 * loopRadius, 0, sin1 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
+                    vc.vertex(mat, cos2 * loopRadius, 0, sin2 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
+                }
+            }
         }
 
         poseStack.popPose();
@@ -145,7 +139,7 @@ public class CaptureParticles {
                                  int color, float alpha) {
         poseStack.pushPose();
         poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.translucent());
+        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
         Matrix4f mat = poseStack.last().pose();
 
         float r = ((color >> 16) & 0xFF) / 255f;
@@ -154,23 +148,18 @@ public class CaptureParticles {
         float a = ((color >> 24) & 0xFF) / 255f * alpha;
 
         int segments = 48;
-        float halfT = thickness / 2f;
+        int lineLoops = Math.max(1, (int)(thickness * 8));
 
-        for (int i = 0; i < segments; i++) {
-            float a1 = (float)(i / (double) segments * Math.PI * 2.0) + rotation;
-            float a2 = (float)((i + 1) / (double) segments * Math.PI * 2.0) + rotation;
-            float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
-            float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
-
-            float x1i = cos1 * (radius - halfT), z1i = sin1 * (radius - halfT);
-            float x1o = cos1 * (radius + halfT), z1o = sin1 * (radius + halfT);
-            float x2i = cos2 * (radius - halfT), z2i = sin2 * (radius - halfT);
-            float x2o = cos2 * (radius + halfT), z2o = sin2 * (radius + halfT);
-
-            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+        for (int t = 0; t < lineLoops; t++) {
+            float loopRadius = radius - thickness * 0.5f + (t + 0.5f) * thickness / lineLoops;
+            for (int i = 0; i < segments; i++) {
+                float a1 = (float)(i / (double)segments * Math.PI * 2.0) + rotation;
+                float a2 = (float)((i + 1) / (double)segments * Math.PI * 2.0) + rotation;
+                float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
+                float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
+                vc.vertex(mat, cos1 * loopRadius, 0, sin1 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
+                vc.vertex(mat, cos2 * loopRadius, 0, sin2 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
+            }
         }
 
         poseStack.popPose();
@@ -250,7 +239,7 @@ public class CaptureParticles {
             double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
             if (dist <= maxDist) {
                 renderBaseRing(poseStack, bufferSource, dx, nato[1] - camY, dz,
-                    radius, 0x661C5FAD, elapsed, dist, brCfg);
+                    radius, 0x991C5FAD, elapsed, dist, brCfg);
             }
         }
         if (russia != null) {
@@ -260,7 +249,7 @@ public class CaptureParticles {
             double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
             if (dist <= maxDist) {
                 renderBaseRing(poseStack, bufferSource, dx, russia[1] - camY, dz,
-                    radius, 0x66AD1C1C, elapsed, dist, brCfg);
+                    radius, 0x99AD1C1C, elapsed, dist, brCfg);
             }
         }
     }
@@ -287,7 +276,7 @@ public class CaptureParticles {
                                       int color, float alpha) {
         poseStack.pushPose();
         poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.translucent());
+        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
         Matrix4f mat = poseStack.last().pose();
 
         float r = ((color >> 16) & 0xFF) / 255f;
@@ -295,29 +284,23 @@ public class CaptureParticles {
         float b = (color & 0xFF) / 255f;
         float a = ((color >> 24) & 0xFF) / 255f * alpha;
 
-        float dashLen = 0.8f;
-        float gapLen = 0.4f;
-        float arcLen = dashLen + gapLen;
-        float circumference = (float)(Math.PI * 2.0 * radius);
-        int segments = (int)(circumference / arcLen);
-        float segAngle = (float)(Math.PI * 2.0 / segments);
-        float halfT = thickness / 2f;
+        int segments = 64;
+        int lineLoops = Math.max(1, (int)(thickness * 8));
 
-        for (int i = 0; i < segments; i += 2) {
-            float a1 = i * segAngle + rotation;
-            float a2 = (i + 1) * segAngle + rotation;
-            float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
-            float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
-
-            float x1i = cos1 * (radius - halfT), z1i = sin1 * (radius - halfT);
-            float x1o = cos1 * (radius + halfT), z1o = sin1 * (radius + halfT);
-            float x2i = cos2 * (radius - halfT), z2i = sin2 * (radius - halfT);
-            float x2o = cos2 * (radius + halfT), z2o = sin2 * (radius + halfT);
-
-            vc.vertex(mat, x1i, 0, z1i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-            vc.vertex(mat, x1o, 0, z1o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-            vc.vertex(mat, x2o, 0, z2o).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
-            vc.vertex(mat, x2i, 0, z2i).color(r, g, b, a).uv(0, 0).uv2(240, 240).normal(0, 1, 0).endVertex();
+        for (int t = 0; t < lineLoops; t++) {
+            float loopRadius = radius - thickness * 0.5f + (t + 0.5f) * thickness / lineLoops;
+            for (int i = 0; i < segments; i += 4) {
+                for (int j = 0; j < 3; j++) {
+                    int idx = i + j;
+                    if (idx >= segments) break;
+                    float a1 = (float)(idx / (double)segments * Math.PI * 2.0) + rotation;
+                    float a2 = (float)((idx + 1) / (double)segments * Math.PI * 2.0) + rotation;
+                    float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
+                    float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
+                    vc.vertex(mat, cos1 * loopRadius, 0, sin1 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
+                    vc.vertex(mat, cos2 * loopRadius, 0, sin2 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
+                }
+            }
         }
 
         poseStack.popPose();

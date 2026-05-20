@@ -68,19 +68,30 @@ public class ClassSelectionScreen extends Screen {
         KitConfig cfg = KitConfig.get();
         if (cfg == null || cfg.classes == null) return;
 
-        com.yourmod.teamsystem.core.Team team = com.yourmod.teamsystem.client.ClientTeamData.getLocalPlayerTeam();
-        if (team == com.yourmod.teamsystem.core.Team.SPECTATOR) {
+        com.yourmod.teamsystem.core.Team localTeam = com.yourmod.teamsystem.client.ClientTeamData.getLocalPlayerTeam();
+        if (localTeam == com.yourmod.teamsystem.core.Team.SPECTATOR) {
             hoverState = new float[0];
             return;
         }
 
         LockChecker.Context ctx = new LockChecker.Context();
         ctx.playerRank = com.yourmod.teamsystem.client.ClientTeamData.localPlayerRank;
-        ctx.playerTeam = team.name();
+        ctx.playerTeam = localTeam.name();
         ctx.playerSP = com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP;
         ctx.playerBC = com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC;
 
         for (Map.Entry<String, KitConfig.ClassConfig> entry : cfg.classes.entrySet()) {
+            if (entry.getValue().kits == null) continue;
+
+            boolean hasUsableKit = false;
+            for (KitConfig.KitDef kit : entry.getValue().kits.values()) {
+                if (kit.requirements == null) { hasUsableKit = true; break; }
+                if (kit.requirements.team != null && !kit.requirements.team.equalsIgnoreCase(localTeam.name())) continue;
+                hasUsableKit = true;
+                break;
+            }
+            if (!hasUsableKit) continue;
+
             classes.add(entry.getValue());
             classKeys.add(entry.getKey());
 
@@ -88,22 +99,20 @@ public class ClassSelectionScreen extends Screen {
             String lockReason = null;
             LockState worst = LockState.AVAILABLE;
 
-            if (entry.getValue().kits != null) {
-                for (KitConfig.KitDef kit : entry.getValue().kits.values()) {
-                    LockState ks = LockChecker.checkKit(kit, ctx);
-                    if (ks == LockState.AVAILABLE) { anyAvailable = true; break; }
-                    if (ks.ordinal() > worst.ordinal()) {
-                        worst = ks;
-                        String detail;
-                        if (ks == LockState.LOCKED_COST) {
-                            detail = kit.requirements != null && kit.requirements.sp_cost > 0 && ctx.playerSP < kit.requirements.sp_cost
-                                    ? "SP: need " + kit.requirements.sp_cost
-                                    : "BC: need " + (kit.requirements != null ? kit.requirements.bc_cost : 0);
-                        } else {
-                            detail = String.valueOf(kit.requirements != null ? kit.requirements.rank : 0);
-                        }
-                        lockReason = ks.tooltip(detail);
+            for (KitConfig.KitDef kit : entry.getValue().kits.values()) {
+                LockState ks = LockChecker.checkKit(kit, ctx);
+                if (ks == LockState.AVAILABLE) { anyAvailable = true; break; }
+                if (ks.ordinal() > worst.ordinal()) {
+                    worst = ks;
+                    String detail;
+                    if (ks == LockState.LOCKED_COST) {
+                        detail = kit.requirements != null && kit.requirements.sp_cost > 0 && ctx.playerSP < kit.requirements.sp_cost
+                                ? "SP: need " + kit.requirements.sp_cost
+                                : "BC: need " + (kit.requirements != null ? kit.requirements.bc_cost : 0);
+                    } else {
+                        detail = String.valueOf(kit.requirements != null ? kit.requirements.rank : 0);
                     }
+                    lockReason = ks.tooltip(detail);
                 }
             }
 

@@ -74,6 +74,8 @@ public class MapPoolManager {
     }
 
     public Path getSourcesPath() {
+        Path serverRoot = server.getServerDirectory().toPath().resolve(SOURCES_DIR_NAME);
+        if (Files.isDirectory(serverRoot)) return serverRoot;
         return getServerRoot().resolve(SOURCES_DIR_NAME);
     }
 

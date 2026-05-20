@@ -9,6 +9,7 @@ public class PlayerScoreboardData {
     public String callsign;
     public String squad;
     public int rankId;
+    public int teamOrdinal;
     public int kills;
     public int deaths;
     public DonateLevel donateLevel = DonateLevel.NONE;

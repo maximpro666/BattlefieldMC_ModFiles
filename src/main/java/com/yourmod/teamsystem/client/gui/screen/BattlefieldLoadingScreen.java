@@ -14,9 +14,7 @@ import java.util.Random;
 public class BattlefieldLoadingScreen extends Overlay {
 
     private static final ResourceLocation[] BACKGROUNDS = {
-        new ResourceLocation("teamsystem", "textures/gui/bg_0.png"),
-        new ResourceLocation("teamsystem", "textures/gui/bg_1.png"),
-        new ResourceLocation("teamsystem", "textures/gui/bg_2.png"),
+        new ResourceLocation("teamsystem", "textures/gui/loading/bg.png"),
     };
     private static final ResourceLocation LEFT_PANEL =
         new ResourceLocation("teamsystem", "textures/gui/loading/left.png");

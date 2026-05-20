@@ -41,6 +41,8 @@ public final class SpawnScreenHelper {
         if (hasCachedData()) {
             Minecraft.getInstance().setScreen(new SpawnSelectionScreen(
                     lastSquadmates, lastFobs, lastBeacons, lastTeamOrdinal, lastSelectedKit));
+        } else {
+            Minecraft.getInstance().setScreen(null);
         }
     }
 
