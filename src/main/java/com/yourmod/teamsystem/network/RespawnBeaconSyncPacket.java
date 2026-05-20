@@ -53,7 +53,7 @@ public class RespawnBeaconSyncPacket {
                     list.add(new ClientTeamData.ClientBeaconData(b.name(), b.x(), b.y(), b.z(), b.teamOrdinal()));
                 }
                 ClientTeamData.beacons = list;
-                com.yourmod.teamsystem.client.xaero.XaeroIntegration.updateBeaconWaypoints(list);
+                com.yourmod.teamsystem.client.journeymap.JourneyMapIntegration.updateBeaconWaypoints(list);
             })
         );
         context.setPacketHandled(true);

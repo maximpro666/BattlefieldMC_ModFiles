@@ -4,6 +4,11 @@ import com.yourmod.teamsystem.client.ClientTeamData;
 import net.minecraft.util.Mth;
 
 public class AnimationHelper {
+    private static float cachedOpacity = 1.0f;
+
+    public static void updateOpacityCache() {
+        cachedOpacity = ClientTeamData.guiOpacity;
+    }
     public static float easeInOutCubic(float t) {
         return t < 0.5F ? 4.0F * t * t * t : 1.0F - (float)Math.pow(-2.0F * t + 2.0F, 3.0F) / 2.0F;
     }
@@ -39,7 +44,7 @@ public class AnimationHelper {
     }
 
     public static int withAlpha(int color, int alpha) {
-        int a = Math.min(255, Math.max(0, (int)(alpha * ClientTeamData.guiOpacity)));
+        int a = Math.min(255, Math.max(0, (int)(alpha * cachedOpacity)));
         return (a & 0xFF) << 24 | (color & 0xFFFFFF);
     }
 

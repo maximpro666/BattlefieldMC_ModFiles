@@ -90,5 +90,47 @@ public class HotbarOverlay {
             g.drawString(mc.font, NUM_STRINGS[i], sx + 3, y - 9,
                 AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 160)));
         }
+
+        renderAmmoDisplay(g, screenWidth, screenHeight, mc);
+    }
+
+    private void renderAmmoDisplay(GuiGraphics g, int screenWidth, int screenHeight, Minecraft mc) {
+        if (mc.player == null) return;
+        ItemStack held = mc.player.getMainHandItem();
+        if (held.isEmpty()) return;
+
+        int maxAmmo = 0;
+        int currentAmmo = 0;
+
+        var tag = held.getTag();
+        if (tag != null && tag.contains("ammo")) {
+            var ammoTag = tag.getCompound("ammo");
+            currentAmmo = ammoTag.getInt("current");
+            maxAmmo = ammoTag.getInt("max");
+        }
+
+        if (maxAmmo <= 0) {
+            if (held.getMaxStackSize() > 1) {
+                currentAmmo = held.getCount();
+                maxAmmo = held.getMaxStackSize();
+            } else {
+                return;
+            }
+        }
+
+        int totalW = SLOTS * SLOT_SIZE + (SLOTS - 1) * PADDING;
+        int hx = screenWidth / 2 - totalW / 2;
+        int hy = screenHeight - SLOT_SIZE - BOTTOM_OFFSET;
+
+        String ammoStr = currentAmmo + " / " + maxAmmo;
+        int ammoW = mc.font.width(ammoStr);
+        int ammoX = hx + totalW - ammoW - 8;
+        int ammoY = hy - 16;
+
+        g.fill(ammoX - 4, ammoY - 2, ammoX + ammoW + 4, ammoY + 10,
+            AnimationHelper.withAlpha(UITheme.HUD_AMMO_BG, (int)(fadeAlpha * 200)));
+
+        g.drawString(mc.font, ammoStr, ammoX, ammoY,
+            AnimationHelper.withAlpha(UITheme.HUD_AMMO_TEXT, (int)(fadeAlpha * 255)));
     }
 }

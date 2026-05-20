@@ -53,7 +53,7 @@ public class FOBSyncPacket {
         context.enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 ClientTeamData.fobs = fobs;
-                com.yourmod.teamsystem.client.xaero.XaeroIntegration.updateFOBWaypoints(fobs);
+                com.yourmod.teamsystem.client.journeymap.JourneyMapIntegration.updateFOBWaypoints(fobs);
             });
         });
         return true;

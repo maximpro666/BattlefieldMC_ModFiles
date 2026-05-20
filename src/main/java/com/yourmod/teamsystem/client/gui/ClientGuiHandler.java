@@ -1,15 +1,22 @@
 package com.yourmod.teamsystem.client.gui;
 
+import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import com.yourmod.teamsystem.client.gui.overlay.*;
+import com.yourmod.teamsystem.client.gui.screen.BattlefieldLoadingScreen;
+import com.yourmod.teamsystem.client.gui.screen.BattlefieldMainMenuScreen;
+import com.yourmod.teamsystem.client.gui.screen.SpawnScreenHelper;
 import com.yourmod.teamsystem.client.gui.screen.BattlefieldPauseScreen;
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.gui.screen.VoteScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,13 +33,17 @@ public class ClientGuiHandler {
     private static final HotbarOverlay       hotbarOverlay   = new HotbarOverlay();
     private static final BattlefieldTabOverlay tabOverlay    = new BattlefieldTabOverlay();
     private static final VoiceIndicatorOverlay voiceOverlay  = new VoiceIndicatorOverlay();
+    private static final KillFeedOverlay     killFeedOverlay = new KillFeedOverlay();
+    private static final CaptureNotificationOverlay captureNotifOverlay = new CaptureNotificationOverlay();
 
     private static boolean hudRenderedThisFrame = false;
 
     @SubscribeEvent
     public static void onRenderTick(TickEvent.RenderTickEvent event) {
-        if (event.phase == TickEvent.Phase.START)
+        if (event.phase == TickEvent.Phase.START) {
+            AnimationHelper.updateOpacityCache();
             hudRenderedThisFrame = false;
+        }
     }
 
     @SubscribeEvent
@@ -50,12 +61,14 @@ public class ClientGuiHandler {
     @SubscribeEvent
     public static void onPostRenderAnyOverlay(RenderGuiOverlayEvent.Post event) {
         if (hudRenderedThisFrame) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || mc.player == null) return;
+        // Hide HUD when any screen is open (loading screen is an Overlay, not a Screen)
+        if (mc.screen != null) return;
         hudRenderedThisFrame = true;
         GuiGraphics g = event.getGuiGraphics();
         int w = event.getWindow().getGuiScaledWidth();
         int h = event.getWindow().getGuiScaledHeight();
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || mc.player == null) return;
 
         float scale = ClientTeamData.guiScale;
         if (Math.abs(scale - 1.0f) > 0.01f) {
@@ -73,6 +86,8 @@ public class ClientGuiHandler {
         hotbarOverlay.render(g, w, h);
         tabOverlay.render(g, w, h);
         voiceOverlay.render(g, w, h);
+        killFeedOverlay.render(g, w);
+        captureNotifOverlay.render(g, w, h);
 
         if (Math.abs(scale - 1.0f) > 0.01f) {
             g.pose().popPose();
@@ -94,6 +109,48 @@ public class ClientGuiHandler {
                 event.setNewScreen(new BattlefieldPauseScreen());
             }
         }
+        if (event.getScreen() instanceof TitleScreen) {
+            event.setNewScreen(new BattlefieldMainMenuScreen());
+        }
     }
 
+    @SubscribeEvent
+    public static void onClientTickLoading(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        Minecraft mc = Minecraft.getInstance();
+
+        boolean hasWorld = mc.level != null && mc.player != null;
+
+        if (mc.getOverlay() instanceof LoadingOverlay) {
+            BattlefieldLoadingScreen.show();
+        }
+
+        BattlefieldLoadingScreen loading = BattlefieldLoadingScreen.getInstance();
+        if (loading == null) return;
+
+        boolean hasConnection = mc.getConnection() != null;
+
+        // Auto-dismiss if on main menu with no loading happening for 3+ seconds
+        if (!hasWorld && !hasConnection && System.currentTimeMillis() - loading.getOpenTime() > 3000) {
+            loading.dismiss();
+            return;
+        }
+
+        int connStage = hasConnection ? 2 : (hasWorld ? 1 : 0);
+        int cfgStage = !ClientTeamData.receivedKitConfigJson.isEmpty() ? 2 : (hasWorld && hasConnection ? 1 : 0);
+        int teamStage = hasWorld && hasConnection ? 2 : 0;
+
+        BattlefieldLoadingScreen.updateProgress(connStage, cfgStage, teamStage);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
+        BattlefieldLoadingScreen.show();
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        SpawnScreenHelper.clear();
+        BattlefieldLoadingScreen.show();
+    }
 }

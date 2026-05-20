@@ -32,6 +32,11 @@ public class KitConfigServerHelper {
         TeamManager teamManager = TeamSystem.getTeamManager();
         PlayerCombatData data = teamManager.getOrCreatePlayerData(player.getUUID());
 
+        if (!player.isAlive()) {
+            // Kit selection already saved in packet handler — will apply on respawn
+            return "You are dead — kit will apply on respawn";
+        }
+
         EconomyManager econ = TeamSystem.getEconomyManager();
         if (kit.requirements != null) {
             if (data.getRankOrdinal() < kit.requirements.rank)
@@ -49,8 +54,6 @@ public class KitConfigServerHelper {
                 econ.addSP(player.getUUID(), -kit.requirements.sp_cost);
             }
         }
-
-        if (!player.isAlive()) return "You are dead";
 
         // Parse loadout
         PlayerLoadout loadout = parseLoadout(data.getLoadoutConfig(), kit);

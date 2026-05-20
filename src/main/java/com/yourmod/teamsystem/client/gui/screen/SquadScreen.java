@@ -8,6 +8,7 @@ import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.SquadActionPacket;
 import com.yourmod.teamsystem.client.gui.component.BButton;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
+import com.yourmod.teamsystem.client.gui.component.SlotBadge;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -48,7 +49,7 @@ public class SquadScreen extends Screen {
         addRenderableWidget(new BButton(
             panelX, panelY + panelH + 10, PANEL_W / 2 - 4, 20,
             Component.literal("Join Squad"), btn -> {
-                PacketHandler.CHANNEL.sendToServer(new SquadActionPacket("join", null));
+                PacketHandler.CHANNEL.sendToServer(new SquadActionPacket("create", null));
                 onClose();
             }
         ));
@@ -84,9 +85,20 @@ public class SquadScreen extends Screen {
         g.drawString(font, title, cx - tw / 2, panelY + 10, AnimationHelper.withAlpha(COLOR_ORANGE, (int)(fadeAlpha * 255)));
 
         String squad = ClientTeamData.localPlayerSquad;
-        String squadText = "Current Squad: " + (squad != null && !squad.isEmpty() ? squad : "None");
+        boolean inSquad = squad != null && !squad.isEmpty();
+        String squadText = "Current Squad: " + (inSquad ? squad : "None");
         int sw = font.width(squadText);
         g.drawString(font, squadText, cx - sw / 2, panelY + 24, AnimationHelper.withAlpha(COLOR_SUBTEXT, (int)(fadeAlpha * 200)));
+
+        if (inSquad && ClientTeamData.playerDataMap != null) {
+            int memberCount = 0;
+            for (var entry : ClientTeamData.playerDataMap.entrySet()) {
+                if (squad.equals(entry.getValue().squad())) memberCount++;
+            }
+            int bx = cx + sw / 2 + 6;
+            int by = panelY + 23;
+            SlotBadge.draw(g, bx, by, memberCount, 4, fadeAlpha);
+        }
 
         g.fill(panelX + 8, panelY + 38, panelX + PANEL_W - 8, panelY + 39,
             AnimationHelper.withAlpha(COLOR_BORDER, (int)(fadeAlpha * 150)));

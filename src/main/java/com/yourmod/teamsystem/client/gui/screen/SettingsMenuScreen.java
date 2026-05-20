@@ -1,14 +1,12 @@
 package com.yourmod.teamsystem.client.gui.screen;
 
 import com.yourmod.teamsystem.client.ClientTeamData;
-import com.yourmod.teamsystem.client.ClientSoundHandler;
 import com.yourmod.teamsystem.client.gui.I18n;
 import com.yourmod.teamsystem.client.gui.UITheme;
 
 import com.yourmod.teamsystem.client.gui.component.BButton;
 import com.yourmod.teamsystem.client.gui.component.BSlider;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
-import com.yourmod.teamsystem.core.ModSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.OptionsScreen;

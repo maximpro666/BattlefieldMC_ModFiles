@@ -106,7 +106,7 @@ public class CapturePointSyncPacket {
                 pointRadii.get(i)));
         }
         ClientTeamData.capturePoints = points;
-        com.yourmod.teamsystem.client.xaero.XaeroIntegration.updateCapturePointWaypoints(points);
+        com.yourmod.teamsystem.client.journeymap.JourneyMapIntegration.updateCapturePointWaypoints(points);
     }
 
     public List<Integer> getPointIds() { return pointIds; }

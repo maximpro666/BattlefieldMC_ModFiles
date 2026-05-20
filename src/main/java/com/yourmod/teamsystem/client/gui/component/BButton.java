@@ -15,10 +15,8 @@ public class BButton extends Button {
 
     private Variant variant = Variant.DEFAULT;
     private float hoverAnim = 0f;
-    private float pressAnim = 0f;
     private boolean wasHovered = false;
-    private boolean wasPressed = false;
-    private boolean small = false;
+    private float pressAnim = 0f;
 
     public BButton(int x, int y, int width, int height, Component text, OnPress onPress) {
         super(x, y, width, height, text, onPress, DEFAULT_NARRATION);
@@ -29,29 +27,22 @@ public class BButton extends Button {
         this.variant = variant;
     }
 
-    public BButton small(boolean v) { this.small = v; return this; }
-
-    public void setVariant(Variant v) { this.variant = v; }
+    public BButton variant(Variant v) { this.variant = v; return this; }
+    public BButton setVariant(Variant v) { this.variant = v; return this; }
 
     @Override
     public void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         boolean hovered = isHoveredOrFocused();
-        boolean pressed = hovered && Minecraft.getInstance().mouseHandler.isLeftPressed();
 
         if (hovered && !wasHovered) {
             ClientSoundHandler.playGuiSound(ModSounds.GUI_BUTTON_HOVER);
         }
         wasHovered = hovered;
 
-        if (pressed && !wasPressed) {
-            ClientSoundHandler.playGuiSound(ModSounds.GUI_BUTTON_CLICK);
-        }
-        wasPressed = pressed;
-
         hoverAnim = AnimationHelper.lerp(hoverAnim, hovered ? 1f : 0f, 0.12f);
-        pressAnim = AnimationHelper.lerp(pressAnim, pressed ? 1f : 0f, 0.15f);
+        pressAnim = AnimationHelper.lerp(pressAnim, 0f, 0.10f);
 
-        int pressOffset = pressed ? 1 : 0;
+        float scale = 1f - pressAnim * 0.03f;
 
         int borderColor;
         int fillColor;
@@ -77,7 +68,7 @@ public class BButton extends Button {
                 textColor = AnimationHelper.blendColors(UITheme.TEXT_SECONDARY, UITheme.STATUS_DANGER, hoverAnim);
                 drawAccent = false;
                 break;
-            default: // DEFAULT
+            default:
                 fillColor = AnimationHelper.blendColors(0x00000000, UITheme.BG_SURFACE, (int)(hoverAnim * 0xDD));
                 borderColor = AnimationHelper.blendColors(UITheme.BORDER, UITheme.ACCENT_DIM, hoverAnim);
                 textColor = AnimationHelper.blendColors(UITheme.TEXT_PRIMARY, UITheme.ACCENT, hoverAnim);
@@ -85,37 +76,37 @@ public class BButton extends Button {
                 break;
         }
 
-        int x = getX();
-        int y = getY() + pressOffset;
-        int w = width;
-        int h = height;
+        int bw = width;
+        int bh = height;
+        int sw = (int)(bw * scale);
+        int sh = (int)(bh * scale);
+        int sx = getX() + (bw - sw) / 2;
+        int sy = getY() + (bh - sh) / 2;
 
-        // Fill
         if ((fillColor >> 24 & 0xFF) > 0) {
-            g.fill(x, y, x + w, y + h, fillColor);
+            g.fill(sx, sy, sx + sw, sy + sh, fillColor);
         }
 
-        // Border (top, bottom, right only — left is accent)
-        g.fill(x, y, x + w, y + 1, borderColor);
-        g.fill(x, y + h - 1, x + w, y + h, borderColor);
-        g.fill(x + w - 1, y, x + w, y + h, borderColor);
+        g.fill(sx, sy, sx + sw, sy + 1, borderColor);
+        g.fill(sx, sy + sh - 1, sx + sw, sy + sh, borderColor);
+        g.fill(sx + sw - 1, sy, sx + sw, sy + sh, borderColor);
 
-        // Left accent bar
         if (drawAccent) {
             int accentAlpha = (int)(0xFF * (0.4f + hoverAnim * 0.6f));
-            g.fill(x, y, x + 2, y + h, AnimationHelper.withAlpha(UITheme.ACCENT, accentAlpha));
+            g.fill(sx, sy, sx + 2, sy + sh, AnimationHelper.withAlpha(UITheme.ACCENT, accentAlpha));
         }
 
-        // Text
         var font = Minecraft.getInstance().font;
         var txt = getMessage();
-        int tx = x + (w - font.width(txt)) / 2;
-        int ty = y + (h - font.lineHeight) / 2;
+        int tx = sx + (sw - font.width(txt)) / 2;
+        int ty = sy + (sh - font.lineHeight) / 2;
         g.drawString(font, txt, tx, ty, textColor);
     }
 
     @Override
     public void onPress() {
+        pressAnim = 1f;
+        ClientSoundHandler.playGuiSound(ModSounds.GUI_BUTTON_CLICK);
         super.onPress();
     }
 

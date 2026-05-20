@@ -42,16 +42,18 @@ public class KitSelectPacket {
                 String[] parts = kitName.split(":", 2);
                 String classId = parts[0];
                 String kitId = parts[1];
+
+                // Save kit selection FIRST so it persists through death/respawn
+                TeamManager tm = TeamSystem.getTeamManager();
+                if (tm != null) {
+                    PlayerCombatData pcd = tm.getOrCreatePlayerData(player.getUUID());
+                    pcd.setSelectedKit(kitName);
+                    tm.setDirty();
+                }
+
                 String result = KitConfigServerHelper.applyKit(player, classId, kitId);
                 if (result != null) {
                     player.displayClientMessage(error(result), false);
-                } else {
-                    TeamManager tm = TeamSystem.getTeamManager();
-                    if (tm != null) {
-                        PlayerCombatData pcd = tm.getOrCreatePlayerData(player.getUUID());
-                        pcd.setSelectedKit(kitName);
-                        tm.setDirty();
-                    }
                 }
             } else {
                 // Old system: plain kit name

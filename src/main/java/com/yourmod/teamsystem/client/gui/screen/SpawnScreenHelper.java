@@ -9,11 +9,17 @@ import java.util.List;
 public final class SpawnScreenHelper {
     private SpawnScreenHelper() {}
 
+    private static final long STALE_MS = 120_000L; // cache valid for 2 minutes
+    private static long lastUpdated;
     private static List<OpenSpawnSelectionScreenPacket.SquadmateInfo> lastSquadmates;
     private static List<FOBData> lastFobs;
     private static List<OpenSpawnSelectionScreenPacket.BeaconInfo> lastBeacons;
     private static int lastTeamOrdinal;
     private static String lastSelectedKit;
+
+    public static boolean hasCachedData() {
+        return lastSquadmates != null && (System.currentTimeMillis() - lastUpdated) < STALE_MS;
+    }
 
     public static void openSpawnSelectionScreen(
             List<OpenSpawnSelectionScreenPacket.SquadmateInfo> squadmates,
@@ -21,6 +27,7 @@ public final class SpawnScreenHelper {
             List<OpenSpawnSelectionScreenPacket.BeaconInfo> beacons,
             int teamOrdinal,
             String selectedKit) {
+        lastUpdated = System.currentTimeMillis();
         lastSquadmates = squadmates;
         lastFobs = fobs;
         lastBeacons = beacons;
@@ -31,7 +38,7 @@ public final class SpawnScreenHelper {
     }
 
     public static void reopen() {
-        if (lastSquadmates != null) {
+        if (hasCachedData()) {
             Minecraft.getInstance().setScreen(new SpawnSelectionScreen(
                     lastSquadmates, lastFobs, lastBeacons, lastTeamOrdinal, lastSelectedKit));
         }
@@ -39,9 +46,23 @@ public final class SpawnScreenHelper {
 
     public static void updateSelectedKit(String kit) {
         lastSelectedKit = kit;
+        lastUpdated = System.currentTimeMillis();
+    }
+
+    public static String getLastSelectedKit() {
+        return lastSelectedKit;
     }
 
     public static void closeSpawnScreen() {
         Minecraft.getInstance().setScreen(null);
+    }
+
+    public static void clear() {
+        lastUpdated = 0;
+        lastSquadmates = null;
+        lastFobs = null;
+        lastBeacons = null;
+        lastTeamOrdinal = 0;
+        lastSelectedKit = null;
     }
 }

@@ -2,6 +2,7 @@ package com.yourmod.teamsystem.network;
 
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.*;
+import com.yourmod.teamsystem.data.KitConfigServerHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -78,6 +79,7 @@ public class RespawnAtPointPacket {
         if (gameManager == null) return;
         player.setGameMode(GameType.SURVIVAL);
         gameManager.teleportPlayerToMapAtTeamSpawn(player, team);
+        applySelectedKit(player);
         closeScreen(player);
     }
 
@@ -97,6 +99,7 @@ public class RespawnAtPointPacket {
         player.teleportTo(level,
                 squadmate.getX(), squadmate.getY(), squadmate.getZ(),
                 squadmate.getYRot(), squadmate.getXRot());
+        applySelectedKit(player);
         closeScreen(player);
     }
 
@@ -126,6 +129,7 @@ public class RespawnAtPointPacket {
         player.setGameMode(GameType.SURVIVAL);
         player.teleportTo(level, target.x + 0.5, target.y + 1, target.z + 0.5,
                 player.getYRot(), player.getXRot());
+        applySelectedKit(player);
         closeScreen(player);
     }
 
@@ -134,7 +138,18 @@ public class RespawnAtPointPacket {
         if (respawnManager == null) return;
         player.setGameMode(GameType.SURVIVAL);
         respawnManager.respawnPlayerAtBeacon(player, targetName);
+        applySelectedKit(player);
         closeScreen(player);
+    }
+
+    private static void applySelectedKit(ServerPlayer player) {
+        TeamManager tm = TeamSystem.getTeamManager();
+        if (tm == null) return;
+        PlayerCombatData pcd = tm.getOrCreatePlayerData(player.getUUID());
+        String kitName = pcd.getSelectedKit();
+        if (kitName == null || kitName.isEmpty() || !kitName.contains(":")) return;
+        String[] parts = kitName.split(":", 2);
+        KitConfigServerHelper.applyKit(player, parts[0], parts[1]);
     }
 
     private static void closeScreen(ServerPlayer player) {

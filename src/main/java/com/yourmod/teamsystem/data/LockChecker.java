@@ -16,11 +16,15 @@ public final class LockChecker {
         public String selectedKit;
     }
 
+    private static final String NO_TEAM = "SPECTATOR";
+
     public static LockState checkKit(KitConfig.KitDef kit, Context ctx) {
         KitConfig.KitRequirements req = kit.requirements;
         if (req == null) return LockState.AVAILABLE;
         if (ctx.playerRank < req.rank) return LockState.LOCKED_RANK;
-        if (req.team != null && !req.team.equalsIgnoreCase(ctx.playerTeam))
+        // Skip team filter if player hasn't been assigned a team yet
+        if (req.team != null && !NO_TEAM.equalsIgnoreCase(ctx.playerTeam)
+                && !req.team.equalsIgnoreCase(ctx.playerTeam))
             return LockState.LOCKED_TEAM;
         if (req.sp_cost > 0 && ctx.playerSP < req.sp_cost)
             return LockState.LOCKED_COST;

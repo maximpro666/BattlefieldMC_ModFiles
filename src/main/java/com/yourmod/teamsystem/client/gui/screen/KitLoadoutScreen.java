@@ -2,12 +2,11 @@ package com.yourmod.teamsystem.client.gui.screen;
 
 import com.yourmod.teamsystem.client.gui.I18n;
 import com.yourmod.teamsystem.client.gui.UITheme;
-
+import com.yourmod.teamsystem.client.gui.component.*;
 import com.yourmod.teamsystem.data.KitConfig;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.KitSavePacket;
-import com.yourmod.teamsystem.client.gui.component.BButton;
-import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -16,198 +15,204 @@ import java.util.*;
 
 public class KitLoadoutScreen extends Screen {
 
-    private static final int COLOR_BG      = 0xFF1A1A2E;
-    private static final int COLOR_PANEL   = 0xFF16213E;
-    private static final int COLOR_ORANGE  = 0xFFE94560;
-    private static final int COLOR_SLOT_BG = 0xFF0F3460;
-    private static final int COLOR_BORDER  = 0xFF533483;
-    private static final int COLOR_TEXT    = 0xFFFFFFFF;
-    private static final int COLOR_SUBTEXT = 0xFF888888;
-
-    private static final String[] SLOT_KEYS = {
-        "Primary", "Secondary", "Special", "Grenade"
-    };
-
     private final String classId;
     private final String kitId;
-    private final int SLOT_W = 180;
-    private final int SLOT_H = 20;
-    private final int GAP = 2;
 
-    private final Map<String, List<String>> weaponOptions = new LinkedHashMap<>();
+    private final List<SlotRow> weaponRows = new ArrayList<>();
+    private final List<SlotRow> armorRows  = new ArrayList<>();
     private final Map<String, String> selections = new LinkedHashMap<>();
-    private final Map<String, Integer> selectionIndex = new LinkedHashMap<>();
+    private final Map<String, String> armorSelections = new LinkedHashMap<>();
 
-    private float fadeAlpha = 0f;
-    private long openTime;
-    private int hoveredSlot = -1;
-    private int scrollOffset = 0;
+    private float fadeAlpha  = 0f;
+    private long  openTime;
+    private boolean saved    = false;
+    private int    savedTimer = 0;
+    private TopBar topBar;
 
     public KitLoadoutScreen(String classId, String kitId) {
         super(Component.literal("Kit Loadout"));
         this.classId = classId;
-        this.kitId = kitId;
+        this.kitId   = kitId;
     }
 
     @Override
     protected void init() {
         openTime = System.currentTimeMillis();
-        loadWeaponOptions();
-
-        int panelW = SLOT_W + 40;
-        int panelX = width / 2 - panelW / 2;
-        int totalH = weaponOptions.size() * (SLOT_H + GAP) + 60;
-        int panelY = height / 2 - totalH / 2;
-        if (panelY < 20) panelY = 20;
-
-        addRenderableWidget(new BButton(
-            panelX + panelW / 2 - 60, panelY + totalH - 25, 120, 20,
-            Component.literal("Save Loadout"), btn -> saveLoadout()
-        ));
-    }
-
-    private void loadWeaponOptions() {
-        weaponOptions.clear();
-        selections.clear();
-        selectionIndex.clear();
-
-        KitConfig cfg = KitConfig.get();
-        if (cfg == null) return;
-
-        KitConfig.ClassConfig cl = cfg.classes.get(classId);
-        if (cl == null) return;
-
-        KitConfig.KitDef kit = cl.kits.get(kitId);
-        if (kit == null) return;
-
-        if (kit.weapons.primary != null && !kit.weapons.primary.isEmpty()) {
-            weaponOptions.put("Primary", kit.weapons.primary);
-            selectionIndex.put("Primary", 0);
-        }
-        if (kit.weapons.secondary != null && !kit.weapons.secondary.isEmpty()) {
-            weaponOptions.put("Secondary", kit.weapons.secondary);
-            selectionIndex.put("Secondary", 0);
-        }
-        if (kit.weapons.special != null && !kit.weapons.special.isEmpty()) {
-            weaponOptions.put("Special", kit.weapons.special);
-            selectionIndex.put("Special", 0);
-        }
-        if (kit.weapons.grenade != null && !kit.weapons.grenade.isEmpty()) {
-            weaponOptions.put("Grenade", kit.weapons.grenade);
-            selectionIndex.put("Grenade", 0);
-        }
-
-        for (Map.Entry<String, List<String>> entry : weaponOptions.entrySet()) {
-            String first = entry.getValue().isEmpty() ? "" : entry.getValue().get(0);
-            selections.put(entry.getKey(), first);
-        }
+        topBar   = new TopBar();
+        loadKitData();
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
-        scrollOffset = (int) Math.max(0, Math.min(scrollOffset - delta * 20, Math.max(0, weaponOptions.size() * (SLOT_H + GAP) - height + 100)));
-        return true;
+    public boolean isPauseScreen() { return false; }
+
+    private void loadKitData() {
+        weaponRows.clear(); armorRows.clear();
+
+        KitConfig cfg = KitConfig.get();
+        if (cfg == null) return;
+        KitConfig.ClassConfig cl = cfg.classes.get(classId);
+        if (cl == null) return;
+        KitConfig.KitDef kit = cl.kits.get(kitId);
+        if (kit == null) return;
+
+        String[] icons = {"\uD83D\uDD2B", "\uD83D\uDD27", "\uD83D\uDC8A", "\uD83D\uDCA3"};
+        String[][] weaponSlots = {
+            {"primary", "Primary"},
+            {"secondary", "Secondary"},
+            {"special", "Special"},
+            {"grenade", "Grenade"},
+        };
+
+        if (kit.weapons != null) {
+            for (int si = 0; si < weaponSlots.length; si++) {
+                String key = weaponSlots[si][0];
+                String label = weaponSlots[si][1];
+                List<String> opts = getWeaponList(kit.weapons, key);
+                selections.put(key, opts.isEmpty() ? "" : opts.get(0));
+
+                SlotRow row = new SlotRow(label, si < icons.length ? icons[si] : "\u2022", opts);
+                String finalKey = key;
+                row.setOnChanged(() -> selections.put(finalKey, row.getSelectedValue()));
+                weaponRows.add(row);
+            }
+        }
     }
 
-    private void saveLoadout() {
-        StringBuilder sb = new StringBuilder("{");
-        boolean first = true;
-        for (Map.Entry<String, String> entry : selections.entrySet()) {
-            if (!first) sb.append(",");
-            first = false;
-            sb.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\"");
-        }
-        sb.append("}");
-        PacketHandler.CHANNEL.sendToServer(new KitSavePacket(classId + ":" + kitId, sb.toString()));
-        onClose();
+    private static List<String> getWeaponList(com.yourmod.teamsystem.data.KitConfig.KitWeapons w, String key) {
+        return switch (key) {
+            case "primary"   -> w.primary   != null ? w.primary   : List.of();
+            case "secondary" -> w.secondary != null ? w.secondary : List.of();
+            case "special"   -> w.special   != null ? w.special   : List.of();
+            case "grenade"   -> w.grenade   != null ? w.grenade   : List.of();
+            default          -> List.of();
+        };
+    }
+
+    @Override
+    public void tick() {
+        if (saved && ++savedTimer > 30) { onClose(); }
     }
 
     @Override
     public void render(GuiGraphics g, int mx, int my, float pt) {
         fadeAlpha = Math.min(1f, (System.currentTimeMillis() - openTime) / 250f);
-        g.fill(0, 0, width, height, AnimationHelper.withAlpha(COLOR_BG, (int)(fadeAlpha * 0xCC)));
+        int alpha = (int)(fadeAlpha * 0xFF);
 
-        int panelW = SLOT_W + 40;
-        int panelX = width / 2 - panelW / 2;
-        int listH = weaponOptions.size() * (SLOT_H + GAP);
-        int panelH = listH + 60;
-        int panelY = height / 2 - panelH / 2;
-        if (panelY < 20) panelY = 20;
+        g.fill(0, 0, width, height,
+            AnimationHelper.withAlpha(UITheme.BG_SCREEN, (int)(fadeAlpha * 0xCC)));
 
-        g.fill(panelX, panelY, panelX + panelW, panelY + panelH, AnimationHelper.withAlpha(COLOR_PANEL, (int)(fadeAlpha * 0xDD)));
-        g.fill(panelX, panelY, panelX + panelW, panelY + 3, AnimationHelper.withAlpha(COLOR_ORANGE, (int)(fadeAlpha * 255)));
+        topBar.render(g, width, "QUICK LOADOUT",
+            com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP,
+            com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC,
+            com.yourmod.teamsystem.client.ClientTeamData.localPlayerRank);
 
-        KitConfig cfgL = KitConfig.get();
-        KitConfig.KitDef currentKit = cfgL != null && cfgL.classes.containsKey(classId) ? cfgL.classes.get(classId).kits.get(kitId) : null;
-        String titleName = currentKit != null && currentKit.display_name != null ? I18n.localize(currentKit.display_name).toUpperCase() : kitId.toUpperCase();
-        String title = titleName + " LOADOUT";
-        int tw = font.width(title);
-        g.drawString(font, title, width / 2 - tw / 2, panelY + 8, AnimationHelper.withAlpha(COLOR_ORANGE, (int)(fadeAlpha * 255)));
+        BreadcrumbNav.render(g, width, TopBar.TOP_H,
+            List.of("SPAWN", "CLASSES", "KITS", "LOADOUT"), alpha);
 
-        hoveredSlot = -1;
-        int i = 0;
-        for (String slotKey : weaponOptions.keySet()) {
-            int sy = panelY + 25 + i * (SLOT_H + GAP);
-            int sx = panelX + 10;
-            boolean hov = mx >= sx && mx <= sx + SLOT_W && my >= sy && my <= sy + SLOT_H;
-            if (hov) hoveredSlot = i;
-            drawSlot(g, sx, sy, slotKey, hov, fadeAlpha);
-            i++;
+        KitConfig cfg = KitConfig.get();
+        KitConfig.KitDef currentKit = cfg != null && cfg.classes != null && cfg.classes.containsKey(classId)
+            ? cfg.classes.get(classId).kits.get(kitId) : null;
+        String kitName = currentKit != null && currentKit.display_name != null
+            ? I18n.localize(currentKit.display_name).toUpperCase() : kitId.toUpperCase();
+        String kitDesc = currentKit != null && currentKit.description != null
+            ? I18n.localize(currentKit.description) : "";
+
+        int topH = TopBar.TOP_H + BreadcrumbNav.BREADCRUMB_H;
+        int contentY = topH + 12;
+        int slotW = Math.min(500, width - 80);
+        int slotX = (width - slotW) / 2;
+
+        g.drawString(font, kitName, slotX, contentY,
+            AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
+        if (!kitDesc.isEmpty()) {
+            g.drawString(font, kitDesc, slotX, contentY + 12,
+                AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fadeAlpha * 200)));
+        }
+        contentY += 28;
+        com.yourmod.teamsystem.client.gui.component.AccentLine.draw(g, slotX, contentY, Math.min(slotW, 200), fadeAlpha);
+        contentY += 16;
+
+        for (SlotRow row : weaponRows) {
+            row.render(g, slotX, contentY, slotW, true, mx, my, fadeAlpha);
+            contentY += SlotRow.SLOT_H + 6;
+        }
+
+        contentY += 16;
+        int btnW = Math.min(250, slotW);
+        int btnX = (width - btnW) / 2;
+
+        boolean btnHov = mx >= btnX && mx <= btnX + btnW && my >= contentY && my <= contentY + 32;
+
+        if (saved) {
+            g.fill(btnX, contentY, btnX + btnW, contentY + 32,
+                AnimationHelper.withAlpha(UITheme.STATUS_OK, (int)(fadeAlpha * 0xDD)));
+            String svTxt = "\u2713 Loadout Saved";
+            g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, contentY + 11, 0xFF000000);
+        } else {
+            int btnBg = AnimationHelper.blendColors(UITheme.ACCENT, 0xFFFF8C0A, btnHov ? 1f : 0f);
+            g.fill(btnX, contentY, btnX + btnW, contentY + 32,
+                AnimationHelper.withAlpha(btnBg, alpha));
+            g.fill(btnX, contentY, btnX + 2, contentY + 32,
+                AnimationHelper.withAlpha(0x33000000, alpha));
+            String svTxt = "Save Loadout";
+            g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, contentY + 11, 0xFF000000);
         }
 
         super.render(g, mx, my, pt);
     }
 
-    private void drawSlot(GuiGraphics g, int x, int y, String slotKey, boolean hov, float alpha) {
-        int bg = hov ? AnimationHelper.withAlpha(0xFF1A3A6E, (int)(alpha * 255))
-                     : AnimationHelper.withAlpha(COLOR_SLOT_BG, (int)(alpha * 255));
-        int brd = hov ? AnimationHelper.withAlpha(COLOR_ORANGE, (int)(alpha * 200))
-                      : AnimationHelper.withAlpha(COLOR_BORDER, (int)(alpha * 150));
-
-        g.fill(x, y, x + SLOT_W, y + SLOT_H, bg);
-        g.fill(x, y, x + SLOT_W, y + 1, brd);
-        g.fill(x, y + SLOT_H - 1, x + SLOT_W, y + SLOT_H, brd);
-
-        String sel = selections.getOrDefault(slotKey, "\u2014");
-        String shortId = sel.contains(":") ? sel.substring(sel.indexOf(':') + 1) : sel;
-        String label = slotKey + ": " + shortId;
-
-        g.drawString(font, label, x + 4, y + 5, AnimationHelper.withAlpha(COLOR_TEXT, (int)(alpha * 255)));
-
-        if (hov) {
-            g.drawString(font, "< >", x + SLOT_W - 20, y + 5, AnimationHelper.withAlpha(COLOR_ORANGE, (int)(alpha * 255)));
-        }
-    }
-
     @Override
     public boolean mouseClicked(double mx, double my, int btn) {
-        if (weaponOptions.isEmpty()) return super.mouseClicked(mx, my, btn);
+        if (btn != 0) return super.mouseClicked(mx, my, btn);
 
-        int panelW = SLOT_W + 40;
-        int panelX = width / 2 - panelW / 2;
-        int listH = weaponOptions.size() * (SLOT_H + GAP);
-        int panelH = listH + 60;
-        int panelY = height / 2 - panelH / 2;
-        if (panelY < 20) panelY = 20;
+        int topH = TopBar.TOP_H + BreadcrumbNav.BREADCRUMB_H;
+        int contentY = topH + 12 + 28 + 16 + 16;
+        int slotW = Math.min(500, width - 80);
+        int slotX = (width - slotW) / 2;
 
-        int i = 0;
-        for (String slotKey : weaponOptions.keySet()) {
-            int sy = panelY + 25 + i * (SLOT_H + GAP);
-            int sx = panelX + 10;
-            if (mx >= sx && mx <= sx + SLOT_W && my >= sy && my <= sy + SLOT_H) {
-                List<String> options = weaponOptions.get(slotKey);
-                if (options == null || options.isEmpty()) return true;
-                int idx = selectionIndex.getOrDefault(slotKey, 0);
-                idx = (idx + 1) % options.size();
-                selectionIndex.put(slotKey, idx);
-                selections.put(slotKey, options.get(idx));
+        for (SlotRow row : weaponRows) {
+            if (my >= contentY && my <= contentY + SlotRow.SLOT_H) {
+                row.handleClick(mx, slotX, contentY, slotW);
+                selections.put(row.getSlotKey(), row.getSelectedValue());
                 return true;
             }
-            i++;
+            contentY += SlotRow.SLOT_H + 6;
         }
+
+        contentY += 16;
+        int btnW = Math.min(250, slotW);
+        int btnX = (width - btnW) / 2;
+        if (mx >= btnX && mx <= btnX + btnW && my >= contentY && my <= contentY + 32) {
+            saveLoadout();
+            return true;
+        }
+
         return super.mouseClicked(mx, my, btn);
     }
 
+    private void saveLoadout() {
+        StringBuilder sb = new StringBuilder("{");
+        boolean first = true;
+        for (var e : selections.entrySet()) {
+            if (!first) sb.append(",");
+            first = false;
+            sb.append("\"").append(escapeJson(e.getKey())).append("\":\"").append(escapeJson(e.getValue())).append("\"");
+        }
+        for (var e : armorSelections.entrySet()) {
+            if (!first) sb.append(",");
+            first = false;
+            sb.append("\"armor_").append(escapeJson(e.getKey())).append("\":\"").append(escapeJson(e.getValue())).append("\"");
+        }
+        sb.append("}");
+        PacketHandler.CHANNEL.sendToServer(new KitSavePacket(classId + ":" + kitId, sb.toString()));
+        saved = true;
+        savedTimer = 0;
+    }
+
+    private static String escapeJson(String s) {
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
     @Override
-    public boolean isPauseScreen() { return false; }
+    public void onClose() { SpawnScreenHelper.reopen(); }
 }

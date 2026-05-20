@@ -264,12 +264,7 @@ public class MapPoolManager {
 
             TeamSystem.LOGGER.info("CopyToLive: source={}, target={}", sourceDir.resolve("region"), regionDir);
 
-            // Удаляем только регионы, data/ не трогаем
-            if (Files.isDirectory(regionDir)) {
-                deleteWithRetry(regionDir);
-            }
-            Files.createDirectories(regionDir);
-            copyRegionFiles(sourceDir.resolve("region"), regionDir);
+            syncRegionFiles(sourceDir.resolve("region"), regionDir);
 
             // Тикаем chunk source чтобы выгрузить старые чанки
             for (int i = 0; i < 20; i++) {
@@ -569,6 +564,42 @@ public class MapPoolManager {
                 map.getName(), centerX, centerZ);
         } catch (Exception e) {
             TeamSystem.LOGGER.warn("Failed to auto-detect map center: {}", e.getMessage());
+        }
+    }
+
+    private void syncRegionFiles(Path srcDir, Path dstDir) throws IOException {
+        Files.createDirectories(dstDir);
+        Set<String> newFiles = new HashSet<>();
+        if (Files.isDirectory(srcDir)) {
+            try (var stream = Files.list(srcDir)) {
+                for (Path source : (Iterable<Path>) stream::iterator) {
+                    if (Files.isDirectory(source)) continue;
+                    String fileName = source.getFileName().toString();
+                    if (!fileName.endsWith(".mca")) continue;
+                    newFiles.add(fileName);
+                    copyFileForce(source, dstDir.resolve(fileName));
+                }
+            }
+        }
+        if (Files.isDirectory(dstDir)) {
+            try (var stream = Files.list(dstDir)) {
+                for (Path target : (Iterable<Path>) stream::iterator) {
+                    if (Files.isDirectory(target)) continue;
+                    String fileName = target.getFileName().toString();
+                    if (!fileName.endsWith(".mca")) continue;
+                    if (!newFiles.contains(fileName)) {
+                        try {
+                            Files.deleteIfExists(target);
+                        } catch (java.nio.file.FileSystemException e) {
+                            try (var ch = java.nio.channels.FileChannel.open(target,
+                                    java.nio.file.StandardOpenOption.WRITE,
+                                    java.nio.file.StandardOpenOption.TRUNCATE_EXISTING)) {
+                                ch.write(java.nio.ByteBuffer.allocate(0));
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

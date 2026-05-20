@@ -4,10 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.yourmod.teamsystem.client.gui.I18n;
 import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
-import com.yourmod.teamsystem.client.gui.component.BScrollPanel;
+import com.yourmod.teamsystem.client.gui.component.KitConfigPanel;
 import com.yourmod.teamsystem.data.ItemResolver;
 import com.yourmod.teamsystem.data.KitConfig;
-import com.yourmod.teamsystem.data.TaczAttachmentResolver;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.network.KitSavePacket;
 import com.yourmod.teamsystem.network.KitSelectPacket;
@@ -18,17 +17,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class KitCustomizationScreen extends Screen {
 
-    private static final int PREVIEW_W = 200;
-    private static final int SLOT_H = 44;
-    private static final int SLOT_GAP = 8;
-    private static final int FOOTER_H = 44;
+    private static final int PREVIEW_W = 190;
+    private static final int PREVIEW_RENDER_H = 110;
+    private static final int FOOTER_H = 40;
     private static final int HEADER_H = 36;
-    private static final int PREVIEW_RENDER_H = 140;
-    private static final int COL_GAP = 4;
-    private static final int CONFIG_PAD = 14;
 
     private final String classId;
     private final String kitId;
@@ -45,18 +42,23 @@ public class KitCustomizationScreen extends Screen {
 
     private final Map<String, String> attachmentSelections = new LinkedHashMap<>();
     private String activeSlot = "Primary";
-    private boolean dataChanged = false;
     private String previewItem;
 
     private float fadeAlpha = 0f;
     private long openTime;
+    private int tickCount;
     private int mouseX, mouseY;
-    private BScrollPanel scrollPanel;
-    private com.yourmod.teamsystem.client.gui.component.BButton saveButton;
-    private int panelX, panelY, panelW, panelH, configX, configW;
+    private KitConfigPanel kitConfigPanel;
+    private final Map<String, String> displayNames = new HashMap<>();
 
-    private static final int ARROW_W = 18;
-    private static final int ARROW_H = 18;
+    private String displayName(String id) {
+        if (id == null || id.isEmpty()) return "\u2014";
+        return displayNames.computeIfAbsent(id, k -> {
+            ItemStack stack = ItemResolver.resolve(k);
+            if (!stack.isEmpty()) return stack.getHoverName().getString();
+            return k.replace("_", " ");
+        });
+    }
 
     public KitCustomizationScreen(String classId, String kitId) {
         super(Component.literal("Kit Customization"));
@@ -67,29 +69,21 @@ public class KitCustomizationScreen extends Screen {
     @Override
     protected void init() {
         openTime = System.currentTimeMillis();
-
-        panelW = Math.min(width - 40, 780);
-        panelH = height - 40;
-        panelX = width / 2 - panelW / 2;
-        panelY = 20;
-        configX = panelX + PREVIEW_W + COL_GAP;
-        configW = panelW - PREVIEW_W - COL_GAP;
-
-        int scrollH = panelH - HEADER_H - FOOTER_H - 16;
-        scrollPanel = new BScrollPanel(configX, panelY + HEADER_H + 8, configW, scrollH);
-
+        tickCount = 0;
         loadData();
 
-        int btnY = panelY + panelH - FOOTER_H + 4;
-        addRenderableWidget(new com.yourmod.teamsystem.client.gui.component.BButton(
-            panelX + 10, btnY, 90, 20,
-            Component.literal("\u2190 Back"), btn -> onClose(), false
-        ));
-        saveButton = addRenderableWidget(new com.yourmod.teamsystem.client.gui.component.BButton(
-            panelX + panelW - 130, btnY, 120, 20,
-            Component.literal("Save & Deploy"), btn -> saveAndDeploy()
-        ));
+        kitConfigPanel = new KitConfigPanel(classId, kitId,
+                slotKeys, weaponOptions, selectionIndex, selections,
+                armorKeys, armorOptions, armorIndex, armorSelections,
+                attachmentSelections, activeSlot, null);
+        kitConfigPanel.init(width, height);
+        kitConfigPanel.setFade(1f);
+        kitConfigPanel.setAlpha(0xFF);
+        kitConfigPanel.setMouse(0, 0);
     }
+
+    @Override
+    public boolean isPauseScreen() { return false; }
 
     private void loadData() {
         weaponOptions.clear();
@@ -107,589 +101,354 @@ public class KitCustomizationScreen extends Screen {
         KitConfig.KitDef kit = cl.kits.get(kitId);
         if (kit == null) return;
 
-        if (kit.weapons.primary != null && !kit.weapons.primary.isEmpty()) {
-            weaponOptions.put("Primary", kit.weapons.primary);
-            selectionIndex.put("Primary", 0);
-            selections.put("Primary", kit.weapons.primary.get(0));
-        }
-        if (kit.weapons.secondary != null && !kit.weapons.secondary.isEmpty()) {
-            weaponOptions.put("Secondary", kit.weapons.secondary);
-            selectionIndex.put("Secondary", 0);
-            selections.put("Secondary", kit.weapons.secondary.get(0));
-        }
-        if (kit.weapons.special != null && !kit.weapons.special.isEmpty()) {
-            weaponOptions.put("Special", kit.weapons.special);
-            selectionIndex.put("Special", 0);
-            selections.put("Special", kit.weapons.special.get(0));
-        }
-        if (kit.weapons.grenade != null && !kit.weapons.grenade.isEmpty()) {
-            weaponOptions.put("Grenade", kit.weapons.grenade);
-            selectionIndex.put("Grenade", 0);
-            selections.put("Grenade", kit.weapons.grenade.get(0));
-        }
-
-        if (kit.armor.helmet != null && !kit.armor.helmet.isEmpty()) {
-            armorOptions.put("Helmet", kit.armor.helmet);
-            armorIndex.put("Helmet", 0);
-            armorSelections.put("Helmet", kit.armor.helmet.get(0));
-        }
-        if (kit.armor.chestplate != null && !kit.armor.chestplate.isEmpty()) {
-            armorOptions.put("Chestplate", kit.armor.chestplate);
-            armorIndex.put("Chestplate", 0);
-            armorSelections.put("Chestplate", kit.armor.chestplate.get(0));
-        }
-        if (kit.armor.backpack != null && !kit.armor.backpack.isEmpty()) {
-            armorOptions.put("Backpack", kit.armor.backpack);
-            armorIndex.put("Backpack", 0);
-            armorSelections.put("Backpack", kit.armor.backpack.get(0));
-        }
-        if (kit.armor.shoulderpads != null && !kit.armor.shoulderpads.isEmpty()) {
-            armorOptions.put("Shoulderpads", kit.armor.shoulderpads);
-            armorIndex.put("Shoulderpads", 0);
-            armorSelections.put("Shoulderpads", kit.armor.shoulderpads.get(0));
+        if (kit.weapons != null) {
+            if (kit.weapons.primary != null && !kit.weapons.primary.isEmpty()) {
+                weaponOptions.put("Primary", kit.weapons.primary);
+                selectionIndex.put("Primary", 0);
+                selections.put("Primary", kit.weapons.primary.get(0));
+            }
+            if (kit.weapons.secondary != null && !kit.weapons.secondary.isEmpty()) {
+                weaponOptions.put("Secondary", kit.weapons.secondary);
+                selectionIndex.put("Secondary", 0);
+                selections.put("Secondary", kit.weapons.secondary.get(0));
+            }
+            if (kit.weapons.special != null && !kit.weapons.special.isEmpty()) {
+                weaponOptions.put("Special", kit.weapons.special);
+                selectionIndex.put("Special", 0);
+                selections.put("Special", kit.weapons.special.get(0));
+            }
+            if (kit.weapons.grenade != null && !kit.weapons.grenade.isEmpty()) {
+                weaponOptions.put("Grenade", kit.weapons.grenade);
+                selectionIndex.put("Grenade", 0);
+                selections.put("Grenade", kit.weapons.grenade.get(0));
+            }
         }
 
-        activeSlot = selections.containsKey("Primary") ? "Primary" : "Secondary";
+        if (kit.armor != null) {
+            if (kit.armor.helmet != null && !kit.armor.helmet.isEmpty()) {
+                armorOptions.put("Helmet", kit.armor.helmet);
+                armorIndex.put("Helmet", 0);
+                armorSelections.put("Helmet", kit.armor.helmet.get(0));
+            }
+            if (kit.armor.chestplate != null && !kit.armor.chestplate.isEmpty()) {
+                armorOptions.put("Chestplate", kit.armor.chestplate);
+                armorIndex.put("Chestplate", 0);
+                armorSelections.put("Chestplate", kit.armor.chestplate.get(0));
+            }
+            if (kit.armor.backpack != null && !kit.armor.backpack.isEmpty()) {
+                armorOptions.put("Backpack", kit.armor.backpack);
+                armorIndex.put("Backpack", 0);
+                armorSelections.put("Backpack", kit.armor.backpack.get(0));
+            }
+            if (kit.armor.shoulderpads != null && !kit.armor.shoulderpads.isEmpty()) {
+                armorOptions.put("Shoulderpads", kit.armor.shoulderpads);
+                armorIndex.put("Shoulderpads", 0);
+                armorSelections.put("Shoulderpads", kit.armor.shoulderpads.get(0));
+            }
+        }
+
+        activeSlot = selections.containsKey("Primary") ? "Primary" : selections.keySet().stream().findFirst().orElse("Primary");
         previewItem = selections.getOrDefault(activeSlot, null);
-
-        resetScrollContent();
     }
 
-    private void resetScrollContent() {
-        if (scrollPanel == null) return;
-        int contentH = 0;
-        contentH += slotKeys.size() * (SLOT_H + SLOT_GAP) + SLOT_GAP;
-        String activeWeapon = selections.getOrDefault(activeSlot, "");
-        boolean hasAttachments = hasAttachmentLimits(activeWeapon);
-        if (hasAttachments) {
-            contentH += 80 + getAttachmentCategories(activeWeapon).size() * 30;
-        }
-        if (!armorOptions.isEmpty()) {
-            contentH += 20 + armorOptions.size() * (SLOT_H + SLOT_GAP);
-        }
-        scrollPanel.setContentHeight(contentH);
-    }
-
-    private boolean hasAttachmentLimits(String weaponId) {
-        if (TaczAttachmentResolver.hasAttachments(weaponId)) return true;
+    private KitConfig.KitDef getKit() {
         KitConfig cfg = KitConfig.get();
-        if (cfg == null) return false;
+        if (cfg == null) return null;
         KitConfig.ClassConfig cl = cfg.classes.get(classId);
-        if (cl == null) return false;
-        KitConfig.KitDef kit = cl.kits.get(kitId);
-        if (kit == null) return false;
-        return kit.attachment_limits.containsKey(weaponId);
+        if (cl == null) return null;
+        return cl.kits.get(kitId);
     }
 
-    private List<String> getAttachmentCategories(String weaponId) {
-        List<String> taczCats = TaczAttachmentResolver.getCategories(weaponId);
-        if (!taczCats.isEmpty()) return taczCats;
-        KitConfig cfg = KitConfig.get();
-        if (cfg == null) return List.of();
-        KitConfig.ClassConfig cl = cfg.classes.get(classId);
-        if (cl == null) return List.of();
-        KitConfig.KitDef kit = cl.kits.get(kitId);
-        if (kit == null) return List.of();
-        KitConfig.AttachmentLimit limits = kit.attachment_limits.get(weaponId);
-        if (limits == null) return List.of();
-        List<String> cats = new ArrayList<>();
-        if (!limits.scope.isEmpty()) cats.add("scope");
-        if (!limits.barrel.isEmpty()) cats.add("barrel");
-        if (!limits.grip.isEmpty()) cats.add("grip");
-        if (!limits.magazine.isEmpty()) cats.add("magazine");
-        if (!limits.ammo.isEmpty()) cats.add("ammo");
-        if (!limits.muzzle.isEmpty()) cats.add("muzzle");
-        if (!limits.underbarrel.isEmpty()) cats.add("underbarrel");
-        return cats;
-    }
-
-    private List<String> getAttachmentOptions(String weaponId, String category) {
-        List<String> taczOpts = TaczAttachmentResolver.getOptions(weaponId, category);
-        if (!taczOpts.isEmpty()) return taczOpts;
-        KitConfig cfg = KitConfig.get();
-        if (cfg == null) return List.of();
-        KitConfig.ClassConfig cl = cfg.classes.get(classId);
-        if (cl == null) return List.of();
-        KitConfig.KitDef kit = cl.kits.get(kitId);
-        if (kit == null) return List.of();
-        KitConfig.AttachmentLimit limits = kit.attachment_limits.get(weaponId);
-        if (limits == null) return List.of();
-        return limits.forCategory(category);
-    }
-
-    private String getAttachmentSelection(String weaponId, String category) {
-        String key = weaponId + ":" + category;
-        return attachmentSelections.get(key);
-    }
-
-    private void setAttachmentSelection(String weaponId, String category, String value) {
-        String key = weaponId + ":" + category;
-        attachmentSelections.put(key, value);
-    }
-
-    private String cycleArmor(String slot, int direction) {
-        List<String> options = armorOptions.get(slot);
-        if (options == null || options.isEmpty()) return "";
-        int idx = armorIndex.getOrDefault(slot, 0);
-        idx = (idx + direction + options.size()) % options.size();
-        armorIndex.put(slot, idx);
-        String sel = options.get(idx);
-        armorSelections.put(slot, sel);
-        dataChanged = true;
-        return sel;
-    }
-
-    private String cycleWeapon(String slot, int direction) {
-        List<String> options = weaponOptions.get(slot);
-        if (options == null || options.isEmpty()) return "";
-        int idx = selectionIndex.getOrDefault(slot, 0);
-        idx = (idx + direction + options.size()) % options.size();
-        selectionIndex.put(slot, idx);
-        String sel = options.get(idx);
-        selections.put(slot, sel);
-        if (slot.equals(activeSlot)) {
-            previewItem = sel;
-            resetScrollContent();
-        }
-        dataChanged = true;
-        return sel;
-    }
-
-    private String cycleAttachment(String weaponId, String category, int direction) {
-        List<String> options = getAttachmentOptions(weaponId, category);
-        if (options.isEmpty()) return "";
-        String current = getAttachmentSelection(weaponId, category);
-        int idx = current != null ? options.indexOf(current) : -1;
-        if (idx < 0) idx = 0;
-        else idx = (idx + direction + options.size()) % options.size();
-        String sel = options.get(idx);
-        setAttachmentSelection(weaponId, category, sel);
-        dataChanged = true;
-        return sel;
-    }
+    // ── RENDER ─────────────────────────────────────────
 
     @Override
     public void render(GuiGraphics g, int mx, int my, float pt) {
+        tickCount++;
         mouseX = mx;
         mouseY = my;
         fadeAlpha = Math.min(1f, (System.currentTimeMillis() - openTime) / 250f);
+        int alpha = (int)(fadeAlpha * 0xFF);
 
         g.fill(0, 0, width, height, AnimationHelper.withAlpha(UITheme.BG_SCREEN, (int)(fadeAlpha * 0xCC)));
-        g.fill(panelX, panelY, panelX + panelW, panelY + panelH,
-            AnimationHelper.withAlpha(UITheme.BG_PANEL, (int)(fadeAlpha * 0xDD)));
 
-        renderHeader(g);
-        renderPreviewPanel(g);
-        renderConfigPanel(g);
+        kitConfigPanel.setFade(fadeAlpha);
+        kitConfigPanel.setAlpha(alpha);
+        kitConfigPanel.setMouse(mx, my);
+
+        renderFooter(g, mx, my, fadeAlpha, alpha);
+        renderPreviewPanel(g, mx, my, fadeAlpha, alpha);
+        kitConfigPanel.render(g, width, height);
+
         super.render(g, mx, my, pt);
     }
 
-    private void renderHeader(GuiGraphics g) {
-        KitConfig cfg = KitConfig.get();
-        String title;
-        KitConfig.KitDef kit = null;
-        if (cfg != null && cfg.classes.containsKey(classId)) {
-            KitConfig.ClassConfig cl = cfg.classes.get(classId);
-            kit = cl.kits.get(kitId);
-            if (kit != null && kit.display_name != null) {
-                title = I18n.localize(kit.display_name).toUpperCase();
-            } else {
-                title = kitId.toUpperCase();
-            }
-        } else {
-            title = kitId.toUpperCase();
-        }
-        int tw = font.width(title);
-        g.drawString(font, title, panelX + panelW / 2 - tw / 2, panelY + 10,
-            AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 255)));
+    // ── FOOTER ─────────────────────────────────────────
 
-        if (kit != null && kit.requirements != null) {
-            int costX = panelX + panelW - 4;
-            int costY = panelY + 10;
-            if (kit.requirements.sp_cost > 0) {
-                String spStr = "SP " + kit.requirements.sp_cost;
-                int cw = font.width(spStr);
-                costX -= cw;
-                boolean canAfford = com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP >= kit.requirements.sp_cost;
-                int col = canAfford ? 0xFFAA00 : 0xFF4444;
-                g.drawString(font, spStr, costX, costY, AnimationHelper.withAlpha(col, (int)(fadeAlpha * 255)));
-                costX -= 12;
-            }
-            if (kit.requirements.bc_cost > 0) {
-                String bcStr = "BC " + kit.requirements.bc_cost;
-                int cw = font.width(bcStr);
-                costX -= cw;
-                boolean canAfford = com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC >= kit.requirements.bc_cost;
-                int col = canAfford ? 0x55FF55 : 0xFF4444;
-                g.drawString(font, bcStr, costX, costY, AnimationHelper.withAlpha(col, (int)(fadeAlpha * 255)));
-            }
+    private void renderFooter(GuiGraphics g, int mx, int my, float fade, int alpha) {
+        KitConfig.KitDef kit = getKit();
+        String name = kit != null && kit.display_name != null ? I18n.localize(kit.display_name).toUpperCase() : kitId.toUpperCase();
+
+        g.fill(0, 0, width, FOOTER_H,
+                AnimationHelper.withAlpha(UITheme.BG_PANEL, (int)(fade * 0xDD)));
+        g.fill(0, FOOTER_H - 1, width, FOOTER_H,
+                AnimationHelper.withAlpha(UITheme.BORDER, (int)(fade * 0xAA)));
+
+        // Back button
+        String back = "\u2190 Back";
+        boolean backHov = mx >= 10 && mx < 10 + font.width(back) + 20 && my >= 8 && my < 8 + 22;
+        if (backHov) {
+            g.fill(10, 8, 10 + font.width(back) + 20, 30,
+                    AnimationHelper.withAlpha(UITheme.ACCENT_GHOST, (int)(fade * 0xCC)));
         }
+        g.drawString(font, back, 18, 14,
+                AnimationHelper.withAlpha(backHov ? UITheme.ACCENT : UITheme.TEXT_SECONDARY, alpha));
+
+        // Kit name
+        g.drawString(font, name, 120, 12,
+                AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
+        g.drawString(font, "customization", 120 + font.width(name) + 6, 12,
+                AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 180)));
+
+        // Save button
+        int btnW = 90;
+        int btnX = width - btnW * 2 - 20;
+        boolean svHov = mx >= btnX && mx < btnX + btnW && my >= 8 && my < 32;
+        int svBg = AnimationHelper.blendColors(UITheme.ACCENT, 0xFFFF8C0A, svHov ? 1f : 0f);
+        g.fill(btnX, 8, btnX + btnW, 32, AnimationHelper.withAlpha(svBg, alpha));
+        g.fill(btnX, 8, btnX + 2, 32, AnimationHelper.withAlpha(0x33000000, alpha));
+        String svTxt = "Save";
+        g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, 17, 0xFF000000);
+
+        // Deploy button
+        int dpX = btnX + btnW + 8;
+        boolean dpHov = mx >= dpX && mx < dpX + btnW && my >= 8 && my < 32;
+        int dpBg = AnimationHelper.blendColors(UITheme.ACCENT, 0xFFFF8C0A, dpHov ? 1f : 0f);
+        g.fill(dpX, 8, dpX + btnW, 32, AnimationHelper.withAlpha(dpBg, alpha));
+        g.fill(dpX, 8, dpX + 2, 32, AnimationHelper.withAlpha(0x33000000, alpha));
+        String dpTxt = "Deploy";
+        g.drawString(font, dpTxt, dpX + btnW / 2 - font.width(dpTxt) / 2, 17, 0xFF000000);
     }
 
-    private void renderPreviewPanel(GuiGraphics g) {
-        int px = panelX;
-        int py = panelY + HEADER_H;
-        int ph = panelH - HEADER_H - FOOTER_H;
+    // ── PREVIEW PANEL ──────────────────────────────────
+
+    private void renderPreviewPanel(GuiGraphics g, int mx, int my, float fade, int alpha) {
+        int px = 0;
+        int py = FOOTER_H;
+        int ph = height - FOOTER_H;
 
         g.fill(px, py, px + PREVIEW_W, py + ph,
-            AnimationHelper.withAlpha(UITheme.BG_SURFACE, (int)(fadeAlpha * 0xDD)));
+                AnimationHelper.withAlpha(UITheme.BG_PANEL, (int)(fade * 0xDD)));
         g.fill(px + PREVIEW_W - 1, py, px + PREVIEW_W, py + ph,
-            AnimationHelper.withAlpha(UITheme.BORDER, (int)(fadeAlpha * 0xAA)));
+                AnimationHelper.withAlpha(UITheme.BORDER, (int)(fade * 0xAA)));
 
-        int renderY = py + 10;
-        int renderH = PREVIEW_RENDER_H;
-        g.fill(px + 4, renderY, px + PREVIEW_W - 4, renderY + renderH,
-            AnimationHelper.withAlpha(0xFF000000, (int)(fadeAlpha * 0x66)));
+        // Render area
+        int rx = 8;
+        int ry = py + 10;
+        int rh = PREVIEW_RENDER_H;
+        g.fill(rx, ry, rx + PREVIEW_W - 16, ry + rh,
+                AnimationHelper.withAlpha(UITheme.BG_SLOT, (int)(fade * 0xDD)));
+        g.fill(rx, ry, rx + PREVIEW_W - 16, ry + rh,
+                AnimationHelper.withAlpha(UITheme.BORDER, (int)(fade * 0x44)));
 
         String currentId = previewItem != null ? previewItem : "";
-        ItemStack previewStack = ItemStack.EMPTY;
+        ItemStack stack = ItemStack.EMPTY;
         if (!currentId.isEmpty()) {
-            previewStack = ItemResolver.resolve(currentId);
+            stack = ItemResolver.resolve(currentId);
         }
 
-        if (!previewStack.isEmpty()) {
+        if (!stack.isEmpty()) {
             PoseStack pose = g.pose();
             pose.pushPose();
             float scale = 3.0f;
-            int renderCX = px + PREVIEW_W / 2;
-            int renderCY = renderY + renderH / 2 - 10;
-            pose.translate(renderCX, renderCY, 0);
+            int cx = rx + (PREVIEW_W - 16) / 2;
+            int cy = ry + rh / 2 - 4;
+            pose.translate(cx, cy, 0);
             pose.scale(scale, scale, 1);
-            g.renderItem(previewStack, -8, -8);
+            g.renderItem(stack, -8, -8);
             pose.popPose();
 
-            String displayName = previewStack.getHoverName().getString();
+            String displayName = stack.getHoverName().getString();
             int dw = font.width(displayName);
-            g.drawString(font, displayName, px + PREVIEW_W / 2 - dw / 2, renderY + renderH + 2,
-                AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 255)));
-
-            String subInfo = currentId;
-            int sw = font.width(subInfo);
-            g.drawString(font, subInfo, px + PREVIEW_W / 2 - sw / 2, renderY + renderH + 14,
-                AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fadeAlpha * 200)));
+            g.drawString(font, displayName, rx + (PREVIEW_W - 16) / 2 - dw / 2, ry + rh + 4,
+                    AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, alpha));
         } else {
-            String noItem = "No item";
-            int nw = font.width(noItem);
-            g.drawString(font, noItem, px + PREVIEW_W / 2 - nw / 2, renderY + renderH / 2 - 4,
-                AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fadeAlpha * 150)));
+            g.drawString(font, "\uD83D\uDD2B", rx + (PREVIEW_W - 16) / 2 - 9, ry + rh / 2 - 8,
+                    AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
+            String noItem = currentId.isEmpty() ? "No item" : currentId.replace("_", " ").toUpperCase();
+            g.drawString(font, noItem, rx + (PREVIEW_W - 16) / 2 - font.width(noItem) / 2, ry + rh / 2 + 10,
+                    AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
         }
 
-        int slotStartY = renderY + renderH + 30;
-        int slotIdx = 0;
+        // Accent line under render area
+        g.fill(rx, ry + rh + 28, rx + PREVIEW_W - 16, ry + rh + 30,
+                AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fade * 0xCC)));
+
+        // Weapon slot list
+        int sy = ry + rh + 38;
         for (String key : slotKeys) {
             if (!weaponOptions.containsKey(key)) continue;
-            int sy = slotStartY + slotIdx * (SLOT_H + 4);
-            boolean active = key.equals(activeSlot);
-            boolean hover = mouseX >= px + 4 && mouseX <= px + PREVIEW_W - 4
-                && mouseY >= sy && mouseY <= sy + SLOT_H;
-            renderSlotCard(g, px + 4, sy, PREVIEW_W - 8, key, active, hover);
-            slotIdx++;
-        }
-    }
+            boolean isActive = key.equals(activeSlot);
+            boolean hover = mx >= 4 && mx <= PREVIEW_W - 4 && my >= sy && my <= sy + 28;
 
-    private void renderSlotCard(GuiGraphics g, int x, int y, int w, String slotKey, boolean active, boolean hover) {
-        int bg = active ? AnimationHelper.blendColors(UITheme.BG_SLOT, UITheme.ACCENT, 0.12f)
-                        : AnimationHelper.withAlpha(UITheme.BG_SLOT, (int)(fadeAlpha * 0xDD));
-        int brd = active ? AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 255))
-                         : AnimationHelper.withAlpha(UITheme.BORDER, (int)(fadeAlpha * (hover ? 0xAA : 0x55)));
+            int slotBg = isActive ? AnimationHelper.blendColors(0x00000000, UITheme.ACCENT, 0.12f)
+                    : hover ? AnimationHelper.withAlpha(UITheme.BG_SURFACE, (int)(fade * 0xCC))
+                    : 0x00000000;
+            int slotBorder = isActive ? AnimationHelper.withAlpha(UITheme.ACCENT_DIM, alpha)
+                    : hover ? AnimationHelper.withAlpha(UITheme.ACCENT_DIM, (int)(fade * 0x66))
+                    : 0x00000000;
 
-        g.fill(x, y, x + w, y + SLOT_H, bg);
-        g.fill(x, y, x + w, y + 1, brd);
-        g.fill(x, y + SLOT_H - 1, x + w, y + SLOT_H, brd);
-        g.fill(x, y, x + 1, y + SLOT_H, brd);
-        g.fill(x + w - 1, y, x + w, y + SLOT_H, brd);
-
-        if (active) {
-            g.fill(x, y, x + 3, y + SLOT_H,
-                AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 255)));
-        }
-
-        String sel = selections.getOrDefault(slotKey, "");
-        String displayName = sel.isEmpty() ? "-" : ItemResolver.getDisplayName(sel);
-        int tw = font.width(displayName);
-        g.drawString(font, displayName, x + w / 2 - tw / 2, y + SLOT_H / 2 - 4,
-            AnimationHelper.withAlpha(sel.isEmpty() ? UITheme.TEXT_MUTED : UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 255)));
-
-    }
-
-    private void renderConfigPanel(GuiGraphics g) {
-        int cx = configX;
-        int cy = panelY + HEADER_H + 8;
-        int cw = configW;
-        int ch = panelH - HEADER_H - FOOTER_H - 16;
-
-        g.enableScissor(cx, cy, cx + cw, cy + ch);
-        scrollPanel.render(g);
-
-        float soff = scrollPanel.getScrollOffset();
-        int curY = cy - (int) soff + 4;
-
-        for (String key : slotKeys) {
-            if (!weaponOptions.containsKey(key)) continue;
-            renderConfigSlot(g, cx + CONFIG_PAD, curY, cw - CONFIG_PAD * 2, key);
-            curY += SLOT_H + SLOT_GAP;
-        }
-
-        curY += SLOT_GAP;
-
-        String activeWeapon = selections.getOrDefault(activeSlot, "");
-        boolean hasAttachments = hasAttachmentLimits(activeWeapon);
-        if (hasAttachments) {
-            int secY = curY;
-            g.drawString(font, "ATTACHMENTS", cx + CONFIG_PAD, secY,
-                AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 255)));
-            curY += 12;
-
-            List<String> cats = getAttachmentCategories(activeWeapon);
-            for (String cat : cats) {
-                List<String> opts = getAttachmentOptions(activeWeapon, cat);
-                String sel = getAttachmentSelection(activeWeapon, cat);
-                if (sel == null && !opts.isEmpty()) {
-                    sel = opts.get(0);
-                    setAttachmentSelection(activeWeapon, cat, sel);
-                }
-
-                g.drawString(font, capitalize(cat) + ":", cx + CONFIG_PAD, curY + 4,
-                    AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 200)));
-
-                int chipX = cx + CONFIG_PAD + font.width(capitalize(cat) + ": ") + 8;
-                for (String opt : opts) {
-                    boolean selected = opt.equals(sel);
-                    String optDisplay = ItemResolver.getDisplayName(opt);
-                    int chipW = font.width(optDisplay) + 16;
-                    int chipH = 22;
-
-                    boolean chipHov = mouseX >= chipX && mouseX <= chipX + chipW
-                        && mouseY >= curY && mouseY <= curY + chipH;
-
-                    int chipBg = selected ? AnimationHelper.withAlpha(UITheme.ACCENT, 0xDD)
-                        : chipHov ? AnimationHelper.withAlpha(UITheme.BG_SLOT, 0xAA)
-                        : AnimationHelper.withAlpha(UITheme.BG_SURFACE, 0x88);
-                    int chipTxt = selected ? 0xFFFFFFFF
-                        : AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 255));
-
-                    g.fill(chipX, curY, chipX + chipW, curY + chipH, chipBg);
-                    if (!selected) {
-                        g.fill(chipX, curY, chipX + chipW, curY + 1, AnimationHelper.withAlpha(UITheme.BORDER, 0x66));
-                        g.fill(chipX, curY + chipH - 1, chipX + chipW, curY + chipH, AnimationHelper.withAlpha(UITheme.BORDER, 0x66));
-                    }
-                    if (selected) {
-                        g.fill(chipX, curY, chipX + chipW, curY + 1, 0xFFFFFFFF);
-                    }
-
-                    g.drawString(font, optDisplay, chipX + 8, curY + 6,
-                        chipTxt);
-
-                    chipX += chipW + 4;
-                }
-                curY += 26;
+            if (slotBg != 0) {
+                g.fill(4, sy, PREVIEW_W - 4, sy + 28, slotBg);
             }
-            curY += 8;
+            if (slotBorder != 0) {
+                g.fill(4, sy, PREVIEW_W - 4, sy + 1, slotBorder);
+                g.fill(4, sy + 27, PREVIEW_W - 4, sy + 28, slotBorder);
+                g.fill(PREVIEW_W - 5, sy, PREVIEW_W - 4, sy + 28, slotBorder);
+            }
+            if (isActive) {
+                g.fill(4, sy, 7, sy + 28,
+                        AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
+            }
+
+            // Slot icon + label
+            String icon = switch (key) {
+                case "Primary" -> "\uD83D\uDD2B";
+                case "Secondary" -> "\uD83D\uDD27";
+                case "Special" -> "\uD83D\uDC8A";
+                case "Grenade" -> "\uD83D\uDCA3";
+                default -> "\u2022";
+            };
+            g.drawString(font, icon + " " + key, 14, sy + 8,
+                    AnimationHelper.withAlpha(isActive ? UITheme.ACCENT : UITheme.TEXT_MUTED, (int)(fade * (isActive ? 255 : 180))));
+
+            // Weapon name
+            String weap = displayName(selections.getOrDefault(key, ""));
+            if (weap.length() > 18) weap = weap.substring(0, 18);
+            g.drawString(font, weap, 14, sy + 18,
+                    AnimationHelper.withAlpha(isActive ? UITheme.TEXT_PRIMARY : UITheme.TEXT_SECONDARY, alpha));
+
+            sy += 32;
         }
 
+        // Armor slots
         if (!armorOptions.isEmpty()) {
-            g.drawString(font, "ARMOR", cx + CONFIG_PAD, curY,
-                AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 255)));
-            curY += 12;
-
+            sy += 4;
+            g.fill(8, sy, PREVIEW_W - 8, sy + 1,
+                    AnimationHelper.withAlpha(UITheme.BORDER, (int)(fade * 0x66)));
+            sy += 8;
             for (String key : armorKeys) {
                 if (!armorOptions.containsKey(key)) continue;
-                renderConfigArmorRow(g, cx + CONFIG_PAD, curY, cw - CONFIG_PAD * 2, key);
-                curY += SLOT_H + SLOT_GAP;
+                boolean isActive = key.equals(activeSlot);
+                boolean hover = mx >= 4 && mx <= PREVIEW_W - 4 && my >= sy && my <= sy + 24;
+
+                int slotBg = isActive ? AnimationHelper.blendColors(0x00000000, UITheme.ACCENT, 0.12f)
+                        : hover ? AnimationHelper.withAlpha(UITheme.BG_SURFACE, (int)(fade * 0xCC))
+                        : 0x00000000;
+                int slotBorder = isActive ? AnimationHelper.withAlpha(UITheme.ACCENT_DIM, alpha)
+                        : hover ? AnimationHelper.withAlpha(UITheme.ACCENT_DIM, (int)(fade * 0x66))
+                        : 0x00000000;
+
+                if (slotBg != 0) g.fill(4, sy, PREVIEW_W - 4, sy + 24, slotBg);
+                if (slotBorder != 0) {
+                    g.fill(4, sy, PREVIEW_W - 4, sy + 1, slotBorder);
+                    g.fill(4, sy + 23, PREVIEW_W - 4, sy + 24, slotBorder);
+                    g.fill(PREVIEW_W - 5, sy, PREVIEW_W - 4, sy + 24, slotBorder);
+                }
+                if (isActive)
+                    g.fill(4, sy, 7, sy + 24, AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
+
+                // Render actual armor item
+                String armorSel = armorSelections.getOrDefault(key, "");
+                ItemStack armorStack = ItemStack.EMPTY;
+                if (!armorSel.isEmpty()) {
+                    armorStack = ItemResolver.resolve(armorSel);
+                }
+                if (!armorStack.isEmpty()) {
+                    g.renderItem(armorStack, 14, sy + 3);
+                } else {
+                    g.drawString(font, "\u2022", 18, sy + 8,
+                            AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
+                }
+                g.drawString(font, key, 32, sy + 4,
+                        AnimationHelper.withAlpha(isActive ? UITheme.ACCENT : UITheme.TEXT_MUTED, (int)(fade * (isActive ? 255 : 180))));
+
+                String armorVal = displayName(armorSel);
+                if (armorVal.length() > 18) armorVal = armorVal.substring(0, 18);
+                g.drawString(font, armorVal, 32, sy + 14,
+                        AnimationHelper.withAlpha(isActive ? UITheme.TEXT_PRIMARY : UITheme.TEXT_SECONDARY, alpha));
+
+                sy += 28;
             }
         }
-
-        g.disableScissor();
     }
 
-    private void renderConfigSlot(GuiGraphics g, int x, int y, int w, String slotKey) {
-        boolean active = slotKey.equals(activeSlot);
-        boolean hover = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + SLOT_H;
-
-        int bg = active ? AnimationHelper.blendColors(UITheme.BG_SLOT, UITheme.ACCENT, 0.12f)
-                        : AnimationHelper.withAlpha(UITheme.BG_SLOT, (int)(fadeAlpha * 0xDD));
-        int brd = active ? AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 255))
-                         : AnimationHelper.withAlpha(UITheme.BORDER, (int)(fadeAlpha * (hover ? 0xAA : 0x55)));
-
-        g.fill(x, y, x + w, y + SLOT_H, bg);
-        g.fill(x, y, x + w, y + 1, brd);
-        g.fill(x, y + SLOT_H - 1, x + w, y + SLOT_H, brd);
-
-        if (active) {
-            g.fill(x, y, x + 3, y + SLOT_H,
-                AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 255)));
-        }
-
-        // Slot label
-        g.drawString(font, slotKey, x + 10, y + 6,
-            AnimationHelper.withAlpha(active ? UITheme.ACCENT : UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 255)));
-
-        // Weapon name
-        String sel = selections.getOrDefault(slotKey, "");
-        String displayName = sel.isEmpty() ? "-" : ItemResolver.getDisplayName(sel);
-        g.drawString(font, displayName, x + 10, y + 22,
-            AnimationHelper.withAlpha(sel.isEmpty() ? UITheme.TEXT_MUTED : UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 255)));
-
-        // Arrows
-        String left = "\u25C0";
-        int lw = font.width(left);
-        int arrowX = x + w - 36;
-        g.drawString(font, left, arrowX, y + SLOT_H / 2 - 4,
-            AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 200)));
-        g.drawString(font, "\u25B6", arrowX + 18, y + SLOT_H / 2 - 4,
-            AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 200)));
-    }
-
-    private void renderConfigArmorRow(GuiGraphics g, int x, int y, int w, String armorKey) {
-        boolean hover = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + SLOT_H;
-
-        g.fill(x, y, x + w, y + SLOT_H,
-            AnimationHelper.withAlpha(UITheme.BG_SLOT, (int)(fadeAlpha * 0xDD)));
-        g.fill(x, y, x + w, y + 1,
-            AnimationHelper.withAlpha(UITheme.BORDER, (int)(fadeAlpha * (hover ? 0xAA : 0x55))));
-        g.fill(x, y + SLOT_H - 1, x + w, y + SLOT_H,
-            AnimationHelper.withAlpha(UITheme.BORDER, (int)(fadeAlpha * (hover ? 0xAA : 0x55))));
-
-        g.drawString(font, armorKey, x + 10, y + 6,
-            AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 255)));
-
-        String sel = armorSelections.getOrDefault(armorKey, "");
-        String displayName = sel.isEmpty() ? "None" : ItemResolver.getDisplayName(sel);
-
-        // Render item icon
-        int iconX = x + 10;
-        int iconY = y + 18;
-        int textX = x + 28;
-        if (!sel.isEmpty()) {
-            ItemStack stack = ItemResolver.resolve(sel);
-            if (!stack.isEmpty()) {
-                PoseStack pose = g.pose();
-                pose.pushPose();
-                pose.translate(iconX, iconY, 0);
-                float iconScale = 0.85f;
-                pose.scale(iconScale, iconScale, 1);
-                g.renderItem(stack, 0, 0);
-                pose.popPose();
-                textX = x + 28 + 18;
-            }
-        }
-
-        g.drawString(font, displayName, textX, y + 22,
-            AnimationHelper.withAlpha(sel.isEmpty() ? UITheme.TEXT_MUTED : UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 255)));
-
-        String left = "\u25C0";
-        int arrowX = x + w - 36;
-        g.drawString(font, left, arrowX, y + SLOT_H / 2 - 4,
-            AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 200)));
-        g.drawString(font, "\u25B6", arrowX + 18, y + SLOT_H / 2 - 4,
-            AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 200)));
-    }
+    // ── MOUSE ──────────────────────────────────────────
 
     @Override
     public boolean mouseClicked(double mx, double my, int btn) {
         if (btn != 0) return super.mouseClicked(mx, my, btn);
-        if (scrollPanel == null) return super.mouseClicked(mx, my, btn);
-        int cx = configX;
-        int cw = configW;
-        int scrollTop = panelY + HEADER_H + 8;
-        int scrollH = panelH - HEADER_H - FOOTER_H - 16;
-        int scrollBot = scrollTop + scrollH;
-        float soff = scrollPanel.getScrollOffset();
-        int baseY = scrollTop;
-        int scrollContentStart = baseY - (int) soff + 4;
 
-        // Only handle config panel clicks if mouse is within the visible scroll area
-        if (my >= scrollTop && my <= scrollBot) {
-        // Click on config panel slot cards
-        int curY = scrollContentStart;
-        for (String key : slotKeys) {
-            if (!weaponOptions.containsKey(key)) { curY += SLOT_H + SLOT_GAP; continue; }
-            int sx = cx + CONFIG_PAD;
-            int sy = curY;
-            if (mx >= sx && mx <= sx + cw - CONFIG_PAD * 2 && my >= sy && my <= sy + SLOT_H) {
-                int arrowX = sx + cw - CONFIG_PAD * 2 - 36;
-                if (mx >= arrowX && mx <= arrowX + ARROW_W) {
-                    cycleWeapon(key, -1);
-                } else if (mx >= arrowX + 18 && mx <= arrowX + 36) {
-                    cycleWeapon(key, 1);
-                } else {
+        // Footer back button
+        if (my >= 8 && my <= 32) {
+            String back = "\u2190 Back";
+            if (mx >= 10 && mx < 10 + font.width(back) + 20) {
+                onClose();
+                return true;
+            }
+            // Save button
+            int btnW = 90;
+            int btnX = width - btnW * 2 - 20;
+            if (mx >= btnX && mx < btnX + btnW) {
+                saveConfig();
+                return true;
+            }
+            // Deploy button
+            int dpX = btnX + btnW + 8;
+            if (mx >= dpX && mx < dpX + btnW) {
+                saveAndDeploy();
+                return true;
+            }
+        }
+
+        // Preview panel slot clicks (weapons + armor)
+        if (mx >= 0 && mx <= PREVIEW_W && my >= FOOTER_H) {
+            int ry = FOOTER_H + 10;
+            int rh = PREVIEW_RENDER_H;
+            int sy = ry + rh + 38;
+            for (String key : slotKeys) {
+                if (!weaponOptions.containsKey(key)) continue;
+                if (my >= sy && my <= sy + 28) {
                     activeSlot = key;
                     previewItem = selections.get(key);
-                    resetScrollContent();
-                }
-                return true;
-            }
-            curY += SLOT_H + SLOT_GAP;
-        }
-
-        // Click on armor rows
-        curY += SLOT_GAP;
-        String activeWeapon = selections.getOrDefault(activeSlot, "");
-        if (hasAttachmentLimits(activeWeapon)) {
-            curY += 20 + getAttachmentCategories(activeWeapon).size() * 26 + 8;
-        }
-        if (!armorOptions.isEmpty()) {
-            curY += 12;
-            for (String key : armorKeys) {
-                if (!armorOptions.containsKey(key)) { curY += SLOT_H + SLOT_GAP; continue; }
-                int sx = cx + CONFIG_PAD;
-                int sy = curY;
-                if (mx >= sx && mx <= sx + cw - CONFIG_PAD * 2 && my >= sy && my <= sy + SLOT_H) {
-                    int arrowX = sx + cw - CONFIG_PAD * 2 - 36;
-                    if (mx >= arrowX && mx <= arrowX + ARROW_W) {
-                        cycleArmor(key, -1);
-                    } else if (mx >= arrowX + 18 && mx <= arrowX + 36) {
-                        cycleArmor(key, 1);
-                    }
+                    kitConfigPanel.setActiveSlot(key);
                     return true;
                 }
-                curY += SLOT_H + SLOT_GAP;
+                sy += 32;
             }
-        }
-
-        // Click on attachment chips
-        curY = scrollContentStart + 4;
-        for (String key : slotKeys) {
-            if (!weaponOptions.containsKey(key)) continue;
-            curY += SLOT_H + SLOT_GAP;
-        }
-        curY += SLOT_GAP;
-        if (hasAttachmentLimits(activeWeapon)) {
-            curY += 12;
-            List<String> cats = getAttachmentCategories(activeWeapon);
-            for (String cat : cats) {
-                List<String> opts = getAttachmentOptions(activeWeapon, cat);
-                int chipX = cx + CONFIG_PAD + font.width(capitalize(cat) + ": ") + 8;
-                for (String opt : opts) {
-                    String optDisp = ItemResolver.getDisplayName(opt);
-                    int chipW = font.width(optDisp) + 16;
-                    int chipH = 22;
-                    if (mx >= chipX && mx <= chipX + chipW && my >= curY && my <= curY + chipH) {
-                        setAttachmentSelection(activeWeapon, cat, opt);
-                        dataChanged = true;
+            if (!armorOptions.isEmpty()) {
+                sy += 12;
+                for (String key : armorKeys) {
+                    if (!armorOptions.containsKey(key)) continue;
+                    if (my >= sy && my <= sy + 24) {
+                        activeSlot = key;
+                        previewItem = armorSelections.get(key);
+                        kitConfigPanel.setActiveSlot(key);
                         return true;
                     }
-                    chipX += chipW + 4;
+                    sy += 28;
                 }
-                curY += 26;
             }
         }
-        } // end scroll-bounds check
 
-        // Click on preview panel slot cards
-        int renderY = panelY + HEADER_H + 10;
-        int slotStartY = renderY + PREVIEW_RENDER_H + 30;
-        int slotIdx = 0;
-        for (String key : slotKeys) {
-            if (!weaponOptions.containsKey(key)) continue;
-            int sy = slotStartY + slotIdx * (SLOT_H + 4);
-            if (mx >= panelX + 4 && mx <= panelX + PREVIEW_W - 4 && my >= sy && my <= sy + SLOT_H) {
-                activeSlot = key;
-                previewItem = selections.get(key);
-                resetScrollContent();
-                return true;
+        // Config panel interactions
+        String configResult = kitConfigPanel.handleConfigClick(mx, my, width, height);
+        if (configResult != null) {
+            String newActive = kitConfigPanel.getActiveSlot();
+            if (!newActive.equals(activeSlot)) {
+                activeSlot = newActive;
+                previewItem = selections.get(activeSlot);
             }
-            slotIdx++;
+            return true;
         }
 
         return super.mouseClicked(mx, my, btn);
@@ -697,20 +456,22 @@ public class KitCustomizationScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double delta) {
-        if (scrollPanel != null && mx >= configX && mx <= configX + configW) {
-            scrollPanel.onScroll((int) mx, (int) my, delta);
+        if (kitConfigPanel != null) {
+            kitConfigPanel.handleMouseScroll(mx, my, delta);
         }
         return true;
     }
 
     @Override
     public void tick() {
-        if (scrollPanel != null) {
-            scrollPanel.tick();
+        if (kitConfigPanel != null) {
+            kitConfigPanel.tick();
         }
     }
 
-    private void saveAndDeploy() {
+    // ── SAVE / DEPLOY ──────────────────────────────────
+
+    private String buildLoadoutJson() {
         StringBuilder sb = new StringBuilder("{");
         boolean first = true;
 
@@ -720,14 +481,12 @@ public class KitCustomizationScreen extends Screen {
             first = false;
             sb.append("\"").append(key).append("\":\"").append(selections.get(key)).append("\"");
         }
-
         for (String key : armorKeys) {
             if (!armorSelections.containsKey(key)) continue;
             if (!first) sb.append(",");
             first = false;
             sb.append("\"").append(key).append("\":\"").append(armorSelections.get(key)).append("\"");
         }
-
         if (!attachmentSelections.isEmpty()) {
             if (!first) sb.append(",");
             sb.append("\"Attachments\":{");
@@ -736,48 +495,29 @@ public class KitCustomizationScreen extends Screen {
                 if (!afirst) sb.append(",");
                 afirst = false;
                 sb.append("\"").append(escapeJson(entry.getKey())).append("\":\"")
-                    .append(escapeJson(entry.getValue())).append("\"");
+                        .append(escapeJson(entry.getValue())).append("\"");
             }
             sb.append("}");
         }
-
         sb.append("}");
+        return sb.toString();
+    }
+
+    private void saveConfig() {
         String packageId = classId + ":" + kitId;
-        PacketHandler.CHANNEL.sendToServer(new KitSavePacket(packageId, sb.toString()));
+        PacketHandler.CHANNEL.sendToServer(new KitSavePacket(packageId, buildLoadoutJson()));
+    }
+
+    private void saveAndDeploy() {
+        String packageId = classId + ":" + kitId;
+        PacketHandler.CHANNEL.sendToServer(new KitSavePacket(packageId, buildLoadoutJson()));
         PacketHandler.CHANNEL.sendToServer(new KitSelectPacket(packageId));
         SpawnScreenHelper.updateSelectedKit(packageId);
-        if (minecraft != null) {
-            minecraft.setScreen(null);
-        }
+        onClose();
     }
 
     private static String escapeJson(String s) {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
-    }
-
-    private static String capitalize(String s) {
-        if (s == null || s.isEmpty()) return s;
-        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
-    }
-
-    private static String formatAttachName(String name) {
-        if (name == null || name.isEmpty()) return name;
-        String spaced = name.replace('_', ' ');
-        if (spaced.isEmpty()) return spaced;
-        StringBuilder sb = new StringBuilder();
-        boolean nextUpper = true;
-        for (char c : spaced.toCharArray()) {
-            if (c == ' ') {
-                sb.append(c);
-                nextUpper = true;
-            } else if (nextUpper) {
-                sb.append(Character.toUpperCase(c));
-                nextUpper = false;
-            } else {
-                sb.append(c);
-            }
-        }
-        return sb.toString();
     }
 
     @Override
@@ -786,7 +526,4 @@ public class KitCustomizationScreen extends Screen {
             minecraft.setScreen(new KitSelectionScreen(classId));
         }
     }
-
-    @Override
-    public boolean isPauseScreen() { return false; }
 }

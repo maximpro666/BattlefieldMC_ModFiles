@@ -6,7 +6,10 @@ import net.minecraft.client.gui.GuiGraphics;
 
 public class BProgressBar {
     protected int x, y, width, height;
-    protected float fraction;
+    protected float targetFraction;
+    protected float currentFraction;
+    protected boolean pulse;
+    protected float pulsePhase;
     protected int fillColor = UITheme.ACCENT;
     protected int backgroundColor = UITheme.BG_SLOT;
     protected int borderColor = UITheme.BORDER;
@@ -29,7 +32,11 @@ public class BProgressBar {
     }
 
     public void setFraction(float f) {
-        this.fraction = Math.max(0F, Math.min(1F, f));
+        this.targetFraction = Math.max(0F, Math.min(1F, f));
+    }
+
+    public void setPulse(boolean pulse) {
+        this.pulse = pulse;
     }
 
     public void setPosition(int x, int y) {
@@ -45,32 +52,53 @@ public class BProgressBar {
     public void setShowLabel(boolean v) { this.showLabel = v; }
 
     public void tick() {
+        currentFraction = AnimationHelper.lerp(currentFraction, targetFraction, 0.12f);
+        if (Math.abs(currentFraction - targetFraction) < 0.001f) {
+            currentFraction = targetFraction;
+        }
+        if (pulse) {
+            pulsePhase = (pulsePhase + 0.025f) % 1f;
+        }
     }
 
     public void render(GuiGraphics g) {
-        int drawW = (int)(width * fraction);
-        // Background
+        int drawW = (int)(width * currentFraction);
+        int pulseEdge = pulse ? (int)(width * pulsePhase) : -1;
+
         g.fill(x, y, x + width, y + height, backgroundColor);
-        // Fill
+
         if (drawW > 0) {
-            g.fill(x, y, x + drawW, y + height, fillColor);
+            g.fill(x, y, x + drawW, y + height,
+                pulse ? AnimationHelper.withAlpha(fillColor, (int)(0xCC + 0x33 * Math.sin(pulsePhase * Math.PI)))
+                      : fillColor);
         }
-        // Border
+
+        if (drawW > 3) {
+            g.fill(x + drawW - 3, y, x + drawW, y + height,
+                AnimationHelper.withAlpha(fillColor, 0x60));
+        }
+
+        if (pulse && pulseEdge >= 1) {
+            int gw = Math.min(6, width - pulseEdge);
+            g.fill(x + pulseEdge, y, x + pulseEdge + gw, y + height,
+                AnimationHelper.withAlpha(0xFFFFFFFF, 0x33));
+        }
+
         if (showBorder) {
             g.fill(x, y, x + width, y + 1, borderColor);
             g.fill(x, y + height - 1, x + width, y + height, borderColor);
             g.fill(x, y, x + 1, y + height, borderColor);
             g.fill(x + width - 1, y, x + width, y + height, borderColor);
         }
-        // Label
+
         if (showLabel) {
-            String pct = Math.round(fraction * 100) + "%";
+            String pct = Math.round(targetFraction * 100) + "%";
             var font = Minecraft.getInstance().font;
             g.drawString(font, pct, x + width + 4, y + (height - font.lineHeight) / 2, UITheme.TEXT_MUTED);
         }
     }
 
-    public float getFraction() { return fraction; }
+    public float getFraction() { return targetFraction; }
     public int getX() { return x; }
     public int getY() { return y; }
     public int getWidth() { return width; }

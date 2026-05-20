@@ -6,7 +6,7 @@ import com.yourmod.teamsystem.client.gui.renderer.CaptureParticles;
 import com.yourmod.teamsystem.client.gui.renderer.CustomNametagRenderer;
 import com.yourmod.teamsystem.client.gui.renderer.WorldMarkerRenderer;
 import com.yourmod.teamsystem.client.gui.screen.ClassSelectionScreen;
-import com.yourmod.teamsystem.client.xaero.XaeroIntegration;
+import com.yourmod.teamsystem.client.journeymap.JourneyMapIntegration;
 import com.yourmod.teamsystem.core.GameManager;
 import net.minecraft.client.Camera;
 import java.util.List;
@@ -47,7 +47,7 @@ public class ClientSetup {
 
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            XaeroIntegration.init();
+            JourneyMapIntegration.init();
         }
     }
 

@@ -57,16 +57,16 @@ public class AdminPanel extends Screen {
 
         addRenderableWidget(new BButton(x, btnY, 100, btnH,
             Component.literal("\u25B6 START"), btn -> sendAdminCommand("start"),
-            false));
+            BButton.Variant.GHOST));
         addRenderableWidget(new BButton(x + 104, btnY, 100, btnH,
             Component.literal("\u21BB RESTART"), btn -> sendAdminCommand("restart"),
-            false));
+            BButton.Variant.GHOST));
         addRenderableWidget(new BButton(x + 208, btnY, 90, btnH,
             Component.literal("\u25A0 STOP"), btn -> sendAdminCommand("stop"),
-            false));
+            BButton.Variant.GHOST));
         addRenderableWidget(new BButton(x + 302, btnY, 120, btnH,
             Component.literal("\uD83D\uDDF3 VOTE"), btn -> sendAdminCommand("forcevote"),
-            false));
+            BButton.Variant.GHOST));
     }
 
     @Override
