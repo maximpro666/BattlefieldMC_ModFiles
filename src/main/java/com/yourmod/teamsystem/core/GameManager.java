@@ -49,7 +49,7 @@ public class GameManager {
     private static final int VOTE_SECONDS = 20;
     private static final int COUNTDOWN_SECONDS = 15;
     private static final int MATCH_SECONDS = 1800;
-    private static final int OVERTIME_TICKETS = 1;
+    private static final int OVERTIME_TICKETS = 15;
     private static final int MAX_OVERTIME_TICKS = 20 * 60;
 
     private final MinecraftServer server;

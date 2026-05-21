@@ -1,5 +1,6 @@
 package com.yourmod.teamsystem.client.gui;
 
+import com.yourmod.teamsystem.client.ClientVoiceHandler;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
 import com.yourmod.teamsystem.client.gui.overlay.*;
 import com.yourmod.teamsystem.client.gui.screen.BattlefieldLoadingScreen;
@@ -32,9 +33,10 @@ public class ClientGuiHandler {
     private static final NotificationOverlay notifOverlay    = new NotificationOverlay();
     private static final HotbarOverlay       hotbarOverlay   = new HotbarOverlay();
     private static final BattlefieldTabOverlay tabOverlay    = new BattlefieldTabOverlay();
-    private static final VoiceIndicatorOverlay voiceOverlay  = new VoiceIndicatorOverlay();
+    private static final PlayerLabelOverlay  playerLabelOverlay = new PlayerLabelOverlay();
     private static final KillFeedOverlay     killFeedOverlay = new KillFeedOverlay();
     private static final CaptureNotificationOverlay captureNotifOverlay = new CaptureNotificationOverlay();
+    private static final CompassOverlay             compassOverlay      = new CompassOverlay();
 
     public static BattlefieldTabOverlay getTabOverlay() {
         return tabOverlay;
@@ -86,12 +88,13 @@ public class ClientGuiHandler {
         boolean tabVisible = tabOverlay.isVisible();
 
         if (!tabVisible) {
+            compassOverlay.render(g, w);
             ticketOverlay.render(g, w, event.getPartialTick());
             squadOverlay.render(g, h);
             vitalsOverlay.render(g, w, h);
             notifOverlay.render(g, w);
             hotbarOverlay.render(g, w, h);
-            voiceOverlay.render(g, w, h);
+            playerLabelOverlay.render(g, w, h);
             killFeedOverlay.render(g, w);
             captureNotifOverlay.render(g, w, h);
         }
@@ -107,6 +110,7 @@ public class ClientGuiHandler {
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             tabOverlay.tick();
+            ClientVoiceHandler.tick();
         }
     }
 

@@ -1,8 +1,8 @@
 package com.yourmod.teamsystem.client.gui.overlay;
 
 import com.yourmod.teamsystem.client.gui.UITheme;
-
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
+import com.yourmod.teamsystem.client.gui.component.RenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.player.Inventory;
@@ -34,7 +34,7 @@ public class HotbarOverlay {
 
         long idle = System.currentTimeMillis() - lastMove;
         if (idle > 3000) {
-            fadeAlpha = AnimationHelper.lerp(fadeAlpha, 0.3f, 0.05f);
+            fadeAlpha = AnimationHelper.lerp(fadeAlpha, 0.55f, 0.05f);
         } else {
             fadeAlpha = AnimationHelper.lerp(fadeAlpha, 1f, 0.15f);
         }
@@ -43,9 +43,11 @@ public class HotbarOverlay {
         int x = screenWidth / 2 - totalW / 2;
         int y = screenHeight - SLOT_SIZE - BOTTOM_OFFSET;
 
-        int bgAlpha = (int)(fadeAlpha * 180);
+        int bgAlpha = (int)(fadeAlpha * 230);
+        
         g.fill(x - 5, y - 3, x + totalW + 5, y + SLOT_SIZE + 3,
             AnimationHelper.withAlpha(COLOR_BG, bgAlpha));
+        
         g.fill(x - 5, y + SLOT_SIZE + 2, x + totalW + 5, y + SLOT_SIZE + 3,
             AnimationHelper.withAlpha(UITheme.ACCENT_DIM, bgAlpha / 2));
 
@@ -59,17 +61,24 @@ public class HotbarOverlay {
             slotGlow[i] = AnimationHelper.lerp(slotGlow[i], isSel ? 1f : 0f, 0.15f);
 
             int slotBg = AnimationHelper.blendColors(
-                AnimationHelper.withAlpha(UITheme.BG_SLOT, (int)(fadeAlpha * 200)),
+                AnimationHelper.withAlpha(UITheme.BG_SLOT, (int)(fadeAlpha * 230)),
                 UITheme.ACCENT,
                 slotGlow[i] * 0.2f * fadeAlpha);
-            g.fill(sx, y, sx + SLOT_SIZE, y + SLOT_SIZE, slotBg);
+            
+            RenderHelper.roundedRect(g, sx, y, SLOT_SIZE, SLOT_SIZE, 2, slotBg);
 
             if (isSel) {
+                RenderHelper.glow(g, sx, y, SLOT_SIZE, SLOT_SIZE, COLOR_SELECTED, 3, fadeAlpha);
+                
                 int selAlpha = (int)(fadeAlpha * 255);
-                g.fill(sx - 1, y - 1, sx + SLOT_SIZE + 1, y, AnimationHelper.withAlpha(COLOR_SELECTED, selAlpha));
-                g.fill(sx - 1, y + SLOT_SIZE, sx + SLOT_SIZE + 1, y + SLOT_SIZE + 1, AnimationHelper.withAlpha(COLOR_SELECTED, selAlpha));
-                g.fill(sx - 1, y, sx, y + SLOT_SIZE, AnimationHelper.withAlpha(COLOR_SELECTED, selAlpha));
-                g.fill(sx + SLOT_SIZE, y, sx + SLOT_SIZE + 1, y + SLOT_SIZE, AnimationHelper.withAlpha(COLOR_SELECTED, selAlpha));
+                g.fill(sx - 1, y - 1, sx + SLOT_SIZE + 1, y, 
+                    AnimationHelper.withAlpha(COLOR_SELECTED, selAlpha));
+                g.fill(sx - 1, y + SLOT_SIZE, sx + SLOT_SIZE + 1, y + SLOT_SIZE + 1, 
+                    AnimationHelper.withAlpha(COLOR_SELECTED, selAlpha));
+                g.fill(sx - 1, y, sx, y + SLOT_SIZE, 
+                    AnimationHelper.withAlpha(COLOR_SELECTED, selAlpha));
+                g.fill(sx + SLOT_SIZE, y, sx + SLOT_SIZE + 1, y + SLOT_SIZE, 
+                    AnimationHelper.withAlpha(COLOR_SELECTED, selAlpha));
             } else {
                 int brdAlpha = (int)(fadeAlpha * 120);
                 g.fill(sx, y + SLOT_SIZE - 1, sx + SLOT_SIZE, y + SLOT_SIZE,
@@ -127,8 +136,8 @@ public class HotbarOverlay {
         int ammoX = hx + totalW - ammoW - 8;
         int ammoY = hy - 16;
 
-        g.fill(ammoX - 4, ammoY - 2, ammoX + ammoW + 4, ammoY + 10,
-            AnimationHelper.withAlpha(UITheme.HUD_AMMO_BG, (int)(fadeAlpha * 200)));
+        RenderHelper.roundedRect(g, ammoX - 4, ammoY - 2, ammoW + 8, 12, 2,
+            AnimationHelper.withAlpha(UITheme.HUD_AMMO_BG, (int)(fadeAlpha * 230)));
 
         g.drawString(mc.font, ammoStr, ammoX, ammoY,
             AnimationHelper.withAlpha(UITheme.HUD_AMMO_TEXT, (int)(fadeAlpha * 255)));

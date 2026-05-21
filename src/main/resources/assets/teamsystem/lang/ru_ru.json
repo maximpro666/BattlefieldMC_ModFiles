@@ -68,5 +68,9 @@
   "teamsystem.error.not_squad_leader": "Только лидер отряда",
   "teamsystem.error.fob_limit": "Лимит FOB достигнут",
   "teamsystem.error.fob_too_close": "Слишком близко к врагу",
-  "teamsystem.error.dead": "Вы мертвы"
+  "teamsystem.error.dead": "Вы мертвы",
+
+  "key.categories.teamsystem": "Team System",
+  "key.teamsystem.squad_voice": "Голосовой чат отряда (PTT)",
+  "key.teamsystem.team_voice": "Голосовой чат команды (PTT)"
 }

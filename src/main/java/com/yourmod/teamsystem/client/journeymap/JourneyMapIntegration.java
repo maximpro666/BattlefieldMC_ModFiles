@@ -104,7 +104,7 @@ public final class JourneyMapIntegration {
             else if (cp.ownerTeamOrdinal() == 1)  color = UITheme.TEAM_RUSSIA;
             else                                   color = 0xFFFFFFFF;
             addWaypoint(PREFIX + " CP-" + cp.id(), PREFIX + " CP - " + cp.name(),
-                    color, (int) cp.x(), 64, (int) cp.z(), dim);
+                    color, (int) cp.x(), (int) cp.y(), (int) cp.z(), dim);
         }
     }
 
@@ -184,7 +184,6 @@ public final class JourneyMapIntegration {
     private static void addWaypoint(String id, String name, int colorArgb,
                                      int x, int y, int z, String dim) {
         if (!available || apiInstance == null) return;
-        if (activeIds.contains(id)) return;
         try {
             BlockPos pos = new BlockPos(x, y, z);
             Object wp = waypointCtor.newInstance("teamsystem", id, name, dim, pos);

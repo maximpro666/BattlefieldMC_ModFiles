@@ -52,6 +52,9 @@ public class ClientTeamData {
     public static List<ClientBeaconData> beacons = new ArrayList<>();
     public static Map<UUID, Integer> squadmateStatuses = new HashMap<>();
 
+    public static int currentVoiceChannel = 0;
+    public static final long SPEAKING_TIMEOUT_MS = 1500;
+
     // Border zone data for client rendering (parallel lists)
     public static List<byte[]> borderZoneTypes = new ArrayList<>();
     public static List<double[]> borderZoneData = new ArrayList<>();

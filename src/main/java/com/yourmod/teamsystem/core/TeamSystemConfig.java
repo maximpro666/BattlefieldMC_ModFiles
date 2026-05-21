@@ -30,6 +30,8 @@ public class TeamSystemConfig {
     private int vehicleKillRewardSP = 20;
     private int winRewardBC = 25;
     private int winRewardSP = 50;
+    private int captureRewardBC = 20;
+    private int captureRewardSP = 30;
     private int spawnProtectionTicks = 100;
     private int maxBeaconsPerPlayer = 3;
     private int respawnDelay = 5;
@@ -78,6 +80,8 @@ public class TeamSystemConfig {
     public int getVehicleKillRewardSP() { return vehicleKillRewardSP; }
     public int getWinRewardBC() { return winRewardBC; }
     public int getWinRewardSP() { return winRewardSP; }
+    public int getCaptureRewardBC() { return captureRewardBC; }
+    public int getCaptureRewardSP() { return captureRewardSP; }
     public int getSpawnProtectionTicks() { return spawnProtectionTicks; }
     public int getMaxBeaconsPerPlayer() { return maxBeaconsPerPlayer; }
     public int getRespawnDelay() { return respawnDelay; }

@@ -10,6 +10,6 @@
   "endingDurationTicks": 200,
   "postgameDurationTicks": 1200,
   "voteDurationTicks": 600,
-  "overtimeTicketThreshold": 50,
+  "overtimeTicketThreshold": 15,
   "voteCandidateCount": 4
 }

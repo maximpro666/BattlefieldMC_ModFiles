@@ -2,6 +2,7 @@ package com.yourmod.teamsystem.events;
 
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.*;
+import com.yourmod.teamsystem.core.TeamVoicePlugin;
 import com.yourmod.teamsystem.network.OpenTeamSelectionScreenPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
 import com.yourmod.teamsystem.proxy.ProxyMessenger;
@@ -18,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -251,6 +253,20 @@ public class PlayerEventHandler {
         }
     }
 
+    private int noHungerTick;
+
+    @SubscribeEvent
+    public void onPlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer player) {
+            noHungerTick++;
+            if (noHungerTick >= 100) {
+                noHungerTick = 0;
+                player.getFoodData().setFoodLevel(20);
+                player.getFoodData().setSaturation(5.0f);
+            }
+        }
+    }
+
     @SubscribeEvent
     public void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
@@ -268,6 +284,8 @@ public class PlayerEventHandler {
             if (vm != null) vm.unregisterPlayerVehicles(uuid);
             FOBManager fm = TeamSystem.getFOBManager();
             if (fm != null) fm.clearPlayerCooldown(uuid);
+            var gm = TeamVoicePlugin.getGroupManager();
+            if (gm != null) gm.leaveChannel(uuid);
             AttachmentEventHandler.clearPlayerAttachments(player);
             TeamSystem.LOGGER.info("Cleaned up player data: {}", player.getName().getString());
         }

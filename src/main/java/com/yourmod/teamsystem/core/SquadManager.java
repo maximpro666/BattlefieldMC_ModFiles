@@ -1,6 +1,7 @@
 package com.yourmod.teamsystem.core;
 
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.core.TeamVoicePlugin;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.*;
@@ -37,6 +38,8 @@ public class SquadManager {
     public void disbandSquad(int squadId) {
         Squad squad = squads.remove(squadId);
         if (squad != null) {
+            var gm = TeamVoicePlugin.getGroupManager();
+            if (gm != null) gm.removeSquadGroup(squadId);
             TeamSystem.LOGGER.info("Squad disbanded: {}", squad.getName());
         }
     }

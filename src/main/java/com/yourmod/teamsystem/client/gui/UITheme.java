@@ -98,4 +98,9 @@ public final class UITheme {
     public static final int PING_HIGH = 0xFFCC3030;
     public static final int NAMETAG_BAR_BG = 0x40000000;
     public static final int NAMETAG_BAR_BASE = 0xFF808080;
+
+    public static final int VOICE_LOCAL  = 0xFF50B050;
+    public static final int VOICE_SQUAD  = 0xFF5090E0;
+    public static final int VOICE_TEAM   = 0xFFE07B00;
+    public static final int VOICE_INACTIVE = 0x66808080;
 }

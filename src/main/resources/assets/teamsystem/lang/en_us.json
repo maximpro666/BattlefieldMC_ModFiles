@@ -68,5 +68,9 @@
   "teamsystem.error.not_squad_leader": "Squad leader only",
   "teamsystem.error.fob_limit": "FOB limit reached",
   "teamsystem.error.fob_too_close": "Too close to enemy",
-  "teamsystem.error.dead": "You are dead"
+  "teamsystem.error.dead": "You are dead",
+
+  "key.categories.teamsystem": "Team System",
+  "key.teamsystem.squad_voice": "Squad Voice (PTT)",
+  "key.teamsystem.team_voice": "Team Voice (PTT)"
 }

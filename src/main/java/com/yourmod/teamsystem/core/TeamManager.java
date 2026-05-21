@@ -257,6 +257,7 @@ public class TeamManager extends SavedData {
         PlayerCombatData data = getOrCreatePlayerData(player.getUUID());
         Squad squad = squadManager.getPlayerSquad(player.getUUID());
         String squadName = squad != null ? squad.getName() : "";
+        boolean isLeader = squad != null && squad.isLeader(player.getUUID());
         EconomyManager econ = TeamSystem.getEconomyManager();
         int sp = econ != null ? econ.getSP(player.getUUID()) : data.getScorePoints();
         int bc = econ != null ? econ.getBC(player.getUUID()) : data.getBattleCredits();
@@ -273,7 +274,8 @@ public class TeamManager extends SavedData {
             squadName,
             sp,
             bc,
-            data.getDonatTier()
+            data.getDonatTier(),
+            isLeader
         );
         PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
     }

@@ -4,6 +4,7 @@ import com.yourmod.teamsystem.core.Team;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
+import java.util.*;
 
 public class CaptureZone {
     private final String id;
@@ -17,6 +18,7 @@ public class CaptureZone {
     private Team ownerTeam;
     private Team capturingTeam;
     private float progress;
+    private final Map<UUID, Double> captureContributions;
 
     private static final String TAG_ID = "id";
     private static final String TAG_NAME = "name";
@@ -47,6 +49,7 @@ public class CaptureZone {
         this.ownerTeam = Team.SPECTATOR;
         this.capturingTeam = Team.SPECTATOR;
         this.progress = 0.0f;
+        this.captureContributions = new HashMap<>();
     }
 
     public String getId() { return id; }
@@ -66,6 +69,28 @@ public class CaptureZone {
     public void addProgress(float amount) { this.progress = Math.max(0.0f, Math.min(1.0f, this.progress + amount)); }
 
     public boolean isCaptured() { return ownerTeam.isPlayable() && progress >= 1.0f; }
+
+    public void addContribution(UUID playerUUID, double amount) {
+        captureContributions.merge(playerUUID, amount, Double::sum);
+    }
+
+    public double getContribution(UUID playerUUID) {
+        return captureContributions.getOrDefault(playerUUID, 0.0);
+    }
+
+    public Map<UUID, Double> getCaptureContributions() {
+        return captureContributions;
+    }
+
+    public double getTotalCaptureContributions() {
+        double total = 0;
+        for (double v : captureContributions.values()) total += v;
+        return total;
+    }
+
+    public void clearCaptureContributions() {
+        captureContributions.clear();
+    }
 
     public BlockPos getCenter() {
         return new BlockPos(
@@ -89,6 +114,7 @@ public class CaptureZone {
         this.ownerTeam = Team.SPECTATOR;
         this.capturingTeam = Team.SPECTATOR;
         this.progress = 0.0f;
+        this.captureContributions.clear();
     }
 
     public CompoundTag toNBT() {

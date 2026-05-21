@@ -290,5 +290,13 @@ public class PacketHandler {
             .encoder(TransferPacket::toBytes)
             .consumerMainThread(TransferPacket::handle)
             .add();
+
+        CHANNEL.registerMessage(
+            nextId++,
+            VoiceChannelSwitchPacket.class,
+            VoiceChannelSwitchPacket::encode,
+            VoiceChannelSwitchPacket::decode,
+            VoiceChannelSwitchPacket::handle
+        );
     }
 }

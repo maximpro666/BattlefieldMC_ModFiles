@@ -39,11 +39,25 @@ public class ClientSetup {
         "key.categories.teamsystem"
     );
 
+    public static final KeyMapping SQUAD_VOICE_KEY = new KeyMapping(
+        "key.teamsystem.squad_voice",
+        GLFW.GLFW_KEY_V,
+        "key.categories.teamsystem"
+    );
+
+    public static final KeyMapping TEAM_VOICE_KEY = new KeyMapping(
+        "key.teamsystem.team_voice",
+        GLFW.GLFW_KEY_B,
+        "key.categories.teamsystem"
+    );
+
     @Mod.EventBusSubscriber(modid = "teamsystem", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModBus {
         @SubscribeEvent
         public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
             event.register(OPEN_KIT_VEHICLE_KEY);
+            event.register(SQUAD_VOICE_KEY);
+            event.register(TEAM_VOICE_KEY);
         }
 
         @SubscribeEvent
@@ -63,6 +77,13 @@ public class ClientSetup {
             } else if (action == GLFW.GLFW_RELEASE) {
                 ClientGuiHandler.getTabOverlay().setVisible(false);
             }
+        }
+
+        if (key == SQUAD_VOICE_KEY.getKey().getValue()) {
+            ClientVoiceHandler.setSquadPtt(action == GLFW.GLFW_PRESS);
+        }
+        if (key == TEAM_VOICE_KEY.getKey().getValue()) {
+            ClientVoiceHandler.setTeamPtt(action == GLFW.GLFW_PRESS);
         }
 
         if (OPEN_KIT_VEHICLE_KEY.consumeClick()) {

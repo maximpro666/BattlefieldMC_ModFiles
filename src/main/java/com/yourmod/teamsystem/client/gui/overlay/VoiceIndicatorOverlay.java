@@ -1,40 +1,69 @@
 package com.yourmod.teamsystem.client.gui.overlay;
 
-import com.yourmod.teamsystem.client.gui.UITheme;
-
 import com.yourmod.teamsystem.client.ClientTeamData;
+import com.yourmod.teamsystem.client.ClientVoiceHandler;
+import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
+import com.yourmod.teamsystem.client.gui.component.RenderHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.List;
 
 public class VoiceIndicatorOverlay {
 
-    private static final int COLOR_BG     = UITheme.BG_HUD;
-    private static final int COLOR_ACTIVE = UITheme.STATUS_OK;
-    private static final int COLOR_TEXT   = UITheme.TEXT_PRIMARY;
-    private static final int ENTRY_H      = 14;
-    private static final int PANEL_W      = 130;
+    private static final int PANEL_W = 110;
+    private static final int ENTRY_H = 14;
+    private static final int CHANNEL_H = 16;
 
     public void render(GuiGraphics g, int screenWidth, int screenHeight) {
-        List<String> speaking = ClientTeamData.speakingPlayers;
-        if (speaking == null || speaking.isEmpty()) return;
+        Font font = Minecraft.getInstance().font;
+        if (font == null) return;
 
-        int x = 4;
-        int y = screenHeight - 60 - speaking.size() * (ENTRY_H + 2);
+        int ch = ClientVoiceHandler.getActiveChannel();
+        String channelLabel;
+        int channelColor;
+        switch (ch) {
+            case 1:
+                channelLabel = "\u266B SQUAD";
+                channelColor = UITheme.VOICE_SQUAD;
+                break;
+            case 2:
+                channelLabel = "\u266B TEAM";
+                channelColor = UITheme.VOICE_TEAM;
+                break;
+            default:
+                channelLabel = "\u266B LOCAL";
+                channelColor = UITheme.VOICE_LOCAL;
+                break;
+        }
 
-        net.minecraft.client.gui.Font font = Minecraft.getInstance().font;
+        int x = 6;
+        int y = screenHeight / 2 + 40;
+
+        RenderHelper.roundedRect(g, x, y, PANEL_W, CHANNEL_H, 2,
+            AnimationHelper.withAlpha(UITheme.BG_HUD, 180));
+        g.drawString(font, channelLabel, x + 8, y + 4,
+            AnimationHelper.withAlpha(channelColor, 240));
+
+        List<String> speaking = ClientVoiceHandler.getActiveSpeakingPlayers();
+        if (speaking.isEmpty()) return;
+
+        int sy = y + CHANNEL_H + 2;
         for (String name : speaking) {
-            g.fill(x, y, x + PANEL_W, y + ENTRY_H, AnimationHelper.withAlpha(COLOR_BG, 180));
+            int labelW = font.width(name);
+            int pw = Math.max(PANEL_W, labelW + 24);
+            RenderHelper.roundedRect(g, x, sy, pw, ENTRY_H, 2,
+                AnimationHelper.withAlpha(UITheme.BG_HUD, 160));
 
-            g.fill(x + 3, y + ENTRY_H / 2 - 3, x + 9, y + ENTRY_H / 2 + 3,
-                AnimationHelper.withAlpha(COLOR_ACTIVE, 255));
+            g.fill(x + 4, sy + ENTRY_H / 2 - 3, x + 10, sy + ENTRY_H / 2 + 3,
+                AnimationHelper.withAlpha(channelColor, 255));
 
-            g.drawString(font, name, x + 13, y + 3,
-                AnimationHelper.withAlpha(COLOR_TEXT, 230));
+            g.drawString(font, name, x + 14, sy + 3,
+                AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, 230));
 
-            y += ENTRY_H + 2;
+            sy += ENTRY_H + 1;
         }
     }
 }
