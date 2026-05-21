@@ -97,11 +97,6 @@ public class BattlefieldPauseScreen extends Screen {
         g.drawString(font, paused, panelX + panelW / 2 - pw / 2, panelY + 16,
             AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
 
-        String hint = "Select an option";
-        int hw = font.width(hint);
-        g.drawString(font, hint, panelX + panelW / 2 - hw / 2, panelY + 32,
-            AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fadeAlpha * 180)));
-
         int lineW = 100;
         g.fill(panelX + panelW / 2 - lineW / 2, panelY + 46,
               panelX + panelW / 2 + lineW / 2, panelY + 48,

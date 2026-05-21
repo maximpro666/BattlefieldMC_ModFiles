@@ -131,11 +131,17 @@ public class PlayerEventHandler {
                 ensureDogTag(player);
             }
             TeamSystem.LOGGER.info("Synced team data for player: {}", player.getName().getString());
+            // Check cycle flag BEFORE checkAndAutoStartCycle deletes it
+            boolean cycleInProgress = false;
+            if (!ProxyMessenger.isMatchServer()) {
+                Path cycleFlag = Path.of(System.getProperty("user.dir")).resolve("../launcher/match_cycle_done.flag").normalize();
+                cycleInProgress = Files.exists(cycleFlag);
+            }
             checkAndAutoStartCycle(player.server);
             // On lobby server: auto-transfer late joiners if match server is running
-            if (!ProxyMessenger.isMatchServer()) {
+            if (!ProxyMessenger.isMatchServer() && !cycleInProgress) {
                 try (Socket s = new Socket()) {
-                    s.connect(new InetSocketAddress("127.0.0.1", 25566), 300);
+                    s.connect(new InetSocketAddress("127.0.0.1", 25566), 2000);
                     com.yourmod.teamsystem.network.PacketHandler.CHANNEL.send(
                         net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
                         new com.yourmod.teamsystem.network.TransferPacket("127.0.0.1:25566"));
@@ -143,6 +149,8 @@ public class PlayerEventHandler {
                 } catch (Exception e) {
                     // No match server running, stay in lobby
                 }
+            } else if (cycleInProgress) {
+                TeamSystem.LOGGER.info("Match cycle in progress, skipping auto-transfer for {}", player.getName().getString());
             }
         }
     }
@@ -152,9 +160,14 @@ public class PlayerEventHandler {
             Path flagFile = Path.of(System.getProperty("user.dir")).resolve("../launcher/match_cycle_done.flag").normalize();
             if (Files.exists(flagFile)) {
                 Files.delete(flagFile);
+                LifecycleNotifier.broadcastToAll(srv, "cycle_detected");
                 TeamSystem.LOGGER.info("Match cycle flag detected, auto-starting next match in 5s...");
                 new Thread(() -> {
-                    try { Thread.sleep(5000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+                    try { Thread.sleep(4000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+                    srv.execute(() -> {
+                        LifecycleNotifier.broadcastToAll(srv, "auto_start");
+                    });
+                    try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
                     srv.execute(() -> {
                         srv.getCommands().performPrefixedCommand(srv.createCommandSourceStack(), "startmatch");
                     });

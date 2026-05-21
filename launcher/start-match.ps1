@@ -23,6 +23,18 @@ Remove-Item -Recurse -Force (Join-Path $temp "logs") -ErrorAction SilentlyContin
 Remove-Item -Recurse -Force (Join-Path $temp "crash-reports") -ErrorAction SilentlyContinue
 Remove-Item -Force (Join-Path $temp ".ready") -ErrorAction SilentlyContinue
 
+# Wait for port to be free (old process might still be shutting down)
+Write-Host "[launcher] Waiting for port $port to be free..."
+$portFree = $false
+for ($i = 0; $i -lt 30; $i++) {
+    $conn = Test-NetConnection -ComputerName 127.0.0.1 -Port $port -WarningAction SilentlyContinue -InformationLevel Quiet 2>$null
+    if (-not $conn) { $portFree = $true; break }
+    Start-Sleep -Seconds 1
+}
+if (-not $portFree) {
+    Write-Warning "[launcher] Port $port still in use after 30s, attempting to start anyway..."
+}
+
 $argsFile = "libraries/net/minecraftforge/forge/1.20.1-47.3.0/win_args.txt"
 $fullArgsFile = Join-Path $temp $argsFile.Replace("/", "\")
 
@@ -36,16 +48,24 @@ $proc = Start-Process -FilePath "java" -ArgumentList "@user_jvm_args.txt -Dteams
 
 $logFile = Join-Path $temp "logs\latest.log"
 $elapsed = 0
-$doneRegex = 'Done \('
+$doneRegex = 'Done\s*\('
+$countdownRegex = 'Game starts in \d+s'
+$doneFound = $false
 
 Write-Host "[launcher] Waiting for server to start..."
 while ($elapsed -lt $timeout) {
     if (Test-Path $logFile) {
-        $lines = Get-Content $logFile -Tail 5
+        $lines = Get-Content $logFile -Tail 10
         foreach ($line in $lines) {
-            if ($line -match $doneRegex) {
+            if (-not $doneFound -and $line -match $doneRegex) {
+                $doneFound = $true
+                Write-Host "[launcher] Server loaded, waiting for game countdown..."
+            }
+            if ($doneFound -and $line -match $countdownRegex) {
                 $procId = $proc.Id
+                Start-Sleep -Seconds 2
                 Set-Content -Path (Join-Path $temp ".ready") -Value $procId
+                Write-Host $line
                 Write-Host "[launcher] Server ready! PID: $procId"
                 exit 0
             }

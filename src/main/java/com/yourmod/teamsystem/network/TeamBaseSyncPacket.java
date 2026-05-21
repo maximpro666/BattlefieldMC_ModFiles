@@ -43,5 +43,6 @@ public class TeamBaseSyncPacket {
         ClientTeamData.setNatoBase(natoX, natoY, natoZ);
         ClientTeamData.setRussiaBase(russiaX, russiaY, russiaZ);
         ClientTeamData.setBaseRadius(baseRadius);
+        com.yourmod.teamsystem.client.journeymap.JourneyMapIntegration.updateBaseWaypoints();
     }
 }

@@ -391,10 +391,12 @@ public class GameManager {
 
     private void finishMatchCycle() {
         if (ProxyMessenger.isMatchServer()) {
+            LifecycleNotifier.broadcastNotification(server, "match_ending", 4000);
             // Send players back to lobby via TransferPacket
             for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                 PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
                     new TransferPacket("127.0.0.1:25565"));
+                LifecycleNotifier.sendNotification(p, "returning_lobby", 4000);
             }
             // Signal lobby server to auto-start next match
             try {
@@ -404,7 +406,7 @@ public class GameManager {
                 TeamSystem.LOGGER.error("Failed to write cycle flag", e);
             }
             server.execute(() -> {
-                try { Thread.sleep(3000); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
+                try { Thread.sleep(5000); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
                 server.halt(false);
             });
             return;

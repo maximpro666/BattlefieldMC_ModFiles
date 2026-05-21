@@ -2,5 +2,5 @@
     "templateDir": "C:\\Users\\maska\\OneDrive\\Desktop\\match-template",
     "tempDir": "C:\\Users\\maska\\OneDrive\\Desktop\\temp-match",
     "matchPort": 25566,
-    "startTimeoutSeconds": 120
+    "startTimeoutSeconds": 180
 }

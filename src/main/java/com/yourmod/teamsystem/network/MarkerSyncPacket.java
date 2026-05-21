@@ -57,7 +57,10 @@ public class MarkerSyncPacket {
     }
 
     public static void handle(MarkerSyncPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> ClientMarkerData.setMarkers(msg.markers));
+        ctx.get().enqueueWork(() -> {
+            ClientMarkerData.setMarkers(msg.markers);
+            com.yourmod.teamsystem.client.journeymap.JourneyMapIntegration.updateMarkerWaypoints();
+        });
         ctx.get().setPacketHandled(true);
     }
 }

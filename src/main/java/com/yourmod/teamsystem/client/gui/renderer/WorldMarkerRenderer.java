@@ -7,9 +7,11 @@ import com.mojang.math.Axis;
 import com.yourmod.teamsystem.client.ClientMarkerData;
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.CapturePointData;
+import com.yourmod.teamsystem.client.PlayerListEntry;
 import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.client.gui.VisualsConfig;
 import com.yourmod.teamsystem.core.MarkerData;
+import com.yourmod.teamsystem.core.Rank;
 import com.yourmod.teamsystem.core.Team;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -22,6 +24,7 @@ import org.joml.Matrix4f;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 public class WorldMarkerRenderer {
 
@@ -59,9 +62,7 @@ public class WorldMarkerRenderer {
         List<MarkerData> markers = ClientMarkerData.getMarkers();
         if (markers != null && !markers.isEmpty()) {
             for (MarkerData marker : markers) {
-                renderMarkerLabel(poseStack, bufferSource, camera, camPos,
-                    marker.getX(), marker.getY() + 2.5, marker.getZ(),
-                    buildLabel(marker), 0xFFFFFFFF);
+                renderMarkerWithCreator(poseStack, bufferSource, camera, camPos, marker);
             }
         }
 
@@ -365,14 +366,28 @@ public class WorldMarkerRenderer {
         poseStack.popPose();
     }
 
-    private void renderMarkerLabel(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera, Vec3 camPos,
-                             double x, double y, double z, String label, int color) {
+    private void renderMarkerWithCreator(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera, Vec3 camPos, MarkerData marker) {
+        double x = marker.getX();
+        double y = marker.getY() + 2.5;
+        double z = marker.getZ();
         double dx = x - camPos.x;
         double dy = y - camPos.y;
         double dz = z - camPos.z;
         double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
         if (dist > MAX_DIST) return;
 
+        String label = marker.getLabel() != null && !marker.getLabel().isEmpty() ? marker.getLabel() : marker.getName();
+        UUID creatorId = marker.getCreatorUUID();
+        PlayerListEntry entry = creatorId != null ? ClientTeamData.playerDataMap.get(creatorId) : null;
+
+        String subLabel = null;
+        if (entry != null) {
+            boolean russian = "ru".equals(ClientTeamData.language);
+            String rankPrefix = Rank.fromOrdinal(entry.rank()).getPrefix(russian);
+            subLabel = rankPrefix + " " + entry.callsign();
+        }
+
+        int color = markerColor(marker.getType());
         double sizeT = Math.max(1.0, dist / 60.0);
         float scale = (float)VisualsConfig.get().capturePoint.extraScale * (float)sizeT;
 
@@ -384,18 +399,51 @@ public class WorldMarkerRenderer {
         poseStack.scale(-scale, -scale, scale);
 
         Minecraft mc = Minecraft.getInstance();
-        mc.font.drawInBatch(label,
-            -mc.font.width(label) / 2f, -4f,
-            color, true,
+        Font font = mc.font;
+
+        float alpha = calcAlpha(dist, MAX_DIST);
+        int textColor = ((int)(alpha * 0xFF) << 24) | (color & 0x00FFFFFF);
+        int shadowColor = 0xF000F0;
+
+        font.drawInBatch(label,
+            -font.width(label) / 2f, -8f,
+            textColor, true,
             poseStack.last().pose(),
             bufferSource,
             Font.DisplayMode.SEE_THROUGH,
-            0, 0xF000F0);
+            0, shadowColor);
+
+        if (subLabel != null && dist < 30) {
+            float subAlpha = 1.0f;
+            if (dist > 15) {
+                subAlpha = 1.0f - (float)((dist - 15) / 15.0);
+            }
+            if (subAlpha > 0.01f) {
+                poseStack.pushPose();
+                poseStack.translate(0, 12, 0);
+                poseStack.scale(0.7f, 0.7f, 1);
+                int subColor = ((int)(subAlpha * 0xFF) << 24) | 0xCCCCCC;
+                font.drawInBatch(subLabel,
+                    -font.width(subLabel) / 2f, 0f,
+                    subColor, true,
+                    poseStack.last().pose(),
+                    bufferSource,
+                    Font.DisplayMode.SEE_THROUGH,
+                    0, shadowColor);
+                poseStack.popPose();
+            }
+        }
+
         poseStack.popPose();
     }
 
-    private String buildLabel(MarkerData m) {
-        return m.getLabel() != null ? m.getLabel() : "";
+    private static int markerColor(MarkerData.MarkerType type) {
+        switch (type) {
+            case ATTACK:  return UITheme.MARKER_ATTACK;
+            case DEFEND:  return UITheme.MARKER_DEFEND;
+            case OBSERVE: return UITheme.MARKER_OBSERVE;
+            default:      return UITheme.MARKER_POINT;
+        }
     }
 
     private static float calcAlpha(double dist, double maxDist) {

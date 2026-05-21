@@ -453,11 +453,10 @@ public class KitCustomizationScreen extends Screen {
         // Config panel interactions
         String configResult = kitConfigPanel.handleConfigClick(mx, my, width, height);
         if (configResult != null) {
-            String newActive = kitConfigPanel.getActiveSlot();
-            if (!newActive.equals(activeSlot)) {
-                activeSlot = newActive;
-                previewItem = selections.get(activeSlot);
-            }
+            activeSlot = kitConfigPanel.getActiveSlot();
+            previewItem = selections.containsKey(activeSlot)
+                ? selections.get(activeSlot)
+                : armorSelections.getOrDefault(activeSlot, previewItem);
             return true;
         }
 

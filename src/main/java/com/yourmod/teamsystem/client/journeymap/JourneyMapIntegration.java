@@ -2,12 +2,18 @@ package com.yourmod.teamsystem.client.journeymap;
 
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.client.CapturePointData;
+import com.yourmod.teamsystem.client.ClientMarkerData;
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.FOBData;
+import com.yourmod.teamsystem.client.PlayerListEntry;
 import com.yourmod.teamsystem.client.gui.UITheme;
+import com.yourmod.teamsystem.core.MarkerData;
+import com.yourmod.teamsystem.core.Rank;
 import com.yourmod.teamsystem.core.Team;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -38,7 +44,7 @@ public final class JourneyMapIntegration {
             showMethod = api.getClass().getMethod("show", Class.forName("journeymap.client.api.display.Displayable"));
             removeMethod = api.getClass().getMethod("remove", Class.forName("journeymap.client.api.display.Displayable"));
             waypointCtor = Class.forName("journeymap.client.api.display.Waypoint")
-                    .getConstructor(String.class, String.class, String.class, int.class, BlockPos.class);
+                    .getConstructor(String.class, String.class, String.class, String.class, BlockPos.class);
             available = true;
             TeamSystem.LOGGER.info("[TeamSystem] JourneyMap integration enabled.");
         } catch (Exception e) {
@@ -56,13 +62,15 @@ public final class JourneyMapIntegration {
         if (cps != null) updateCapturePointWaypoints(cps);
         List<ClientTeamData.ClientBeaconData> beacons = ClientTeamData.beacons;
         if (beacons != null) updateBeaconWaypoints(beacons);
+        updateMarkerWaypoints();
+        updateBaseWaypoints();
     }
 
     public static void clearAll() {
         if (!available || apiInstance == null) return;
         try {
             for (String id : activeIds) {
-                Object wp = waypointCtor.newInstance("teamsystem", id, id, Minecraft.getInstance().level.dimensionType().hashCode(), BlockPos.ZERO);
+                Object wp = waypointCtor.newInstance("teamsystem", id, id, currentDimension(), BlockPos.ZERO);
                 removeMethod.invoke(apiInstance, wp);
             }
             activeIds.clear();
@@ -76,7 +84,7 @@ public final class JourneyMapIntegration {
         removeByPrefix(PREFIX + " FOB");
         if (fobs == null) return;
         Team playerTeam = ClientTeamData.getLocalPlayerTeam();
-        int dim = getDimension();
+        String dim = currentDimension();
         for (FOBData fob : fobs) {
             if (playerTeam != Team.SPECTATOR && fob.teamOrdinal() != playerTeam.ordinal()) continue;
             int color = fob.teamOrdinal() == 0 ? UITheme.TEAM_NATO : UITheme.TEAM_RUSSIA;
@@ -89,7 +97,7 @@ public final class JourneyMapIntegration {
         if (!available) return;
         removeByPrefix(PREFIX + " CP");
         if (cps == null) return;
-        int dim = getDimension();
+        String dim = currentDimension();
         for (CapturePointData cp : cps) {
             int color;
             if (cp.ownerTeamOrdinal() == 0)      color = UITheme.TEAM_NATO;
@@ -105,7 +113,7 @@ public final class JourneyMapIntegration {
         removeByPrefix(PREFIX + " BCN");
         if (beacons == null) return;
         Team playerTeam = ClientTeamData.getLocalPlayerTeam();
-        int dim = getDimension();
+        String dim = currentDimension();
         for (ClientTeamData.ClientBeaconData b : beacons) {
             if (playerTeam != Team.SPECTATOR && b.teamOrdinal() != playerTeam.ordinal()) continue;
             addWaypoint(PREFIX + " BCN-" + b.name(), PREFIX + " BCN - " + b.name(),
@@ -113,8 +121,68 @@ public final class JourneyMapIntegration {
         }
     }
 
+    public static void updateMarkerWaypoints() {
+        if (!available) return;
+        removeByPrefix(PREFIX + " MARKER");
+        Team playerTeam = ClientTeamData.getLocalPlayerTeam();
+        if (playerTeam == Team.SPECTATOR) return;
+        List<MarkerData> markers = ClientMarkerData.getMarkers();
+        if (markers == null || markers.isEmpty()) return;
+        String dim = currentDimension();
+        long now = System.currentTimeMillis();
+        for (MarkerData m : markers) {
+            if (m.getTeamOrdinal() != playerTeam.ordinal()) continue;
+            if (m.isExpired(now)) continue;
+            int color = markerColor(m.getType());
+            String label = PREFIX + " " + buildMarkerLabel(m);
+            addWaypoint(PREFIX + " MARKER-" + m.getName(), label,
+                    color, (int) m.getX(), (int) m.getY(), (int) m.getZ(), dim);
+        }
+    }
+
+    public static void updateBaseWaypoints() {
+        if (!available) return;
+        removeByPrefix(PREFIX + " BASE");
+        Team playerTeam = ClientTeamData.getLocalPlayerTeam();
+        if (playerTeam == Team.SPECTATOR) return;
+        String dim = currentDimension();
+        int[] nato = ClientTeamData.getNatoBasePos();
+        int[] russia = ClientTeamData.getRussiaBasePos();
+        if (playerTeam == Team.NATO && nato != null) {
+            addWaypoint(PREFIX + " BASE-NATO", PREFIX + " BASE - NATO",
+                    UITheme.TEAM_NATO, nato[0], nato[1], nato[2], dim);
+        }
+        if (playerTeam == Team.RUSSIA && russia != null) {
+            addWaypoint(PREFIX + " BASE-RUSSIA", PREFIX + " BASE - RUSSIA",
+                    UITheme.TEAM_RUSSIA, russia[0], russia[1], russia[2], dim);
+        }
+    }
+
+    private static String buildMarkerLabel(MarkerData m) {
+        String label = m.getLabel() != null && !m.getLabel().isEmpty() ? m.getLabel() : m.getName();
+        UUID creator = m.getCreatorUUID();
+        if (creator != null) {
+            PlayerListEntry entry = ClientTeamData.playerDataMap.get(creator);
+            if (entry != null) {
+                boolean russian = "ru".equals(ClientTeamData.language);
+                String rankStr = Rank.fromOrdinal(entry.rank()).getPrefix(russian);
+                label = label + " (" + rankStr + " " + entry.callsign() + ")";
+            }
+        }
+        return label;
+    }
+
+    private static int markerColor(MarkerData.MarkerType type) {
+        switch (type) {
+            case ATTACK:  return UITheme.MARKER_ATTACK;
+            case DEFEND:  return UITheme.MARKER_DEFEND;
+            case OBSERVE: return UITheme.MARKER_OBSERVE;
+            default:      return UITheme.MARKER_POINT;
+        }
+    }
+
     private static void addWaypoint(String id, String name, int colorArgb,
-                                     int x, int y, int z, int dim) {
+                                     int x, int y, int z, String dim) {
         if (!available || apiInstance == null) return;
         if (activeIds.contains(id)) return;
         try {
@@ -135,7 +203,7 @@ public final class JourneyMapIntegration {
         activeIds.removeIf(id -> {
             if (id.startsWith(prefix)) {
                 try {
-                    Object wp = waypointCtor.newInstance("teamsystem", id, id, 0, BlockPos.ZERO);
+                    Object wp = waypointCtor.newInstance("teamsystem", id, id, currentDimension(), BlockPos.ZERO);
                     removeMethod.invoke(apiInstance, wp);
                 } catch (Exception ignored) {}
                 return true;
@@ -144,9 +212,12 @@ public final class JourneyMapIntegration {
         });
     }
 
-    private static int getDimension() {
+    private static String currentDimension() {
         var level = Minecraft.getInstance().level;
-        return level != null ? level.dimensionType().hashCode() : 0;
+        if (level != null) {
+            ResourceLocation loc = level.dimension().location();
+            return loc.toString();
+        }
+        return Level.OVERWORLD.location().toString();
     }
-
 }
