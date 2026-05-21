@@ -71,6 +71,9 @@
   "teamsystem.error.dead": "You are dead",
 
   "key.categories.teamsystem": "Team System",
+  "key.teamsystem.open_kit_vehicle": "Open Kit Selection",
+  "key.teamsystem.open_vehicle": "Open Vehicle Selection",
   "key.teamsystem.squad_voice": "Squad Voice (PTT)",
-  "key.teamsystem.team_voice": "Team Voice (PTT)"
+  "key.teamsystem.team_voice": "Team Voice (PTT)",
+  "key.teamsystem.request_ammo": "Open Resupply Menu"
 }

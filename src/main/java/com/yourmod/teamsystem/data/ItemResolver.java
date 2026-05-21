@@ -35,19 +35,25 @@ public class ItemResolver {
             return ItemStack.EMPTY;
         }
 
+        boolean isTacZ = tacZNamespaces.contains(rl.getNamespace());
+
         Item directItem = BuiltInRegistries.ITEM.get(rl);
         if (directItem != null && directItem != Items.AIR) {
-            return new ItemStack(directItem);
+            ItemStack stack = new ItemStack(directItem);
+            if (isTacZ) {
+                stack.getOrCreateTag().putInt("SelectFire", 1);
+            }
+            return stack;
         }
 
         // Fallback for TaCZ gun pack items: use tacz:modern_kinetic_gun with GunId NBT
-        if (tacZNamespaces.contains(rl.getNamespace())) {
+        if (isTacZ) {
             Item tacZGun = getTacZGunItem();
             if (tacZGun != null && tacZGun != Items.AIR) {
                 ItemStack stack = new ItemStack(tacZGun);
                 CompoundTag tag = new CompoundTag();
                 tag.putString("GunId", weaponId);
-                tag.putInt("SelectFire", 1); // default to full-auto
+                tag.putInt("SelectFire", 1);
                 stack.setTag(tag);
                 return stack;
             }

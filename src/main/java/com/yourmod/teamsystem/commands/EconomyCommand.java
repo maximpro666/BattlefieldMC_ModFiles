@@ -2,8 +2,7 @@ package com.yourmod.teamsystem.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.yourmod.teamsystem.TeamSystem;
-import com.yourmod.teamsystem.core.EconomyManager;
-import net.minecraft.ChatFormatting;
+import com.yourmod.teamsystem.core.BattlefieldRuntime;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -25,18 +24,13 @@ public class EconomyCommand {
             return 0;
         }
 
-        EconomyManager econ = TeamSystem.getEconomyManager();
-        if (econ == null) {
-            source.sendFailure(Component.literal("Economy not available"));
-            return 0;
-        }
-
-        int bc = econ.getBC(player.getUUID());
-        int sp = econ.getSP(player.getUUID());
+        BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+        int bc = runtime.getBC(player.getUUID());
+        int wc = runtime.getWC(player.getUUID());
 
         source.sendSuccess(() -> Component.literal("§6=== Your Balance ==="), false);
-        source.sendSuccess(() -> Component.literal("§eBattleCredits: §f" + bc + " BC"), false);
-        source.sendSuccess(() -> Component.literal("§aScorePoints: §f" + sp + " SP"), false);
+        source.sendSuccess(() -> Component.literal("§eBattle Coins: §f" + bc + " BC §7(матчевые)"), false);
+        source.sendSuccess(() -> Component.literal("§bWar Credits: §f" + wc + " WC §7(постоянные)"), false);
         return 1;
     }
 }

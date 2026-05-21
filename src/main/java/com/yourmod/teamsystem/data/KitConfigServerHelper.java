@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.yourmod.teamsystem.TeamSystem;
-import com.yourmod.teamsystem.core.EconomyManager;
+import com.yourmod.teamsystem.core.BattlefieldRuntime;
 import com.yourmod.teamsystem.core.KitManager;
 import com.yourmod.teamsystem.core.PlayerCombatData;
 import com.yourmod.teamsystem.core.Team;
@@ -37,21 +37,16 @@ public class KitConfigServerHelper {
             return "You are dead — kit will apply on respawn";
         }
 
-        EconomyManager econ = TeamSystem.getEconomyManager();
+        BattlefieldRuntime rt = BattlefieldRuntime.getInstance();
         if (kit.requirements != null) {
             if (data.getRankOrdinal() < kit.requirements.rank)
                 return "Rank too low, need " + kit.requirements.rank;
             if (kit.requirements.team != null && !kit.requirements.team.equalsIgnoreCase(data.getTeam().name()))
                 return "Wrong team for this kit";
             if (kit.requirements.bc_cost > 0) {
-                if (econ == null || econ.getBC(player.getUUID()) < kit.requirements.bc_cost)
+                if (rt.getBC(player.getUUID()) < kit.requirements.bc_cost)
                     return "Not enough BC, need " + kit.requirements.bc_cost;
-                econ.deductBC(player.getUUID(), kit.requirements.bc_cost);
-            }
-            if (kit.requirements.sp_cost > 0) {
-                if (econ == null || econ.getSP(player.getUUID()) < kit.requirements.sp_cost)
-                    return "Not enough SP, need " + kit.requirements.sp_cost;
-                econ.addSP(player.getUUID(), -kit.requirements.sp_cost);
+                rt.deductBC(player.getUUID(), kit.requirements.bc_cost);
             }
         }
 

@@ -13,12 +13,14 @@ public class CaptureZone {
     private final BlockPos min;
     private final BlockPos max;
     private final int captureSeconds;
-    private final boolean main;
+    private final String pointType;
 
     private Team ownerTeam;
     private Team capturingTeam;
     private float progress;
     private final Map<UUID, Double> captureContributions;
+    private int vcRate;
+    private boolean contested;
 
     private static final String TAG_ID = "id";
     private static final String TAG_NAME = "name";
@@ -35,17 +37,17 @@ public class CaptureZone {
     private static final String TAG_PROGRESS = "progress";
 
     public CaptureZone(String id, String name, String dimension, BlockPos pos1, BlockPos pos2, int captureSeconds) {
-        this(id, name, dimension, pos1, pos2, captureSeconds, false);
+        this(id, name, dimension, pos1, pos2, captureSeconds, "small");
     }
 
-    public CaptureZone(String id, String name, String dimension, BlockPos pos1, BlockPos pos2, int captureSeconds, boolean main) {
+    public CaptureZone(String id, String name, String dimension, BlockPos pos1, BlockPos pos2, int captureSeconds, String pointType) {
         this.id = id;
         this.name = name;
         this.dimension = dimension;
         this.min = new BlockPos(Math.min(pos1.getX(), pos2.getX()), Math.min(pos1.getY(), pos2.getY()), Math.min(pos1.getZ(), pos2.getZ()));
         this.max = new BlockPos(Math.max(pos1.getX(), pos2.getX()), Math.max(pos1.getY(), pos2.getY()), Math.max(pos1.getZ(), pos2.getZ()));
         this.captureSeconds = Math.max(1, captureSeconds);
-        this.main = main;
+        this.pointType = pointType;
         this.ownerTeam = Team.SPECTATOR;
         this.capturingTeam = Team.SPECTATOR;
         this.progress = 0.0f;
@@ -58,10 +60,13 @@ public class CaptureZone {
     public BlockPos getMin() { return min; }
     public BlockPos getMax() { return max; }
     public int getCaptureSeconds() { return captureSeconds; }
-    public boolean isMain() { return main; }
+    public boolean isMain() { return "major".equals(pointType); }
+    public String getPointType() { return pointType; }
     public Team getOwnerTeam() { return ownerTeam; }
     public Team getCapturingTeam() { return capturingTeam; }
     public float getProgress() { return progress; }
+    public int getVcRate() { return vcRate; }
+    public void setVcRate(int rate) { this.vcRate = Math.max(0, rate); }
 
     public void setOwnerTeam(Team t) { this.ownerTeam = t; }
     public void setCapturingTeam(Team t) { this.capturingTeam = t; }
@@ -69,6 +74,8 @@ public class CaptureZone {
     public void addProgress(float amount) { this.progress = Math.max(0.0f, Math.min(1.0f, this.progress + amount)); }
 
     public boolean isCaptured() { return ownerTeam.isPlayable() && progress >= 1.0f; }
+    public boolean isContested() { return contested; }
+    public void setContested(boolean c) { this.contested = c; }
 
     public void addContribution(UUID playerUUID, double amount) {
         captureContributions.merge(playerUUID, amount, Double::sum);

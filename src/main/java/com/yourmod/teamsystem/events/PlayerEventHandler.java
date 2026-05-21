@@ -264,6 +264,18 @@ public class PlayerEventHandler {
                 player.getFoodData().setFoodLevel(20);
                 player.getFoodData().setSaturation(5.0f);
             }
+
+            GameManager gm = TeamSystem.getGameManager();
+            if (gm != null && gm.isPlaying()) {
+                BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+                if (player.zza != 0 || player.xxa != 0) {
+                    double dx = player.getX() - player.xOld;
+                    double dz = player.getZ() - player.zOld;
+                    if (dx * dx + dz * dz > 0.001) {
+                        runtime.addActivity(player.getUUID(), BattlefieldRuntime.SCORE_MOVE);
+                    }
+                }
+            }
         }
     }
 
@@ -272,8 +284,7 @@ public class PlayerEventHandler {
         if (event.getEntity() instanceof ServerPlayer player) {
             UUID uuid = player.getUUID();
             RateLimiter.removePlayer(uuid);
-            EconomyManager econ = TeamSystem.getEconomyManager();
-            if (econ != null) econ.clearPlayer(uuid);
+            BattlefieldRuntime.getInstance().resetForPlayer(uuid);
             KitManager km = TeamSystem.getKitManager();
             if (km != null) km.clearPlayerCooldowns(uuid);
             SquadManager sm = TeamSystem.getSquadManager();

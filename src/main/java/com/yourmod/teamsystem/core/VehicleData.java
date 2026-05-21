@@ -9,6 +9,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 
+@Deprecated
 public class VehicleData {
     private String vehicleId;
     private String displayName;

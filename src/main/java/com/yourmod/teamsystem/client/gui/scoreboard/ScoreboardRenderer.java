@@ -2,6 +2,7 @@ package com.yourmod.teamsystem.client.gui.scoreboard;
 
 import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
+import com.yourmod.teamsystem.client.gui.component.RenderHelper;
 import com.yourmod.teamsystem.client.gui.scoreboard.data.PlayerScoreboardData;
 import com.yourmod.teamsystem.client.gui.scoreboard.data.RankDefinition;
 import com.yourmod.teamsystem.client.gui.scoreboard.data.ScoreboardDataProvider;
@@ -13,13 +14,22 @@ import java.util.*;
 
 public class ScoreboardRenderer {
 
-    private static final int ROW_H = 13;
-    private static final int SECTION_H = 15;
-    private static final int PADDING = 4;
-    private static final int ICON_SIZE = 10;
-    private static final int TEAM_HEADER_H = 13;
-    private static final int COLUMNS_GAP = 16;
+    private static final int ROW_H = 15;
+    private static final int SECTION_H = 17;
+    private static final int PADDING = 6;
+    private static final int ICON_SIZE = 11;
+    private static final int TEAM_HEADER_H = 20;
+    private static final int COL_HEADER_H = 14;
+    private static final int COLUMNS_GAP = 24;
     private static final int PANEL_TOP = 18;
+
+    private static final int COL_RANK = 32;
+    private static final int COL_NAME = 90;
+    private static final int COL_KILLS = 30;
+    private static final int COL_DEATHS = 30;
+    private static final int COL_KD = 36;
+    private static final int COL_PING = 34;
+    private static final int COL_GAP = 4;
 
     private boolean visible = false;
     private float prevAlpha = 0f;
@@ -33,13 +43,8 @@ public class ScoreboardRenderer {
         if (v) scrollOffset = 0;
     }
 
-    public boolean isVisible() {
-        return visible;
-    }
-
-    public float getAlpha() {
-        return prevAlpha;
-    }
+    public boolean isVisible() { return visible; }
+    public float getAlpha() { return prevAlpha; }
 
     public void scrollBy(int delta) {
         scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset + delta));
@@ -70,14 +75,11 @@ public class ScoreboardRenderer {
         Map<String, List<PlayerScoreboardData>> natoGrouped = groupBySquad(nato);
         Map<String, List<PlayerScoreboardData>> russiaGrouped = groupBySquad(russia);
 
-        int rankW = ICON_SIZE + 2 + font.width("Gen.") + 2;
-        int baseDataW = rankW + COL_CALLSIGN + COL_NICK + COL_KD + COL_PING + COL_GAP * 4;
-        int minColW = baseDataW + PADDING * 2;
+        int minColW = COL_RANK + COL_NAME + COL_KILLS + COL_DEATHS + COL_KD + COL_PING + COL_GAP * 5 + PADDING * 2;
         int availableW = screenWidth - PADDING * 2 - COLUMNS_GAP;
-        int colW = Math.max(minColW, Math.min(availableW / 2, baseDataW + 40));
-
-        if (colW * 2 + COLUMNS_GAP + PADDING * 2 > screenWidth) {
-            colW = (screenWidth - COLUMNS_GAP - PADDING * 2) / 2;
+        int colW = Math.max(minColW, Math.min(availableW / 2, 460));
+        if (colW * 2 + COLUMNS_GAP > screenWidth) {
+            colW = (screenWidth - COLUMNS_GAP) / 2;
         }
 
         int totalW = colW * 2 + COLUMNS_GAP;
@@ -88,31 +90,27 @@ public class ScoreboardRenderer {
         int russiaRows = countRows(russiaGrouped);
         int maxRows = Math.max(natoRows, russiaRows);
         int contentH = maxRows * ROW_H + PADDING * 2;
-        int maxH = screenHeight - panelY - PADDING - TEAM_HEADER_H;
+        int maxH = screenHeight - panelY - PADDING - TEAM_HEADER_H - COL_HEADER_H;
         if (maxH <= 0) return;
         int panelH = Math.min(contentH, maxH);
 
         maxScroll = Math.max(0, contentH - maxH);
 
-        g.fill(panelX, panelY, panelX + totalW, panelY + panelH + TEAM_HEADER_H,
-                AnimationHelper.withAlpha(UITheme.BG_SCREEN, alpha));
+        RenderHelper.dropShadow(g, panelX, panelY, totalW, panelH + TEAM_HEADER_H + COL_HEADER_H, 5, (int) (alpha * 0.7f));
+        RenderHelper.roundedRect(g, panelX, panelY, totalW, panelH + TEAM_HEADER_H + COL_HEADER_H, 4,
+            AnimationHelper.withAlpha(UITheme.BG_SCREEN, alpha));
 
-        drawTeamColumn(g, font, panelX, panelY, colW, panelH, natoGrouped, "NATO", nato.size(), alpha, 0xFF1C5FAD);
-        drawTeamColumn(g, font, panelX + colW + COLUMNS_GAP, panelY, colW, panelH, russiaGrouped, "RUSSIA", russia.size(), alpha, 0xFFAD1C1C);
+        drawTeamColumn(g, font, panelX, panelY, colW, panelH, natoGrouped, "NATO", nato.size(), alpha, UITheme.TEAM_NATO);
+        drawTeamColumn(g, font, panelX + colW + COLUMNS_GAP, panelY, colW, panelH, russiaGrouped, "RUSSIA", russia.size(), alpha, UITheme.TEAM_RUSSIA);
 
         if (maxScroll > 0) {
             String scrollHint = (scrollOffset > 0 ? "\u25B2 " : "") + "\u25BC";
             int hintW = font.width(scrollHint);
-            g.drawString(font, scrollHint, screenWidth / 2 - hintW / 2, panelY + panelH + TEAM_HEADER_H + 2,
-                    AnimationHelper.withAlpha(0xFF808080, alpha));
+            g.drawString(font, scrollHint, screenWidth / 2 - hintW / 2,
+                panelY + panelH + TEAM_HEADER_H + COL_HEADER_H + 3,
+                AnimationHelper.withAlpha(0xFF808080, alpha));
         }
     }
-
-    private static final int COL_CALLSIGN = 60;
-    private static final int COL_NICK = 60;
-    private static final int COL_KD = 36;
-    private static final int COL_PING = 30;
-    private static final int COL_GAP = 2;
 
     private void sortBySquad(List<PlayerScoreboardData> list) {
         list.sort((a, b) -> {
@@ -146,100 +144,54 @@ public class ScoreboardRenderer {
                                  Map<String, List<PlayerScoreboardData>> grouped, String teamName,
                                  int playerCount, int alpha, int teamColor) {
         int headerY = panelY;
-        int alphaTeam = teamColor & 0x00FFFFFF | (alpha << 24);
-        g.drawString(font, teamName + " (" + playerCount + ")", x + PADDING, headerY + 3, alphaTeam);
-        g.fill(x, headerY + TEAM_HEADER_H - 1, x + colW, headerY + TEAM_HEADER_H,
-                AnimationHelper.withAlpha(teamColor, alpha / 3));
+
+        int headerBg = teamColor & 0x00FFFFFF | 0x44000000;
+        RenderHelper.roundedRect(g, x, headerY, colW, TEAM_HEADER_H, 3,
+            AnimationHelper.withAlpha(headerBg, Math.min(255, alpha)));
+
+        g.fill(x, headerY + TEAM_HEADER_H - 2, x + colW, headerY + TEAM_HEADER_H,
+            AnimationHelper.withAlpha(teamColor, alpha / 2));
+
+        String headerText = teamName;
+        int hw = font.width(headerText);
+        g.drawString(font, headerText, x + PADDING, headerY + 5,
+            AnimationHelper.withAlpha(teamColor, alpha));
+
+        String countStr = "(" + playerCount + ")";
+        g.drawString(font, countStr, x + PADDING + hw + 4, headerY + 5,
+            AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int) (alpha * 0.8f)));
+
+        int colHeaderY = headerY + TEAM_HEADER_H;
+        g.fill(x, colHeaderY, x + colW, colHeaderY + COL_HEADER_H,
+            AnimationHelper.withAlpha(UITheme.BG_SURFACE, (int) (alpha * 0.85f)));
+
+        drawColumnHeaders(g, font, x, colHeaderY, colW, alpha);
+
+        g.fill(x, colHeaderY + COL_HEADER_H - 1, x + colW, colHeaderY + COL_HEADER_H,
+            AnimationHelper.withAlpha(UITheme.BORDER, alpha / 3));
 
         if (panelH > 0) {
-            g.enableScissor(x, headerY + TEAM_HEADER_H, x + colW, headerY + TEAM_HEADER_H + panelH);
+            g.enableScissor(x, colHeaderY + COL_HEADER_H, x + colW, colHeaderY + COL_HEADER_H + panelH);
         }
 
-        int cy = headerY + TEAM_HEADER_H - scrollOffset;
+        int cy = colHeaderY + COL_HEADER_H - scrollOffset;
         int rowX = x + PADDING;
 
         for (Map.Entry<String, List<PlayerScoreboardData>> section : grouped.entrySet()) {
-            if (cy + SECTION_H > headerY + TEAM_HEADER_H - ROW_H &&
-                cy < headerY + TEAM_HEADER_H + panelH) {
-                g.drawString(font, section.getKey(), rowX, cy + 2,
-                        AnimationHelper.withAlpha(UITheme.SQUAD_LABEL, alpha));
+            if (cy + SECTION_H > colHeaderY + COL_HEADER_H - ROW_H &&
+                cy < colHeaderY + COL_HEADER_H + panelH) {
+                String sqLabel = section.getKey();
+                g.drawString(font, sqLabel, rowX, cy + 3,
+                    AnimationHelper.withAlpha(UITheme.SQUAD_LABEL, alpha));
                 g.fill(x + PADDING, cy + SECTION_H - 1, x + colW - PADDING, cy + SECTION_H,
-                        AnimationHelper.withAlpha(UITheme.SQUAD_LINE, alpha));
+                    AnimationHelper.withAlpha(UITheme.SQUAD_LINE, alpha));
             }
             cy += SECTION_H;
 
             for (PlayerScoreboardData pd : section.getValue()) {
-                if (cy + ROW_H > headerY + TEAM_HEADER_H - ROW_H &&
-                    cy < headerY + TEAM_HEADER_H + panelH) {
-                    int rowY = cy;
-
-                    if (pd.isSelf) {
-                        g.fill(x, rowY, x + colW, rowY + ROW_H, AnimationHelper.withAlpha(UITheme.SELF_BG, alpha));
-                        g.fill(x, rowY, x + 2, rowY + ROW_H, AnimationHelper.withAlpha(UITheme.SELF_BORDER, alpha));
-                    }
-
-                    RankDefinition rankDef = RankDefinition.get(pd.rankId);
-                    int iconY = rowY + (ROW_H - ICON_SIZE) / 2;
-                    g.blit(rankDef.iconTexture, rowX, iconY, 0, rankDef.getIconVOffset(), ICON_SIZE, ICON_SIZE, 16, 160);
-                    int cx = rowX + ICON_SIZE + 2;
-
-                    String rankStr = rankDef.shortName;
-                    g.drawString(font, rankStr, cx, rowY + 3, AnimationHelper.withAlpha(rankDef.color, alpha));
-                    cx += font.width(rankStr) + 2;
-
-                    int dataW = colW - (cx - x) - PADDING;
-                    if (dataW <= 0) dataW = 10;
-
-                    int callsignW = Math.min(COL_CALLSIGN, dataW * 35 / 100);
-                    int nickW = Math.min(COL_NICK, dataW * 30 / 100);
-                    int kdW = Math.min(COL_KD, dataW * 15 / 100);
-                    int donateW = Math.min(50, dataW * 10 / 100);
-                    int pingW = Math.min(COL_PING, dataW * 10 / 100);
-
-                    String callsign = pd.callsign;
-                    if (font.width(callsign) > callsignW) {
-                        while (font.width(callsign + "...") > callsignW && callsign.length() > 1)
-                            callsign = callsign.substring(0, callsign.length() - 1);
-                        callsign += "...";
-                    }
-                    g.drawString(font, callsign, cx, rowY + 3, AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, alpha));
-                    cx += callsignW + COL_GAP;
-
-                    String nickStr = pd.nick != null && !pd.nick.isEmpty() ? pd.nick : "-";
-                    if (font.width(nickStr) > nickW) {
-                        while (font.width(nickStr + "...") > nickW && nickStr.length() > 1)
-                            nickStr = nickStr.substring(0, nickStr.length() - 1);
-                        nickStr += "...";
-                    }
-                    g.drawString(font, nickStr, cx, rowY + 3, AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, alpha));
-                    cx += nickW + COL_GAP;
-
-                    String kdStr = pd.kills + "/" + pd.deaths;
-                    g.drawString(font, kdStr, cx, rowY + 3, AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, alpha));
-                    cx += kdW + COL_GAP;
-
-                    if (pd.donateLevel != PlayerScoreboardData.DonateLevel.NONE) {
-                        String donStr = switch (pd.donateLevel) {
-                            case VIP -> "VIP";
-                            case ELITE -> "ELT";
-                            case GENERAL -> "GEN";
-                            default -> "";
-                        };
-                        int donCol = switch (pd.donateLevel) {
-                            case VIP -> UITheme.DONATE_VIP;
-                            case ELITE -> UITheme.DONATE_ELITE_A;
-                            case GENERAL -> UITheme.DONATE_GENERAL;
-                            default -> 0;
-                        };
-                        g.drawString(font, donStr, cx, rowY + 3, AnimationHelper.withAlpha(donCol, alpha));
-                    }
-                    cx += donateW + COL_GAP;
-
-                    int pingColor;
-                    if (pd.pingMs < 80) pingColor = UITheme.PING_LOW;
-                    else if (pd.pingMs < 200) pingColor = UITheme.PING_MID;
-                    else pingColor = UITheme.PING_HIGH;
-                    g.drawString(font, pd.pingMs + "ms", cx, rowY + 3, AnimationHelper.withAlpha(pingColor, alpha));
+                if (cy + ROW_H > colHeaderY + COL_HEADER_H - ROW_H &&
+                    cy < colHeaderY + COL_HEADER_H + panelH) {
+                    drawPlayerRow(g, font, x, cy, colW, pd, alpha);
                 }
                 cy += ROW_H;
             }
@@ -248,5 +200,85 @@ public class ScoreboardRenderer {
         if (panelH > 0) {
             g.disableScissor();
         }
+    }
+
+    private void drawColumnHeaders(GuiGraphics g, Font font, int x, int y, int colW, int alpha) {
+        int cx = x + PADDING + ICON_SIZE + 4;
+        int ty = y + 4;
+        int hdrColor = AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int) (alpha * 0.8f));
+
+        g.drawString(font, "Rank", cx, ty, hdrColor);
+        cx += COL_RANK + COL_GAP;
+        g.drawString(font, "Name", cx, ty, hdrColor);
+        cx += COL_NAME + COL_GAP;
+        g.drawString(font, "K", cx, ty, hdrColor);
+        cx += COL_KILLS + COL_GAP;
+        g.drawString(font, "D", cx, ty, hdrColor);
+        cx += COL_DEATHS + COL_GAP;
+        g.drawString(font, "K/D", cx, ty, hdrColor);
+        cx += COL_KD + COL_GAP;
+        g.drawString(font, "Ping", cx, ty, hdrColor);
+    }
+
+    private void drawPlayerRow(GuiGraphics g, Font font, int x, int rowY, int colW,
+                                PlayerScoreboardData pd, int alpha) {
+        int rowX = x + PADDING;
+
+        if (pd.isSelf) {
+            g.fill(x, rowY, x + colW, rowY + ROW_H,
+                AnimationHelper.withAlpha(UITheme.SELF_BG, alpha));
+            g.fill(x, rowY, x + 3, rowY + ROW_H,
+                AnimationHelper.withAlpha(UITheme.ACCENT, (int) (alpha * 0.8f)));
+        }
+
+        RankDefinition rankDef = RankDefinition.get(pd.rankId);
+        int iconY = rowY + (ROW_H - ICON_SIZE) / 2;
+        g.blit(rankDef.iconTexture, rowX + 2, iconY, 0, rankDef.getIconVOffset(),
+            ICON_SIZE, ICON_SIZE, 16, 160);
+
+        int cx = rowX + 2 + ICON_SIZE + 2;
+
+        String rankStr = rankDef.shortName;
+        g.drawString(font, rankStr, cx, rowY + 4, AnimationHelper.withAlpha(rankDef.color, alpha));
+        cx += COL_RANK + COL_GAP;
+
+        String nameStr = truncateText(font, pd.callsign, COL_NAME);
+        g.drawString(font, nameStr, cx, rowY + 4, AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, alpha));
+        cx += COL_NAME + COL_GAP;
+
+        String killsStr = String.valueOf(pd.kills);
+        g.drawString(font, killsStr, cx, rowY + 4, AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, alpha));
+        cx += COL_KILLS + COL_GAP;
+
+        String deathsStr = String.valueOf(pd.deaths);
+        g.drawString(font, deathsStr, cx, rowY + 4, AnimationHelper.withAlpha(UITheme.TEXT_MUTED, alpha));
+        cx += COL_DEATHS + COL_GAP;
+
+        float kd = pd.deaths > 0 ? (float) pd.kills / pd.deaths : pd.kills;
+        String kdStr = String.format("%.1f", kd);
+        int kdColor = kd >= 2.0f ? UITheme.STATUS_OK : kd >= 1.0f ? UITheme.STATUS_WARN : UITheme.STATUS_DANGER;
+        g.drawString(font, kdStr, cx, rowY + 4, AnimationHelper.withAlpha(kdColor, alpha));
+        cx += COL_KD + COL_GAP;
+
+        String pingStr = formatPing(pd.pingMs);
+        int pingColor;
+        if (pd.pingMs < 80) pingColor = UITheme.PING_LOW;
+        else if (pd.pingMs < 200) pingColor = UITheme.PING_MID;
+        else pingColor = UITheme.PING_HIGH;
+        g.drawString(font, pingStr, cx, rowY + 4, AnimationHelper.withAlpha(pingColor, alpha));
+    }
+
+    private String formatPing(int ms) {
+        if (ms >= 1000) return (ms / 1000) + "s";
+        return ms + "ms";
+    }
+
+    private String truncateText(Font font, String text, int maxWidth) {
+        if (font.width(text) <= maxWidth) return text;
+        String result = text;
+        while (font.width(result + "...") > maxWidth && result.length() > 1) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result + "...";
     }
 }

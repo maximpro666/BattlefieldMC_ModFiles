@@ -2,8 +2,11 @@ package com.yourmod.teamsystem.core;
 
 import com.google.gson.*;
 import com.yourmod.teamsystem.TeamSystem;
-import net.minecraft.core.BlockPos;
+import com.yourmod.teamsystem.vehicle.VehicleDefinition;
+import com.yourmod.teamsystem.vehicle.VehicleDefinitionRegistry;
+import com.yourmod.teamsystem.vehicle.adapter.VehicleAdapterRegistry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -16,37 +19,38 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class VehicleManager {
-    private static final String CONFIG_DIR = "config/teamsystem";
-    private static final String VEHICLES_FILE = CONFIG_DIR + "/vehicles.json";
-    private static final String COOLDOWN_FILE = CONFIG_DIR + "/vehicle_cooldowns.json";
+    private static final String COOLDOWN_FILE = "config/teamsystem/vehicle_cooldowns.json";
 
-    private Map<String, VehicleData> vehicles = new HashMap<>();
     private final Set<UUID> spawnedVehicles = new HashSet<>();
     private final Map<UUID, UUID> vehicleToOwner = new HashMap<>();
     private final Set<UUID> playersHidingPlaques = new HashSet<>();
     private final Map<String, Long> cooldowns = new HashMap<>();
-    private static final Class<?> SUPERB_VEHICLE_CLASS;
-
-    static {
-        Class<?> cls = null;
-        try {
-            cls = Class.forName("com.atsuishio.superbwarfare.entity.vehicle.base.VehicleEntity");
-            TeamSystem.LOGGER.info("Superb Warfare vehicle system detected");
-        } catch (ClassNotFoundException e) {
-            cls = null;
-        }
-        SUPERB_VEHICLE_CLASS = cls;
-    }
+    private boolean cooldownsLoaded = false;
 
     public VehicleManager() {
-        loadVehicles();
         loadCooldowns();
     }
 
-    public static boolean isSuperbVehicleEntity(Entity entity) {
-        if (SUPERB_VEHICLE_CLASS == null) return false;
-        return SUPERB_VEHICLE_CLASS.isAssignableFrom(entity.getClass());
+    // ===== Vehicle Lookup =====
+
+    public VehicleDefinition getDefinition(String vehicleId) {
+        return BattlefieldRuntime.getInstance().getVehicleDefRegistry().get(vehicleId);
     }
+
+    @Deprecated
+    public VehicleData getVehicle(String vehicleId) {
+        VehicleDefinition def = getDefinition(vehicleId);
+        if (def != null) {
+            VehicleData data = new VehicleData(vehicleId, def.getDisplayName(),
+                Team.SPECTATOR, 0, def.getTicketCost());
+            data.setCooldownSeconds(def.getCooldownSeconds());
+            data.setMaxActive(4);
+            return data;
+        }
+        return null;
+    }
+
+    // ===== Spawned Vehicle Tracking =====
 
     public void registerSpawnedVehicle(Entity ent, UUID ownerUUID) {
         spawnedVehicles.add(ent.getUUID());
@@ -58,11 +62,12 @@ public class VehicleManager {
     }
 
     public boolean isVehicleEntityType(Entity entity) {
+        VehicleAdapterRegistry registry = BattlefieldRuntime.getInstance().getVehicleAdapterRegistry();
+        if (registry.findAdapter(entity) != null) return true;
         String entityTypeId = EntityType.getKey(entity.getType()).toString();
-        for (VehicleData v : vehicles.values()) {
-            if (entityTypeId.equals(v.getEntityType())) return true;
+        for (VehicleDefinition def : BattlefieldRuntime.getInstance().getVehicleDefRegistry().getAll()) {
+            if (entityTypeId.equals(def.getEntityType())) return true;
         }
-        if (isSuperbVehicleEntity(entity)) return true;
         if (entity.getTeam() != null) {
             String teamName = entity.getTeam().getName();
             if ("NATO".equalsIgnoreCase(teamName) || "RUSSIA".equalsIgnoreCase(teamName)) return true;
@@ -104,6 +109,18 @@ public class VehicleManager {
         return count;
     }
 
+    // ===== Upkeep System Access =====
+
+    public Collection<UUID> getSpawnedVehicleIds() {
+        return new ArrayList<>(spawnedVehicles);
+    }
+
+    public UUID getOwnerForVehicle(UUID vehicleId) {
+        return vehicleToOwner.get(vehicleId);
+    }
+
+    // ===== Cooldowns =====
+
     public boolean isOnCooldown(Team team, String vehicleId) {
         String key = team.name() + ":" + vehicleId;
         Long expiry = cooldowns.get(key);
@@ -122,6 +139,8 @@ public class VehicleManager {
         saveCooldowns();
     }
 
+    // ===== Plaque Visibility =====
+
     public boolean isHidingPlaques(UUID playerUUID) {
         return playersHidingPlaques.contains(playerUUID);
     }
@@ -136,34 +155,44 @@ public class VehicleManager {
         }
     }
 
+    // ===== Buy Vehicle =====
+
     public String buyVehicle(ServerPlayer player, String vehicleId, TeamManager teamManager) {
-        VehicleData vehicle = getVehicle(vehicleId);
-        if (vehicle == null) return "§cТехника не найдена: " + vehicleId;
+        VehicleDefinition def = getDefinition(vehicleId);
+        if (def == null) return "§cТехника не найдена: " + vehicleId;
 
         Team playerTeam = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
         if (!playerTeam.isPlayable()) return "§cВы не в команде";
 
         int playerRank = teamManager.getOrCreatePlayerData(player.getUUID()).getRankOrdinal();
-        if (vehicle.getTeam() != Team.SPECTATOR && vehicle.getTeam() != playerTeam) return "§cТехника недоступна для вашей команды";
-        if (playerRank < vehicle.getMinRankOrdinal()) return "§cТребуется ранг " + vehicle.getMinRankOrdinal();
+        if (playerRank < 0) return "§cТребуется ранг " + 0;
 
         if (isOnCooldown(playerTeam, vehicleId)) {
-            long remaining = (cooldowns.get(playerTeam.getName() + ":" + vehicleId) - System.currentTimeMillis()) / 1000;
+            long remaining = (cooldowns.get(playerTeam.name() + ":" + vehicleId) - System.currentTimeMillis()) / 1000;
             return "§cКд " + remaining + " сек";
         }
 
-        int activeCount = countActiveVehicles(playerTeam);
-        if (activeCount >= vehicle.getMaxActive()) return "§cЛимит техники: " + vehicle.getMaxActive();
+        BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+        int bcCost = def.getCosts().getDeployBC();
+        int vcCost = def.getCosts().getDeployVC();
 
-        TicketManager ticketMgr = TeamSystem.getTicketManager();
-        if (ticketMgr != null) {
-            int teamTickets = ticketMgr.getTickets(playerTeam);
-            if (teamTickets < vehicle.getTicketCost()) return "§cНе хватает билетов (нужно " + vehicle.getTicketCost() + ")";
-            ticketMgr.setTickets(playerTeam, teamTickets - vehicle.getTicketCost());
+        if (bcCost > 0 && !runtime.deductBC(player.getUUID(), bcCost)) {
+            return "§cНе хватает BC (нужно " + bcCost + ")";
+        }
+        if (vcCost > 0 && !runtime.deductVC(playerTeam, vcCost)) {
+            if (bcCost > 0) runtime.addBC(player.getUUID(), bcCost);
+            return "§cНе хватает VC (нужно " + vcCost + ")";
         }
 
-        EntityType<?> type = vehicle.resolveEntityType();
-        if (type == null) return "§cНеверный тип сущности";
+        int activeCount = countActiveVehicles(playerTeam);
+        int popLimit = def.getPopulationLimit(runtime.getActiveFrontlineCount());
+        if (activeCount >= popLimit) return "§cЛимит техники: " + popLimit;
+
+        String entityTypeStr = def.getEntityType();
+        if (entityTypeStr == null || entityTypeStr.isEmpty()) return "§centityType не указан";
+
+        EntityType<?> type = def.resolveEntityType();
+        if (type == null) return "§cНеверный тип сущности: " + entityTypeStr;
 
         GameManager game = TeamSystem.getGameManager();
         MapConfig map = game != null ? game.getCurrentMap() : null;
@@ -174,7 +203,7 @@ public class VehicleManager {
         }
 
         ServerLevel level = (ServerLevel) player.level();
-        CompoundTag nbt = vehicle.resolveNbt();
+        CompoundTag nbt = def.resolveNbt();
         if (nbt != null) {
             nbt.remove("UUID"); nbt.remove("uuid"); nbt.remove("Uuid");
         }
@@ -190,71 +219,39 @@ public class VehicleManager {
         level.addFreshEntity(ent);
         player.startRiding(ent, true);
         registerSpawnedVehicle(ent, player.getUUID());
-        setCooldown(playerTeam, vehicleId, vehicle.getCooldownSeconds());
+        setCooldown(playerTeam, vehicleId, def.getCooldownSeconds());
+
+        runtime.trackVehicleSpawn(ent.getUUID(), playerTeam, vehicleId);
 
         TeamSystem.LOGGER.info("Player {} bought vehicle {} for team {}", player.getName().getString(), vehicleId, playerTeam);
-        return null; // success
+        return null;
     }
 
-    public void loadVehicles() {
-        try {
-            Path configPath = Paths.get(VEHICLES_FILE);
-            if (Files.exists(configPath)) {
-                String content = Files.readString(configPath);
-                JsonArray arr = JsonParser.parseString(content).getAsJsonArray();
-                for (JsonElement elem : arr) {
-                    VehicleData vehicle = VehicleData.fromJson(elem.getAsJsonObject());
-                    vehicles.put(vehicle.getVehicleId(), vehicle);
-                }
-                TeamSystem.LOGGER.info("Loaded {} vehicles", vehicles.size());
-            }
-        } catch (Exception e) {
-            TeamSystem.LOGGER.warn("Failed to load vehicles: {}", e.getMessage());
-        }
-    }
+    // ===== Available Vehicles =====
 
-    public void saveVehicles() {
-        try {
-            Path configPath = Paths.get(CONFIG_DIR);
-            Files.createDirectories(configPath);
-            JsonArray arr = new JsonArray();
-            for (VehicleData vehicle : vehicles.values()) arr.add(vehicle.toJson());
-            Files.writeString(Paths.get(VEHICLES_FILE), new GsonBuilder().setPrettyPrinting().create().toJson(arr));
-            TeamSystem.LOGGER.info("Saved {} vehicles", vehicles.size());
-        } catch (Exception e) {
-            TeamSystem.LOGGER.warn("Failed to save vehicles: {}", e.getMessage());
-        }
-    }
-
-    public void addVehicle(VehicleData vehicle) {
-        vehicles.put(vehicle.getVehicleId(), vehicle);
-        saveVehicles();
-    }
-
-    public void removeVehicle(String vehicleId) {
-        if (vehicles.remove(vehicleId) != null) saveVehicles();
-    }
-
-    public VehicleData getVehicle(String vehicleId) {
-        return vehicles.get(vehicleId);
-    }
-
-    public List<VehicleData> getAvailableVehicles(ServerPlayer player, TeamManager teamManager) {
-        List<VehicleData> available = new ArrayList<>();
+    public List<VehicleDefinition> getAvailableDefinitions(ServerPlayer player, TeamManager teamManager) {
+        List<VehicleDefinition> available = new ArrayList<>();
+        VehicleDefinitionRegistry reg = BattlefieldRuntime.getInstance().getVehicleDefRegistry();
         Team playerTeam = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
-        int playerRank = teamManager.getOrCreatePlayerData(player.getUUID()).getRankOrdinal();
-        for (VehicleData vehicle : vehicles.values()) {
-            if ((vehicle.getTeam() == Team.SPECTATOR || vehicle.getTeam() == playerTeam) &&
-                playerRank >= vehicle.getMinRankOrdinal()) {
-                available.add(vehicle);
-            }
+        for (VehicleDefinition def : reg.getAll()) {
+            available.add(def);
         }
         return available;
     }
 
-    public Map<String, VehicleData> getVehicles() {
-        return vehicles;
+    @Deprecated
+    public List<VehicleData> getAvailableVehicles(ServerPlayer player, TeamManager teamManager) {
+        List<VehicleData> result = new ArrayList<>();
+        for (VehicleDefinition def : getAvailableDefinitions(player, teamManager)) {
+            VehicleData data = new VehicleData(def.getId(), def.getDisplayName(),
+                Team.SPECTATOR, 0, def.getTicketCost());
+            data.setCooldownSeconds(def.getCooldownSeconds());
+            result.add(data);
+        }
+        return result;
     }
+
+    // ===== Cooldown Persistence =====
 
     private void loadCooldowns() {
         try {
@@ -275,7 +272,7 @@ public class VehicleManager {
 
     private void saveCooldowns() {
         try {
-            Path configPath = Paths.get(CONFIG_DIR);
+            Path configPath = Paths.get("config/teamsystem");
             Files.createDirectories(configPath);
             JsonObject obj = new JsonObject();
             long now = System.currentTimeMillis();

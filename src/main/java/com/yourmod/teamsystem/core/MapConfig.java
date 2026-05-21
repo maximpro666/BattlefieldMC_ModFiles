@@ -50,6 +50,7 @@ public class MapConfig {
         public double radius;
         public double captureSpeed;
         public boolean main;
+        public String type = "small";
 
         public CapturePointEntry() {
             this.radius = 5.0;
@@ -65,6 +66,14 @@ public class MapConfig {
             this.radius = radius;
             this.captureSpeed = captureSpeed;
             this.main = main;
+        }
+
+        public int getVcRate() {
+            return switch (type.toLowerCase()) {
+                case "major" -> 200;
+                case "medium" -> 100;
+                default -> 50;
+            };
         }
     }
 

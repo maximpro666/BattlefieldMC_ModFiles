@@ -7,10 +7,13 @@ import com.yourmod.teamsystem.client.gui.renderer.CaptureParticles;
 import com.yourmod.teamsystem.client.gui.renderer.CustomNametagRenderer;
 import com.yourmod.teamsystem.client.gui.renderer.WorldMarkerRenderer;
 import com.yourmod.teamsystem.client.gui.screen.ClassSelectionScreen;
+import com.yourmod.teamsystem.client.gui.screen.ResupplyScreen;
+import com.yourmod.teamsystem.client.gui.screen.VehicleSelectionScreen;
 import com.yourmod.teamsystem.client.journeymap.JourneyMapIntegration;
 import com.yourmod.teamsystem.core.GameManager;
+import com.yourmod.teamsystem.core.Team;
+import com.yourmod.teamsystem.network.PacketHandler;
 import net.minecraft.client.Camera;
-import java.util.List;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -39,6 +42,12 @@ public class ClientSetup {
         "key.categories.teamsystem"
     );
 
+    public static final KeyMapping OPEN_VEHICLE_KEY = new KeyMapping(
+        "key.teamsystem.open_vehicle",
+        GLFW.GLFW_KEY_H,
+        "key.categories.teamsystem"
+    );
+
     public static final KeyMapping SQUAD_VOICE_KEY = new KeyMapping(
         "key.teamsystem.squad_voice",
         GLFW.GLFW_KEY_V,
@@ -51,13 +60,21 @@ public class ClientSetup {
         "key.categories.teamsystem"
     );
 
+    public static final KeyMapping REQUEST_AMMO_KEY = new KeyMapping(
+        "key.teamsystem.request_ammo",
+        GLFW.GLFW_KEY_R,
+        "key.categories.teamsystem"
+    );
+
     @Mod.EventBusSubscriber(modid = "teamsystem", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModBus {
         @SubscribeEvent
         public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
             event.register(OPEN_KIT_VEHICLE_KEY);
+            event.register(OPEN_VEHICLE_KEY);
             event.register(SQUAD_VOICE_KEY);
             event.register(TEAM_VOICE_KEY);
+            event.register(REQUEST_AMMO_KEY);
         }
 
         @SubscribeEvent
@@ -80,10 +97,18 @@ public class ClientSetup {
         }
 
         if (key == SQUAD_VOICE_KEY.getKey().getValue()) {
-            ClientVoiceHandler.setSquadPtt(action == GLFW.GLFW_PRESS);
+            if (action == GLFW.GLFW_PRESS) {
+                ClientVoiceHandler.setSquadPtt(true);
+            } else if (action == GLFW.GLFW_RELEASE) {
+                ClientVoiceHandler.setSquadPtt(false);
+            }
         }
         if (key == TEAM_VOICE_KEY.getKey().getValue()) {
-            ClientVoiceHandler.setTeamPtt(action == GLFW.GLFW_PRESS);
+            if (action == GLFW.GLFW_PRESS) {
+                ClientVoiceHandler.setTeamPtt(true);
+            } else if (action == GLFW.GLFW_RELEASE) {
+                ClientVoiceHandler.setTeamPtt(false);
+            }
         }
 
         if (OPEN_KIT_VEHICLE_KEY.consumeClick()) {
@@ -91,14 +116,28 @@ public class ClientSetup {
             if (mc.player != null && mc.level != null) {
                 GameManager gm = TeamSystem.getGameManager();
                 if (gm != null && gm.isPlaying()) {
-                    if (!isNearCapturePoint(mc.player)) {
+                    if (!isNearTeamBase(mc.player)) {
                         mc.player.displayClientMessage(
-                            Component.literal("\u00a7e[\u00a76BF\u00a7e] \u00a7cYou must be near a capture point to change loadout!"),
+                            Component.literal("\u00a7e[\u00a76BF\u00a7e] \u00a7cYou must be at your team's base to change loadout!"),
                             true);
                         return;
                     }
                 }
                 mc.setScreen(new ClassSelectionScreen());
+            }
+        }
+
+        if (OPEN_VEHICLE_KEY.consumeClick()) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null && mc.level != null) {
+                mc.setScreen(new VehicleSelectionScreen());
+            }
+        }
+
+        if (REQUEST_AMMO_KEY.consumeClick()) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null && mc.level != null) {
+                mc.setScreen(new ResupplyScreen());
             }
         }
     }
@@ -112,19 +151,15 @@ public class ClientSetup {
         }
     }
 
-    private static boolean isNearCapturePoint(Player player) {
-        List<CapturePointData> points = ClientTeamData.capturePoints;
-        if (points == null || points.isEmpty()) return false;
-        double px = player.getX();
-        double py = player.getY();
-        double pz = player.getZ();
-        for (CapturePointData cp : points) {
-            double dx = px - cp.x();
-            double dy = py - cp.y();
-            double dz = pz - cp.z();
-            if (dx * dx + dz * dz <= 4.5 * 4.5 && Math.abs(dy) <= 6.0) return true;
-        }
-        return false;
+    private static boolean isNearTeamBase(Player player) {
+        Team team = ClientTeamData.getLocalPlayerTeam();
+        if (team == Team.SPECTATOR) return false;
+        int[] basePos = team == Team.NATO ? ClientTeamData.getNatoBasePos() : ClientTeamData.getRussiaBasePos();
+        if (basePos == null) return false;
+        double dx = player.getX() - (basePos[0] + 0.5);
+        double dz = player.getZ() - (basePos[2] + 0.5);
+        double radius = ClientTeamData.getBaseRadius();
+        return dx * dx + dz * dz <= radius * radius;
     }
 
     @SubscribeEvent

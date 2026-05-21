@@ -25,13 +25,10 @@ public class TeamSystemConfig {
     private int votingTime = 30;
     private int countdownSeconds = 15;
     private int killRewardBC = 5;
-    private int killRewardSP = 10;
     private int vehicleKillRewardBC = 10;
-    private int vehicleKillRewardSP = 20;
     private int winRewardBC = 25;
-    private int winRewardSP = 50;
-    private int captureRewardBC = 20;
-    private int captureRewardSP = 30;
+    private int winRewardWC = 50;
+    private int captureRewardBC = 150;
     private int spawnProtectionTicks = 100;
     private int maxBeaconsPerPlayer = 3;
     private int respawnDelay = 5;
@@ -64,7 +61,7 @@ public class TeamSystemConfig {
         messages.put("team_spectator", "&7\u041d\u0430\u0431\u043b\u044e\u0434\u0430\u0442\u0435\u043b\u044c");
         messages.put("kill_feed_player", "&6{victim} &e\u0443\u0431\u0438\u0442 &6{killer}");
         messages.put("kill_feed_vehicle", "&c\u0422\u0435\u0445\u043d\u0438\u043a\u0430 &6{vehicle} &c\u0443\u043d\u0438\u0447\u0442\u043e\u0436\u0435\u043d\u0430 &6{killer}");
-        messages.put("kill_reward", "&a+{bc} BC &7+{sp} SP");
+        messages.put("kill_reward", "&a+{bc} BC");
         messages.put("rank_up", "&e\u041f\u043e\u0437\u0434\u0440\u0430\u0432\u043b\u044f\u0435\u043c! \u0412\u044b \u043f\u043e\u043b\u0443\u0447\u0438\u043b\u0438 \u0437\u0432\u0430\u043d\u0438\u0435 &6{rank}");
     }
 
@@ -75,13 +72,10 @@ public class TeamSystemConfig {
     public int getVotingTime() { return votingTime; }
     public int getCountdownSeconds() { return countdownSeconds; }
     public int getKillRewardBC() { return killRewardBC; }
-    public int getKillRewardSP() { return killRewardSP; }
     public int getVehicleKillRewardBC() { return vehicleKillRewardBC; }
-    public int getVehicleKillRewardSP() { return vehicleKillRewardSP; }
     public int getWinRewardBC() { return winRewardBC; }
-    public int getWinRewardSP() { return winRewardSP; }
+    public int getWinRewardWC() { return winRewardWC; }
     public int getCaptureRewardBC() { return captureRewardBC; }
-    public int getCaptureRewardSP() { return captureRewardSP; }
     public int getSpawnProtectionTicks() { return spawnProtectionTicks; }
     public int getMaxBeaconsPerPlayer() { return maxBeaconsPerPlayer; }
     public int getRespawnDelay() { return respawnDelay; }

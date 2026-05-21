@@ -12,6 +12,7 @@ import com.yourmod.teamsystem.events.CombatEventHandler;
 import com.yourmod.teamsystem.events.PlayerEventHandler;
 import com.yourmod.teamsystem.data.KitConfig;
 import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.system.RoleSystem;
 import com.yourmod.teamsystem.proxy.ProxyMessenger;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -79,7 +80,6 @@ public class TeamSystem {
     private static KitManager kitManager;
     private static SquadManager squadManager;
     private static VehicleManager vehicleManager;
-    private static EconomyManager economyManager;
     private static CapturePointManager capturePointManager;
     private static TicketManager ticketManager;
 
@@ -88,6 +88,9 @@ public class TeamSystem {
     private static FOBManager fobManager;
     private static TeamSystemConfig config;
     private static CaptureParticleManager captureParticleManager;
+    private static RoleSystem roleSystem;
+
+    private static BattlefieldRuntime battlefieldRuntime;
 
     public TeamSystem() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -127,6 +130,9 @@ public class TeamSystem {
 
         KitConfig.loadOrCreate(event.getServer().getWorldPath(LevelResource.ROOT));
 
+        roleSystem = new RoleSystem();
+        roleSystem.reload(KitConfig.get());
+
         mapPoolManager = new MapPoolManager(event.getServer());
         mapPoolManager.loadConfig();
         MinecraftForge.EVENT_BUS.register(mapPoolManager);
@@ -154,8 +160,20 @@ public class TeamSystem {
         MinecraftForge.EVENT_BUS.register(new CombatEventHandler(teamManager));
         MinecraftForge.EVENT_BUS.register(new com.yourmod.teamsystem.events.AttachmentEventHandler());
 
-        economyManager = new EconomyManager();
-        economyManager.loadFromTeamManager();
+        battlefieldRuntime = BattlefieldRuntime.getInstance();
+        battlefieldRuntime.loadFromTeamManager();
+        MinecraftForge.EVENT_BUS.register(battlefieldRuntime);
+
+        battlefieldRuntime.getVehicleDefRegistry().loadAll();
+
+        battlefieldRuntime.getVehicleAdapterRegistry().register(
+            new com.yourmod.teamsystem.vehicle.adapter.SuperbVehicleAdapter());
+        battlefieldRuntime.getVehicleAdapterRegistry().register(
+            new com.yourmod.teamsystem.vehicle.adapter.AshVehicleAdapter());
+
+        MinecraftForge.EVENT_BUS.register(
+            new com.yourmod.teamsystem.events.VehicleAccessControl());
+
         capturePointManager = new CapturePointManager();
         ticketManager = new TicketManager();
         contributionManager = new ContributionManager();
@@ -206,7 +224,6 @@ public class TeamSystem {
     public static KitManager getKitManager() { return kitManager; }
     public static SquadManager getSquadManager() { return squadManager; }
     public static VehicleManager getVehicleManager() { return vehicleManager; }
-    public static EconomyManager getEconomyManager() { return economyManager; }
     public static CapturePointManager getCapturePointManager() { return capturePointManager; }
     public static TicketManager getTicketManager() { return ticketManager; }
     public static ContributionManager getContributionManager() { return contributionManager; }
@@ -215,4 +232,5 @@ public class TeamSystem {
 
     public static TeamSystemConfig getConfig() { return config; }
     public static CaptureParticleManager getCaptureParticleManager() { return captureParticleManager; }
+    public static RoleSystem getRoleSystem() { return roleSystem; }
 }

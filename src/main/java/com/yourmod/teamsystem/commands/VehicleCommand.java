@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.*;
+import com.yourmod.teamsystem.vehicle.VehicleDefinition;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -15,10 +16,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Collection;
+import java.util.List;
 
 public class VehicleCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -36,21 +36,6 @@ public class VehicleCommand {
                         .executes(ctx -> spawnVehicle(ctx.getSource(),
                             StringArgumentType.getString(ctx, "vehicleId"),
                             IntegerArgumentType.getInteger(ctx, "count"))))))
-            .then(Commands.literal("create")
-                .requires(src -> src.hasPermission(2))
-                .then(Commands.argument("id", StringArgumentType.word())
-                    .then(Commands.argument("team", StringArgumentType.word())
-                        .then(Commands.argument("minRank", IntegerArgumentType.integer(0))
-                            .then(Commands.argument("ticketCost", IntegerArgumentType.integer(1))
-                                .then(Commands.argument("cooldown", IntegerArgumentType.integer(0))
-                                    .then(Commands.argument("maxActive", IntegerArgumentType.integer(1))
-                                        .executes(ctx -> createVehicle(ctx.getSource(),
-                                            StringArgumentType.getString(ctx, "id"),
-                                            StringArgumentType.getString(ctx, "team"),
-                                            IntegerArgumentType.getInteger(ctx, "minRank"),
-                                            IntegerArgumentType.getInteger(ctx, "ticketCost"),
-                                            IntegerArgumentType.getInteger(ctx, "cooldown"),
-                                            IntegerArgumentType.getInteger(ctx, "maxActive"))))))))))
             .then(Commands.literal("setspawn")
                 .requires(src -> src.hasPermission(2))
                 .then(Commands.literal("nato")
@@ -78,61 +63,28 @@ public class VehicleCommand {
         );
     }
 
-    private static int saveVehicleKit(CommandSourceStack source, String name, Team team) {
-        ServerPlayer player = source.getPlayer();
-        if (player == null) return 0;
-
-        Entity vehicle = player.getVehicle();
-        if (vehicle == null) {
-            source.sendFailure(Component.literal("§cYou are not in a vehicle!"));
-            return 0;
-        }
-
-        VehicleManager vm = TeamSystem.getVehicleManager();
-        TeamManager tm = TeamSystem.getTeamManager();
-
-        if (team == null) {
-            team = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
-        }
-
-        String entityTypeId = EntityType.getKey(vehicle.getType()).toString();
-        CompoundTag nbt = new CompoundTag();
-        vehicle.save(nbt);
-
-        VehicleData data = new VehicleData(name, name, team, 0, 0);
-        data.setEntityData(entityTypeId, nbt);
-        vm.addVehicle(data);
-
-        String teamName = team != null ? team.getColoredName().getString() : "§7Any";
-        source.sendSuccess(() -> Component.literal(
-            "§aVehicle kit saved: " + name + " (" + entityTypeId + ") for " + teamName), true);
-        return 1;
-    }
-
     private static int spawnVehicle(CommandSourceStack source, String vehicleId, int count) {
         ServerPlayer player = source.getPlayer();
         if (player == null) return 0;
 
         VehicleManager vm = TeamSystem.getVehicleManager();
-        VehicleData vehicle = vm.getVehicle(vehicleId);
+        VehicleDefinition def = vm.getDefinition(vehicleId);
 
-        if (vehicle == null) {
+        if (def == null) {
             source.sendFailure(Component.literal("§cVehicle not found: " + vehicleId));
             return 0;
         }
 
-        EntityType<?> type = vehicle.resolveEntityType();
+        EntityType<?> type = def.resolveEntityType();
         if (type == null) {
             source.sendFailure(Component.literal("§cInvalid entity type for: " + vehicleId));
             return 0;
         }
 
         ServerLevel level = (ServerLevel) player.level();
-        CompoundTag nbt = vehicle.resolveNbt();
+        CompoundTag nbt = def.resolveNbt();
         if (nbt != null) {
-            nbt.remove("UUID");
-            nbt.remove("uuid");
-            nbt.remove("Uuid");
+            nbt.remove("UUID"); nbt.remove("uuid"); nbt.remove("Uuid");
         }
 
         for (int i = 0; i < count; i++) {
@@ -146,27 +98,27 @@ public class VehicleCommand {
         }
 
         source.sendSuccess(() -> Component.literal(
-            String.format("§aSpawned %d x %s", count, vehicle.getDisplayName())), true);
+            String.format("§aSpawned %d x %s", count, def.getDisplayName())), true);
         return 1;
     }
 
     private static int spawnVehicleAt(CommandSourceStack source, String vehicleId, ServerPlayer target) {
         VehicleManager vm = TeamSystem.getVehicleManager();
-        VehicleData vehicle = vm.getVehicle(vehicleId);
+        VehicleDefinition def = vm.getDefinition(vehicleId);
 
-        if (vehicle == null) {
+        if (def == null) {
             source.sendFailure(Component.literal("§cТехника не найдена: " + vehicleId));
             return 0;
         }
 
-        EntityType<?> type = vehicle.resolveEntityType();
+        EntityType<?> type = def.resolveEntityType();
         if (type == null) {
             source.sendFailure(Component.literal("§cНеверный тип сущности для: " + vehicleId));
             return 0;
         }
 
         ServerLevel level = (ServerLevel) target.level();
-        CompoundTag nbt = vehicle.resolveNbt();
+        CompoundTag nbt = def.resolveNbt();
         if (nbt != null) {
             nbt.remove("UUID"); nbt.remove("uuid"); nbt.remove("Uuid");
         }
@@ -183,31 +135,62 @@ public class VehicleCommand {
         target.startRiding(ent, true);
 
         source.sendSuccess(() -> Component.literal(
-            String.format("§aТехника %s создана для %s", vehicle.getDisplayName(), target.getName().getString())), true);
+            String.format("§aТехника %s создана для %s", def.getDisplayName(), target.getName().getString())), true);
         return 1;
     }
 
-    private static int createVehicle(CommandSourceStack source, String id, String teamName, int minRank, int ticketCost, int cooldown, int maxActive) {
-        Team team = Team.fromString(teamName);
+    private static int saveVehicleKit(CommandSourceStack source, String name, Team team) {
+        ServerPlayer player = source.getPlayer();
+        if (player == null) return 0;
+
+        Entity vehicle = player.getVehicle();
+        if (vehicle == null) {
+            source.sendFailure(Component.literal("§cYou are not in a vehicle!"));
+            return 0;
+        }
+
         if (team == null) {
-            source.sendFailure(Component.literal("§cНеверная команда: " + teamName + " (nato/russia/spectator)"));
-            return 0;
+            team = TeamSystem.getTeamManager().getOrCreatePlayerData(player.getUUID()).getTeam();
         }
 
-        VehicleManager vm = TeamSystem.getVehicleManager();
-        if (vm.getVehicle(id) != null) {
-            source.sendFailure(Component.literal("§cТехника \"" + id + "\" уже существует"));
-            return 0;
+        String entityTypeId = EntityType.getKey(vehicle.getType()).toString();
+        CompoundTag nbt = new CompoundTag();
+        vehicle.save(nbt);
+
+        try {
+            java.nio.file.Path defDir = java.nio.file.Paths.get("config/teamsystem/vehicle_definitions");
+            java.nio.file.Files.createDirectories(defDir);
+            com.google.gson.JsonObject out = new com.google.gson.JsonObject();
+            out.addProperty("id", name);
+            out.addProperty("displayName", name);
+            out.addProperty("entityType", entityTypeId);
+            out.addProperty("nbt", nbt.toString());
+
+            com.google.gson.JsonObject costs = new com.google.gson.JsonObject();
+            costs.addProperty("deployBC", 1000);
+            costs.addProperty("deployVC", 200);
+            out.add("costs", costs);
+
+            com.google.gson.JsonObject pressure = new com.google.gson.JsonObject();
+            pressure.addProperty("ground", 5);
+            pressure.addProperty("air", 0);
+            pressure.addProperty("siege", 1);
+            out.add("pressure", pressure);
+
+            out.addProperty("cooldownSeconds", 60);
+            out.addProperty("ticketCost", 0);
+
+            java.nio.file.Path outFile = defDir.resolve(name + ".json");
+            java.nio.file.Files.writeString(outFile,
+                new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(out));
+
+            BattlefieldRuntime.getInstance().getVehicleDefRegistry().loadAll();
+
+            source.sendSuccess(() -> Component.literal(
+                "§aVehicle kit saved: " + name + " (" + entityTypeId + ")"), true);
+        } catch (Exception e) {
+            source.sendFailure(Component.literal("§cFailed to save vehicle kit: " + e.getMessage()));
         }
-
-        VehicleData data = new VehicleData(id, id, team, minRank, ticketCost);
-        data.setCooldownSeconds(cooldown);
-        data.setMaxActive(maxActive);
-        vm.addVehicle(data);
-
-        source.sendSuccess(() -> Component.literal(
-            String.format("§aТехника создана: §b%s§a | Команда: %s§a | Кд: §c%dс§a | Лимит: §c%d",
-                id, team.getColoredName().getString(), cooldown, maxActive)), true);
         return 1;
     }
 
@@ -241,31 +224,33 @@ public class VehicleCommand {
         ServerPlayer player = source.getPlayer();
         if (player == null) return 0;
 
-        VehicleManager vm = TeamSystem.getVehicleManager();
-        TeamManager tm = TeamSystem.getTeamManager();
+        VehicleDefinitionRegistryHelper helper = new VehicleDefinitionRegistryHelper();
 
         source.sendSuccess(() -> Component.literal("§6Available Vehicles:"), false);
-        for (VehicleData vehicle : vm.getAvailableVehicles(player, tm)) {
+        for (VehicleDefinition def : helper.getAll()) {
+            int bc = def.getCosts().getDeployBC();
+            int vc = def.getCosts().getDeployVC();
             source.sendSuccess(() -> Component.literal(
-                String.format("§b%s§6: §a%s§6 (cost: §c%d§6 tickets)",
-                    vehicle.getVehicleId(), vehicle.getDisplayName(), vehicle.getTicketCost())), false);
+                String.format("§b%s§6: §a%s§6 (BC: §c%d§6, VC: §c%d§6)",
+                    def.getId(), def.getDisplayName(), bc, vc)), false);
         }
         return 1;
     }
 
     private static int vehicleInfo(CommandSourceStack source, String vehicleId) {
         VehicleManager vm = TeamSystem.getVehicleManager();
-        VehicleData vehicle = vm.getVehicle(vehicleId);
+        VehicleDefinition def = vm.getDefinition(vehicleId);
 
-        if (vehicle == null) {
+        if (def == null) {
             source.sendFailure(Component.literal("§cVehicle not found"));
             return 0;
         }
 
+        int bc = def.getCosts().getDeployBC();
+        int vc = def.getCosts().getDeployVC();
         source.sendSuccess(() -> Component.literal(
-            String.format("§6Vehicle: §b%s§6 | Team: §a%s§6 | Ticket Cost: §c%d§6 | Min Rank: §a%d",
-                vehicle.getDisplayName(), vehicle.getTeam().getName(),
-                vehicle.getTicketCost(), vehicle.getMinRankOrdinal())), false);
+            String.format("§6Vehicle: §b%s§6 | BC: §c%d§6 | VC: §c%d§6 | Category: §a%s",
+                def.getDisplayName(), bc, vc, def.getCategory())), false);
         return 1;
     }
 
@@ -278,9 +263,9 @@ public class VehicleCommand {
 
         String error = vm.buyVehicle(player, vehicleId, tm);
         if (error == null) {
-            VehicleData vehicle = vm.getVehicle(vehicleId);
+            VehicleDefinition def = vm.getDefinition(vehicleId);
             source.sendSuccess(() -> Component.literal(
-                String.format("§aКуплена техника: §b%s", vehicle.getDisplayName())), false);
+                String.format("§aКуплена техника: §b%s", def != null ? def.getDisplayName() : vehicleId)), false);
             return 1;
         } else {
             source.sendFailure(Component.literal(error));
@@ -297,5 +282,16 @@ public class VehicleCommand {
         player.sendSystemMessage(Component.literal(
             nowHidden ? "§aПлажка вражеской техники скрыта" : "§eПлажка вражеской техники видна"));
         return 1;
+    }
+
+    // ===== Helper: wraps VehicleDefinitionRegistry for command use =====
+
+    private static class VehicleDefinitionRegistryHelper {
+        private final com.yourmod.teamsystem.vehicle.VehicleDefinitionRegistry reg =
+            BattlefieldRuntime.getInstance().getVehicleDefRegistry();
+
+        java.util.Collection<VehicleDefinition> getAll() {
+            return reg.getAll();
+        }
     }
 }

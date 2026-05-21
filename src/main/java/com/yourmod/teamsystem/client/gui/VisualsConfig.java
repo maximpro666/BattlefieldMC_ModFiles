@@ -22,7 +22,7 @@ public class VisualsConfig {
     public BaseRingVisual baseRings = new BaseRingVisual();
 
     public static class PointVisual {
-        public double markerSize = 3.0;
+        public double markerSize = 14.0;
         public double borderWidth = 0.3;
         public double progressEdgeWidth = 1.0;
         public double riseHeight = 6.0;

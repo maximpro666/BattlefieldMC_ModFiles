@@ -94,7 +94,7 @@ public class TeamManager extends SavedData {
 
         String fullName;
         if (!callsign.isEmpty()) {
-            fullName = rankPrefix + " " + callsign + " §7(" + actualName + ")";
+            fullName = rankPrefix + " " + callsign;
         } else {
             fullName = rankPrefix + " " + actualName;
         }
@@ -153,8 +153,7 @@ public class TeamManager extends SavedData {
         syncPlayerData(player);
         updatePlayerDisplayName(player);
         syncRank(player);
-        EconomyManager econ = TeamSystem.getEconomyManager();
-        if (econ != null) econ.syncAll(player);
+        BattlefieldRuntime.getInstance().syncAll(player);
 
         // Clear inventory on team change
         if (oldTeam != null && oldTeam != team) {
@@ -260,9 +259,9 @@ public class TeamManager extends SavedData {
         boolean isLeader = squad != null && squad.isLeader(player.getUUID());
         int rawDonat = data.getDonatTier();
         if (isLeader) rawDonat |= 128;
-        EconomyManager econ = TeamSystem.getEconomyManager();
-        int sp = econ != null ? econ.getSP(player.getUUID()) : data.getScorePoints();
-        int bc = econ != null ? econ.getBC(player.getUUID()) : data.getBattleCredits();
+        BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+        int wc = runtime.getWC(player.getUUID());
+        int bc = runtime.getBC(player.getUUID());
         CombatDataSyncPacket packet = new CombatDataSyncPacket(
             player.getUUID(),
             data.getTeam().ordinal(),
@@ -274,7 +273,7 @@ public class TeamManager extends SavedData {
             data.getCallsign(),
             data.getRankOrdinal(),
             squadName,
-            sp,
+            wc,
             bc,
             rawDonat
         );
@@ -290,8 +289,8 @@ public class TeamManager extends SavedData {
         syncKitConfig(player);
         syncVehicles(player);
         syncFOBs(player);
-        EconomyManager econ = TeamSystem.getEconomyManager();
-        if (econ != null) econ.syncAll(player);
+        BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+        runtime.syncAll(player);
     }
 
     public void syncConfig(ServerPlayer player) {

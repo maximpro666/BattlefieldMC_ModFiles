@@ -21,7 +21,7 @@ public class CombatDataSyncPacket {
     private final String callsign;
     private final int rankOrdinal;
     private final String squadName;
-    private final int scorePoints;
+    private final int warCredits;
     private final int battleCredits;
     private final int donatTier;
 
@@ -29,11 +29,11 @@ public class CombatDataSyncPacket {
         this(playerId, teamOrdinal, kills, deaths, prefix, suffix, displayName, callsign, rankOrdinal, squadName, 0, 0, 0);
     }
 
-    public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName, int scorePoints, int battleCredits) {
-        this(playerId, teamOrdinal, kills, deaths, prefix, suffix, displayName, callsign, rankOrdinal, squadName, scorePoints, battleCredits, 0);
+    public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName, int warCredits, int battleCredits) {
+        this(playerId, teamOrdinal, kills, deaths, prefix, suffix, displayName, callsign, rankOrdinal, squadName, warCredits, battleCredits, 0);
     }
 
-    public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName, int scorePoints, int battleCredits, int donatTier) {
+    public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName, int warCredits, int battleCredits, int donatTier) {
         this.playerId = playerId;
         this.teamOrdinal = teamOrdinal;
         this.kills = kills;
@@ -44,7 +44,7 @@ public class CombatDataSyncPacket {
         this.callsign = callsign != null ? callsign : "";
         this.rankOrdinal = rankOrdinal;
         this.squadName = squadName != null ? squadName : "";
-        this.scorePoints = scorePoints;
+        this.warCredits = warCredits;
         this.battleCredits = battleCredits;
         this.donatTier = donatTier;
     }
@@ -60,7 +60,7 @@ public class CombatDataSyncPacket {
         buf.writeUtf(msg.callsign);
         buf.writeInt(msg.rankOrdinal);
         buf.writeUtf(msg.squadName);
-        buf.writeInt(msg.scorePoints);
+        buf.writeInt(msg.warCredits);
         buf.writeInt(msg.battleCredits);
         buf.writeInt(msg.donatTier);
     }
@@ -83,7 +83,7 @@ public class CombatDataSyncPacket {
                     msg.prefix, msg.suffix, msg.displayName
                 );
                 ClientTeamData.localPlayerRank = msg.rankOrdinal;
-                ClientTeamData.localPlayerSP = msg.scorePoints;
+                ClientTeamData.localPlayerWC = msg.warCredits;
                 ClientTeamData.localPlayerBC = msg.battleCredits;
             }
             int rawDonat = msg.donatTier;

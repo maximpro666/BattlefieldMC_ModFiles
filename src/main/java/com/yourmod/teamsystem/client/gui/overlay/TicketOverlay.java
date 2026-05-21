@@ -3,7 +3,6 @@ package com.yourmod.teamsystem.client.gui.overlay;
 import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
-import com.yourmod.teamsystem.client.gui.component.BProgressBar;
 import com.yourmod.teamsystem.client.gui.component.RenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -11,98 +10,87 @@ import net.minecraft.client.gui.GuiGraphics;
 
 public class TicketOverlay {
 
-    private static final int COLOR_NATO_BAR  = UITheme.TEAM_NATO;
-    private static final int COLOR_RUS_BAR   = UITheme.TEAM_RUSSIA;
-    private static final int COLOR_BG        = UITheme.BG_HUD;
-    private static final int COLOR_TEXT      = UITheme.TEXT_PRIMARY;
-    private static final int COLOR_ORANGE    = UITheme.ACCENT;
-    private static final int COLOR_BORDER    = UITheme.BORDER;
-
-    private static final int BAR_W = 140;
-    private static final int BAR_H = 6;
+    private static final int BAR_H = 7;
     private static final int PANEL_H = 28;
 
-    private final BProgressBar natoBar;
-    private final BProgressBar russiaBar;
-
-    private float natoSmooth   = 0f;
+    private float natoSmooth = 0f;
     private float russiaSmooth = 0f;
     private float timerGlowPhase = 0f;
 
-    public TicketOverlay(int screenWidth) {
-        int cx = screenWidth / 2;
-        natoBar   = new BProgressBar(cx - BAR_W - 4, 6, BAR_W, BAR_H, COLOR_NATO_BAR);
-        russiaBar = new BProgressBar(cx + 4,          6, BAR_W, BAR_H, COLOR_RUS_BAR);
-        
-        natoBar.setGradient(true);
-        russiaBar.setGradient(true);
-        natoBar.setShowBorder(false);
-        russiaBar.setShowBorder(false);
-    }
+    public TicketOverlay(int screenWidth) {}
 
     public void render(GuiGraphics g, int screenWidth, float partialTick) {
-        int natoTickets   = ClientTeamData.getNatoTickets();
+        int natoTickets = ClientTeamData.getNatoTickets();
         int russiaTickets = ClientTeamData.getRussiaTickets();
-        int timeSeconds   = ClientTeamData.matchTimeSeconds;
-        int maxTickets    = ClientTeamData.maxTickets;
+        int timeSeconds = ClientTeamData.matchTimeSeconds;
+        int maxTickets = ClientTeamData.maxTickets;
 
-        natoSmooth   = AnimationHelper.lerp(natoSmooth,   natoTickets   / (float) maxTickets, 0.06f);
-        russiaSmooth = AnimationHelper.lerp(russiaSmooth, russiaTickets / (float) maxTickets, 0.06f);
+        if (maxTickets <= 0) maxTickets = 1;
+        natoSmooth = AnimationHelper.lerp(natoSmooth, natoTickets / (float) maxTickets, 0.08f);
+        russiaSmooth = AnimationHelper.lerp(russiaSmooth, russiaTickets / (float) maxTickets, 0.08f);
 
         int cx = screenWidth / 2;
-        int totalW = BAR_W * 2 + 16;
+        int totalW = 290;
+        int barW = 120;
         int panelX = cx - totalW / 2;
         int panelY = 0;
-        
+
         Font font = Minecraft.getInstance().font;
 
-        RenderHelper.dropShadow(g, panelX, panelY, totalW, PANEL_H, 2, 80);
-        g.fill(panelX, panelY, panelX + totalW, panelY + PANEL_H, 
-            AnimationHelper.withAlpha(COLOR_BG, 200));
-        
-        g.fill(panelX, panelY + PANEL_H - 1, panelX + totalW, panelY + PANEL_H, 
-            AnimationHelper.withAlpha(COLOR_BORDER, 180));
+        RenderHelper.dropShadow(g, panelX, panelY, totalW, PANEL_H, 3, 100);
+        RenderHelper.roundedRect(g, panelX, panelY, totalW, PANEL_H, 3,
+            AnimationHelper.withAlpha(UITheme.BG_HUD, 220));
 
-        natoBar.setPosition(cx - BAR_W - 4, 6);
-        russiaBar.setPosition(cx + 4, 6);
+        int natoBarX = panelX + 8;
+        int barY = 18;
+        g.fill(natoBarX, barY, natoBarX + barW, barY + BAR_H,
+            AnimationHelper.withAlpha(UITheme.HUD_HP_BG, 200));
+        int natoFillW = (int) (barW * natoSmooth);
+        if (natoFillW > 0) {
+            RenderHelper.gradientRectH(g, natoBarX, barY, natoFillW, BAR_H,
+                0xFF0D3A6B, UITheme.TEAM_NATO);
+        }
 
-        String natoText = "NATO  " + natoTickets;
-        g.drawString(font, natoText, cx - BAR_W - 4, 16, 
-            AnimationHelper.withAlpha(COLOR_TEXT, 220));
+        int russiaBarX = panelX + totalW - 8 - barW;
+        g.fill(russiaBarX, barY, russiaBarX + barW, barY + BAR_H,
+            AnimationHelper.withAlpha(UITheme.HUD_HP_BG, 200));
+        int russiaFillW = (int) (barW * russiaSmooth);
+        if (russiaFillW > 0) {
+            RenderHelper.gradientRectH(g, russiaBarX, barY, russiaFillW, BAR_H,
+                UITheme.TEAM_RUSSIA, 0xFF6B0D0D);
+        }
 
-        String rusText = russiaTickets + "  RUSSIA";
-        int rw = font.width(rusText);
-        g.drawString(font, rusText, cx + BAR_W + 4 - rw, 16, 
-            AnimationHelper.withAlpha(COLOR_TEXT, 220));
+        String natoLabel = "NATO";
+        g.drawString(font, natoLabel, natoBarX, 3,
+            AnimationHelper.withAlpha(UITheme.TEAM_NATO, 255));
+        String natoCount = String.valueOf(natoTickets);
+        g.drawString(font, natoCount, natoBarX, 11,
+            AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, 220));
 
-        natoBar.setFraction(natoSmooth);
-        natoBar.render(g);
-
-        russiaBar.setFraction(russiaSmooth);
-        russiaBar.render(g);
+        String rusLabel = "RUSSIA";
+        int rlw = font.width(rusLabel);
+        g.drawString(font, rusLabel, russiaBarX + barW - rlw, 3,
+            AnimationHelper.withAlpha(UITheme.TEAM_RUSSIA, 255));
+        String rusCount = String.valueOf(russiaTickets);
+        int rcw = font.width(rusCount);
+        g.drawString(font, rusCount, russiaBarX + barW - rcw, 11,
+            AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, 220));
 
         int mins = timeSeconds / 60;
         int secs = timeSeconds % 60;
-        String timerStr;
-        if (mins < 10) { 
-            timerStr = "0" + mins + ":" + (secs < 10 ? "0" + secs : Integer.toString(secs)); 
-        } else { 
-            timerStr = Integer.toString(mins) + ":" + (secs < 10 ? "0" + secs : Integer.toString(secs)); 
-        }
-        
+        String timerStr = String.format("%02d:%02d", mins, secs);
         int tw = font.width(timerStr);
         int timerX = cx - tw / 2;
-        int timerY = 20;
-        
+        int timerY = 4;
+
         if (timeSeconds < 60 && timeSeconds > 0) {
-            timerGlowPhase = (timerGlowPhase + 0.05f) % 1f;
-            float glowIntensity = (float)Math.sin(timerGlowPhase * Math.PI * 2) * 0.5f + 0.5f;
-            
-            RenderHelper.glow(g, timerX - 2, timerY - 2, tw + 4, font.lineHeight + 4, 
-                COLOR_ORANGE, 3, glowIntensity);
+            timerGlowPhase = (timerGlowPhase + 0.08f) % 1f;
+            float glowIntensity = (float) Math.sin(timerGlowPhase * Math.PI * 2) * 0.5f + 0.5f;
+            RenderHelper.glow(g, timerX - 4, timerY - 2, tw + 8, font.lineHeight + 4,
+                UITheme.ACCENT, 5, glowIntensity * 0.7f);
         }
-        
-        g.drawString(font, timerStr, timerX, timerY, 
-            AnimationHelper.withAlpha(COLOR_ORANGE, 255));
+
+        g.drawString(font, timerStr, timerX, timerY,
+            AnimationHelper.withAlpha(UITheme.ACCENT, 255));
     }
 }

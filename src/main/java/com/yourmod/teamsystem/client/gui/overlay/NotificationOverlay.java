@@ -1,31 +1,28 @@
 package com.yourmod.teamsystem.client.gui.overlay;
 
 import com.yourmod.teamsystem.client.gui.UITheme;
-
 import com.yourmod.teamsystem.client.gui.component.AnimationHelper;
+import com.yourmod.teamsystem.client.gui.component.RenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class NotificationOverlay {
 
-    private static final int COLOR_BG     = UITheme.BG_HUD;
-    private static final int COLOR_ORANGE = UITheme.ACCENT;
-    private static final int COLOR_TEXT   = UITheme.TEXT_PRIMARY;
-    private static final int FADE_MS      = 300;
-    private static final int ENTRY_H      = 18;
+    private static final int FADE_MS = 400;
+    private static final int ENTRY_H = 22;
 
     public static class NotifEntry {
         public final String text;
-        public final long   expireAt;
-        public float        alpha = 1f;
+        public final long expireAt;
+        public float alpha = 1f;
+        public float slideOffset = 30f;
 
         public NotifEntry(String text, int durationMs) {
-            this.text     = text;
+            this.text = text;
             this.expireAt = System.currentTimeMillis() + durationMs;
         }
     }
@@ -33,14 +30,10 @@ public class NotificationOverlay {
     private static NotificationOverlay INSTANCE = null;
     private final List<NotifEntry> entries = new ArrayList<>();
 
-    public NotificationOverlay() {
-        INSTANCE = this;
-    }
+    public NotificationOverlay() { INSTANCE = this; }
 
     public static void addNotification(String text, int durationMs) {
-        if (INSTANCE != null) {
-            INSTANCE.add(text, durationMs);
-        }
+        if (INSTANCE != null) INSTANCE.add(text, durationMs);
     }
 
     public void add(String text, int durationMs) {
@@ -56,20 +49,30 @@ public class NotificationOverlay {
             long remaining = e.expireAt - now;
             if (remaining <= 0) { it.remove(); continue; }
             e.alpha = (float) Math.min(1.0, remaining / (double) FADE_MS);
+            e.slideOffset = AnimationHelper.lerp(e.slideOffset, 0f, 0.12f);
         }
 
-        int startY = 52;
+        int startY = 54;
         Font font = Minecraft.getInstance().font;
         for (int i = 0; i < entries.size(); i++) {
             NotifEntry e = entries.get(i);
             int tw = font.width(e.text);
-            int x  = screenWidth / 2 - tw / 2 - 4;
-            int y  = startY + i * (ENTRY_H + 2);
+            int pw = tw + 24;
+            int x = screenWidth / 2 - pw / 2;
+            int y = startY + i * (ENTRY_H + 4) + (int) e.slideOffset;
 
-            g.fill(x, y, x + tw + 8, y + ENTRY_H, AnimationHelper.withAlpha(COLOR_BG, (int)(e.alpha * 200)));
-            g.fill(x, y, x + 2, y + ENTRY_H, AnimationHelper.withAlpha(COLOR_ORANGE, (int)(e.alpha * 255)));
-            g.drawString(font, e.text, x + 6, y + 5,
-                AnimationHelper.withAlpha(COLOR_TEXT, (int)(e.alpha * 255)));
+            RenderHelper.dropShadow(g, x, y, pw, ENTRY_H, 3, (int) (e.alpha * 100));
+            RenderHelper.roundedRect(g, x, y, pw, ENTRY_H, 4,
+                AnimationHelper.withAlpha(UITheme.BG_HUD, (int) (e.alpha * 230)));
+
+            g.fill(x, y, x + 4, y + ENTRY_H,
+                AnimationHelper.withAlpha(UITheme.ACCENT, (int) (e.alpha * 255)));
+
+            g.fill(x + pw - 4, y, x + pw, y + ENTRY_H,
+                AnimationHelper.withAlpha(UITheme.ACCENT_DIM, (int) (e.alpha * 80)));
+
+            g.drawString(font, e.text, x + 12, y + 6,
+                AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, (int) (e.alpha * 255)));
         }
     }
 }

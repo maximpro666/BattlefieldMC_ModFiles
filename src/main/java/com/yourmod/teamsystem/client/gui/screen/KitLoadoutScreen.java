@@ -102,7 +102,7 @@ public class KitLoadoutScreen extends Screen {
             AnimationHelper.withAlpha(UITheme.BG_SCREEN, (int)(fadeAlpha * 0xCC)));
 
         topBar.render(g, width, "QUICK LOADOUT",
-            com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP,
+            com.yourmod.teamsystem.client.ClientTeamData.localPlayerWC,
             com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC,
             com.yourmod.teamsystem.client.ClientTeamData.localPlayerRank);
 

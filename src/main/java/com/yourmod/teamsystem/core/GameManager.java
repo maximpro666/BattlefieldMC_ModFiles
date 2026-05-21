@@ -35,6 +35,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 public class GameManager {
     public enum GamePhase {
@@ -63,6 +65,7 @@ public class GameManager {
     private int overtimeTicks;
     private int captureTicks;
     private int matchTimeRemaining;
+    private Set<Integer> sentTimeWarnings;
     private boolean lastLiberateAttachment;
     /** Match index used to determine team rotation parity */
     private int currentMatchIndex;
@@ -80,6 +83,7 @@ public class GameManager {
         this.overtimeTicks = 0;
         this.captureTicks = 0;
         this.matchTimeRemaining = 0;
+        this.sentTimeWarnings = new HashSet<>();
         this.lastLiberateAttachment = false;
         this.currentMatchIndex = 0;
         this.mapReady = false;
@@ -135,6 +139,7 @@ public class GameManager {
         overtime = false;
         overtimeTicks = 0;
         matchTimeRemaining = MATCH_SECONDS;
+        sentTimeWarnings.clear();
 
         var fobMgr = TeamSystem.getFOBManager();
         if (fobMgr != null) fobMgr.clearAll();
@@ -142,11 +147,7 @@ public class GameManager {
         TicketManager ticketMgr = TeamSystem.getTicketManager();
         if (ticketMgr != null) ticketMgr.resetTickets(map.getTickets());
 
-        EconomyManager econ = TeamSystem.getEconomyManager();
-        if (econ != null) {
-            econ.resetAllSPForMatch();
-            econ.syncSPToAll();
-        }
+        BattlefieldRuntime.getInstance().resetMatch();
 
         CapturePointManager cp = TeamSystem.getCapturePointManager();
         if (cp != null) {
@@ -253,26 +254,25 @@ public class GameManager {
                 .append(winner.getColoredName())
                 .append(bright(" wins!")), false);
 
-        EconomyManager econ = TeamSystem.getEconomyManager();
-        if (econ != null) {
-            TeamManager tm = TeamSystem.getTeamManager();
-            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-                int baseSP = 50;
-                int baseBC = 25;
-                if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == winner) {
-                    baseSP += 50;
-                    baseBC += 50;
-                }
-                econ.addSP(p.getUUID(), baseSP);
-                econ.addBC(p.getUUID(), baseBC);
-                PlayerCombatData pcd = tm.getOrCreatePlayerData(p.getUUID());
-                pcd.addScorePoints(baseSP);
-                pcd.addBattleCredits(baseBC);
-                econ.syncAll(p);
-                p.sendSystemMessage(accent("+ " + baseBC + " BC, + " + baseSP + " SP"));
+        BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+        TeamSystemConfig cfg = TeamSystem.getConfig();
+        TeamManager tm = TeamSystem.getTeamManager();
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            int baseBC = cfg != null ? cfg.getWinRewardBC() : 25;
+            int baseWC = cfg != null ? cfg.getWinRewardWC() : 50;
+            if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == winner) {
+                baseBC += 50;
+                baseWC += 50;
             }
-            tm.setDirty();
+            runtime.addBC(p.getUUID(), baseBC);
+            runtime.addWC(p.getUUID(), baseWC);
+            PlayerCombatData pcd = tm.getOrCreatePlayerData(p.getUUID());
+            pcd.setWarCredits(runtime.getWC(p.getUUID()));
+            pcd.addBattleCredits(baseBC);
+            runtime.syncAll(p);
+            p.sendSystemMessage(accent("+ " + baseBC + " BC, + " + baseWC + " WC"));
         }
+        tm.setDirty();
 
         CapturePointManager cp = TeamSystem.getCapturePointManager();
         if (cp != null) cp.setActive(false);
@@ -328,6 +328,20 @@ public class GameManager {
             if (captureTicks % 20 == 0) {
                 if (matchTimeRemaining > 0) {
                     matchTimeRemaining--;
+
+                    // send time warning notifications
+                    int[] thresholds = {600, 300, 120, 60, 30, 10};
+                    for (int t : thresholds) {
+                        if (matchTimeRemaining == t && !sentTimeWarnings.contains(t)) {
+                            sentTimeWarnings.add(t);
+                            String key = t >= 120 ? "match_" + (t / 60) + "min" :
+                                         t == 60 ? "match_1min" :
+                                         t == 30 ? "match_30s" : "match_10s";
+                            LifecycleNotifier.broadcastNotification(server, key, 3000);
+                            broadcast("Match ends in " + t + "s", CHAT_WARNING);
+                        }
+                    }
+
                     if (matchTimeRemaining <= 0 && tm != null) {
                         int nTk = tm.getTickets(Team.NATO);
                         int rTk = tm.getTickets(Team.RUSSIA);
@@ -335,6 +349,7 @@ public class GameManager {
                             overtime = true;
                             overtimeTicks = 0;
                             broadcast("OVERTIME!", CHAT_ACCENT, CHAT_EMPHASIS);
+                            LifecycleNotifier.broadcastNotification(server, "match_overtime", 4000);
                             matchTimeRemaining = 1;
                         } else {
                             Team winner = nTk > rTk ? Team.NATO : (rTk > nTk ? Team.RUSSIA : Team.SPECTATOR);
@@ -372,6 +387,7 @@ public class GameManager {
                             overtime = true;
                             overtimeTicks = 0;
                             broadcast("OVERTIME!", CHAT_ACCENT, CHAT_EMPHASIS);
+                            LifecycleNotifier.broadcastNotification(server, "match_overtime", 4000);
                         }
                     }
                 } else {
@@ -632,8 +648,7 @@ public class GameManager {
             if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == Team.SPECTATOR) continue;
             tm.syncKitConfig(p);
             tm.syncRank(p);
-            EconomyManager econ = TeamSystem.getEconomyManager();
-            if (econ != null) econ.syncAll(p);
+            BattlefieldRuntime.getInstance().syncAll(p);
             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
                 new com.yourmod.teamsystem.network.OpenLoadoutScreenPacket());
         }

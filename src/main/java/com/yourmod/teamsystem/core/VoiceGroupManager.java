@@ -128,4 +128,8 @@ public class VoiceGroupManager {
     public boolean isAvailable() {
         return available;
     }
+
+    public VoicechatServerApi getApi() {
+        return api;
+    }
 }

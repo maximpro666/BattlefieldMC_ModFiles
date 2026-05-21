@@ -2,6 +2,8 @@ package com.yourmod.teamsystem.core;
 
 import com.google.gson.*;
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.ammo.AmmoService;
+import com.yourmod.teamsystem.ammo.FOBAmmoProvider;
 import com.yourmod.teamsystem.client.FOBData;
 import com.yourmod.teamsystem.network.FOBSyncPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
@@ -46,8 +48,30 @@ public class FOBManager {
         public long placedTime;
     }
 
+    private final Map<Integer, FOBAmmoProvider> fobAmmoProviders = new HashMap<>();
+
     public FOBManager() {
         load();
+        for (SavedFOB fob : fobs) {
+            registerAmmoProviderForFOB(fob);
+        }
+    }
+
+    private void registerAmmoProviderForFOB(SavedFOB fob) {
+        FOBAmmoProvider provider = new FOBAmmoProvider(
+            Team.fromOrdinal(fob.teamOrdinal),
+            new BlockPos(fob.x, fob.y, fob.z),
+            fob.name
+        );
+        fobAmmoProviders.put(fob.fobId, provider);
+        BattlefieldRuntime.getInstance().getAmmoService().registerProvider(provider);
+    }
+
+    private void unregisterAmmoProviderForFOB(int fobId) {
+        FOBAmmoProvider provider = fobAmmoProviders.remove(fobId);
+        if (provider != null) {
+            BattlefieldRuntime.getInstance().getAmmoService().unregisterProvider(provider);
+        }
     }
 
     public void clearPlayerCooldown(UUID uuid) {
@@ -100,10 +124,10 @@ public class FOBManager {
 
         // Check economy cost
         int fobCost = TeamSystem.getConfig().getFOBCost();
-        int requiredSP = existing != null ? fobCost / 2 : fobCost;
-        EconomyManager econ = TeamSystem.getEconomyManager();
-        if (requiredSP > 0 && econ != null && econ.getSP(uuid) < requiredSP) {
-            return "§cNot enough SP! FOB costs " + requiredSP + " SP";
+        int requiredBC = existing != null ? fobCost / 2 : fobCost;
+        BattlefieldRuntime rt = BattlefieldRuntime.getInstance();
+        if (requiredBC > 0 && rt.getBC(uuid) < requiredBC) {
+            return "§cNot enough BC! FOB costs " + requiredBC + " BC";
         }
 
         if (existing != null) {
@@ -113,9 +137,9 @@ public class FOBManager {
         }
 
         // Deduct cost
-        if (requiredSP > 0 && econ != null) {
-            econ.addSP(uuid, -requiredSP);
-            econ.syncAll(player);
+        if (requiredBC > 0) {
+            rt.deductBC(uuid, requiredBC);
+            rt.syncAll(player);
         }
 
         SavedFOB fob = new SavedFOB();
@@ -131,6 +155,7 @@ public class FOBManager {
         fob.health = MAX_HEALTH;
         fob.placedTime = player.serverLevel().getGameTime();
         fobs.add(fob);
+        registerAmmoProviderForFOB(fob);
         save();
 
         // Place beacon block as visual
@@ -228,6 +253,7 @@ public class FOBManager {
         SavedFOB fob = getFOBById(fobId);
         if (fob == null) return false;
         fobs.removeIf(f -> f.fobId == fobId);
+        unregisterAmmoProviderForFOB(fobId);
         removeFOBBlock(fob);
         save();
         syncAll();
@@ -295,6 +321,9 @@ public class FOBManager {
     }
 
     public void clearAll() {
+        for (int id : List.copyOf(fobAmmoProviders.keySet())) {
+            unregisterAmmoProviderForFOB(id);
+        }
         fobs.clear();
         save();
         syncAll();

@@ -97,7 +97,7 @@ public class KitSelectionScreen extends Screen {
         LockChecker.Context ctx = new LockChecker.Context();
         ctx.playerRank = com.yourmod.teamsystem.client.ClientTeamData.localPlayerRank;
         ctx.playerTeam = team.name();
-        ctx.playerSP = com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP;
+        ctx.playerSP = com.yourmod.teamsystem.client.ClientTeamData.localPlayerWC;
         ctx.playerBC = com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC;
 
         for (Map.Entry<String, KitConfig.KitDef> entry : cl.kits.entrySet()) {

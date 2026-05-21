@@ -26,7 +26,9 @@ public class ClientTeamData {
     public static int localPlayerRank = 0;
     public static String localPlayerSquad = "";
     public static int localPlayerBC = 0;
-    public static int localPlayerSP = 0;
+    public static int localPlayerWC = 0;
+    public static int natoVC = 0;
+    public static int russiaVC = 0;
     public static List<KitData> kits = new ArrayList<>();
     public static List<VehicleData> vehicles = new ArrayList<>();
     public static List<FOBData> fobs = new ArrayList<>();

@@ -2,6 +2,7 @@ package com.yourmod.teamsystem.network;
 
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.VehicleData;
+import com.yourmod.teamsystem.client.VehicleEntry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -61,6 +62,7 @@ public class VehicleSyncPacket {
     private static void handleClientSide(List<String> vehicleIds, List<String> vehicleDisplayNames,
                                          List<Integer> vehicleTicketCosts, List<Integer> vehicleMinRanks) {
         List<VehicleData> vehicleList = new ArrayList<>();
+        List<VehicleEntry> entryList = new ArrayList<>();
         for (int i = 0; i < vehicleIds.size(); i++) {
             String id = vehicleIds.get(i);
             String displayName = vehicleDisplayNames.get(i);
@@ -68,8 +70,11 @@ public class VehicleSyncPacket {
             int minRank = vehicleMinRanks.get(i);
             boolean available = com.yourmod.teamsystem.core.Rank.fromOrdinal(ClientTeamData.localPlayerRank).ordinal() >= minRank;
             vehicleList.add(new VehicleData(id, displayName, "", "", ticketCost, minRank, 0, available));
+            entryList.add(new VehicleEntry(id, displayName, "", "", ticketCost, ticketCost, minRank, 0));
         }
         ClientTeamData.vehicles = vehicleList;
+        ClientTeamData.availableVehicles.clear();
+        ClientTeamData.availableVehicles.addAll(entryList);
     }
 
     public List<String> getVehicleIds() { return vehicleIds; }

@@ -1,0 +1,24 @@
+{
+  "id": "minecraft:horse",
+  "displayName": "Test Horse",
+  "category": "mbt",
+  "certification": "",
+  "entityType": "minecraft:horse",
+  "cooldownSeconds": 10,
+  "ticketCost": 1,
+  "costs": {
+    "deployBC": 0,
+    "deployVC": 0
+  },
+  "pressure": {
+    "ground": 1,
+    "air": 0,
+    "siege": 0
+  },
+  "ammo": {},
+  "phases": ["SKIRMISH", "CONFLICT", "BATTLE", "TOTAL_WAR"],
+  "populationLimits": {
+    "1": 10,
+    "10": 20
+  }
+}

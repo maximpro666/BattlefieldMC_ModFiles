@@ -77,12 +77,6 @@ public class PacketHandler {
             .consumerMainThread(BCSyncPacket::handle)
             .add();
 
-        CHANNEL.messageBuilder(SPSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
-            .decoder(SPSyncPacket::new)
-            .encoder(SPSyncPacket::toBytes)
-            .consumerMainThread(SPSyncPacket::handle)
-            .add();
-
         CHANNEL.messageBuilder(KitSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
             .decoder(KitSyncPacket::new)
             .encoder(KitSyncPacket::toBytes)
@@ -298,5 +292,29 @@ public class PacketHandler {
             VoiceChannelSwitchPacket::decode,
             VoiceChannelSwitchPacket::handle
         );
+
+        CHANNEL.messageBuilder(VoiceSpeakingStatePacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(VoiceSpeakingStatePacket::new)
+            .encoder(VoiceSpeakingStatePacket::toBytes)
+            .consumerMainThread(VoiceSpeakingStatePacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(WCSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(WCSyncPacket::new)
+            .encoder(WCSyncPacket::toBytes)
+            .consumerMainThread(WCSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(VehicleCreditsSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(VehicleCreditsSyncPacket::new)
+            .encoder(VehicleCreditsSyncPacket::toBytes)
+            .consumerMainThread(VehicleCreditsSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(ResupplyActionPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(ResupplyActionPacket::new)
+            .encoder(ResupplyActionPacket::toBytes)
+            .consumerMainThread(ResupplyActionPacket::handle)
+            .add();
     }
 }

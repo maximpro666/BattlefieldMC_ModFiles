@@ -71,6 +71,9 @@
   "teamsystem.error.dead": "Вы мертвы",
 
   "key.categories.teamsystem": "Team System",
+  "key.teamsystem.open_kit_vehicle": "Выбор класса",
+  "key.teamsystem.open_vehicle": "Выбор техники",
   "key.teamsystem.squad_voice": "Голосовой чат отряда (PTT)",
-  "key.teamsystem.team_voice": "Голосовой чат команды (PTT)"
+  "key.teamsystem.team_voice": "Голосовой чат команды (PTT)",
+  "key.teamsystem.request_ammo": "Пополнение БК / Покупка ракет"
 }

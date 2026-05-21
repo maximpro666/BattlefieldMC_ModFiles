@@ -1,7 +1,7 @@
 package com.yourmod.teamsystem.capture;
 
 import com.yourmod.teamsystem.TeamSystem;
-import com.yourmod.teamsystem.core.EconomyManager;
+import com.yourmod.teamsystem.core.BattlefieldRuntime;
 import com.yourmod.teamsystem.core.GameManager;
 import com.yourmod.teamsystem.core.ContributionManager;
 import com.yourmod.teamsystem.core.Team;
@@ -40,6 +40,7 @@ public class CaptureProcessor {
         double russiaOwned = 0;
 
         for (CaptureZone zone : zones) {
+            zone.setContested(false);
             Team prevCapturing = zone.getCapturingTeam();
             Map<Team, Integer> counts = countPlayersInZone(level, zone, teamCache);
             if (counts.isEmpty()) {
@@ -83,6 +84,7 @@ public class CaptureProcessor {
             }
 
             if (contested) {
+                zone.setContested(true);
                 zone.setCapturingTeam(Team.SPECTATOR);
                 changed = true;
                 if (prevCapturing.isPlayable() && prevCapturing != zone.getOwnerTeam()) {
@@ -220,15 +222,13 @@ public class CaptureProcessor {
         if (gm == null || !gm.isPlaying()) return;
         TeamSystemConfig cfg = TeamSystem.getConfig();
         if (cfg == null) return;
-        EconomyManager econ = TeamSystem.getEconomyManager();
-        if (econ == null) return;
+        BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
 
         Map<UUID, Double> contribs = zone.getCaptureContributions();
         if (contribs.isEmpty()) return;
 
         int totalBC = cfg.getCaptureRewardBC();
-        int totalSP = cfg.getCaptureRewardSP();
-        if (totalBC <= 0 && totalSP <= 0) return;
+        if (totalBC <= 0) return;
 
         List<Map.Entry<UUID, Double>> sorted = new ArrayList<>(contribs.entrySet());
         sorted.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
@@ -237,35 +237,15 @@ public class CaptureProcessor {
         for (Map.Entry<UUID, Double> e : sorted) total += e.getValue();
         if (total <= 0) return;
 
-        List<Integer> bcAmounts = new ArrayList<>();
-        List<Integer> spAmounts = new ArrayList<>();
-        int bcSum = 0, spSum = 0;
-
         for (Map.Entry<UUID, Double> e : sorted) {
-            double share = e.getValue() / total;
-            int bc = (int) (share * totalBC);
-            int sp = (int) (share * totalSP);
-            bcAmounts.add(bc);
-            spAmounts.add(sp);
-            bcSum += bc;
-            spSum += sp;
-        }
-
-        int bcRem = totalBC - bcSum;
-        int spRem = totalSP - spSum;
-        if (bcRem > 0 && !bcAmounts.isEmpty()) bcAmounts.set(0, bcAmounts.get(0) + bcRem);
-        if (spRem > 0 && !spAmounts.isEmpty()) spAmounts.set(0, spAmounts.get(0) + spRem);
-
-        for (int i = 0; i < sorted.size(); i++) {
-            UUID uuid = sorted.get(i).getKey();
-            int bc = bcAmounts.get(i);
-            int sp = spAmounts.get(i);
-            if (bc > 0) econ.addBC(uuid, bc);
-            if (sp > 0) econ.addSP(uuid, sp);
+            UUID uuid = e.getKey();
+            runtime.addBC(uuid, totalBC);
+            runtime.addActivity(uuid, BattlefieldRuntime.SCORE_CAPTURE);
             ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
-            if (player != null && (bc > 0 || sp > 0)) {
+            if (player != null) {
+                runtime.syncBC(player);
                 player.displayClientMessage(
-                    Component.literal("§a+" + bc + " BC §7+" + sp + " SP §f(захват точки)"),
+                    Component.literal("§a+" + totalBC + " BC §f(захват точки)"),
                     false
                 );
             }
@@ -294,6 +274,7 @@ public class CaptureProcessor {
         List<Double> ys = new ArrayList<>();
         List<Double> zs = new ArrayList<>();
         List<Double> radii = new ArrayList<>();
+        List<String> types = new ArrayList<>();
 
         for (CaptureZone z : zones) {
             ids.add(z.getId().hashCode());
@@ -307,8 +288,9 @@ public class CaptureProcessor {
             zs.add((double) center.getZ());
             double half = (z.getMax().getX() - z.getMin().getX()) / 2.0;
             radii.add(half);
+            types.add(z.getPointType());
         }
 
-        return new CapturePointSyncPacket(ids, progress, owners, names, capturing, xs, ys, zs, radii);
+        return new CapturePointSyncPacket(ids, progress, owners, names, capturing, xs, ys, zs, radii, types);
     }
 }

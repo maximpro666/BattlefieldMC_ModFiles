@@ -91,7 +91,7 @@ public class SpawnSelectionScreen extends Screen {
         g.fill(0, 0, width, height, AnimationHelper.withAlpha(UITheme.BG_SCREEN, (int)(fade * 0xCC)));
 
         topBar.render(g, width, "SPAWN SELECTION",
-            com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP,
+            com.yourmod.teamsystem.client.ClientTeamData.localPlayerWC,
             com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC,
             com.yourmod.teamsystem.client.ClientTeamData.localPlayerRank);
 
@@ -284,7 +284,7 @@ public class SpawnSelectionScreen extends Screen {
                             if (sp > 0) { sb.append(" ").append(sp).append("SP"); }
                             if (bc > 0) { if (sp > 0) sb.append(" +"); sb.append(" ").append(bc).append("BC"); }
                             costLabel = "> " + sb.toString();
-                            int playerSP = com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP;
+                            int playerSP = com.yourmod.teamsystem.client.ClientTeamData.localPlayerWC;
                             int playerBC = com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC;
                             canAfford = (sp <= playerSP) && (bc <= playerBC);
                         }

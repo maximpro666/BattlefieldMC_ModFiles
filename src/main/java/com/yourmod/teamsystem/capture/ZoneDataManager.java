@@ -69,8 +69,9 @@ public class ZoneDataManager {
                 center.offset(-radius, -radius, -radius),
                 center.offset(radius, radius, radius),
                 Math.max(5, captureSec),
-                entry.main
+                entry.type
             );
+            zone.setVcRate(entry.getVcRate());
             addZone(zone);
             index++;
         }

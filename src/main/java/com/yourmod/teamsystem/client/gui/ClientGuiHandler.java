@@ -34,6 +34,7 @@ public class ClientGuiHandler {
     private static final HotbarOverlay       hotbarOverlay   = new HotbarOverlay();
     private static final BattlefieldTabOverlay tabOverlay    = new BattlefieldTabOverlay();
     private static final PlayerLabelOverlay  playerLabelOverlay = new PlayerLabelOverlay();
+    private static final VoiceChatHudOverlay voiceChatHudOverlay = new VoiceChatHudOverlay();
     private static final KillFeedOverlay     killFeedOverlay = new KillFeedOverlay();
     private static final CaptureNotificationOverlay captureNotifOverlay = new CaptureNotificationOverlay();
     private static final CompassOverlay             compassOverlay      = new CompassOverlay();
@@ -95,6 +96,7 @@ public class ClientGuiHandler {
             notifOverlay.render(g, w);
             hotbarOverlay.render(g, w, h);
             playerLabelOverlay.render(g, w, h);
+            voiceChatHudOverlay.render(g, w, h);
             killFeedOverlay.render(g, w);
             captureNotifOverlay.render(g, w, h);
         }
@@ -108,10 +110,36 @@ public class ClientGuiHandler {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
+        if (event.phase == TickEvent.Phase.START) {
+            handlePerspectiveKey();
+        } else {
             tabOverlay.tick();
             ClientVoiceHandler.tick();
         }
+    }
+
+    private static void handlePerspectiveKey() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level == null) return;
+        if (!mc.options.keyTogglePerspective.consumeClick()) return;
+        if (isInBattleVehicle(mc)) {
+            net.minecraft.client.CameraType next = switch (mc.options.getCameraType()) {
+                case FIRST_PERSON -> net.minecraft.client.CameraType.THIRD_PERSON_BACK;
+                case THIRD_PERSON_BACK -> net.minecraft.client.CameraType.THIRD_PERSON_FRONT;
+                case THIRD_PERSON_FRONT -> net.minecraft.client.CameraType.FIRST_PERSON;
+            };
+            mc.options.setCameraType(next);
+        }
+    }
+
+    private static boolean isInBattleVehicle(Minecraft mc) {
+        net.minecraft.world.entity.Entity vehicle = mc.player.getVehicle();
+        if (vehicle == null) return false;
+        if (vehicle.getTeam() != null) {
+            String name = vehicle.getTeam().getName();
+            if ("NATO".equalsIgnoreCase(name) || "RUSSIA".equalsIgnoreCase(name)) return true;
+        }
+        return false;
     }
 
     @SubscribeEvent

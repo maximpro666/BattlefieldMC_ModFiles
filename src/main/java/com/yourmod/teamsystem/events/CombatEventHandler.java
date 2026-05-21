@@ -3,6 +3,7 @@ package com.yourmod.teamsystem.events;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.*;
 import com.yourmod.teamsystem.network.*;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
@@ -224,11 +225,13 @@ public class CombatEventHandler {
         SquadmateRespawnCooldownManager.onPlayerAttacked(victim);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public void onLivingDeath(LivingDeathEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer victim)) {
             return;
         }
+
+        if (event.isCanceled()) return;
 
         DamageSource source = event.getSource();
         ServerLevel level = (ServerLevel) victim.level();
@@ -259,22 +262,20 @@ public class CombatEventHandler {
                 contrib.addKill(killer.getUUID(), killer.getName().getString());
             }
 
-            EconomyManager econ = TeamSystem.getEconomyManager();
+            BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
             TeamSystemConfig cfg = TeamSystem.getConfig();
-            int spReward = cfg != null ? cfg.getKillRewardSP() : 10;
             int bcReward = cfg != null ? cfg.getKillRewardBC() : 5;
 
-            if (econ != null && isPlaying) {
-                econ.addSP(killer.getUUID(), spReward);
-                econ.addBC(killer.getUUID(), bcReward);
-                econ.syncAll(killer);
+            if (isPlaying) {
+                runtime.addBC(killer.getUUID(), bcReward);
+                runtime.addActivity(killer.getUUID(), BattlefieldRuntime.SCORE_DAMAGE);
+                runtime.syncBC(killer);
             }
 
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("killer", killer.getName().getString());
             placeholders.put("victim", victim.getName().getString());
             placeholders.put("bc", String.valueOf(bcReward));
-            placeholders.put("sp", String.valueOf(spReward));
 
             victim.sendSystemMessage(Component.literal("§cВас убил §6" + killer.getName().getString()
                 + " §cс дистанции §6" + (int) victim.distanceTo(killer) + "§cм"), false);
@@ -282,7 +283,7 @@ public class CombatEventHandler {
             killer.sendSystemMessage(
                 Component.literal("§6" + victim.getName().getString() + " §a"
                     + (cfg != null ? cfg.getMessage("kill_reward", placeholders)
-                    : "+" + bcReward + " BC +" + spReward + " SP")), false);
+                    : "+" + bcReward + " BC")), false);
 
             Rank oldRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills() - 1);
             Rank newRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills());
@@ -414,22 +415,18 @@ public class CombatEventHandler {
         if (!isDedupKill(killer, le)) return;
 
         TeamSystemConfig cfg = TeamSystem.getConfig();
-        int vSpReward = cfg != null ? cfg.getVehicleKillRewardSP() : 20;
         int vBcReward = cfg != null ? cfg.getVehicleKillRewardBC() : 10;
 
-        EconomyManager econ = TeamSystem.getEconomyManager();
-        if (econ != null) {
-            econ.addSP(killer.getUUID(), vSpReward);
-            econ.addBC(killer.getUUID(), vBcReward);
-            econ.syncAll(killer);
-        }
+        BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+        runtime.addBC(killer.getUUID(), vBcReward);
+        runtime.addActivity(killer.getUUID(), BattlefieldRuntime.SCORE_DAMAGE);
+        runtime.syncBC(killer);
 
         String name = le.hasCustomName() ? le.getCustomName().getString() : le.getType().getDescription().getString();
         Map<String, String> vPl = new HashMap<>();
         vPl.put("killer", killer.getName().getString());
         vPl.put("vehicle", name);
         vPl.put("bc", String.valueOf(vBcReward));
-        vPl.put("sp", String.valueOf(vSpReward));
         getServer(level).getPlayerList().broadcastSystemMessage(
             Component.literal(cfg != null
                 ? cfg.getMessage("kill_feed_vehicle", vPl)
@@ -438,8 +435,9 @@ public class CombatEventHandler {
         killer.sendSystemMessage(
             Component.literal(cfg != null
                 ? cfg.getMessage("kill_reward", vPl)
-                : "§a+" + vBcReward + " BC §7+" + vSpReward + " SP"), false);
+                : "§a+" + vBcReward + " BC"), false);
         if (vm != null) vm.unregisterSpawnedVehicle(ent.getUUID());
+        runtime.trackVehicleDestroy(ent.getUUID());
     }
 
     @SubscribeEvent
@@ -449,9 +447,24 @@ public class CombatEventHandler {
         Level level = event.getLevel();
         if (level.isClientSide) return;
         // Copy and clear so vanilla won't re-destroy, then destroy blocks without drops
-        List<net.minecraft.core.BlockPos> blocks = List.copyOf(event.getExplosion().getToBlow());
+        List<BlockPos> blocks = List.copyOf(event.getExplosion().getToBlow());
         event.getExplosion().clearToBlow();
-        for (net.minecraft.core.BlockPos pos : blocks) {
+        for (BlockPos pos : blocks) {
+            // Clean up FOBs destroyed by explosion (BreakEvent is not fired)
+            if (level instanceof ServerLevel serverLevel) {
+                String dim = serverLevel.dimension().location().toString();
+                FOBManager fobManager = TeamSystem.getFOBManager();
+                if (fobManager != null) {
+                    FOBManager.SavedFOB fob = fobManager.getFOBAt(pos, dim);
+                    if (fob != null) {
+                        fobManager.removeFOB(fob.fobId);
+                        serverLevel.players().forEach(p ->
+                            p.displayClientMessage(
+                                net.minecraft.network.chat.Component.literal("§c[FOB] " + fob.name + " destroyed!"),
+                                false));
+                    }
+                }
+            }
             level.destroyBlock(pos, false);
         }
     }

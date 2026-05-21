@@ -17,8 +17,9 @@ public class PlayerCombatData {
     private String suffix;
     private String displayName;
     private int battleCredits;
-    private int scorePoints;
+    private int warCredits;
     private final Set<String> unlockedKits;
+    private final Set<String> certifications;
     private final Map<String, CompoundTag> savedAttachments;
 
     private String callsign = "";
@@ -28,6 +29,10 @@ public class PlayerCombatData {
     private String playerTitle = "";
     private String loadoutConfig = "";
     private String selectedKit = "";
+    private String selectedRole = "";
+    private String selectedLoadout = "";
+    private final Set<String> unlockedRoles = new HashSet<>();
+    private final Set<String> unlockedLoadouts = new HashSet<>();
 
     private boolean hasChosenTeam = false;
 
@@ -40,8 +45,9 @@ public class PlayerCombatData {
         this.suffix = "";
         this.displayName = "";
         this.battleCredits = 0;
-        this.scorePoints = 0;
+        this.warCredits = 0;
         this.unlockedKits = new HashSet<>();
+        this.certifications = new HashSet<>();
         this.savedAttachments = new HashMap<>();
     }
 
@@ -144,13 +150,22 @@ public class PlayerCombatData {
         this.battleCredits -= amount;
         return true;
     }
-    public int getScorePoints() { return scorePoints; }
-    public void setScorePoints(int sp) { this.scorePoints = Math.max(0, sp); }
-    public void addScorePoints(int amount) { this.scorePoints = Math.max(0, this.scorePoints + amount); }
+    public int getWarCredits() { return warCredits; }
+    public void setWarCredits(int wc) { this.warCredits = Math.max(0, wc); }
+    public void addWarCredits(int amount) { this.warCredits = Math.max(0, this.warCredits + amount); }
+    public boolean deductWarCredits(int amount) {
+        if (this.warCredits < amount) return false;
+        this.warCredits -= amount;
+        return true;
+    }
     public Set<String> getUnlockedKits() { return unlockedKits; }
     public boolean isKitUnlocked(String kitName) { return unlockedKits.contains(kitName); }
     public void unlockKit(String kitName) { unlockedKits.add(kitName); }
     public void lockKit(String kitName) { unlockedKits.remove(kitName); }
+    public Set<String> getCertifications() { return certifications; }
+    public boolean hasCertification(String cert) { return certifications.contains(cert); }
+    public void grantCertification(String cert) { certifications.add(cert); }
+    public void revokeCertification(String cert) { certifications.remove(cert); }
     public Map<String, CompoundTag> getSavedAttachments() { return savedAttachments; }
 
     public String getCallsign() { return callsign; }
@@ -168,6 +183,19 @@ public class PlayerCombatData {
     public String getSelectedKit() { return selectedKit; }
     public void setSelectedKit(String selectedKit) { this.selectedKit = selectedKit != null ? selectedKit : ""; }
 
+    public String getSelectedRole() { return selectedRole; }
+    public void setSelectedRole(String role) { this.selectedRole = role != null ? role : ""; }
+    public String getSelectedLoadout() { return selectedLoadout; }
+    public void setSelectedLoadout(String loadout) { this.selectedLoadout = loadout != null ? loadout : ""; }
+    public Set<String> getUnlockedRoles() { return unlockedRoles; }
+    public boolean hasRole(String roleId) { return unlockedRoles.contains(roleId); }
+    public void unlockRole(String roleId) { unlockedRoles.add(roleId); }
+    public void lockRole(String roleId) { unlockedRoles.remove(roleId); }
+    public Set<String> getUnlockedLoadouts() { return unlockedLoadouts; }
+    public boolean hasLoadout(String loadoutId) { return unlockedLoadouts.contains(loadoutId); }
+    public void unlockLoadout(String loadoutId) { unlockedLoadouts.add(loadoutId); }
+    public void lockLoadout(String loadoutId) { unlockedLoadouts.remove(loadoutId); }
+
     public void reset() {
         this.team = Team.SPECTATOR;
         this.kills = 0;
@@ -176,7 +204,7 @@ public class PlayerCombatData {
         this.prefix = "";
         this.suffix = "";
         this.displayName = "";
-        this.scorePoints = 0;
+        this.battleCredits = 0;
         this.callsign = "";
         this.rankPrefix = "";
         this.isAdmin = false;
@@ -184,6 +212,8 @@ public class PlayerCombatData {
         this.playerTitle = "";
         this.loadoutConfig = "";
         this.selectedKit = "";
+        this.selectedRole = "";
+        this.selectedLoadout = "";
     }
 
     // ===== NBT Serialization =====
@@ -199,6 +229,7 @@ public class PlayerCombatData {
         tag.putString("Suffix", suffix);
         tag.putString("DisplayName", displayName);
         tag.putInt("BattleCredits", battleCredits);
+        tag.putInt("WarCredits", warCredits);
         tag.putString("Callsign", callsign);
         tag.putString("RankPrefix", rankPrefix);
         tag.putBoolean("IsAdmin", isAdmin);
@@ -206,6 +237,8 @@ public class PlayerCombatData {
         tag.putString("PlayerTitle", playerTitle);
         tag.putString("LoadoutConfig", loadoutConfig);
         tag.putString("SelectedKit", selectedKit);
+        tag.putString("SelectedRole", selectedRole);
+        tag.putString("SelectedLoadout", selectedLoadout);
         {
             CompoundTag attTag = new CompoundTag();
             for (Map.Entry<String, CompoundTag> e : savedAttachments.entrySet()) {
@@ -220,6 +253,27 @@ public class PlayerCombatData {
             }
             tag.put("UnlockedKits", kitList);
         }
+        {
+            ListTag roleList = new ListTag();
+            for (String role : unlockedRoles) {
+                roleList.add(StringTag.valueOf(role));
+            }
+            tag.put("UnlockedRoles", roleList);
+        }
+        {
+            ListTag loadoutList = new ListTag();
+            for (String ld : unlockedLoadouts) {
+                loadoutList.add(StringTag.valueOf(ld));
+            }
+            tag.put("UnlockedLoadouts", loadoutList);
+        }
+        {
+            ListTag certList = new ListTag();
+            for (String cert : certifications) {
+                certList.add(StringTag.valueOf(cert));
+            }
+            tag.put("Certifications", certList);
+        }
         return tag;
     }
 
@@ -233,6 +287,7 @@ public class PlayerCombatData {
         this.suffix = tag.getString("Suffix");
         this.displayName = tag.getString("DisplayName");
         this.battleCredits = tag.getInt("BattleCredits");
+        this.warCredits = tag.contains("WarCredits") ? tag.getInt("WarCredits") : 0;
         this.callsign = tag.getString("Callsign");
         this.rankPrefix = tag.getString("RankPrefix");
         this.isAdmin = tag.getBoolean("IsAdmin");
@@ -240,6 +295,8 @@ public class PlayerCombatData {
         this.playerTitle = tag.getString("PlayerTitle");
         this.loadoutConfig = tag.contains("LoadoutConfig") ? tag.getString("LoadoutConfig") : "";
         this.selectedKit = tag.contains("SelectedKit") ? tag.getString("SelectedKit") : "";
+        this.selectedRole = tag.contains("SelectedRole") ? tag.getString("SelectedRole") : "";
+        this.selectedLoadout = tag.contains("SelectedLoadout") ? tag.getString("SelectedLoadout") : "";
         if (tag.contains("SavedAttachments")) {
             CompoundTag attTag = tag.getCompound("SavedAttachments");
             savedAttachments.clear();
@@ -252,6 +309,27 @@ public class PlayerCombatData {
             unlockedKits.clear();
             for (Tag base : kitList) {
                 unlockedKits.add(base.getAsString());
+            }
+        }
+        if (tag.contains("UnlockedRoles")) {
+            ListTag roleList = tag.getList("UnlockedRoles", Tag.TAG_STRING);
+            unlockedRoles.clear();
+            for (Tag base : roleList) {
+                unlockedRoles.add(base.getAsString());
+            }
+        }
+        if (tag.contains("UnlockedLoadouts")) {
+            ListTag loadoutList = tag.getList("UnlockedLoadouts", Tag.TAG_STRING);
+            unlockedLoadouts.clear();
+            for (Tag base : loadoutList) {
+                unlockedLoadouts.add(base.getAsString());
+            }
+        }
+        if (tag.contains("Certifications")) {
+            ListTag certList = tag.getList("Certifications", Tag.TAG_STRING);
+            certifications.clear();
+            for (Tag base : certList) {
+                certifications.add(base.getAsString());
             }
         }
     }

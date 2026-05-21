@@ -4,8 +4,10 @@ import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.client.gui.component.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -46,8 +48,12 @@ public class BattlefieldMainMenuScreen extends Screen {
         int gap  = 8;
 
         addRenderableWidget(new BButton(cx - btnW / 2, startY, btnW, btnH,
-            Component.literal("Play"), btn ->
-                Minecraft.getInstance().setScreen(new JoinMultiplayerScreen(this)),
+            Component.literal("Play"), btn -> {
+                Minecraft mc = Minecraft.getInstance();
+                ServerAddress addr = ServerAddress.parseString("127.0.0.1:25565");
+                ServerData data = new ServerData("127.0.0.1:25565", "127.0.0.1:25565", false);
+                ConnectScreen.startConnecting(null, mc, addr, data, false);
+            },
             BButton.Variant.PRIMARY));
 
         addRenderableWidget(new BButton(cx - btnW / 2, startY + btnH + gap, btnW, btnH,

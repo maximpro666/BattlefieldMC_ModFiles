@@ -77,7 +77,7 @@ public class ClassSelectionScreen extends Screen {
         LockChecker.Context ctx = new LockChecker.Context();
         ctx.playerRank = com.yourmod.teamsystem.client.ClientTeamData.localPlayerRank;
         ctx.playerTeam = localTeam.name();
-        ctx.playerSP = com.yourmod.teamsystem.client.ClientTeamData.localPlayerSP;
+        ctx.playerSP = com.yourmod.teamsystem.client.ClientTeamData.localPlayerWC;
         ctx.playerBC = com.yourmod.teamsystem.client.ClientTeamData.localPlayerBC;
 
         for (Map.Entry<String, KitConfig.ClassConfig> entry : cfg.classes.entrySet()) {

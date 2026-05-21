@@ -1,6 +1,8 @@
 package com.yourmod.teamsystem.core;
 
 import com.yourmod.teamsystem.TeamSystem;
+import com.yourmod.teamsystem.ammo.AmmoService;
+import com.yourmod.teamsystem.ammo.PointAmmoProvider;
 import com.yourmod.teamsystem.capture.CaptureProcessor;
 import com.yourmod.teamsystem.capture.CaptureZone;
 import com.yourmod.teamsystem.capture.ZoneDataManager;
@@ -15,9 +17,40 @@ import java.util.stream.Collectors;
 
 public class CapturePointManager {
     private final ZoneDataManager zoneData;
+    private final Map<String, PointAmmoProvider> pointAmmoProviders = new HashMap<>();
 
     public CapturePointManager() {
         this.zoneData = new ZoneDataManager();
+    }
+
+    private AmmoService ammo() {
+        return BattlefieldRuntime.getInstance().getAmmoService();
+    }
+
+    private void registerAmmoProvidersForDimension(String dimension) {
+        for (CaptureZone zone : zoneData.getZones(dimension)) {
+            if (!pointAmmoProviders.containsKey(zone.getId())) {
+                PointAmmoProvider provider = new PointAmmoProvider(zone);
+                pointAmmoProviders.put(zone.getId(), provider);
+                ammo().registerProvider(provider);
+            }
+        }
+    }
+
+    private void unregisterAmmoProvidersForDimension(String dimension) {
+        for (CaptureZone zone : zoneData.getZones(dimension)) {
+            PointAmmoProvider provider = pointAmmoProviders.remove(zone.getId());
+            if (provider != null) {
+                ammo().unregisterProvider(provider);
+            }
+        }
+    }
+
+    private void unregisterAllAmmoProviders() {
+        for (PointAmmoProvider provider : pointAmmoProviders.values()) {
+            ammo().unregisterProvider(provider);
+        }
+        pointAmmoProviders.clear();
     }
 
     public ZoneDataManager getZoneData() { return zoneData; }
@@ -36,6 +69,7 @@ public class CapturePointManager {
     }
 
     public void clearPoints() {
+        unregisterAllAmmoProviders();
         zoneData.clearAll();
     }
 
@@ -52,7 +86,10 @@ public class CapturePointManager {
     public void loadFromMapConfig(MapConfig map, int zOffset) {
         ResourceLocation dimId = getCurrentMapDimension();
         if (dimId != null) {
-            zoneData.loadFromMapConfig(map, dimId.toString(), zOffset);
+            String dimension = dimId.toString();
+            unregisterAmmoProvidersForDimension(dimension);
+            zoneData.loadFromMapConfig(map, dimension, zOffset);
+            registerAmmoProvidersForDimension(dimension);
         }
     }
 
@@ -67,10 +104,14 @@ public class CapturePointManager {
                 int captureSec = (int) Math.ceil(entry.captureSpeed * 10);
                 String id = "map_" + entry.hashCode();
                 if (zoneData.getZone(id, dimension) != null) return;
-                zoneData.addZone(new CaptureZone(id, name, dimension,
+                CaptureZone zone = new CaptureZone(id, name, dimension,
                     center.offset(-radius, -radius, -radius),
                     center.offset(radius, radius, radius),
-                    Math.max(5, captureSec)));
+                    Math.max(5, captureSec));
+                zoneData.addZone(zone);
+                PointAmmoProvider provider = new PointAmmoProvider(zone);
+                pointAmmoProviders.put(zone.getId(), provider);
+                ammo().registerProvider(provider);
                 return;
             }
         }

@@ -4,14 +4,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import com.yourmod.teamsystem.client.ClientMarkerData;
 import com.yourmod.teamsystem.client.ClientTeamData;
 import com.yourmod.teamsystem.client.CapturePointData;
-import com.yourmod.teamsystem.client.PlayerListEntry;
 import com.yourmod.teamsystem.client.gui.UITheme;
 import com.yourmod.teamsystem.client.gui.VisualsConfig;
-import com.yourmod.teamsystem.core.MarkerData;
-import com.yourmod.teamsystem.core.Rank;
 import com.yourmod.teamsystem.core.Team;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -24,7 +20,6 @@ import org.joml.Matrix4f;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 public class WorldMarkerRenderer {
 
@@ -59,16 +54,10 @@ public class WorldMarkerRenderer {
         Minecraft mc = Minecraft.getInstance();
         Vec3 camPos = camera.getPosition();
 
-        List<MarkerData> markers = ClientMarkerData.getMarkers();
-        if (markers != null && !markers.isEmpty()) {
-            for (MarkerData marker : markers) {
-                renderMarkerWithCreator(poseStack, bufferSource, camera, camPos, marker);
-            }
-        }
-
         List<CapturePointData> points = ClientTeamData.capturePoints;
+
+        List<CapturePointRender> renderList = new ArrayList<>();
         if (points != null && !points.isEmpty()) {
-            List<CapturePointRender> renderList = new ArrayList<>();
             for (CapturePointData cp : points) {
                 double dx = cp.x() - camPos.x;
                 double dy = cp.y() - camPos.y;
@@ -78,12 +67,27 @@ public class WorldMarkerRenderer {
                 renderList.add(new CapturePointRender(cp, dist));
             }
             renderList.sort(Comparator.comparingDouble(a -> -a.dist));
-            for (CapturePointRender r : renderList) {
-                renderCapturePoint(poseStack, bufferSource, camera, camPos, r.cp, r.dist);
-            }
         }
 
-        renderBases(poseStack, bufferSource, camera, camPos);
+        // Pass 1: body elements (backgrounds, borders, progress bars)
+        for (CapturePointRender r : renderList) {
+            renderCapturePoint(poseStack, bufferSource, camera, camPos, r.cp, r.dist, true);
+        }
+        renderBases(poseStack, bufferSource, camera, camPos, true);
+
+        if (bufferSource instanceof MultiBufferSource.BufferSource bs) {
+            bs.endBatch(RenderType.gui());
+        }
+
+        // Pass 2: text elements (letters, labels, distance) on top of all bodies
+        for (CapturePointRender r : renderList) {
+            renderCapturePoint(poseStack, bufferSource, camera, camPos, r.cp, r.dist, false);
+        }
+        renderBases(poseStack, bufferSource, camera, camPos, false);
+
+        if (bufferSource instanceof MultiBufferSource.BufferSource bs) {
+            bs.endBatch(RenderType.gui());
+        }
 
         RenderSystem.enableDepthTest();
     }
@@ -95,7 +99,7 @@ public class WorldMarkerRenderer {
     }
 
     private void renderCapturePoint(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera,
-                                     Vec3 camPos, CapturePointData cp, double dist) {
+                                     Vec3 camPos, CapturePointData cp, double dist, boolean bodyPass) {
         Minecraft mc = Minecraft.getInstance();
         int ownerOrdinal = cp.ownerTeamOrdinal();
         int capturerOrdinal = cp.capturingTeamOrdinal();
@@ -165,91 +169,103 @@ public class WorldMarkerRenderer {
         poseStack.scale(-scale, -scale, scale);
 
         Font font = mc.font;
-        String letter = cp.name().length() > 0 ? cp.name().substring(0, 1).toUpperCase() : "?";
+        String pointType = cp.pointType() != null ? cp.pointType() : "small";
+        String letter = switch (pointType) {
+            case "major" -> "\u2605";
+            case "medium" -> "\u2666";
+            default -> cp.name().length() > 0 ? cp.name().substring(0, 1).toUpperCase() : "?";
+        };
         int lw = font.width(letter);
         int lh = font.lineHeight;
         float hs = (float)cfg.markerSize / 2f;
         float texAlpha = textAlpha(dist, MAX_DIST);
 
-        // === Background ===
-        drawRect(poseStack, bufferSource, -hs, -hs, hs, hs,
-            applyAlpha(bgColor, alpha));
+        if (bodyPass) {
+            // === Background ===
+            drawRect(poseStack, bufferSource, -hs, -hs, hs, hs,
+                applyAlpha(bgColor, alpha));
 
-        // === Progress fill ===
-        if (prog > 0.01) {
-            int pf;
-            if (capturerOrdinal >= 0 && capturerOrdinal <= 1) {
-                pf = capturerOrdinal == 0 ? NATO_FILL : RUSSIA_FILL;
-            } else if (ownerOrdinal >= 0 && ownerOrdinal <= 1) {
-                pf = ownerOrdinal == 0 ? NATO_FILL : RUSSIA_FILL;
-            } else {
-                pf = CAPTURE_FILL;
+            // === Type stripe ===
+            int stripeColor = switch (pointType) {
+                case "major" -> 0xFFD700;
+                case "medium" -> 0x4488FF;
+                default -> 0x888888;
+            };
+            float stripeH = hs * 0.2f;
+            drawRect(poseStack, bufferSource, -hs, -hs - stripeH, hs, -hs,
+                applyAlpha(stripeColor, alpha));
+
+            // === Progress fill ===
+            if (prog > 0.01) {
+                int pf;
+                if (capturerOrdinal >= 0 && capturerOrdinal <= 1) {
+                    pf = capturerOrdinal == 0 ? NATO_FILL : RUSSIA_FILL;
+                } else if (ownerOrdinal >= 0 && ownerOrdinal <= 1) {
+                    pf = ownerOrdinal == 0 ? NATO_FILL : RUSSIA_FILL;
+                } else {
+                    pf = CAPTURE_FILL;
+                }
+                float fillW = (float)(hs * 2.0 * Math.max(0.0, Math.min(1.0, prog)));
+                drawRect(poseStack, bufferSource, -hs, -hs, -hs + fillW, hs,
+                    applyAlpha(pf, alpha));
             }
-            float fillW = (float)(hs * 2.0 * Math.max(0.0, Math.min(1.0, prog)));
-            drawRect(poseStack, bufferSource, -hs, -hs, -hs + fillW, hs,
-                applyAlpha(pf, alpha));
-        }
 
-        // === Border ===
-        float bd = (float)cfg.borderWidth;
-        int borderA = (int)(alpha * 0xFF);
-        int ba = Math.min(0xFF, Math.max(0, borderA * 2 / 3));
-        int borderArgb = (borderA << 24) | (borderColor & 0x00FFFFFF);
-        int borderOuterArgb = (ba << 24) | (borderColor & 0x00FFFFFF);
-        drawRect(poseStack, bufferSource, -hs - bd, -hs - bd, hs + bd, -hs, borderOuterArgb);
-        drawRect(poseStack, bufferSource, -hs - bd, hs, hs + bd, hs + bd, borderOuterArgb);
-        drawRect(poseStack, bufferSource, -hs - bd, -hs, -hs, hs + bd, borderOuterArgb);
-        drawRect(poseStack, bufferSource, hs, -hs, hs + bd, hs + bd, borderOuterArgb);
-        drawRect(poseStack, bufferSource, -hs, -hs, hs, -hs + bd, borderArgb);
-        drawRect(poseStack, bufferSource, -hs, hs - bd, hs, hs, borderArgb);
-        drawRect(poseStack, bufferSource, -hs, -hs, -hs + bd, hs, borderArgb);
-        drawRect(poseStack, bufferSource, hs - bd, -hs, hs, hs, borderArgb);
+            // === Border ===
+            float bd = (float)cfg.borderWidth;
+            int borderA = (int)(alpha * 0xFF);
+            int ba = Math.min(0xFF, Math.max(0, borderA * 2 / 3));
+            int borderArgb = (borderA << 24) | (borderColor & 0x00FFFFFF);
+            int borderOuterArgb = (ba << 24) | (borderColor & 0x00FFFFFF);
+            drawRect(poseStack, bufferSource, -hs - bd, -hs - bd, hs + bd, -hs, borderOuterArgb);
+            drawRect(poseStack, bufferSource, -hs - bd, hs, hs + bd, hs + bd, borderOuterArgb);
+            drawRect(poseStack, bufferSource, -hs - bd, -hs, -hs, hs + bd, borderOuterArgb);
+            drawRect(poseStack, bufferSource, hs, -hs, hs + bd, hs + bd, borderOuterArgb);
+            drawRect(poseStack, bufferSource, -hs, -hs, hs, -hs + bd, borderArgb);
+            drawRect(poseStack, bufferSource, -hs, hs - bd, hs, hs, borderArgb);
+            drawRect(poseStack, bufferSource, -hs, -hs, -hs + bd, hs, borderArgb);
+            drawRect(poseStack, bufferSource, hs - bd, -hs, hs, hs, borderArgb);
 
-        // === Progress edge line ===
-        if (prog > 0.01) {
-            float fillW = (float)(hs * 2.0 * Math.max(0.0, Math.min(1.0, prog)));
-            float edgeX = -hs + fillW;
-            float ew = (float)cfg.progressEdgeWidth;
-            int edgeColor = applyAlpha(0xFFFFFFFF, alpha * 0.6f);
-            drawRect(poseStack, bufferSource, edgeX - ew, -hs, edgeX + ew, hs, edgeColor);
-        }
-
-        // Flush gui buffer so background/progress/border render before text
-        if (bufferSource instanceof MultiBufferSource.BufferSource bs) {
-            bs.endBatch(RenderType.gui());
-        }
-
-        // === Letter (scaled to fit) ===
-        int letterColor = (int)(0xFF * texAlpha) << 24 | 0xFFFFFF;
-        float textScale = 1.8f;
-        poseStack.pushPose();
-        poseStack.translate(0, 0, 0.001f);
-        poseStack.scale(textScale, textScale, 1f);
-        font.drawInBatch(letter,
-            -lw / 2f, -lh / 2f,
-            letterColor, true,
-            poseStack.last().pose(),
-            bufferSource,
-            Font.DisplayMode.SEE_THROUGH,
-            0, 0xF000F0);
-        poseStack.popPose();
-
-        // === Distance suffix ===
-        if (cfg.showDistance && dist > 60) {
-            String distStr = (int)dist + "m";
-            int dw = font.width(distStr);
-            float ds = 0.5f;
+            // === Progress edge line ===
+            if (prog > 0.01) {
+                float fillW = (float)(hs * 2.0 * Math.max(0.0, Math.min(1.0, prog)));
+                float edgeX = -hs + fillW;
+                float ew = (float)cfg.progressEdgeWidth;
+                int edgeColor = applyAlpha(0xFFFFFFFF, alpha * 0.6f);
+                drawRect(poseStack, bufferSource, edgeX - ew, -hs, edgeX + ew, hs, edgeColor);
+            }
+        } else {
+            // === Letter (scaled to fit inside body) ===
+            int letterColor = (int)(0xFF * texAlpha) << 24 | 0xFFFFFF;
+            float textScale = Math.min(0.85f, (hs * 1.2f) / Math.max(lw, 1));
             poseStack.pushPose();
-            poseStack.translate(0, hs + 2, 0);
-            poseStack.scale(ds, ds, 1);
-            font.drawInBatch(distStr,
-                -dw / 2f, 0f,
-                (int)(0x88 * alpha) << 24 | 0xCCCCCC, true,
+            poseStack.translate(0, 0, 0.001f);
+            poseStack.scale(textScale, textScale, 1f);
+            font.drawInBatch(letter,
+                -lw / 2f, -lh / 2f,
+                letterColor, true,
                 poseStack.last().pose(),
                 bufferSource,
                 Font.DisplayMode.SEE_THROUGH,
                 0, 0xF000F0);
             poseStack.popPose();
+
+            // === Distance suffix ===
+            if (cfg.showDistance && dist > 60) {
+                String distStr = (int)dist + "m";
+                int dw = font.width(distStr);
+                float ds = 0.5f;
+                poseStack.pushPose();
+                poseStack.translate(0, hs + 2, 0);
+                poseStack.scale(ds, ds, 1);
+                font.drawInBatch(distStr,
+                    -dw / 2f, 0f,
+                    (int)(0x88 * alpha) << 24 | 0xCCCCCC, true,
+                    poseStack.last().pose(),
+                    bufferSource,
+                    Font.DisplayMode.SEE_THROUGH,
+                    0, 0xF000F0);
+                poseStack.popPose();
+            }
         }
 
         poseStack.popPose();
@@ -274,7 +290,7 @@ public class WorldMarkerRenderer {
         vc.vertex(mat, x1, y1, z).color(r, g, b, a).endVertex();
     }
 
-    private void renderBases(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera, Vec3 camPos) {
+    private void renderBases(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera, Vec3 camPos, boolean bodyPass) {
         Team playerTeam = ClientTeamData.getLocalPlayerTeam();
         if (playerTeam == Team.SPECTATOR) return;
         int[] nato = ClientTeamData.getNatoBasePos();
@@ -284,17 +300,17 @@ public class WorldMarkerRenderer {
 
         if (playerTeam == Team.NATO && nato != null) {
             renderBaseMarker(poseStack, bufferSource, camera, camPos,
-                nato[0], nato[1], nato[2], "NATO", UITheme.TEAM_NATO, elapsed);
+                nato[0], nato[1], nato[2], "NATO", UITheme.TEAM_NATO, elapsed, bodyPass);
         }
         if (playerTeam == Team.RUSSIA && russia != null) {
             renderBaseMarker(poseStack, bufferSource, camera, camPos,
-                russia[0], russia[1], russia[2], "RUSSIA", UITheme.TEAM_RUSSIA, elapsed);
+                russia[0], russia[1], russia[2], "RUSSIA", UITheme.TEAM_RUSSIA, elapsed, bodyPass);
         }
     }
 
     private void renderBaseMarker(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera,
                                    Vec3 camPos, double x, double y, double z,
-                                   String label, int teamColor, float elapsed) {
+                                   String label, int teamColor, float elapsed, boolean bodyPass) {
         double dx = x - camPos.x;
         double dy = y - camPos.y;
         double dz = z - camPos.z;
@@ -332,114 +348,40 @@ public class WorldMarkerRenderer {
         float hs = Math.max(6f, lw / 2f + 2f) * 2f;
         float bd = 1.2f;
 
-        drawRect(poseStack, bufferSource, -hs, -hs, hs, hs,
-            applyAlpha(0xCC0A0A0A, alpha));
-        drawRect(poseStack, bufferSource, -hs, -hs, hs, hs,
-            applyAlpha(teamColor, alpha * 0.55f));
+        if (bodyPass) {
+            drawRect(poseStack, bufferSource, -hs, -hs, hs, hs,
+                applyAlpha(0xCC0A0A0A, alpha));
+            drawRect(poseStack, bufferSource, -hs, -hs, hs, hs,
+                applyAlpha(teamColor, alpha * 0.55f));
 
-        int borderArgb = ((int)(0xFF * alpha) << 24) | (teamColor & 0x00FFFFFF);
-        drawRect(poseStack, bufferSource, -hs, -hs, hs, -hs + bd, borderArgb);
-        drawRect(poseStack, bufferSource, -hs, hs - bd, hs, hs, borderArgb);
-        drawRect(poseStack, bufferSource, -hs, -hs, -hs + bd, hs, borderArgb);
-        drawRect(poseStack, bufferSource, hs - bd, -hs, hs, hs, borderArgb);
-
-        // Flush gui buffer so background renders before text
-        if (bufferSource instanceof MultiBufferSource.BufferSource bs) {
-            bs.endBatch(RenderType.gui());
-        }
-
-        int letterColor = (int)(0xFF * alpha) << 24 | 0xFFFFFF;
-        font.drawInBatch(letter,
-            -lw / 2f, -font.lineHeight / 2f,
-            letterColor, true,
-            poseStack.last().pose(),
-            bufferSource,
-            Font.DisplayMode.SEE_THROUGH,
-            0, 0xF000F0);
-
-        if (dist > 60) {
-            String distStr = (int)dist + "m";
-            int dw = font.width(distStr);
-            poseStack.pushPose();
-            poseStack.translate(0, hs + 2, 0);
-            poseStack.scale(0.5f, 0.5f, 1);
-            font.drawInBatch(distStr,
-                -dw / 2f, 0f,
-                (int)(0x88 * alpha) << 24 | 0xCCCCCC, true,
+            int borderArgb = ((int)(0xFF * alpha) << 24) | (teamColor & 0x00FFFFFF);
+            drawRect(poseStack, bufferSource, -hs, -hs, hs, -hs + bd, borderArgb);
+            drawRect(poseStack, bufferSource, -hs, hs - bd, hs, hs, borderArgb);
+            drawRect(poseStack, bufferSource, -hs, -hs, -hs + bd, hs, borderArgb);
+            drawRect(poseStack, bufferSource, hs - bd, -hs, hs, hs, borderArgb);
+        } else {
+            int letterColor = (int)(0xFF * alpha) << 24 | 0xFFFFFF;
+            font.drawInBatch(letter,
+                -lw / 2f, -font.lineHeight / 2f,
+                letterColor, true,
                 poseStack.last().pose(),
                 bufferSource,
                 Font.DisplayMode.SEE_THROUGH,
                 0, 0xF000F0);
-            poseStack.popPose();
-        }
 
-        poseStack.popPose();
-    }
-
-    private void renderMarkerWithCreator(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera, Vec3 camPos, MarkerData marker) {
-        double x = marker.getX();
-        double y = marker.getY() + 2.5;
-        double z = marker.getZ();
-        double dx = x - camPos.x;
-        double dy = y - camPos.y;
-        double dz = z - camPos.z;
-        double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (dist > MAX_DIST) return;
-
-        String label = marker.getLabel() != null && !marker.getLabel().isEmpty() ? marker.getLabel() : marker.getName();
-        UUID creatorId = marker.getCreatorUUID();
-        PlayerListEntry entry = creatorId != null ? ClientTeamData.playerDataMap.get(creatorId) : null;
-
-        String subLabel = null;
-        if (entry != null) {
-            boolean russian = "ru".equals(ClientTeamData.language);
-            String rankPrefix = Rank.fromOrdinal(entry.rank()).getPrefix(russian);
-            subLabel = rankPrefix + " " + entry.callsign();
-        }
-
-        int color = markerColor(marker.getType());
-        double sizeT = Math.max(1.0, dist / 60.0);
-        float scale = (float)VisualsConfig.get().capturePoint.extraScale * (float)sizeT;
-
-        poseStack.pushPose();
-        poseStack.translate(dx, dy, dz);
-        poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
-        poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
-        poseStack.translate(0, 0, (float)(-dist * 0.0001));
-        poseStack.scale(-scale, -scale, scale);
-
-        Minecraft mc = Minecraft.getInstance();
-        Font font = mc.font;
-
-        float alpha = calcAlpha(dist, MAX_DIST);
-        int textColor = ((int)(alpha * 0xFF) << 24) | (color & 0x00FFFFFF);
-        int shadowColor = 0xF000F0;
-
-        font.drawInBatch(label,
-            -font.width(label) / 2f, -8f,
-            textColor, true,
-            poseStack.last().pose(),
-            bufferSource,
-            Font.DisplayMode.SEE_THROUGH,
-            0, shadowColor);
-
-        if (subLabel != null && dist < 30) {
-            float subAlpha = 1.0f;
-            if (dist > 15) {
-                subAlpha = 1.0f - (float)((dist - 15) / 15.0);
-            }
-            if (subAlpha > 0.01f) {
+            if (dist > 60) {
+                String distStr = (int)dist + "m";
+                int dw = font.width(distStr);
                 poseStack.pushPose();
-                poseStack.translate(0, 12, 0);
-                poseStack.scale(0.7f, 0.7f, 1);
-                int subColor = ((int)(subAlpha * 0xFF) << 24) | 0xCCCCCC;
-                font.drawInBatch(subLabel,
-                    -font.width(subLabel) / 2f, 0f,
-                    subColor, true,
+                poseStack.translate(0, hs + 2, 0);
+                poseStack.scale(0.5f, 0.5f, 1);
+                font.drawInBatch(distStr,
+                    -dw / 2f, 0f,
+                    (int)(0x88 * alpha) << 24 | 0xCCCCCC, true,
                     poseStack.last().pose(),
                     bufferSource,
                     Font.DisplayMode.SEE_THROUGH,
-                    0, shadowColor);
+                    0, 0xF000F0);
                 poseStack.popPose();
             }
         }
@@ -447,25 +389,16 @@ public class WorldMarkerRenderer {
         poseStack.popPose();
     }
 
-    private static int markerColor(MarkerData.MarkerType type) {
-        switch (type) {
-            case ATTACK:  return UITheme.MARKER_ATTACK;
-            case DEFEND:  return UITheme.MARKER_DEFEND;
-            case OBSERVE: return UITheme.MARKER_OBSERVE;
-            default:      return UITheme.MARKER_POINT;
-        }
-    }
-
     private static float calcAlpha(double dist, double maxDist) {
         if (dist <= FULL_VIS_DIST) return 1.0f;
-        if (dist >= maxDist) return 0.05f;
-        return (float)Math.max(0.05, 1.0 - (dist - FULL_VIS_DIST) / (maxDist - FULL_VIS_DIST));
+        if (dist >= maxDist) return 0.25f;
+        return (float)Math.max(0.25, 1.0 - (dist - FULL_VIS_DIST) / (maxDist - FULL_VIS_DIST) * 0.75);
     }
 
     private static float textAlpha(double dist, double maxDist) {
         if (dist <= FULL_VIS_DIST) return 1.0f;
-        if (dist >= maxDist) return 0.35f;
-        return (float)Math.max(0.35, 1.0 - (dist - FULL_VIS_DIST) / (maxDist - FULL_VIS_DIST) * 0.65);
+        if (dist >= maxDist) return 0.70f;
+        return (float)Math.max(0.70, 1.0 - (dist - FULL_VIS_DIST) / (maxDist - FULL_VIS_DIST) * 0.30);
     }
 
     private static int applyAlpha(int color, float alpha) {
