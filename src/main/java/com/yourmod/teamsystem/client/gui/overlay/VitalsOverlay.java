@@ -44,7 +44,7 @@ public class VitalsOverlay {
 
         RenderHelper.dropShadow(g, panelX, panelY, PANEL_W, PANEL_H, 2, 60);
         RenderHelper.roundedRect(g, panelX, panelY, PANEL_W, PANEL_H, 2,
-            AnimationHelper.withAlpha(UITheme.BG_HUD, 230));
+            AnimationHelper.withAlpha(UITheme.BG_HUD, 255));
 
         Font font = Minecraft.getInstance().font;
 
@@ -61,7 +61,7 @@ public class VitalsOverlay {
         int hpBarY = hpY + 1;
         int hpBarW = PANEL_W - 76;
         g.fill(hpBarX, hpBarY, hpBarX + hpBarW, hpBarY + HP_BAR_H,
-            AnimationHelper.withAlpha(UITheme.HUD_HP_BG, 230));
+            AnimationHelper.withAlpha(UITheme.HUD_HP_BG, 255));
 
         int fillW = (int)(hpBarW * smoothHp);
         if (fillW > 0) {
@@ -88,7 +88,7 @@ public class VitalsOverlay {
         int armorBarY = armorY + 1;
         int armorBarW = PANEL_W - 76;
         g.fill(armorBarX, armorBarY, armorBarX + armorBarW, armorBarY + ARMOR_BAR_H,
-            AnimationHelper.withAlpha(0xFF1A1A1A, 230));
+            AnimationHelper.withAlpha(0xFF1A1A1A, 255));
 
         int armorFillW = (int)(armorBarW * smoothArmor);
         if (armorFillW > 0) {

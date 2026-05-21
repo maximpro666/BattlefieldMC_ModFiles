@@ -214,6 +214,11 @@ public class WorldMarkerRenderer {
             drawRect(poseStack, bufferSource, edgeX - ew, -hs, edgeX + ew, hs, edgeColor);
         }
 
+        // Flush gui buffer so background/progress/border render before text
+        if (bufferSource instanceof MultiBufferSource.BufferSource bs) {
+            bs.endBatch(RenderType.gui());
+        }
+
         // === Letter (scaled to fit) ===
         int letterColor = (int)(0xFF * texAlpha) << 24 | 0xFFFFFF;
         float textScale = 1.8f;
@@ -337,6 +342,11 @@ public class WorldMarkerRenderer {
         drawRect(poseStack, bufferSource, -hs, hs - bd, hs, hs, borderArgb);
         drawRect(poseStack, bufferSource, -hs, -hs, -hs + bd, hs, borderArgb);
         drawRect(poseStack, bufferSource, hs - bd, -hs, hs, hs, borderArgb);
+
+        // Flush gui buffer so background renders before text
+        if (bufferSource instanceof MultiBufferSource.BufferSource bs) {
+            bs.endBatch(RenderType.gui());
+        }
 
         int letterColor = (int)(0xFF * alpha) << 24 | 0xFFFFFF;
         font.drawInBatch(letter,

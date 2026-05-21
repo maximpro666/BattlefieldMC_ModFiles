@@ -34,7 +34,7 @@ public class HotbarOverlay {
 
         long idle = System.currentTimeMillis() - lastMove;
         if (idle > 3000) {
-            fadeAlpha = AnimationHelper.lerp(fadeAlpha, 0.55f, 0.05f);
+            fadeAlpha = AnimationHelper.lerp(fadeAlpha, 0.7f, 0.05f);
         } else {
             fadeAlpha = AnimationHelper.lerp(fadeAlpha, 1f, 0.15f);
         }
@@ -43,7 +43,7 @@ public class HotbarOverlay {
         int x = screenWidth / 2 - totalW / 2;
         int y = screenHeight - SLOT_SIZE - BOTTOM_OFFSET;
 
-        int bgAlpha = (int)(fadeAlpha * 230);
+        int bgAlpha = (int)(fadeAlpha * 255);
         
         g.fill(x - 5, y - 3, x + totalW + 5, y + SLOT_SIZE + 3,
             AnimationHelper.withAlpha(COLOR_BG, bgAlpha));
@@ -61,7 +61,7 @@ public class HotbarOverlay {
             slotGlow[i] = AnimationHelper.lerp(slotGlow[i], isSel ? 1f : 0f, 0.15f);
 
             int slotBg = AnimationHelper.blendColors(
-                AnimationHelper.withAlpha(UITheme.BG_SLOT, (int)(fadeAlpha * 230)),
+                AnimationHelper.withAlpha(UITheme.BG_SLOT, (int)(fadeAlpha * 255)),
                 UITheme.ACCENT,
                 slotGlow[i] * 0.2f * fadeAlpha);
             
@@ -137,7 +137,7 @@ public class HotbarOverlay {
         int ammoY = hy - 16;
 
         RenderHelper.roundedRect(g, ammoX - 4, ammoY - 2, ammoW + 8, 12, 2,
-            AnimationHelper.withAlpha(UITheme.HUD_AMMO_BG, (int)(fadeAlpha * 230)));
+            AnimationHelper.withAlpha(UITheme.HUD_AMMO_BG, (int)(fadeAlpha * 255)));
 
         g.drawString(mc.font, ammoStr, ammoX, ammoY,
             AnimationHelper.withAlpha(UITheme.HUD_AMMO_TEXT, (int)(fadeAlpha * 255)));
