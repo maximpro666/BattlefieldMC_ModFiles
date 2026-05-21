@@ -1,0 +1,67 @@
+{
+  "gui.button_click": {
+    "category": "master",
+    "subtitle": "Button Click",
+    "sounds": ["pwp:gui/button_click"]
+  },
+  "gui.button_hover": {
+    "category": "master",
+    "subtitle": "Button Hover",
+    "sounds": ["pwp:gui/button_hover"]
+  },
+  "gui.error": {
+    "category": "master",
+    "subtitle": "Error",
+    "sounds": ["pwp:gui/error"]
+  },
+  "gui.success": {
+    "category": "master",
+    "subtitle": "Success",
+    "sounds": ["pwp:gui/success"]
+  },
+  "gui.transition": {
+    "category": "master",
+    "subtitle": "Transition",
+    "sounds": ["pwp:gui/transition"]
+  },
+  "gui.first_deploy": {
+    "category": "master",
+    "subtitle": "First Deploy",
+    "sounds": ["pwp:gui/first_deploy"]
+  },
+  "gui.respawn": {
+    "category": "master",
+    "subtitle": "Respawn",
+    "sounds": ["pwp:gui/respawn"]
+  },
+  "game.capture_point": {
+    "category": "master",
+    "subtitle": "Capture Point",
+    "sounds": ["pwp:game/capture_point"]
+  },
+  "game.victory": {
+    "category": "master",
+    "subtitle": "Victory",
+    "sounds": ["pwp:game/victory"]
+  },
+  "game.defeat": {
+    "category": "master",
+    "subtitle": "Defeat",
+    "sounds": ["pwp:game/defeat"]
+  },
+  "game.map_change": {
+    "category": "master",
+    "subtitle": "Map Change",
+    "sounds": ["pwp:game/map_change"]
+  },
+  "notification.info": {
+    "category": "master",
+    "subtitle": "Notification",
+    "sounds": ["pwp:notification/info"]
+  },
+  "notification.alert": {
+    "category": "master",
+    "subtitle": "Alert",
+    "sounds": ["pwp:notification/alert"]
+  }
+}

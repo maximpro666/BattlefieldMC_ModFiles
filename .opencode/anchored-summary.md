@@ -1,4 +1,4 @@
-# BattlefieldMC Mod — Anchored Summary
+# Project Warfare Pigeo (PWP) Mod — Anchored Summary
 
 ## Session: 2026-05-18 — Fix compilation errors, redesign ESC menu, add /redeploy, fix death handling, rewrite CaptureParticles/WorldMarkerRenderer, design spawn system
 
@@ -41,9 +41,45 @@
 - **Security**: 5s cooldown on `/redeploy` to prevent griefing via ticket drain
 
 ### Key Files
-- `src/main/java/com/yourmod/teamsystem/client/gui/screen/BattlefieldPauseScreen.java`
-- `src/main/java/com/yourmod/teamsystem/client/gui/renderer/CaptureParticles.java`
-- `src/main/java/com/yourmod/teamsystem/client/gui/renderer/WorldMarkerRenderer.java`
-- `src/main/java/com/yourmod/teamsystem/commands/RedeployCommand.java`
-- `src/main/java/com/yourmod/teamsystem/events/CombatEventHandler.java`
-- `src/main/java/com/yourmod/teamsystem/client/ClientSetup.java`
+- `src/main/java/com/pigeostudios/pwp/client/gui/screen/BattlefieldPauseScreen.java`
+- `src/main/java/com/pigeostudios/pwp/client/gui/renderer/CaptureParticles.java`
+- `src/main/java/com/pigeostudios/pwp/client/gui/renderer/WorldMarkerRenderer.java`
+- `src/main/java/com/pigeostudios/pwp/commands/RedeployCommand.java`
+- `src/main/java/com/pigeostudios/pwp/events/CombatEventHandler.java`
+- `src/main/java/com/pigeostudios/pwp/client/ClientSetup.java`
+
+---
+
+## Локализация (Language System) — ВАЖНО
+
+**Принцип:** весь текст мода (чат, гуи, уведомления) должен проходить через локализацию. Хардкод русского текста в Java-файлах запрещён.
+
+### 1. Единый файл русского текста
+Весь русский текст — в одном файле:  
+`src/main/resources/assets/pwp/lang/ru_ru.json`  
+Английские оригиналы — там же: `en_us.json`
+
+### 2. Два механизма рендера
+
+| Где | Механизм | Пример |
+|-----|----------|--------|
+| **Сервер → Клиент** (чат, команды, события) | `Component.translatable("key", args...)` | `player.sendSystemMessage(Component.translatable("pwp.chat.kit.not_found", name))` |
+| **Клиентский GUI** (экраны, виджеты) | `I18n.get("key", args...)` | `I18n.get("pwp.ui.buy_for")` |
+| **Билингвальные строки из конфигов** (kit/class display_name) | `I18n.localize("EN // RU")` | `I18n.localize(kit.display_name)` |
+
+### 3. Правила добавления нового текста
+1. **Всегда** добавляй ключ в `en_us.json` (англ.) и `ru_ru.json` (рус.)
+2. На сервере используй `Component.translatable("key", arg1, arg2)`
+3. В GUI используй `I18n.get("key", arg1, arg2)` (import: `com.pigeostudios.pwp.client.gui.I18n`)
+4. Цветовые коды (`§c`, `§a`, `§e`, `§6`, `§7`, `§f`) пиши прямо в значениях JSON
+5. Методы, возвращающие ошибки (`buyVehicle`, `claimKit`, `applyKit`), должны возвращать `Component` (не `String`), с `null` при успехе
+
+### 4. Переключение языка
+`ClientTeamData.language` — `"ru"` для русского, любое другое — английский.
+`I18n.get()` проверяет это поле. `Component.translatable()` автоматически использует язык клиента Minecraft.
+
+### 5. Чего НЕ делать
+- ❌ Не писать `Component.literal("§cРусский текст")` в Java-файлах
+- ❌ Не добавлять русский текст вне `ru_ru.json`
+- ❌ Не использовать `I18n` на сервере (он клиентский!)
+- ❌ Не возвращать `String` с ошибкой из серверных методов — возвращай `Component`

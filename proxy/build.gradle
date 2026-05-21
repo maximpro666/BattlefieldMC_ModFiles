@@ -18,5 +18,5 @@ java {
 }
 
 jar {
-    archiveFileName = 'teamsystem-proxy-1.0.0.jar'
+    archiveFileName = 'pwp-proxy-1.0.0.jar'
 }

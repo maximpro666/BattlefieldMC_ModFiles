@@ -1,0 +1,16 @@
+{
+  "matchSequence": 0,
+  "maps": [
+    {
+      "name": "noviy_mir",
+      "worldFolder": "noviy_mir",
+      "enabled": true,
+      "worldBorderCenterX": 0,
+      "worldBorderCenterZ": 0,
+      "tickets": 100,
+      "state": "AVAILABLE",
+      "natoSpawn": [0, 64, 0],
+      "russiaSpawn": [0, 64, 0]
+    }
+  ]
+}

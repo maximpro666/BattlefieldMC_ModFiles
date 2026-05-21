@@ -1,4 +1,4 @@
-name: TeamSystemProxy
+name: PWPProxy
 version: 1.0.0
-author: maska
-main: com.yourmod.teamsystem.proxy.TeamSystemProxy
+author: Pigeo Studios
+main: com.pigeostudios.pwp.proxy.PWPProxy

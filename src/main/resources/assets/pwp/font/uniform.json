@@ -1,0 +1,23 @@
+{
+  "providers": [
+    {
+      "type": "ttf",
+      "file": "pwp:font/ShareTechMono-Regular.ttf",
+      "shift": [0.0, 0.0],
+      "size": 16.0,
+      "oversample": 2.0
+    },
+    {
+      "type": "space",
+      "advances": {
+        " ": 4
+      }
+    },
+    {
+      "type": "bitmap",
+      "file": "minecraft:font/glyph_sprite_sheet.png",
+      "ascent": 8,
+      "chars": ["\u0000-\u00FF"]
+    }
+  ]
+}

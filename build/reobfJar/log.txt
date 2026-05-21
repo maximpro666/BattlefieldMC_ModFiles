@@ -1,5 +1,5 @@
 Java Launcher: C:\Users\maska\AppData\Roaming\PrismLauncher\java\java-runtime-gamma\bin\java.exe
-Arguments: '--input, C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\libs\teamsystem-1.0.0.jar, --output, C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reobfJar\output.jar, --names, C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reobfJar\mappings.tsrg, --lib, C:\Users\maska\.gradle\caches\forge_gradle\deobf_dependencies\info\journeymap\journeymap-api\1.20-1.9-SNAPSHOT_mapped_official_1.20.1\journeymap-api-1.20-1.9-SNAPSHOT_mapped_official_1.20.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\de.maxhenkel.voicechat\voicechat-api\2.4.6\3378a4cf336a1f86cf29e6d7ca2caca291e6e5c0\voicechat-api-2.4.6.jar, --lib, C:\Users\maska\.gradle\caches\forge_gradle\minecraft_user_repo\net\minecraftforge\forge\1.20.1-47.3.0_mapped_official_1.20.1\forge-1.20.1-47.3.0_mapped_official_1.20.1.jar, --lib, C:\Users\maska\.gradle\caches\forge_gradle\minecraft_repo\versions\1.20.1\client-extra.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\fmlloader\1.20.1-47.3.0\547850469c8a336b4c60cb8619f6cd421e9e5f55\fmlloader-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\JarJarSelector\0.3.19\376cc9c8ea60720cf027c01fc033de915699801c\JarJarSelector-0.3.19.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\JarJarMetadata\0.3.19\83feaa9b770e6ac0e96ee4fc23fa89325c5fe2\JarJarMetadata-0.3.19.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.guava\guava\31.1-jre\60458f877d055d0c9114d9e1a2efb737b4bc282c\guava-31.1-jre.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.code.findbugs\jsr305\3.0.2\25ea2e8b0c338a877313bd4672d3fe056ea78f0d\jsr305-3.0.2.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\ca.weblite\java-objc-bridge\1.1\1227f9e0666314f9de41477e3ec277e542ed7f7b\java-objc-bridge-1.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\forgespi\7.0.1\3b4972a0cdb135853dba219be61a79b22cff1309\forgespi-7.0.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\mergetool\1.1.5\f3da18e12c696d35a47c82cbb2cc8b5aa15e1154\mergetool-1.1.5-api.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.jetbrains\annotations\24.0.1\13c5c75c4206580aa4d683bffee658caae6c9f43\annotations-24.0.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\cpw.mods\securejarhandler\2.1.10\51e6a22c6c716beb11e244bf5b8be480f51dd6b5\securejarhandler-2.1.10.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\coremods\5.1.6\62fab3c3d59d37f8e15af311cb638c6f6123423\coremods-5.1.6.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\cpw.mods\modlauncher\10.0.9\6d9443f56f50bb85cea383686ff9c867391458b\modlauncher-10.0.9.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.openjdk.nashorn\nashorn-core\15.3\43977e804697048fc8d81d333a36c17d07a5b3dd\nashorn-core-15.3.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-commons\9.7\e86dda4696d3c185fcc95d8d311904e7ce38a53f\asm-commons-9.7.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-util\9.7\c0655519f24d92af2202cb681cd7c1569df6ead6\asm-util-9.7.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-analysis\9.7\e4a258b7eb96107106c0599f0061cfc1832fe07a\asm-analysis-9.7.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-tree\9.7\e446a17b175bfb733b87c5c2560ccb4e57d69f1a\asm-tree-9.7.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm\9.7\73d7b3086e14beb604ced229c302feff6449723\asm-9.7.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\accesstransformers\8.0.4\272d240aa73f42195b2a68e2ebd8b701ecf41f63\accesstransformers-8.0.4.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.antlr\antlr4\4.9.1\e92af8ab33e428461927b484e90bb155a4f3a052\antlr4-4.9.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.antlr\antlr4-runtime\4.9.1\428664f05d2b7f7b7610204b5aa7c1763f62011a\antlr4-runtime-4.9.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\fmlcore\1.20.1-47.3.0\3b6be96aba3e323f3c918e8ef6a96312d82d76ad\fmlcore-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\eventbus\6.0.5\699143dd438431d06b57416944f7cedbe52e1475\eventbus-6.0.5.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\unsafe\0.2.0\54d7a0a5e8fdb71b973025caa46f341ae5904f39\unsafe-0.2.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.electronwill.night-config\toml\3.6.4\51d6cefb2b55ee55ee26b16391212fb2c7dfb4f4\toml-3.6.4.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.electronwill.night-config\core\3.6.4\510f174abbf1c947494db50ef2445683bd52c230\core-3.6.4.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.maven\maven-artifact\3.8.5\4433f50c07debefaed0553bd0068f4f48d449313\maven-artifact-3.8.5.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.jodah\typetools\0.6.3\a01aaa6ddaea9ec07ec4f209487b7a46a526283a\typetools-0.6.3.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecrell\terminalconsoleappender\1.2.0\96d02cd3b384ff015a8fef4223bcb4ccf1717c95\terminalconsoleappender-1.2.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.jline\jline-reader\3.12.1\4382ab1382c7b6f379377ed5f665dc2f6e1218bc\jline-reader-3.12.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.jline\jline-terminal\3.12.1\c777448314e050d980a6b697c140f3bfe9eb7416\jline-terminal-3.12.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.spongepowered\mixin\0.8.5\9d1c0c3a304ae6697ecd477218fa61b850bf57fc\mixin-0.8.5.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\cpw.mods\bootstraplauncher\1.1.2\c546e00443d8432cda6baa1c860346980742628\bootstraplauncher-1.1.2.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\JarJarFileSystems\0.3.19\2464eb7d6b9ddb9db36a82cf8a95193e5c6fe020\JarJarFileSystems-0.3.19.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\fmlearlydisplay\1.20.1-47.3.0\91e33682894f35862e9ce29d633e3258120952f0\fmlearlydisplay-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\javafmllanguage\1.20.1-47.3.0\d7ebc62120f202109e300e084ca1a31a7b946a62\javafmllanguage-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\lowcodelanguage\1.20.1-47.3.0\1bf3e845ea0ce750096da8c71c8364b188ab74d4\lowcodelanguage-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\mclanguage\1.20.1-47.3.0\6093682e943ddccbabf70539319d7f2fe64db2e7\mclanguage-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.github.oshi\oshi-core\6.2.2\54f5efc19bca95d709d9a37d19ffcbba3d21c1a6\oshi-core-6.2.2.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.code.gson\gson\2.10\dd9b193aef96e973d5a11ab13cd17430c2e4306b\gson-2.10.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.guava\failureaccess\1.0.1\1dcf1de382a0bf95a3d8b0849546c88bac1292c9\failureaccess-1.0.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.ibm.icu\icu4j\71.1\9e7d3304c23f9ba5cb71915f7cce23231a57a445\icu4j-71.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\authlib\4.0.43\2ff9d747a77570a07a60d32ac77eb6162ad2a2d9\authlib-4.0.43.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\blocklist\1.0.10\5c685c5ffa94c4cd39496c7184c1d122e515ecef\blocklist-1.0.10.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\brigadier\1.1.8\5244ce82c3337bba4a196a3ce858bfaecc74404a\brigadier-1.1.8.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\datafixerupper\6.0.8\3ba4a30557a9b057760af4011f909ba619fc5125\datafixerupper-6.0.8.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\logging\1.1.1\832b8e6674a9b325a5175a3a6267dfaf34c85139\logging-1.1.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\patchy\2.2.10\da05971b07cbb379d002cf7eaec6a2048211fefc\patchy-2.2.10.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\text2speech\1.17.9\3cad216e3a7f0c19b4b394388bc9ffc446f13b14\text2speech-1.17.9.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.httpcomponents\httpclient\4.5.13\e5f6cae5ca7ecaac1ec2827a9e2d65ae2869cada\httpclient-4.5.13.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\commons-codec\commons-codec\1.15\49d94806b6e3dc933dacbd8acb0fdbab8ebd1e5d\commons-codec-1.15.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\commons-io\commons-io\2.11.0\a2503f302b11ebde7ebc3df41daebe0e4eea3689\commons-io-2.11.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\commons-logging\commons-logging\1.2\4bfc12adfe4842bf07b657f0369c4cb522955686\commons-logging-1.2.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-handler\4.1.82.Final\644041d1fa96a5d3130a29e8978630d716d76e38\netty-handler-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-codec\4.1.82.Final\b77200379acb345a9ffdece1c605e591ac3e4e0a\netty-codec-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-transport-classes-epoll\4.1.82.Final\e7c7dd18deac93105797f30057c912651ea76521\netty-transport-classes-epoll-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-transport-native-unix-common\4.1.82.Final\3e895b35ca1b8a0eca56cacff4c2dde5d2c6abce\netty-transport-native-unix-common-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-transport\4.1.82.Final\e431a218d91acb6476ccad5f5aafde50aa3945ca\netty-transport-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-buffer\4.1.82.Final\a544270cf1ae8b8077082f5036436a9a9971ea71\netty-buffer-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-resolver\4.1.82.Final\38f665ae8dcd29032eea31245ba7806bed2e0fa8\netty-resolver-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-common\4.1.82.Final\22d148e85c3f5ebdacc0ce1f5aabb1d420f73f3\netty-common-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\it.unimi.dsi\fastutil\8.5.9\bb7ea75ecdb216654237830b3a96d87ad91f8cc5\fastutil-8.5.9.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.java.dev.jna\jna-platform\5.12.1\97406a297c852f4a41e688a176ec675f72e8329\jna-platform-5.12.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.java.dev.jna\jna\5.12.1\b1e93a735caea94f503e95e6fe79bf9cdc1e985d\jna-5.12.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.sf.jopt-simple\jopt-simple\5.0.4\4fdac2fbe92dfad86aa6e9301736f6b4342a3f5c\jopt-simple-5.0.4.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.commons\commons-compress\1.21\4ec95b60d4e86b5c95a0e919cb172a0af98011ef\commons-compress-1.21.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.commons\commons-lang3\3.12.0\c6842c86792ff03b9f1d1fe2aab8dc23aa6c6f0e\commons-lang3-3.12.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.httpcomponents\httpcore\4.4.15\7f2e0c573eaa7a74bac2e89b359e1f73d92a0a1d\httpcore-4.4.15.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.logging.log4j\log4j-core\2.19.0\3b6eeb4de4c49c0fe38a4ee27188ff5fee44d0bb\log4j-core-2.19.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.logging.log4j\log4j-slf4j2-impl\2.19.0\5c04bfdd63ce9dceb2e284b81e96b6a70010ee10\log4j-slf4j2-impl-2.19.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.logging.log4j\log4j-api\2.19.0\ea1b37f38c327596b216542bc636cfdc0b8036fa\log4j-api-2.19.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.joml\joml\1.10.5\22566d58af70ad3d72308bab63b8339906deb649\joml-1.10.5.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-glfw\3.3.1\cbac1b8d30cb4795149c1ef540f912671a8616d0\lwjgl-glfw-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-glfw\3.3.1\ed892f945cf7e79c8756796f32d00fa4ceaf573b\lwjgl-glfw-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-glfw\3.3.1\beda65ee503443e60aa196d58ed31f8d001dc22a\lwjgl-glfw-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-glfw\3.3.1\b997e3391d6ce8f05487e7335d95c606043884a1\lwjgl-glfw-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-jemalloc\3.3.1\a817bcf213db49f710603677457567c37d53e103\lwjgl-jemalloc-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-jemalloc\3.3.1\948a89b76a16aa324b046ae9308891216ffce5f9\lwjgl-jemalloc-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-jemalloc\3.3.1\cae85c4edb219c88b6a0c26a87955ad98dc9519d\lwjgl-jemalloc-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-jemalloc\3.3.1\fb476c8ec110e1c137ad3ce8a7f7bfe6b11c6324\lwjgl-jemalloc-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-openal\3.3.1\2623a6b8ae1dfcd880738656a9f0243d2e6840bd\lwjgl-openal-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-openal\3.3.1\30a474d0e57193d7bc128849a3ab66bc9316fdb1\lwjgl-openal-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-openal\3.3.1\40d65f1a7368a2aa47336f9cb69f5a190cf9975a\lwjgl-openal-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-openal\3.3.1\888349f7b1be6fbae58bf8edfb9ef12def04c4e3\lwjgl-openal-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-opengl\3.3.1\831a5533a21a5f4f81bbc51bb13e9899319b5411\lwjgl-opengl-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-opengl\3.3.1\c1807e9bd571402787d7e37e3029776ae2513bb8\lwjgl-opengl-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-opengl\3.3.1\527d78f1e9056aff3ed02ce93019c73c5e8f1721\lwjgl-opengl-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-opengl\3.3.1\deef3eb9b178ff2ff3ce893cc72ae741c3a17974\lwjgl-opengl-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-stb\3.3.1\b119297cf8ed01f247abe8685857f8e7fcf5980f\lwjgl-stb-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-stb\3.3.1\86315914ac119efdb02dc9e8e978ade84f1702af\lwjgl-stb-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-stb\3.3.1\fde63cdd2605c00636721a6c8b961e41d1f6b247\lwjgl-stb-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-stb\3.3.1\a8d41f419eecb430b7c91ea2ce2c5c451cae2091\lwjgl-stb-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-tinyfd\3.3.1\ff1914111ef2e3e0110ef2dabc8d8cdaad82347\lwjgl-tinyfd-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-tinyfd\3.3.1\a5d830475ec0958d9fdba1559efa99aef211e6ff\lwjgl-tinyfd-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-tinyfd\3.3.1\83a5e780df610829ff3a737822b4f931cffecd91\lwjgl-tinyfd-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-tinyfd\3.3.1\842eedd876fae354abc308c98a263f6bbc9e8a4d\lwjgl-tinyfd-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl\3.3.1\ae58664f88e18a9bb2c77b063833ca7aaec484cb\lwjgl-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl\3.3.1\36c37f16ab611b3aa11f3bcf80b1d509b4ce6b\lwjgl-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl\3.3.1\f46cadcf95675908fd3a550d63d9d709cb68998\lwjgl-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl\3.3.1\3b14f4beae9dd39791ec9e12190a9380cd8a3ce6\lwjgl-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.machinezoo.noexception\noexception\1.7.1\b65330c98e38a1f915fa54a6e5eca496505e3f0a\noexception-1.7.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.slf4j\slf4j-api\2.0.1\f48d81adce2abf5ad3cfe463df517952749e03bc\slf4j-api-2.0.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.codehaus.plexus\plexus-utils\3.3.0\cf43b5391de623b36fe066a21127baef82c64022\plexus-utils-3.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\b421526c5f297295adef1c886e5246c39d4ac629\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.checkerframework\checker-qual\3.12.0\d5692f0526415fcc6de94bb5bfbd3afd9dd3b3e5\checker-qual-3.12.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.errorprone\error_prone_annotations\2.11.0\c5a0ace696d3f8b1c1d8cc036d8c03cc0cbe6b69\error_prone_annotations-2.11.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.j2objc\j2objc-annotations\1.3\ba035118bc8bac37d7eff77700720999acd9986d\j2objc-annotations-1.3.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.antlr\ST4\4.3\92f2c1ad8d84abcbeead6cf7f2c53a04166293c2\ST4-4.3.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.antlr\antlr-runtime\3.5.2\cd9cd41361c155f3af0f653009dcecb08d8b4afd\antlr-runtime-3.5.2.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.abego.treelayout\org.abego.treelayout.core\1.0.3\457216e8e6578099ae63667bb1e4439235892028\org.abego.treelayout.core-1.0.3.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.glassfish\javax.json\1.0.4\3178f73569fd7a1e5ffc464e680f7a8cc784b85a\javax.json-1.0.4.jar, --disable-abstract-param'
+Arguments: '--input, C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\libs\pwp-1.0.0.jar, --output, C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reobfJar\output.jar, --names, C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reobfJar\mappings.tsrg, --lib, C:\Users\maska\.gradle\caches\forge_gradle\deobf_dependencies\info\journeymap\journeymap-api\1.20-1.9-SNAPSHOT_mapped_official_1.20.1\journeymap-api-1.20-1.9-SNAPSHOT_mapped_official_1.20.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\de.maxhenkel.voicechat\voicechat-api\2.4.6\3378a4cf336a1f86cf29e6d7ca2caca291e6e5c0\voicechat-api-2.4.6.jar, --lib, C:\Users\maska\.gradle\caches\forge_gradle\minecraft_user_repo\net\minecraftforge\forge\1.20.1-47.3.0_mapped_official_1.20.1\forge-1.20.1-47.3.0_mapped_official_1.20.1.jar, --lib, C:\Users\maska\.gradle\caches\forge_gradle\minecraft_repo\versions\1.20.1\client-extra.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\fmlloader\1.20.1-47.3.0\547850469c8a336b4c60cb8619f6cd421e9e5f55\fmlloader-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\JarJarSelector\0.3.19\376cc9c8ea60720cf027c01fc033de915699801c\JarJarSelector-0.3.19.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\JarJarMetadata\0.3.19\83feaa9b770e6ac0e96ee4fc23fa89325c5fe2\JarJarMetadata-0.3.19.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.guava\guava\31.1-jre\60458f877d055d0c9114d9e1a2efb737b4bc282c\guava-31.1-jre.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.code.findbugs\jsr305\3.0.2\25ea2e8b0c338a877313bd4672d3fe056ea78f0d\jsr305-3.0.2.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\ca.weblite\java-objc-bridge\1.1\1227f9e0666314f9de41477e3ec277e542ed7f7b\java-objc-bridge-1.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\forgespi\7.0.1\3b4972a0cdb135853dba219be61a79b22cff1309\forgespi-7.0.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\mergetool\1.1.5\f3da18e12c696d35a47c82cbb2cc8b5aa15e1154\mergetool-1.1.5-api.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.jetbrains\annotations\24.0.1\13c5c75c4206580aa4d683bffee658caae6c9f43\annotations-24.0.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\cpw.mods\securejarhandler\2.1.10\51e6a22c6c716beb11e244bf5b8be480f51dd6b5\securejarhandler-2.1.10.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\coremods\5.1.6\62fab3c3d59d37f8e15af311cb638c6f6123423\coremods-5.1.6.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\cpw.mods\modlauncher\10.0.9\6d9443f56f50bb85cea383686ff9c867391458b\modlauncher-10.0.9.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.openjdk.nashorn\nashorn-core\15.3\43977e804697048fc8d81d333a36c17d07a5b3dd\nashorn-core-15.3.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-commons\9.7\e86dda4696d3c185fcc95d8d311904e7ce38a53f\asm-commons-9.7.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-util\9.7\c0655519f24d92af2202cb681cd7c1569df6ead6\asm-util-9.7.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-analysis\9.7\e4a258b7eb96107106c0599f0061cfc1832fe07a\asm-analysis-9.7.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm-tree\9.7\e446a17b175bfb733b87c5c2560ccb4e57d69f1a\asm-tree-9.7.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.ow2.asm\asm\9.7\73d7b3086e14beb604ced229c302feff6449723\asm-9.7.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\accesstransformers\8.0.4\272d240aa73f42195b2a68e2ebd8b701ecf41f63\accesstransformers-8.0.4.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.antlr\antlr4\4.9.1\e92af8ab33e428461927b484e90bb155a4f3a052\antlr4-4.9.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.antlr\antlr4-runtime\4.9.1\428664f05d2b7f7b7610204b5aa7c1763f62011a\antlr4-runtime-4.9.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\fmlcore\1.20.1-47.3.0\3b6be96aba3e323f3c918e8ef6a96312d82d76ad\fmlcore-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\eventbus\6.0.5\699143dd438431d06b57416944f7cedbe52e1475\eventbus-6.0.5.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\unsafe\0.2.0\54d7a0a5e8fdb71b973025caa46f341ae5904f39\unsafe-0.2.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.electronwill.night-config\toml\3.6.4\51d6cefb2b55ee55ee26b16391212fb2c7dfb4f4\toml-3.6.4.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.electronwill.night-config\core\3.6.4\510f174abbf1c947494db50ef2445683bd52c230\core-3.6.4.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.maven\maven-artifact\3.8.5\4433f50c07debefaed0553bd0068f4f48d449313\maven-artifact-3.8.5.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.jodah\typetools\0.6.3\a01aaa6ddaea9ec07ec4f209487b7a46a526283a\typetools-0.6.3.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecrell\terminalconsoleappender\1.2.0\96d02cd3b384ff015a8fef4223bcb4ccf1717c95\terminalconsoleappender-1.2.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.jline\jline-reader\3.12.1\4382ab1382c7b6f379377ed5f665dc2f6e1218bc\jline-reader-3.12.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.jline\jline-terminal\3.12.1\c777448314e050d980a6b697c140f3bfe9eb7416\jline-terminal-3.12.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.spongepowered\mixin\0.8.5\9d1c0c3a304ae6697ecd477218fa61b850bf57fc\mixin-0.8.5.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\cpw.mods\bootstraplauncher\1.1.2\c546e00443d8432cda6baa1c860346980742628\bootstraplauncher-1.1.2.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\JarJarFileSystems\0.3.19\2464eb7d6b9ddb9db36a82cf8a95193e5c6fe020\JarJarFileSystems-0.3.19.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\fmlearlydisplay\1.20.1-47.3.0\91e33682894f35862e9ce29d633e3258120952f0\fmlearlydisplay-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\javafmllanguage\1.20.1-47.3.0\d7ebc62120f202109e300e084ca1a31a7b946a62\javafmllanguage-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\lowcodelanguage\1.20.1-47.3.0\1bf3e845ea0ce750096da8c71c8364b188ab74d4\lowcodelanguage-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.minecraftforge\mclanguage\1.20.1-47.3.0\6093682e943ddccbabf70539319d7f2fe64db2e7\mclanguage-1.20.1-47.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.github.oshi\oshi-core\6.2.2\54f5efc19bca95d709d9a37d19ffcbba3d21c1a6\oshi-core-6.2.2.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.code.gson\gson\2.10\dd9b193aef96e973d5a11ab13cd17430c2e4306b\gson-2.10.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.guava\failureaccess\1.0.1\1dcf1de382a0bf95a3d8b0849546c88bac1292c9\failureaccess-1.0.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.ibm.icu\icu4j\71.1\9e7d3304c23f9ba5cb71915f7cce23231a57a445\icu4j-71.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\authlib\4.0.43\2ff9d747a77570a07a60d32ac77eb6162ad2a2d9\authlib-4.0.43.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\blocklist\1.0.10\5c685c5ffa94c4cd39496c7184c1d122e515ecef\blocklist-1.0.10.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\brigadier\1.1.8\5244ce82c3337bba4a196a3ce858bfaecc74404a\brigadier-1.1.8.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\datafixerupper\6.0.8\3ba4a30557a9b057760af4011f909ba619fc5125\datafixerupper-6.0.8.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\logging\1.1.1\832b8e6674a9b325a5175a3a6267dfaf34c85139\logging-1.1.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\patchy\2.2.10\da05971b07cbb379d002cf7eaec6a2048211fefc\patchy-2.2.10.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.mojang\text2speech\1.17.9\3cad216e3a7f0c19b4b394388bc9ffc446f13b14\text2speech-1.17.9.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.httpcomponents\httpclient\4.5.13\e5f6cae5ca7ecaac1ec2827a9e2d65ae2869cada\httpclient-4.5.13.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\commons-codec\commons-codec\1.15\49d94806b6e3dc933dacbd8acb0fdbab8ebd1e5d\commons-codec-1.15.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\commons-io\commons-io\2.11.0\a2503f302b11ebde7ebc3df41daebe0e4eea3689\commons-io-2.11.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\commons-logging\commons-logging\1.2\4bfc12adfe4842bf07b657f0369c4cb522955686\commons-logging-1.2.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-handler\4.1.82.Final\644041d1fa96a5d3130a29e8978630d716d76e38\netty-handler-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-codec\4.1.82.Final\b77200379acb345a9ffdece1c605e591ac3e4e0a\netty-codec-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-transport-classes-epoll\4.1.82.Final\e7c7dd18deac93105797f30057c912651ea76521\netty-transport-classes-epoll-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-transport-native-unix-common\4.1.82.Final\3e895b35ca1b8a0eca56cacff4c2dde5d2c6abce\netty-transport-native-unix-common-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-transport\4.1.82.Final\e431a218d91acb6476ccad5f5aafde50aa3945ca\netty-transport-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-buffer\4.1.82.Final\a544270cf1ae8b8077082f5036436a9a9971ea71\netty-buffer-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-resolver\4.1.82.Final\38f665ae8dcd29032eea31245ba7806bed2e0fa8\netty-resolver-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\io.netty\netty-common\4.1.82.Final\22d148e85c3f5ebdacc0ce1f5aabb1d420f73f3\netty-common-4.1.82.Final.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\it.unimi.dsi\fastutil\8.5.9\bb7ea75ecdb216654237830b3a96d87ad91f8cc5\fastutil-8.5.9.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.java.dev.jna\jna-platform\5.12.1\97406a297c852f4a41e688a176ec675f72e8329\jna-platform-5.12.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.java.dev.jna\jna\5.12.1\b1e93a735caea94f503e95e6fe79bf9cdc1e985d\jna-5.12.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\net.sf.jopt-simple\jopt-simple\5.0.4\4fdac2fbe92dfad86aa6e9301736f6b4342a3f5c\jopt-simple-5.0.4.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.commons\commons-compress\1.21\4ec95b60d4e86b5c95a0e919cb172a0af98011ef\commons-compress-1.21.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.commons\commons-lang3\3.12.0\c6842c86792ff03b9f1d1fe2aab8dc23aa6c6f0e\commons-lang3-3.12.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.httpcomponents\httpcore\4.4.15\7f2e0c573eaa7a74bac2e89b359e1f73d92a0a1d\httpcore-4.4.15.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.logging.log4j\log4j-core\2.19.0\3b6eeb4de4c49c0fe38a4ee27188ff5fee44d0bb\log4j-core-2.19.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.logging.log4j\log4j-slf4j2-impl\2.19.0\5c04bfdd63ce9dceb2e284b81e96b6a70010ee10\log4j-slf4j2-impl-2.19.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.apache.logging.log4j\log4j-api\2.19.0\ea1b37f38c327596b216542bc636cfdc0b8036fa\log4j-api-2.19.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.joml\joml\1.10.5\22566d58af70ad3d72308bab63b8339906deb649\joml-1.10.5.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-glfw\3.3.1\cbac1b8d30cb4795149c1ef540f912671a8616d0\lwjgl-glfw-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-glfw\3.3.1\ed892f945cf7e79c8756796f32d00fa4ceaf573b\lwjgl-glfw-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-glfw\3.3.1\beda65ee503443e60aa196d58ed31f8d001dc22a\lwjgl-glfw-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-glfw\3.3.1\b997e3391d6ce8f05487e7335d95c606043884a1\lwjgl-glfw-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-jemalloc\3.3.1\a817bcf213db49f710603677457567c37d53e103\lwjgl-jemalloc-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-jemalloc\3.3.1\948a89b76a16aa324b046ae9308891216ffce5f9\lwjgl-jemalloc-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-jemalloc\3.3.1\cae85c4edb219c88b6a0c26a87955ad98dc9519d\lwjgl-jemalloc-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-jemalloc\3.3.1\fb476c8ec110e1c137ad3ce8a7f7bfe6b11c6324\lwjgl-jemalloc-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-openal\3.3.1\2623a6b8ae1dfcd880738656a9f0243d2e6840bd\lwjgl-openal-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-openal\3.3.1\30a474d0e57193d7bc128849a3ab66bc9316fdb1\lwjgl-openal-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-openal\3.3.1\40d65f1a7368a2aa47336f9cb69f5a190cf9975a\lwjgl-openal-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-openal\3.3.1\888349f7b1be6fbae58bf8edfb9ef12def04c4e3\lwjgl-openal-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-opengl\3.3.1\831a5533a21a5f4f81bbc51bb13e9899319b5411\lwjgl-opengl-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-opengl\3.3.1\c1807e9bd571402787d7e37e3029776ae2513bb8\lwjgl-opengl-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-opengl\3.3.1\527d78f1e9056aff3ed02ce93019c73c5e8f1721\lwjgl-opengl-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-opengl\3.3.1\deef3eb9b178ff2ff3ce893cc72ae741c3a17974\lwjgl-opengl-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-stb\3.3.1\b119297cf8ed01f247abe8685857f8e7fcf5980f\lwjgl-stb-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-stb\3.3.1\86315914ac119efdb02dc9e8e978ade84f1702af\lwjgl-stb-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-stb\3.3.1\fde63cdd2605c00636721a6c8b961e41d1f6b247\lwjgl-stb-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-stb\3.3.1\a8d41f419eecb430b7c91ea2ce2c5c451cae2091\lwjgl-stb-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-tinyfd\3.3.1\ff1914111ef2e3e0110ef2dabc8d8cdaad82347\lwjgl-tinyfd-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-tinyfd\3.3.1\a5d830475ec0958d9fdba1559efa99aef211e6ff\lwjgl-tinyfd-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-tinyfd\3.3.1\83a5e780df610829ff3a737822b4f931cffecd91\lwjgl-tinyfd-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl-tinyfd\3.3.1\842eedd876fae354abc308c98a263f6bbc9e8a4d\lwjgl-tinyfd-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl\3.3.1\ae58664f88e18a9bb2c77b063833ca7aaec484cb\lwjgl-3.3.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl\3.3.1\36c37f16ab611b3aa11f3bcf80b1d509b4ce6b\lwjgl-3.3.1-natives-windows.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl\3.3.1\f46cadcf95675908fd3a550d63d9d709cb68998\lwjgl-3.3.1-natives-windows-arm64.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.lwjgl\lwjgl\3.3.1\3b14f4beae9dd39791ec9e12190a9380cd8a3ce6\lwjgl-3.3.1-natives-windows-x86.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.machinezoo.noexception\noexception\1.7.1\b65330c98e38a1f915fa54a6e5eca496505e3f0a\noexception-1.7.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.slf4j\slf4j-api\2.0.1\f48d81adce2abf5ad3cfe463df517952749e03bc\slf4j-api-2.0.1.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.codehaus.plexus\plexus-utils\3.3.0\cf43b5391de623b36fe066a21127baef82c64022\plexus-utils-3.3.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\b421526c5f297295adef1c886e5246c39d4ac629\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.checkerframework\checker-qual\3.12.0\d5692f0526415fcc6de94bb5bfbd3afd9dd3b3e5\checker-qual-3.12.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.errorprone\error_prone_annotations\2.11.0\c5a0ace696d3f8b1c1d8cc036d8c03cc0cbe6b69\error_prone_annotations-2.11.0.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\com.google.j2objc\j2objc-annotations\1.3\ba035118bc8bac37d7eff77700720999acd9986d\j2objc-annotations-1.3.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.antlr\ST4\4.3\92f2c1ad8d84abcbeead6cf7f2c53a04166293c2\ST4-4.3.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.antlr\antlr-runtime\3.5.2\cd9cd41361c155f3af0f653009dcecb08d8b4afd\antlr-runtime-3.5.2.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.abego.treelayout\org.abego.treelayout.core\1.0.3\457216e8e6578099ae63667bb1e4439235892028\org.abego.treelayout.core-1.0.3.jar, --lib, C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.glassfish\javax.json\1.0.4\3178f73569fd7a1e5ffc464e680f7a8cc784b85a\javax.json-1.0.4.jar, --disable-abstract-param'
 Classpath:
  - C:\Users\maska\.gradle\caches\forge_gradle\maven_downloader\net\minecraftforge\renamer\2.0.4\renamer-2.0.4-all.jar
 Working directory: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reobfJar
@@ -122,7 +122,7 @@ lib: C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.antlr\antlr-runtime\3
 lib: C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.abego.treelayout\org.abego.treelayout.core\1.0.3\457216e8e6578099ae63667bb1e4439235892028\org.abego.treelayout.core-1.0.3.jar
 lib: C:\Users\maska\.gradle\caches\modules-2\files-2.1\org.glassfish\javax.json\1.0.4\3178f73569fd7a1e5ffc464e680f7a8cc784b85a\javax.json-1.0.4.jar
 log: null
-input: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\libs\teamsystem-1.0.0.jar
+input: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\libs\pwp-1.0.0.jar
 output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reobfJar\output.jar
 threads: 16
 Names: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reobfJar\mappings.tsrg(reversed: false)
@@ -133,118 +133,126 @@ Fix SourceFile: false
 Fix Line Numbers: false
 Strip codesigning signatures: false
 Adding Libraries to Inheritance
-Reading Input: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\libs\teamsystem-1.0.0.jar
+Reading Input: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\libs\pwp-1.0.0.jar
 Adding input to inheritance map
 Processing entries
-Conflicting propagated mapping for com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity/getUpdateTag()Lnet/minecraft/nbt/CompoundTag; from net/minecraft/world/level/block/entity/BlockEntity/getUpdateTag()Lnet/minecraft/nbt/CompoundTag;: getUpdateTag -> m_5995_
-Conflicting propagated mapping for com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity/load(Lnet/minecraft/nbt/CompoundTag;)V from net/minecraft/world/level/block/entity/BlockEntity/load(Lnet/minecraft/nbt/CompoundTag;)V: load -> m_142466_
-Conflicting propagated mapping for com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity/saveAdditional(Lnet/minecraft/nbt/CompoundTag;)V from net/minecraft/world/level/block/entity/BlockEntity/saveAdditional(Lnet/minecraft/nbt/CompoundTag;)V: saveAdditional -> m_183515_
-Conflicting propagated mapping for com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity/getUpdatePacket()Lnet/minecraft/network/protocol/Packet; from net/minecraft/world/level/block/entity/BlockEntity/getUpdatePacket()Lnet/minecraft/network/protocol/Packet;: getUpdatePacket -> m_58483_
+Conflicting propagated mapping for com/pigeostudios/pwp/blockentity/RespawnBeaconBlockEntity/getUpdateTag()Lnet/minecraft/nbt/CompoundTag; from net/minecraft/world/level/block/entity/BlockEntity/getUpdateTag()Lnet/minecraft/nbt/CompoundTag;: getUpdateTag -> m_5995_
+Conflicting propagated mapping for com/pigeostudios/pwp/blockentity/RespawnBeaconBlockEntity/load(Lnet/minecraft/nbt/CompoundTag;)V from net/minecraft/world/level/block/entity/BlockEntity/load(Lnet/minecraft/nbt/CompoundTag;)V: load -> m_142466_
+Conflicting propagated mapping for com/pigeostudios/pwp/blockentity/RespawnBeaconBlockEntity/saveAdditional(Lnet/minecraft/nbt/CompoundTag;)V from net/minecraft/world/level/block/entity/BlockEntity/saveAdditional(Lnet/minecraft/nbt/CompoundTag;)V: saveAdditional -> m_183515_
+Conflicting propagated mapping for com/pigeostudios/pwp/blockentity/RespawnBeaconBlockEntity/getUpdatePacket()Lnet/minecraft/network/protocol/Packet; from net/minecraft/world/level/block/entity/BlockEntity/getUpdatePacket()Lnet/minecraft/network/protocol/Packet;: getUpdatePacket -> m_58483_
 Conflicting propagated mapping for net/minecraft/world/entity/LivingEntity/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V from net/minecraft/world/entity/player/Player/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V: lambda$addAdditionalSaveData$3 -> m_219754_
-Conflicting propagated mapping for com/yourmod/teamsystem/core/TeamManager/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag; from net/minecraft/world/level/saveddata/SavedData/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;: save -> m_7176_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BSlider/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BSlider/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BSlider/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BSlider/onDrag(DDDD)V from net/minecraft/client/gui/components/AbstractWidget/onDrag(DDDD)V: onDrag -> m_7212_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BSlider/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V from net/minecraft/client/gui/components/AbstractWidget/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V: playDownSound -> m_7435_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BButton/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractButton/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BButton/onPress()V from net/minecraft/client/gui/components/Button/onPress()V: onPress -> m_5691_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/component/BButton/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V from net/minecraft/client/gui/components/AbstractWidget/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V: playDownSound -> m_7435_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ResupplyScreen/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ResupplyScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ResupplyScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/ResupplyScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/AdminPanel/charTyped(CI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/charTyped(CI)Z: charTyped -> m_5534_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldMainMenuScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldMainMenuScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldMainMenuScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldLoadingScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/Renderable/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldPauseScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldPauseScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldPauseScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/BattlefieldScreen/renderBackground(Lnet/minecraft/client/gui/GuiGraphics;)V from net/minecraft/client/gui/screens/Screen/renderBackground(Lnet/minecraft/client/gui/GuiGraphics;)V: renderBackground -> m_280273_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitCustomizationScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitCustomizationScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitCustomizationScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitCustomizationScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitCustomizationScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitCustomizationScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitCustomizationScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SettingsMenuScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SettingsMenuScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SettingsMenuScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/TeamSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/TeamSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/TeamSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SquadScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SquadScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/SquadScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VoteScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VoteScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VoteScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/screen/VoteScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/RespawnBeaconBlockRenderer/render(Lnet/minecraft/world/level/block/entity/BlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V from net/minecraft/client/renderer/blockentity/BlockEntityRenderer/render(Lnet/minecraft/world/level/block/entity/BlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V: render -> m_6922_
+Conflicting propagated mapping for com/pigeostudios/pwp/core/TeamManager/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag; from net/minecraft/world/level/saveddata/SavedData/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;: save -> m_7176_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BButton/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractButton/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BButton/onPress()V from net/minecraft/client/gui/components/Button/onPress()V: onPress -> m_5691_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BButton/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V from net/minecraft/client/gui/components/AbstractWidget/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V: playDownSound -> m_7435_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/onDrag(DDDD)V from net/minecraft/client/gui/components/AbstractWidget/onDrag(DDDD)V: onDrag -> m_7212_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V from net/minecraft/client/gui/components/AbstractWidget/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V: playDownSound -> m_7435_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ResupplyScreen/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ResupplyScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ResupplyScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ResupplyScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldPauseScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldPauseScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldPauseScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldMainMenuScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldMainMenuScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldMainMenuScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/charTyped(CI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/charTyped(CI)Z: charTyped -> m_5534_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldScreen/renderBackground(Lnet/minecraft/client/gui/GuiGraphics;)V from net/minecraft/client/gui/screens/Screen/renderBackground(Lnet/minecraft/client/gui/GuiGraphics;)V: renderBackground -> m_280273_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TeamSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TeamSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TeamSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldLoadingScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/Renderable/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/shouldCloseOnEsc()Z from net/minecraft/client/gui/screens/Screen/shouldCloseOnEsc()Z: shouldCloseOnEsc -> m_6913_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
 Conflicting propagated mapping for net/minecraft/client/gui/screens/OptionsScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BCard/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BDropdown/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BCard/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BCard/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BDropdown/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BDropdown/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BLockOverlay/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BLockOverlay/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BTag/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BTag/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BNumberInput/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BNumberInput/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BNumberInput/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BToggle/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BToggle/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
-Conflicting propagated mapping for com/yourmod/teamsystem/client/gui/widget/BWidgets$BToggle/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
-Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/onRemove(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V from net/minecraft/world/level/block/state/BlockBehaviour/onRemove(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V: onRemove -> m_6810_
-Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/newBlockEntity(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/entity/BlockEntity; from net/minecraft/world/level/block/EntityBlock/newBlockEntity(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/entity/BlockEntity;: newBlockEntity -> m_142194_
-Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/getRenderShape(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/RenderShape; from net/minecraft/world/level/block/BaseEntityBlock/getRenderShape(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/RenderShape;: getRenderShape -> m_7514_
-Conflicting propagated mapping for com/yourmod/teamsystem/core/RespawnBeaconBlock/use(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult; from net/minecraft/world/level/block/state/BlockBehaviour/use(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;: use -> m_6227_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SquadScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SquadScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SquadScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VoteScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VoteScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VoteScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VoteScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BDropdown/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BDropdown/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BDropdown/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BCard/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BCard/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BCard/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BLockOverlay/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BLockOverlay/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BNumberInput/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BNumberInput/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BNumberInput/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BTag/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BTag/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BToggle/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BToggle/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BToggle/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/core/RespawnBeaconBlock/onRemove(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V from net/minecraft/world/level/block/state/BlockBehaviour/onRemove(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V: onRemove -> m_6810_
+Conflicting propagated mapping for com/pigeostudios/pwp/core/RespawnBeaconBlock/newBlockEntity(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/entity/BlockEntity; from net/minecraft/world/level/block/EntityBlock/newBlockEntity(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/entity/BlockEntity;: newBlockEntity -> m_142194_
+Conflicting propagated mapping for com/pigeostudios/pwp/core/RespawnBeaconBlock/getRenderShape(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/RenderShape; from net/minecraft/world/level/block/BaseEntityBlock/getRenderShape(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/RenderShape;: getRenderShape -> m_7514_
+Conflicting propagated mapping for com/pigeostudios/pwp/core/RespawnBeaconBlock/use(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult; from net/minecraft/world/level/block/state/BlockBehaviour/use(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;: use -> m_6227_
 Conflicting propagated mapping for net/minecraftforge/client/loading/ForgeLoadingOverlay/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/LoadingOverlay/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
 Adding extras
 Sorting
@@ -256,400 +264,407 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   META-INF/services/de.maxhenkel.voicechat.api.VoicechatPlugin
   META-INF/services/org.spongepowered.asm.mixin.connect.IMixinConnector
   assets/
-  assets/teamsystem/
-  assets/teamsystem/font/
-  assets/teamsystem/font/Rajdhani-Regular.ttf
-  assets/teamsystem/font/ShareTechMono-Regular.ttf
-  assets/teamsystem/font/default.json
-  assets/teamsystem/font/uniform.json
-  assets/teamsystem/lang/
-  assets/teamsystem/lang/en_us.json
-  assets/teamsystem/lang/ru_ru.json
-  assets/teamsystem/sounds.json
-  assets/teamsystem/sounds/
-  assets/teamsystem/sounds/game/
-  assets/teamsystem/sounds/game/capture_point.ogg
-  assets/teamsystem/sounds/game/defeat.ogg
-  assets/teamsystem/sounds/game/map_change.ogg
-  assets/teamsystem/sounds/game/victory.ogg
-  assets/teamsystem/sounds/gui/
-  assets/teamsystem/sounds/gui/button_click.ogg
-  assets/teamsystem/sounds/gui/button_hover.ogg
-  assets/teamsystem/sounds/gui/error.ogg
-  assets/teamsystem/sounds/gui/first_deploy.ogg
-  assets/teamsystem/sounds/gui/respawn.ogg
-  assets/teamsystem/sounds/gui/success.ogg
-  assets/teamsystem/sounds/gui/transition.ogg
-  assets/teamsystem/sounds/navigation/
-  assets/teamsystem/sounds/navigation/alert.ogg
-  assets/teamsystem/sounds/notification/
-  assets/teamsystem/sounds/notification/alert.ogg
-  assets/teamsystem/sounds/notification/info.ogg
-  assets/teamsystem/textures/
-  assets/teamsystem/textures/gui/
-  assets/teamsystem/textures/gui/bg_0.png
-  assets/teamsystem/textures/gui/bg_1.png
-  assets/teamsystem/textures/gui/bg_2.png
-  assets/teamsystem/textures/gui/bg_main_0.png
-  assets/teamsystem/textures/gui/bg_main_1.png
-  assets/teamsystem/textures/gui/loading/
-  assets/teamsystem/textures/gui/loading/bg.png
-  assets/teamsystem/textures/gui/loading/left.png
-  assets/teamsystem/textures/gui/loading/right.png
-  assets/teamsystem/textures/gui/ranks/
-  assets/teamsystem/textures/gui/ranks/ranks.png
+  assets/pwp/
+  assets/pwp/font/
+  assets/pwp/font/Rajdhani-Regular.ttf
+  assets/pwp/font/ShareTechMono-Regular.ttf
+  assets/pwp/font/default.json
+  assets/pwp/font/uniform.json
+  assets/pwp/lang/
+  assets/pwp/lang/en_us.json
+  assets/pwp/lang/ru_ru.json
+  assets/pwp/sounds.json
+  assets/pwp/sounds/
+  assets/pwp/sounds/game/
+  assets/pwp/sounds/game/capture_point.ogg
+  assets/pwp/sounds/game/defeat.ogg
+  assets/pwp/sounds/game/map_change.ogg
+  assets/pwp/sounds/game/victory.ogg
+  assets/pwp/sounds/gui/
+  assets/pwp/sounds/gui/button_click.ogg
+  assets/pwp/sounds/gui/button_hover.ogg
+  assets/pwp/sounds/gui/error.ogg
+  assets/pwp/sounds/gui/first_deploy.ogg
+  assets/pwp/sounds/gui/respawn.ogg
+  assets/pwp/sounds/gui/success.ogg
+  assets/pwp/sounds/gui/transition.ogg
+  assets/pwp/sounds/navigation/
+  assets/pwp/sounds/navigation/alert.ogg
+  assets/pwp/sounds/notification/
+  assets/pwp/sounds/notification/alert.ogg
+  assets/pwp/sounds/notification/info.ogg
+  assets/pwp/textures/
+  assets/pwp/textures/entity/
+  assets/pwp/textures/entity/fob_beacon.png
+  assets/pwp/textures/gui/
+  assets/pwp/textures/gui/bg_0.png
+  assets/pwp/textures/gui/bg_1.png
+  assets/pwp/textures/gui/bg_2.png
+  assets/pwp/textures/gui/bg_main_0.png
+  assets/pwp/textures/gui/bg_main_1.png
+  assets/pwp/textures/gui/loading/
+  assets/pwp/textures/gui/loading/bg.png
+  assets/pwp/textures/gui/loading/left.png
+  assets/pwp/textures/gui/loading/right.png
+  assets/pwp/textures/gui/ranks/
+  assets/pwp/textures/gui/ranks/ranks.png
   com/
-  com/yourmod/
-  com/yourmod/teamsystem/
-  com/yourmod/teamsystem/TeamSystem.class
-  com/yourmod/teamsystem/ammo/
-  com/yourmod/teamsystem/ammo/AmmoCooldownManager.class
-  com/yourmod/teamsystem/ammo/AmmoCrateProvider.class
-  com/yourmod/teamsystem/ammo/AmmoService.class
-  com/yourmod/teamsystem/ammo/FOBAmmoProvider.class
-  com/yourmod/teamsystem/ammo/IAmmoProvider.class
-  com/yourmod/teamsystem/ammo/PointAmmoProvider.class
-  com/yourmod/teamsystem/ammo/SupplyTruckAmmoProvider.class
-  com/yourmod/teamsystem/blockentity/
-  com/yourmod/teamsystem/blockentity/RespawnBeaconBlockEntity.class
-  com/yourmod/teamsystem/capture/
-  com/yourmod/teamsystem/capture/CaptureProcessor.class
-  com/yourmod/teamsystem/capture/CaptureZone.class
-  com/yourmod/teamsystem/capture/ZoneDataManager.class
-  com/yourmod/teamsystem/client/
-  com/yourmod/teamsystem/client/CapturePointData.class
-  com/yourmod/teamsystem/client/ClientHotbarData.class
-  com/yourmod/teamsystem/client/ClientMarkerData.class
-  com/yourmod/teamsystem/client/ClientSetup$ClientModBus.class
-  com/yourmod/teamsystem/client/ClientSetup.class
-  com/yourmod/teamsystem/client/ClientSoundHandler.class
-  com/yourmod/teamsystem/client/ClientTeamData$ClientBeaconData.class
-  com/yourmod/teamsystem/client/ClientTeamData.class
-  com/yourmod/teamsystem/client/ClientVoiceHandler$SpeakingEntry.class
-  com/yourmod/teamsystem/client/ClientVoiceHandler.class
-  com/yourmod/teamsystem/client/FOBData.class
-  com/yourmod/teamsystem/client/KitData.class
-  com/yourmod/teamsystem/client/KitEntry.class
-  com/yourmod/teamsystem/client/PlayerListEntry.class
-  com/yourmod/teamsystem/client/SpeakingPlayer.class
-  com/yourmod/teamsystem/client/VehicleData.class
-  com/yourmod/teamsystem/client/VehicleEntry.class
-  com/yourmod/teamsystem/client/gui/
-  com/yourmod/teamsystem/client/gui/ClientGuiHandler$1.class
-  com/yourmod/teamsystem/client/gui/ClientGuiHandler.class
-  com/yourmod/teamsystem/client/gui/I18n.class
-  com/yourmod/teamsystem/client/gui/NotificationManager$Notification.class
-  com/yourmod/teamsystem/client/gui/NotificationManager.class
-  com/yourmod/teamsystem/client/gui/UITheme.class
-  com/yourmod/teamsystem/client/gui/VisualsConfig$BaseRingVisual.class
-  com/yourmod/teamsystem/client/gui/VisualsConfig$BaseVisual.class
-  com/yourmod/teamsystem/client/gui/VisualsConfig$BorderVisual.class
-  com/yourmod/teamsystem/client/gui/VisualsConfig$PointVisual.class
-  com/yourmod/teamsystem/client/gui/VisualsConfig$RingVisual.class
-  com/yourmod/teamsystem/client/gui/VisualsConfig.class
-  com/yourmod/teamsystem/client/gui/component/
-  com/yourmod/teamsystem/client/gui/component/AccentLine.class
-  com/yourmod/teamsystem/client/gui/component/AnimationHelper.class
-  com/yourmod/teamsystem/client/gui/component/BButton$1.class
-  com/yourmod/teamsystem/client/gui/component/BButton$Variant.class
-  com/yourmod/teamsystem/client/gui/component/BButton.class
-  com/yourmod/teamsystem/client/gui/component/BCard.class
-  com/yourmod/teamsystem/client/gui/component/BProgressBar.class
-  com/yourmod/teamsystem/client/gui/component/BScrollPanel.class
-  com/yourmod/teamsystem/client/gui/component/BSlider.class
-  com/yourmod/teamsystem/client/gui/component/BreadcrumbNav.class
-  com/yourmod/teamsystem/client/gui/component/Chip.class
-  com/yourmod/teamsystem/client/gui/component/ClassCard.class
-  com/yourmod/teamsystem/client/gui/component/KitCard.class
-  com/yourmod/teamsystem/client/gui/component/KitConfigPanel.class
-  com/yourmod/teamsystem/client/gui/component/KitPreviewPanel$FontAccessor.class
-  com/yourmod/teamsystem/client/gui/component/KitPreviewPanel.class
-  com/yourmod/teamsystem/client/gui/component/LockBadge.class
-  com/yourmod/teamsystem/client/gui/component/RenderHelper.class
-  com/yourmod/teamsystem/client/gui/component/SlotBadge.class
-  com/yourmod/teamsystem/client/gui/component/SlotRow.class
-  com/yourmod/teamsystem/client/gui/component/SortControl$SortMode.class
-  com/yourmod/teamsystem/client/gui/component/SortControl.class
-  com/yourmod/teamsystem/client/gui/component/StatusBar.class
-  com/yourmod/teamsystem/client/gui/component/StatusDot$1.class
-  com/yourmod/teamsystem/client/gui/component/StatusDot$Status.class
-  com/yourmod/teamsystem/client/gui/component/StatusDot.class
-  com/yourmod/teamsystem/client/gui/component/TopBar.class
-  com/yourmod/teamsystem/client/gui/overlay/
-  com/yourmod/teamsystem/client/gui/overlay/BattlefieldTabOverlay.class
-  com/yourmod/teamsystem/client/gui/overlay/CaptureNotificationOverlay.class
-  com/yourmod/teamsystem/client/gui/overlay/CompassOverlay.class
-  com/yourmod/teamsystem/client/gui/overlay/HotbarOverlay.class
-  com/yourmod/teamsystem/client/gui/overlay/KillFeedOverlay$KillEntry.class
-  com/yourmod/teamsystem/client/gui/overlay/KillFeedOverlay.class
-  com/yourmod/teamsystem/client/gui/overlay/NotificationOverlay$NotifEntry.class
-  com/yourmod/teamsystem/client/gui/overlay/NotificationOverlay.class
-  com/yourmod/teamsystem/client/gui/overlay/PlayerLabelOverlay$PlayerLabel.class
-  com/yourmod/teamsystem/client/gui/overlay/PlayerLabelOverlay.class
-  com/yourmod/teamsystem/client/gui/overlay/SquadOverlay.class
-  com/yourmod/teamsystem/client/gui/overlay/TicketOverlay.class
-  com/yourmod/teamsystem/client/gui/overlay/VitalsOverlay.class
-  com/yourmod/teamsystem/client/gui/overlay/VoiceChatHudOverlay.class
-  com/yourmod/teamsystem/client/gui/renderer/
-  com/yourmod/teamsystem/client/gui/renderer/CaptureParticles.class
-  com/yourmod/teamsystem/client/gui/renderer/CustomNametagRenderer.class
-  com/yourmod/teamsystem/client/gui/renderer/WorldMarkerRenderer$CapturePointRender.class
-  com/yourmod/teamsystem/client/gui/renderer/WorldMarkerRenderer.class
-  com/yourmod/teamsystem/client/gui/scoreboard/
-  com/yourmod/teamsystem/client/gui/scoreboard/DonateBadgeRenderer$1.class
-  com/yourmod/teamsystem/client/gui/scoreboard/DonateBadgeRenderer.class
-  com/yourmod/teamsystem/client/gui/scoreboard/ScoreboardRenderer.class
-  com/yourmod/teamsystem/client/gui/scoreboard/data/
-  com/yourmod/teamsystem/client/gui/scoreboard/data/PlayerScoreboardData$DonateLevel.class
-  com/yourmod/teamsystem/client/gui/scoreboard/data/PlayerScoreboardData.class
-  com/yourmod/teamsystem/client/gui/scoreboard/data/RankDefinition.class
-  com/yourmod/teamsystem/client/gui/scoreboard/data/ScoreboardDataProvider.class
-  com/yourmod/teamsystem/client/gui/screen/
-  com/yourmod/teamsystem/client/gui/screen/AdminPanel$1.class
-  com/yourmod/teamsystem/client/gui/screen/AdminPanel$Tab.class
-  com/yourmod/teamsystem/client/gui/screen/AdminPanel.class
-  com/yourmod/teamsystem/client/gui/screen/BattlefieldLoadingScreen.class
-  com/yourmod/teamsystem/client/gui/screen/BattlefieldMainMenuScreen.class
-  com/yourmod/teamsystem/client/gui/screen/BattlefieldPauseScreen.class
-  com/yourmod/teamsystem/client/gui/screen/BattlefieldScreen.class
-  com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen$1.class
-  com/yourmod/teamsystem/client/gui/screen/ClassSelectionScreen.class
-  com/yourmod/teamsystem/client/gui/screen/KitCustomizationScreen.class
-  com/yourmod/teamsystem/client/gui/screen/KitLoadoutScreen.class
-  com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen$1.class
-  com/yourmod/teamsystem/client/gui/screen/KitSelectionScreen.class
-  com/yourmod/teamsystem/client/gui/screen/ResupplyScreen$WeaponEntry.class
-  com/yourmod/teamsystem/client/gui/screen/ResupplyScreen.class
-  com/yourmod/teamsystem/client/gui/screen/SettingsMenuScreen.class
-  com/yourmod/teamsystem/client/gui/screen/SpawnScreenHelper.class
-  com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen$SpawnEntry.class
-  com/yourmod/teamsystem/client/gui/screen/SpawnSelectionScreen.class
-  com/yourmod/teamsystem/client/gui/screen/SquadScreen.class
-  com/yourmod/teamsystem/client/gui/screen/TeamSelectionScreen.class
-  com/yourmod/teamsystem/client/gui/screen/VehicleSelectionScreen.class
-  com/yourmod/teamsystem/client/gui/screen/VoteScreen.class
-  com/yourmod/teamsystem/client/gui/widget/
-  com/yourmod/teamsystem/client/gui/widget/BCard.class
-  com/yourmod/teamsystem/client/gui/widget/BWidgets$BDropdown.class
-  com/yourmod/teamsystem/client/gui/widget/BWidgets$BLockOverlay.class
-  com/yourmod/teamsystem/client/gui/widget/BWidgets$BNumberInput.class
-  com/yourmod/teamsystem/client/gui/widget/BWidgets$BTag.class
-  com/yourmod/teamsystem/client/gui/widget/BWidgets$BToggle.class
-  com/yourmod/teamsystem/client/gui/widget/BWidgets.class
-  com/yourmod/teamsystem/client/journeymap/
-  com/yourmod/teamsystem/client/journeymap/JourneyMapIntegration.class
-  com/yourmod/teamsystem/client/journeymap/TeamSystemJourneymapPlugin.class
-  com/yourmod/teamsystem/commands/
-  com/yourmod/teamsystem/commands/AdminCommand.class
-  com/yourmod/teamsystem/commands/AdminNotifyCommand.class
-  com/yourmod/teamsystem/commands/CallsignCommand.class
-  com/yourmod/teamsystem/commands/CapturePointCommand.class
-  com/yourmod/teamsystem/commands/DeployCommand.class
-  com/yourmod/teamsystem/commands/EconomyCommand.class
-  com/yourmod/teamsystem/commands/FOBCommand.class
-  com/yourmod/teamsystem/commands/GameCommand$1.class
-  com/yourmod/teamsystem/commands/GameCommand.class
-  com/yourmod/teamsystem/commands/GiveCoinsCommand.class
-  com/yourmod/teamsystem/commands/KitAdminCommand.class
-  com/yourmod/teamsystem/commands/KitCommand.class
-  com/yourmod/teamsystem/commands/KitSelectCommand.class
-  com/yourmod/teamsystem/commands/LobbyCommand.class
-  com/yourmod/teamsystem/commands/MapCommand.class
-  com/yourmod/teamsystem/commands/MarkerCommand.class
-  com/yourmod/teamsystem/commands/PingCommand.class
-  com/yourmod/teamsystem/commands/RankCommand.class
-  com/yourmod/teamsystem/commands/RedeployCommand.class
-  com/yourmod/teamsystem/commands/RespawnCommand.class
-  com/yourmod/teamsystem/commands/SquadCommand.class
-  com/yourmod/teamsystem/commands/StartMatchCommand.class
-  com/yourmod/teamsystem/commands/TeamCommand.class
-  com/yourmod/teamsystem/commands/VehicleCommand$VehicleDefinitionRegistryHelper.class
-  com/yourmod/teamsystem/commands/VehicleCommand.class
-  com/yourmod/teamsystem/config/
-  com/yourmod/teamsystem/config/ConfigManager.class
-  com/yourmod/teamsystem/core/
-  com/yourmod/teamsystem/core/BattlefieldRuntime.class
-  com/yourmod/teamsystem/core/BorderManager.class
-  com/yourmod/teamsystem/core/BorderZone.class
-  com/yourmod/teamsystem/core/CaptureParticleManager.class
-  com/yourmod/teamsystem/core/CapturePointManager.class
-  com/yourmod/teamsystem/core/ChatHelper.class
-  com/yourmod/teamsystem/core/ContributionData.class
-  com/yourmod/teamsystem/core/ContributionManager.class
-  com/yourmod/teamsystem/core/DynamicDimensionManager.class
-  com/yourmod/teamsystem/core/FOBManager$SavedFOB.class
-  com/yourmod/teamsystem/core/FOBManager.class
-  com/yourmod/teamsystem/core/GameManager$GamePhase.class
-  com/yourmod/teamsystem/core/GameManager.class
-  com/yourmod/teamsystem/core/Kit$IndexedItem.class
-  com/yourmod/teamsystem/core/Kit.class
-  com/yourmod/teamsystem/core/KitManager.class
-  com/yourmod/teamsystem/core/LifecycleNotifier.class
-  com/yourmod/teamsystem/core/MapConfig$CapturePointEntry.class
-  com/yourmod/teamsystem/core/MapConfig.class
-  com/yourmod/teamsystem/core/MapDimensionGenerator.class
-  com/yourmod/teamsystem/core/MapPoolManager$1.class
-  com/yourmod/teamsystem/core/MapPoolManager$2.class
-  com/yourmod/teamsystem/core/MapPoolManager.class
-  com/yourmod/teamsystem/core/MapState.class
-  com/yourmod/teamsystem/core/MarkerData$MarkerType.class
-  com/yourmod/teamsystem/core/MarkerData.class
-  com/yourmod/teamsystem/core/MarkerManager.class
-  com/yourmod/teamsystem/core/ModSounds.class
-  com/yourmod/teamsystem/core/PacketValidator.class
-  com/yourmod/teamsystem/core/PlayerCombatData.class
-  com/yourmod/teamsystem/core/Rank.class
-  com/yourmod/teamsystem/core/RankManager.class
-  com/yourmod/teamsystem/core/RateLimiter$Bucket.class
-  com/yourmod/teamsystem/core/RateLimiter.class
-  com/yourmod/teamsystem/core/RespawnBeaconBlock.class
-  com/yourmod/teamsystem/core/RespawnConfig.class
-  com/yourmod/teamsystem/core/RespawnManager$1.class
-  com/yourmod/teamsystem/core/RespawnManager$SavedBeacon.class
-  com/yourmod/teamsystem/core/RespawnManager.class
-  com/yourmod/teamsystem/core/Squad.class
-  com/yourmod/teamsystem/core/SquadManager$Invitation.class
-  com/yourmod/teamsystem/core/SquadManager.class
-  com/yourmod/teamsystem/core/SquadmateRespawnCooldownManager.class
-  com/yourmod/teamsystem/core/Team.class
-  com/yourmod/teamsystem/core/TeamManager.class
-  com/yourmod/teamsystem/core/TeamSystemColors.class
-  com/yourmod/teamsystem/core/TeamSystemConfig.class
-  com/yourmod/teamsystem/core/TeamVoicePlugin.class
-  com/yourmod/teamsystem/core/TicketManager.class
-  com/yourmod/teamsystem/core/VehicleData.class
-  com/yourmod/teamsystem/core/VehicleManager.class
-  com/yourmod/teamsystem/core/VoiceGroupManager.class
-  com/yourmod/teamsystem/data/
-  com/yourmod/teamsystem/data/ItemResolver.class
-  com/yourmod/teamsystem/data/KitConfig$AttachmentLimit.class
-  com/yourmod/teamsystem/data/KitConfig$ClassConfig.class
-  com/yourmod/teamsystem/data/KitConfig$KitArmor.class
-  com/yourmod/teamsystem/data/KitConfig$KitDef.class
-  com/yourmod/teamsystem/data/KitConfig$KitRequirements.class
-  com/yourmod/teamsystem/data/KitConfig$KitWeapons.class
-  com/yourmod/teamsystem/data/KitConfig.class
-  com/yourmod/teamsystem/data/KitConfigServerHelper.class
-  com/yourmod/teamsystem/data/LockChecker$Context.class
-  com/yourmod/teamsystem/data/LockChecker.class
-  com/yourmod/teamsystem/data/LockState$1.class
-  com/yourmod/teamsystem/data/LockState.class
-  com/yourmod/teamsystem/data/PlayerLoadout$LoadoutSlots.class
-  com/yourmod/teamsystem/data/PlayerLoadout$WeaponSlot.class
-  com/yourmod/teamsystem/data/PlayerLoadout.class
-  com/yourmod/teamsystem/data/TaczAttachmentResolver.class
-  com/yourmod/teamsystem/events/
-  com/yourmod/teamsystem/events/AttachmentEventHandler.class
-  com/yourmod/teamsystem/events/CombatEventHandler.class
-  com/yourmod/teamsystem/events/PlayerEventHandler.class
-  com/yourmod/teamsystem/events/VehicleAccessControl.class
-  com/yourmod/teamsystem/integration/
-  com/yourmod/teamsystem/integration/ReviveMeIntegration.class
-  com/yourmod/teamsystem/mixin/
-  com/yourmod/teamsystem/mixin/ForgeLoadingOverlayMixin.class
-  com/yourmod/teamsystem/mixin/IndexedMessageCodecMixin.class
-  com/yourmod/teamsystem/mixin/TeamSystemMixinConnector.class
-  com/yourmod/teamsystem/network/
-  com/yourmod/teamsystem/network/BCSyncPacket.class
-  com/yourmod/teamsystem/network/BorderSyncPacket.class
-  com/yourmod/teamsystem/network/CapturePointSyncPacket.class
-  com/yourmod/teamsystem/network/ClientScreenAccessor.class
-  com/yourmod/teamsystem/network/CloseSpawnScreenPacket.class
-  com/yourmod/teamsystem/network/CombatDataSyncPacket.class
-  com/yourmod/teamsystem/network/ConfigSyncPacket.class
-  com/yourmod/teamsystem/network/FOBPlacePacket.class
-  com/yourmod/teamsystem/network/FOBSyncPacket.class
-  com/yourmod/teamsystem/network/GameStateSyncPacket.class
-  com/yourmod/teamsystem/network/KitAdminConfigSyncPacket.class
-  com/yourmod/teamsystem/network/KitAdminRequestPacket.class
-  com/yourmod/teamsystem/network/KitAdminSavePacket.class
-  com/yourmod/teamsystem/network/KitConfigSyncPacket.class
-  com/yourmod/teamsystem/network/KitDataSyncPacket.class
-  com/yourmod/teamsystem/network/KitSavePacket.class
-  com/yourmod/teamsystem/network/KitSelectPacket.class
-  com/yourmod/teamsystem/network/KitSyncPacket.class
-  com/yourmod/teamsystem/network/MapVotePacket.class
-  com/yourmod/teamsystem/network/MarkerSyncPacket.class
-  com/yourmod/teamsystem/network/NotificationPacket.class
-  com/yourmod/teamsystem/network/OpenAdminPanelPacket.class
-  com/yourmod/teamsystem/network/OpenLoadoutScreenPacket.class
-  com/yourmod/teamsystem/network/OpenSpawnSelectionScreenPacket$BeaconInfo.class
-  com/yourmod/teamsystem/network/OpenSpawnSelectionScreenPacket$SquadmateInfo.class
-  com/yourmod/teamsystem/network/OpenSpawnSelectionScreenPacket.class
-  com/yourmod/teamsystem/network/OpenTeamSelectionScreenPacket.class
-  com/yourmod/teamsystem/network/PacketHandler.class
-  com/yourmod/teamsystem/network/RankSyncPacket.class
-  com/yourmod/teamsystem/network/ReloadVisualsPacket.class
-  com/yourmod/teamsystem/network/RespawnAtPointPacket.class
-  com/yourmod/teamsystem/network/RespawnBeaconSyncPacket$BeaconData.class
-  com/yourmod/teamsystem/network/RespawnBeaconSyncPacket.class
-  com/yourmod/teamsystem/network/ResupplyActionPacket$Action.class
-  com/yourmod/teamsystem/network/ResupplyActionPacket$RocketDef.class
-  com/yourmod/teamsystem/network/ResupplyActionPacket.class
-  com/yourmod/teamsystem/network/SoundPacket.class
-  com/yourmod/teamsystem/network/SquadActionPacket.class
-  com/yourmod/teamsystem/network/SquadSyncPacket.class
-  com/yourmod/teamsystem/network/SquadmateStatusSyncPacket$SyncEntry.class
-  com/yourmod/teamsystem/network/SquadmateStatusSyncPacket.class
-  com/yourmod/teamsystem/network/TeamBaseSyncPacket.class
-  com/yourmod/teamsystem/network/TeamChangeRequestPacket.class
-  com/yourmod/teamsystem/network/TeamSelectPacket.class
-  com/yourmod/teamsystem/network/TeamSyncPacket.class
-  com/yourmod/teamsystem/network/TeamTicketSyncPacket.class
-  com/yourmod/teamsystem/network/TransferPacket.class
-  com/yourmod/teamsystem/network/VehicleCreditsSyncPacket.class
-  com/yourmod/teamsystem/network/VehicleDataSyncPacket.class
-  com/yourmod/teamsystem/network/VehicleDeployPacket.class
-  com/yourmod/teamsystem/network/VehicleSpawnPacket.class
-  com/yourmod/teamsystem/network/VehicleSyncPacket.class
-  com/yourmod/teamsystem/network/VoiceChannelSwitchPacket.class
-  com/yourmod/teamsystem/network/VoiceSpeakingStatePacket.class
-  com/yourmod/teamsystem/network/WCSyncPacket.class
-  com/yourmod/teamsystem/proxy/
-  com/yourmod/teamsystem/proxy/ProxyMessenger.class
-  com/yourmod/teamsystem/role/
-  com/yourmod/teamsystem/role/LoadoutDefinition.class
-  com/yourmod/teamsystem/role/RoleDefinition.class
-  com/yourmod/teamsystem/role/RoleRegistry.class
-  com/yourmod/teamsystem/state/
-  com/yourmod/teamsystem/state/EconomyState.class
-  com/yourmod/teamsystem/state/EscalationPhase.class
-  com/yourmod/teamsystem/state/FrontlineState.class
-  com/yourmod/teamsystem/state/MatchState.class
-  com/yourmod/teamsystem/state/PressureState.class
-  com/yourmod/teamsystem/state/PressureType.class
-  com/yourmod/teamsystem/state/VehicleState.class
-  com/yourmod/teamsystem/system/
-  com/yourmod/teamsystem/system/ActivitySystem.class
-  com/yourmod/teamsystem/system/EconomySystem.class
-  com/yourmod/teamsystem/system/EscalationSystem.class
-  com/yourmod/teamsystem/system/PressureSystem.class
-  com/yourmod/teamsystem/system/RoleSystem.class
-  com/yourmod/teamsystem/system/VehicleUpkeepSystem.class
-  com/yourmod/teamsystem/vehicle/
-  com/yourmod/teamsystem/vehicle/VehicleDefinition$Costs.class
-  com/yourmod/teamsystem/vehicle/VehicleDefinition$Pressure.class
-  com/yourmod/teamsystem/vehicle/VehicleDefinition$Upkeep.class
-  com/yourmod/teamsystem/vehicle/VehicleDefinition.class
-  com/yourmod/teamsystem/vehicle/VehicleDefinitionRegistry.class
-  com/yourmod/teamsystem/vehicle/adapter/
-  com/yourmod/teamsystem/vehicle/adapter/AshVehicleAdapter.class
-  com/yourmod/teamsystem/vehicle/adapter/IVehicleAdapter.class
-  com/yourmod/teamsystem/vehicle/adapter/SuperbVehicleAdapter.class
-  com/yourmod/teamsystem/vehicle/adapter/VehicleAdapterRegistry.class
+  com/pigeostudios/
+  com/pigeostudios/pwp/
+  com/pigeostudios/pwp/PWP.class
+  com/pigeostudios/pwp/ammo/
+  com/pigeostudios/pwp/ammo/AmmoCooldownManager.class
+  com/pigeostudios/pwp/ammo/AmmoCrateProvider.class
+  com/pigeostudios/pwp/ammo/AmmoService.class
+  com/pigeostudios/pwp/ammo/FOBAmmoProvider.class
+  com/pigeostudios/pwp/ammo/IAmmoProvider.class
+  com/pigeostudios/pwp/ammo/PointAmmoProvider.class
+  com/pigeostudios/pwp/ammo/SupplyTruckAmmoProvider.class
+  com/pigeostudios/pwp/blockentity/
+  com/pigeostudios/pwp/blockentity/RespawnBeaconBlockEntity.class
+  com/pigeostudios/pwp/capture/
+  com/pigeostudios/pwp/capture/CaptureProcessor.class
+  com/pigeostudios/pwp/capture/CaptureZone.class
+  com/pigeostudios/pwp/capture/ZoneDataManager.class
+  com/pigeostudios/pwp/client/
+  com/pigeostudios/pwp/client/CapturePointData.class
+  com/pigeostudios/pwp/client/ClientHotbarData.class
+  com/pigeostudios/pwp/client/ClientMarkerData.class
+  com/pigeostudios/pwp/client/ClientSetup$ClientModBus.class
+  com/pigeostudios/pwp/client/ClientSetup.class
+  com/pigeostudios/pwp/client/ClientSoundHandler.class
+  com/pigeostudios/pwp/client/ClientTeamData$ClientBeaconData.class
+  com/pigeostudios/pwp/client/ClientTeamData.class
+  com/pigeostudios/pwp/client/ClientVoiceHandler$SpeakingEntry.class
+  com/pigeostudios/pwp/client/ClientVoiceHandler.class
+  com/pigeostudios/pwp/client/FOBData.class
+  com/pigeostudios/pwp/client/KitData.class
+  com/pigeostudios/pwp/client/KitEntry.class
+  com/pigeostudios/pwp/client/PlayerListEntry.class
+  com/pigeostudios/pwp/client/RespawnBeaconBlockRenderer.class
+  com/pigeostudios/pwp/client/VehicleData.class
+  com/pigeostudios/pwp/client/VehicleEntry.class
+  com/pigeostudios/pwp/client/gui/
+  com/pigeostudios/pwp/client/gui/ClientGuiHandler$1.class
+  com/pigeostudios/pwp/client/gui/ClientGuiHandler.class
+  com/pigeostudios/pwp/client/gui/I18n.class
+  com/pigeostudios/pwp/client/gui/NotificationManager$Notification.class
+  com/pigeostudios/pwp/client/gui/NotificationManager.class
+  com/pigeostudios/pwp/client/gui/UITheme.class
+  com/pigeostudios/pwp/client/gui/VisualsConfig$BaseRingVisual.class
+  com/pigeostudios/pwp/client/gui/VisualsConfig$BaseVisual.class
+  com/pigeostudios/pwp/client/gui/VisualsConfig$BorderVisual.class
+  com/pigeostudios/pwp/client/gui/VisualsConfig$PointVisual.class
+  com/pigeostudios/pwp/client/gui/VisualsConfig$RingVisual.class
+  com/pigeostudios/pwp/client/gui/VisualsConfig.class
+  com/pigeostudios/pwp/client/gui/component/
+  com/pigeostudios/pwp/client/gui/component/AccentLine.class
+  com/pigeostudios/pwp/client/gui/component/AnimationHelper.class
+  com/pigeostudios/pwp/client/gui/component/BButton$1.class
+  com/pigeostudios/pwp/client/gui/component/BButton$Variant.class
+  com/pigeostudios/pwp/client/gui/component/BButton.class
+  com/pigeostudios/pwp/client/gui/component/BCard.class
+  com/pigeostudios/pwp/client/gui/component/BProgressBar.class
+  com/pigeostudios/pwp/client/gui/component/BScrollPanel.class
+  com/pigeostudios/pwp/client/gui/component/BSlider.class
+  com/pigeostudios/pwp/client/gui/component/BreadcrumbNav.class
+  com/pigeostudios/pwp/client/gui/component/Chip.class
+  com/pigeostudios/pwp/client/gui/component/ClassCard.class
+  com/pigeostudios/pwp/client/gui/component/KitCard.class
+  com/pigeostudios/pwp/client/gui/component/KitConfigPanel.class
+  com/pigeostudios/pwp/client/gui/component/KitPreviewPanel$FontAccessor.class
+  com/pigeostudios/pwp/client/gui/component/KitPreviewPanel.class
+  com/pigeostudios/pwp/client/gui/component/LockBadge.class
+  com/pigeostudios/pwp/client/gui/component/RenderHelper.class
+  com/pigeostudios/pwp/client/gui/component/SlotBadge.class
+  com/pigeostudios/pwp/client/gui/component/SlotRow.class
+  com/pigeostudios/pwp/client/gui/component/SortControl$SortMode.class
+  com/pigeostudios/pwp/client/gui/component/SortControl.class
+  com/pigeostudios/pwp/client/gui/component/StatusBar.class
+  com/pigeostudios/pwp/client/gui/component/StatusDot$1.class
+  com/pigeostudios/pwp/client/gui/component/StatusDot$Status.class
+  com/pigeostudios/pwp/client/gui/component/StatusDot.class
+  com/pigeostudios/pwp/client/gui/component/TopBar.class
+  com/pigeostudios/pwp/client/gui/overlay/
+  com/pigeostudios/pwp/client/gui/overlay/BattlefieldTabOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/CaptureNotificationOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/CompassOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/HotbarOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/KillFeedOverlay$KillEntry.class
+  com/pigeostudios/pwp/client/gui/overlay/KillFeedOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/NotificationOverlay$NotifEntry.class
+  com/pigeostudios/pwp/client/gui/overlay/NotificationOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/PlayerLabelOverlay$PlayerLabel.class
+  com/pigeostudios/pwp/client/gui/overlay/PlayerLabelOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/SquadOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/TicketOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/VitalsOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/VoiceChatHudOverlay.class
+  com/pigeostudios/pwp/client/gui/renderer/
+  com/pigeostudios/pwp/client/gui/renderer/CaptureParticles.class
+  com/pigeostudios/pwp/client/gui/renderer/CustomNametagRenderer.class
+  com/pigeostudios/pwp/client/gui/renderer/WorldMarkerRenderer$CapturePointRender.class
+  com/pigeostudios/pwp/client/gui/renderer/WorldMarkerRenderer.class
+  com/pigeostudios/pwp/client/gui/scoreboard/
+  com/pigeostudios/pwp/client/gui/scoreboard/DonateBadgeRenderer$1.class
+  com/pigeostudios/pwp/client/gui/scoreboard/DonateBadgeRenderer.class
+  com/pigeostudios/pwp/client/gui/scoreboard/ScoreboardRenderer.class
+  com/pigeostudios/pwp/client/gui/scoreboard/data/
+  com/pigeostudios/pwp/client/gui/scoreboard/data/PlayerScoreboardData$DonateLevel.class
+  com/pigeostudios/pwp/client/gui/scoreboard/data/PlayerScoreboardData.class
+  com/pigeostudios/pwp/client/gui/scoreboard/data/RankDefinition.class
+  com/pigeostudios/pwp/client/gui/scoreboard/data/ScoreboardDataProvider.class
+  com/pigeostudios/pwp/client/gui/screen/
+  com/pigeostudios/pwp/client/gui/screen/AdminPanel$1.class
+  com/pigeostudios/pwp/client/gui/screen/AdminPanel$Tab.class
+  com/pigeostudios/pwp/client/gui/screen/AdminPanel.class
+  com/pigeostudios/pwp/client/gui/screen/BattlefieldLoadingScreen.class
+  com/pigeostudios/pwp/client/gui/screen/BattlefieldMainMenuScreen.class
+  com/pigeostudios/pwp/client/gui/screen/BattlefieldPauseScreen.class
+  com/pigeostudios/pwp/client/gui/screen/BattlefieldScreen.class
+  com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen$1.class
+  com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen.class
+  com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen.class
+  com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen.class
+  com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen$1.class
+  com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen.class
+  com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen.class
+  com/pigeostudios/pwp/client/gui/screen/ResupplyScreen$WeaponEntry.class
+  com/pigeostudios/pwp/client/gui/screen/ResupplyScreen.class
+  com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen.class
+  com/pigeostudios/pwp/client/gui/screen/SpawnScreenHelper.class
+  com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen$SpawnEntry.class
+  com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen.class
+  com/pigeostudios/pwp/client/gui/screen/SquadScreen.class
+  com/pigeostudios/pwp/client/gui/screen/TeamSelectionScreen.class
+  com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen.class
+  com/pigeostudios/pwp/client/gui/screen/VoteScreen.class
+  com/pigeostudios/pwp/client/gui/widget/
+  com/pigeostudios/pwp/client/gui/widget/BCard.class
+  com/pigeostudios/pwp/client/gui/widget/BWidgets$BDropdown.class
+  com/pigeostudios/pwp/client/gui/widget/BWidgets$BLockOverlay.class
+  com/pigeostudios/pwp/client/gui/widget/BWidgets$BNumberInput.class
+  com/pigeostudios/pwp/client/gui/widget/BWidgets$BTag.class
+  com/pigeostudios/pwp/client/gui/widget/BWidgets$BToggle.class
+  com/pigeostudios/pwp/client/gui/widget/BWidgets.class
+  com/pigeostudios/pwp/client/journeymap/
+  com/pigeostudios/pwp/client/journeymap/JourneyMapIntegration.class
+  com/pigeostudios/pwp/client/journeymap/PWPJourneymapPlugin.class
+  com/pigeostudios/pwp/commands/
+  com/pigeostudios/pwp/commands/AdminCommand.class
+  com/pigeostudios/pwp/commands/AdminNotifyCommand.class
+  com/pigeostudios/pwp/commands/CallsignCommand.class
+  com/pigeostudios/pwp/commands/CapturePointCommand.class
+  com/pigeostudios/pwp/commands/DeployCommand.class
+  com/pigeostudios/pwp/commands/EconomyCommand.class
+  com/pigeostudios/pwp/commands/FOBCommand.class
+  com/pigeostudios/pwp/commands/GameCommand$1.class
+  com/pigeostudios/pwp/commands/GameCommand.class
+  com/pigeostudios/pwp/commands/GiveCoinsCommand.class
+  com/pigeostudios/pwp/commands/KitAdminCommand.class
+  com/pigeostudios/pwp/commands/KitCommand.class
+  com/pigeostudios/pwp/commands/KitSelectCommand.class
+  com/pigeostudios/pwp/commands/LobbyCommand.class
+  com/pigeostudios/pwp/commands/MapCommand.class
+  com/pigeostudios/pwp/commands/MarkerCommand.class
+  com/pigeostudios/pwp/commands/PingCommand.class
+  com/pigeostudios/pwp/commands/RankCommand.class
+  com/pigeostudios/pwp/commands/RedeployCommand.class
+  com/pigeostudios/pwp/commands/RespawnCommand.class
+  com/pigeostudios/pwp/commands/SquadCommand.class
+  com/pigeostudios/pwp/commands/StartMatchCommand.class
+  com/pigeostudios/pwp/commands/TeamCommand.class
+  com/pigeostudios/pwp/commands/VehicleCommand$VehicleDefinitionRegistryHelper.class
+  com/pigeostudios/pwp/commands/VehicleCommand.class
+  com/pigeostudios/pwp/config/
+  com/pigeostudios/pwp/config/ConfigManager.class
+  com/pigeostudios/pwp/core/
+  com/pigeostudios/pwp/core/BattlefieldRuntime.class
+  com/pigeostudios/pwp/core/BorderManager.class
+  com/pigeostudios/pwp/core/BorderZone.class
+  com/pigeostudios/pwp/core/CaptureParticleManager.class
+  com/pigeostudios/pwp/core/CapturePointManager.class
+  com/pigeostudios/pwp/core/ChatHelper.class
+  com/pigeostudios/pwp/core/ContributionData.class
+  com/pigeostudios/pwp/core/ContributionManager.class
+  com/pigeostudios/pwp/core/DynamicDimensionManager.class
+  com/pigeostudios/pwp/core/FOBManager$SavedFOB.class
+  com/pigeostudios/pwp/core/FOBManager.class
+  com/pigeostudios/pwp/core/GameManager$GamePhase.class
+  com/pigeostudios/pwp/core/GameManager.class
+  com/pigeostudios/pwp/core/Kit$IndexedItem.class
+  com/pigeostudios/pwp/core/Kit.class
+  com/pigeostudios/pwp/core/KitManager.class
+  com/pigeostudios/pwp/core/LifecycleNotifier.class
+  com/pigeostudios/pwp/core/MapConfig$CapturePointEntry.class
+  com/pigeostudios/pwp/core/MapConfig.class
+  com/pigeostudios/pwp/core/MapDimensionGenerator.class
+  com/pigeostudios/pwp/core/MapPoolManager$1.class
+  com/pigeostudios/pwp/core/MapPoolManager$2.class
+  com/pigeostudios/pwp/core/MapPoolManager.class
+  com/pigeostudios/pwp/core/MapState.class
+  com/pigeostudios/pwp/core/MarkerData$MarkerType.class
+  com/pigeostudios/pwp/core/MarkerData.class
+  com/pigeostudios/pwp/core/MarkerManager.class
+  com/pigeostudios/pwp/core/ModSounds.class
+  com/pigeostudios/pwp/core/PWPColors.class
+  com/pigeostudios/pwp/core/PWPConfig.class
+  com/pigeostudios/pwp/core/PacketValidator.class
+  com/pigeostudios/pwp/core/PlayerCombatData.class
+  com/pigeostudios/pwp/core/PlayerDataSyncManager.class
+  com/pigeostudios/pwp/core/Rank.class
+  com/pigeostudios/pwp/core/RankManager.class
+  com/pigeostudios/pwp/core/RateLimiter$Bucket.class
+  com/pigeostudios/pwp/core/RateLimiter.class
+  com/pigeostudios/pwp/core/RespawnBeaconBlock.class
+  com/pigeostudios/pwp/core/RespawnConfig.class
+  com/pigeostudios/pwp/core/RespawnManager$1.class
+  com/pigeostudios/pwp/core/RespawnManager$SavedBeacon.class
+  com/pigeostudios/pwp/core/RespawnManager.class
+  com/pigeostudios/pwp/core/Squad.class
+  com/pigeostudios/pwp/core/SquadManager$Invitation.class
+  com/pigeostudios/pwp/core/SquadManager.class
+  com/pigeostudios/pwp/core/SquadmateRespawnCooldownManager.class
+  com/pigeostudios/pwp/core/Team.class
+  com/pigeostudios/pwp/core/TeamManager.class
+  com/pigeostudios/pwp/core/TeamVoicePlugin$VoiceSpeakerState.class
+  com/pigeostudios/pwp/core/TeamVoicePlugin.class
+  com/pigeostudios/pwp/core/TicketManager.class
+  com/pigeostudios/pwp/core/VehicleData.class
+  com/pigeostudios/pwp/core/VehicleManager.class
+  com/pigeostudios/pwp/core/VoiceGroupManager.class
+  com/pigeostudios/pwp/data/
+  com/pigeostudios/pwp/data/ItemResolver.class
+  com/pigeostudios/pwp/data/KitConfig$AttachmentLimit.class
+  com/pigeostudios/pwp/data/KitConfig$ClassConfig.class
+  com/pigeostudios/pwp/data/KitConfig$KitArmor.class
+  com/pigeostudios/pwp/data/KitConfig$KitDef.class
+  com/pigeostudios/pwp/data/KitConfig$KitRequirements.class
+  com/pigeostudios/pwp/data/KitConfig$KitWeapons.class
+  com/pigeostudios/pwp/data/KitConfig.class
+  com/pigeostudios/pwp/data/KitConfigServerHelper.class
+  com/pigeostudios/pwp/data/LockChecker$Context.class
+  com/pigeostudios/pwp/data/LockChecker.class
+  com/pigeostudios/pwp/data/LockState$1.class
+  com/pigeostudios/pwp/data/LockState.class
+  com/pigeostudios/pwp/data/PlayerLoadout$LoadoutSlots.class
+  com/pigeostudios/pwp/data/PlayerLoadout$WeaponSlot.class
+  com/pigeostudios/pwp/data/PlayerLoadout.class
+  com/pigeostudios/pwp/data/TaczAttachmentResolver.class
+  com/pigeostudios/pwp/events/
+  com/pigeostudios/pwp/events/AttachmentEventHandler.class
+  com/pigeostudios/pwp/events/CombatEventHandler.class
+  com/pigeostudios/pwp/events/PlayerEventHandler.class
+  com/pigeostudios/pwp/events/VehicleAccessControl.class
+  com/pigeostudios/pwp/integration/
+  com/pigeostudios/pwp/integration/ReviveMeIntegration.class
+  com/pigeostudios/pwp/mixin/
+  com/pigeostudios/pwp/mixin/ForgeLoadingOverlayMixin.class
+  com/pigeostudios/pwp/mixin/IndexedMessageCodecMixin.class
+  com/pigeostudios/pwp/mixin/PWPMixinConnector.class
+  com/pigeostudios/pwp/network/
+  com/pigeostudios/pwp/network/BCSyncPacket.class
+  com/pigeostudios/pwp/network/BorderSyncPacket.class
+  com/pigeostudios/pwp/network/CapturePointSyncPacket.class
+  com/pigeostudios/pwp/network/ClientScreenAccessor.class
+  com/pigeostudios/pwp/network/CloseSpawnScreenPacket.class
+  com/pigeostudios/pwp/network/CombatDataSyncPacket.class
+  com/pigeostudios/pwp/network/ConfigSyncPacket.class
+  com/pigeostudios/pwp/network/FOBPlacePacket.class
+  com/pigeostudios/pwp/network/FOBSyncPacket.class
+  com/pigeostudios/pwp/network/GameStateSyncPacket.class
+  com/pigeostudios/pwp/network/KitAdminConfigSyncPacket.class
+  com/pigeostudios/pwp/network/KitAdminRequestPacket.class
+  com/pigeostudios/pwp/network/KitAdminSavePacket.class
+  com/pigeostudios/pwp/network/KitConfigSyncPacket.class
+  com/pigeostudios/pwp/network/KitDataSyncPacket.class
+  com/pigeostudios/pwp/network/KitSavePacket.class
+  com/pigeostudios/pwp/network/KitSelectPacket.class
+  com/pigeostudios/pwp/network/KitSyncPacket.class
+  com/pigeostudios/pwp/network/MapVotePacket.class
+  com/pigeostudios/pwp/network/MarkerSyncPacket.class
+  com/pigeostudios/pwp/network/NotificationPacket.class
+  com/pigeostudios/pwp/network/OpenAdminPanelPacket.class
+  com/pigeostudios/pwp/network/OpenLoadoutScreenPacket.class
+  com/pigeostudios/pwp/network/OpenMatchResultsPacket$PlayerResultEntry.class
+  com/pigeostudios/pwp/network/OpenMatchResultsPacket.class
+  com/pigeostudios/pwp/network/OpenSpawnSelectionScreenPacket$BeaconInfo.class
+  com/pigeostudios/pwp/network/OpenSpawnSelectionScreenPacket$SquadmateInfo.class
+  com/pigeostudios/pwp/network/OpenSpawnSelectionScreenPacket.class
+  com/pigeostudios/pwp/network/OpenTeamSelectionScreenPacket.class
+  com/pigeostudios/pwp/network/PacketHandler.class
+  com/pigeostudios/pwp/network/RankSyncPacket.class
+  com/pigeostudios/pwp/network/ReloadVisualsPacket.class
+  com/pigeostudios/pwp/network/RespawnAtPointPacket.class
+  com/pigeostudios/pwp/network/RespawnBeaconSyncPacket$BeaconData.class
+  com/pigeostudios/pwp/network/RespawnBeaconSyncPacket.class
+  com/pigeostudios/pwp/network/ResupplyActionPacket$Action.class
+  com/pigeostudios/pwp/network/ResupplyActionPacket$RocketDef.class
+  com/pigeostudios/pwp/network/ResupplyActionPacket.class
+  com/pigeostudios/pwp/network/SoundPacket.class
+  com/pigeostudios/pwp/network/SquadActionPacket.class
+  com/pigeostudios/pwp/network/SquadSyncPacket.class
+  com/pigeostudios/pwp/network/SquadmateStatusSyncPacket$SyncEntry.class
+  com/pigeostudios/pwp/network/SquadmateStatusSyncPacket.class
+  com/pigeostudios/pwp/network/TeamBaseSyncPacket.class
+  com/pigeostudios/pwp/network/TeamChangeRequestPacket.class
+  com/pigeostudios/pwp/network/TeamSelectPacket.class
+  com/pigeostudios/pwp/network/TeamSyncPacket.class
+  com/pigeostudios/pwp/network/TeamTicketSyncPacket.class
+  com/pigeostudios/pwp/network/TransferPacket.class
+  com/pigeostudios/pwp/network/VehicleCreditsSyncPacket.class
+  com/pigeostudios/pwp/network/VehicleDataSyncPacket.class
+  com/pigeostudios/pwp/network/VehicleDeployPacket.class
+  com/pigeostudios/pwp/network/VehicleSpawnPacket.class
+  com/pigeostudios/pwp/network/VehicleSyncPacket.class
+  com/pigeostudios/pwp/network/VoiceChannelSwitchPacket.class
+  com/pigeostudios/pwp/network/VoiceSpeakingStatePacket.class
+  com/pigeostudios/pwp/network/WCSyncPacket.class
+  com/pigeostudios/pwp/proxy/
+  com/pigeostudios/pwp/proxy/ProxyMessenger.class
+  com/pigeostudios/pwp/role/
+  com/pigeostudios/pwp/role/LoadoutDefinition.class
+  com/pigeostudios/pwp/role/RoleDefinition.class
+  com/pigeostudios/pwp/role/RoleRegistry.class
+  com/pigeostudios/pwp/state/
+  com/pigeostudios/pwp/state/EconomyState.class
+  com/pigeostudios/pwp/state/EscalationPhase.class
+  com/pigeostudios/pwp/state/FrontlineState.class
+  com/pigeostudios/pwp/state/MatchState.class
+  com/pigeostudios/pwp/state/PressureState.class
+  com/pigeostudios/pwp/state/PressureType.class
+  com/pigeostudios/pwp/state/VehicleState.class
+  com/pigeostudios/pwp/system/
+  com/pigeostudios/pwp/system/ActivitySystem.class
+  com/pigeostudios/pwp/system/EconomySystem.class
+  com/pigeostudios/pwp/system/EscalationSystem.class
+  com/pigeostudios/pwp/system/PressureSystem.class
+  com/pigeostudios/pwp/system/RoleSystem.class
+  com/pigeostudios/pwp/system/VehicleUpkeepSystem.class
+  com/pigeostudios/pwp/vehicle/
+  com/pigeostudios/pwp/vehicle/VehicleDefinition$Costs.class
+  com/pigeostudios/pwp/vehicle/VehicleDefinition$Pressure.class
+  com/pigeostudios/pwp/vehicle/VehicleDefinition$Upkeep.class
+  com/pigeostudios/pwp/vehicle/VehicleDefinition.class
+  com/pigeostudios/pwp/vehicle/VehicleDefinitionRegistry.class
+  com/pigeostudios/pwp/vehicle/adapter/
+  com/pigeostudios/pwp/vehicle/adapter/AshVehicleAdapter.class
+  com/pigeostudios/pwp/vehicle/adapter/IVehicleAdapter.class
+  com/pigeostudios/pwp/vehicle/adapter/SuperbVehicleAdapter.class
+  com/pigeostudios/pwp/vehicle/adapter/VehicleAdapterRegistry.class
   config/
-  config/teamsystem/
-  config/teamsystem/vehicle_definitions/
-  config/teamsystem/vehicle_definitions/sample_ah64.json
-  config/teamsystem/vehicle_definitions/sample_f16.json
-  config/teamsystem/vehicle_definitions/sample_t90.json
-  config/teamsystem/vehicle_definitions/test_horse.json
+  config/pwp/
+  config/pwp/vehicle_definitions/
+  config/pwp/vehicle_definitions/sample_ah64.json
+  config/pwp/vehicle_definitions/sample_f16.json
+  config/pwp/vehicle_definitions/sample_t90.json
+  config/pwp/vehicle_definitions/test_horse.json
   data/
-  data/teamsystem/
-  data/teamsystem/dimension/
-  data/teamsystem/dimension/lobby.json
-  data/teamsystem/dimension_type/
-  data/teamsystem/dimension_type/lobby.json
-  mixins.teamsystem.json
+  data/pwp/
+  data/pwp/dimension/
+  data/pwp/dimension/lobby.json
+  data/pwp/dimension_type/
+  data/pwp/dimension_type/lobby.json
+  mixins.pwp.json
   pack.mcmeta
-  teamsystem_maps.json
+  pwp_maps.json

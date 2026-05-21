@@ -18,7 +18,7 @@ if (Test-Path $TemplateDir) {
 
 # Copy everything except world, logs, crash-reports
 $exclude = @("world", "logs", "crash-reports", "server_test.log", "server_test_err.log")
-Copy-Item -Recurse $SourceServer $TemplateDir -Exclude $exclude
+Copy-Item -Recurse "$SourceServer\*" $TemplateDir -Exclude $exclude
 
 # Set port to 25566 in template
 $props = Join-Path $TemplateDir "server.properties"
@@ -30,12 +30,48 @@ if (Test-Path $props) {
     Write-Host "Port set to 25566"
 }
 
+# Ensure offline-mode=false in template (matches main server)
+if (Test-Path $props) {
+    $content = Get-Content $props
+    if ($content -match 'online-mode=') {
+        $content = $content -replace 'online-mode=true', 'online-mode=false'
+    } else {
+        $content += "`nonline-mode=false"
+    }
+    $content | Set-Content $props
+}
+
 # Ensure eula=true
 $eula = Join-Path $TemplateDir "eula.txt"
 Set-Content -Path $eula -Value "eula=true" -Force
 
-# Clean mods (keep only teamsystem, TACZ, SuperbWarfare, and essentials)
-# Actually keep all mods - they should be same as main server
+# Add a user_jvm_args.txt if missing (basic settings)
+$jvmArgsFile = Join-Path $TemplateDir "user_jvm_args.txt"
+if (-not (Test-Path $jvmArgsFile)) {
+    @(
+        "-Xmx3G"
+        "-XX:+UseG1GC"
+        "-XX:+ParallelRefProcEnabled"
+        "-XX:MaxGCPauseMillis=200"
+        "-XX:+UnlockExperimentalVMOptions"
+        "-XX:+DisableExplicitGC"
+        "-XX:+AlwaysPreTouch"
+        "--add-opens java.base/java.util=ALL-UNNAMED"
+    ) | Out-File -FilePath $jvmArgsFile -Encoding ASCII
+    Write-Host "Created user_jvm_args.txt with default settings"
+}
+
+# Copy launcher scripts to be adjacent to template (on Desktop)
+$launcherTarget = Join-Path (Split-Path $TemplateDir -Parent) "launcher"
+if (-not (Test-Path $launcherTarget)) {
+    $projectLauncher = Join-Path $PSScriptRoot "..\launcher"
+    if (Test-Path $projectLauncher) {
+        New-Item -ItemType Directory -Path $launcherTarget -Force | Out-Null
+        Copy-Item "$projectLauncher\*" $launcherTarget -Recurse -Force
+        Write-Host "Copied launcher scripts to $launcherTarget"
+    }
+}
 
 Write-Host "Match template created at $TemplateDir"
 Write-Host "You can now deploy new builds with: gradlew deployToTemplate"
+Write-Host "Make sure launcher/match-config.json has the correct paths."

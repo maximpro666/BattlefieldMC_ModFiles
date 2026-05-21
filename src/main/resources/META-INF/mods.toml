@@ -9,14 +9,14 @@ displayName="${mod_name}"
 authors="${mod_authors}"
 description='''${mod_description}'''
 
-[[dependencies.teamsystem]]
+[[dependencies.pwp]]
     modId="forge"
     mandatory=true
     versionRange="${forge_version_range}"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.teamsystem]]
+[[dependencies.pwp]]
     modId="minecraft"
     mandatory=true
     versionRange="${minecraft_version_range}"

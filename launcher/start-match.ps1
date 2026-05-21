@@ -1,6 +1,13 @@
 param(
-    [string]$ConfigPath = (Join-Path $PSScriptRoot "match-config.json")
+    [string]$ConfigPath = (Join-Path $PSScriptRoot "match-config.json"),
+    [string]$LobbyRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\run")).Path
 )
+
+# Check config exists
+if (-not (Test-Path $ConfigPath)) {
+    Write-Error "[launcher] match-config.json not found at $ConfigPath"
+    exit 1
+}
 
 $config = Get-Content $ConfigPath | ConvertFrom-Json
 $template = $config.templateDir
@@ -8,9 +15,32 @@ $temp = $config.tempDir
 $port = $config.matchPort
 $timeout = [int]$config.startTimeoutSeconds
 
-Write-Host "[launcher] Copying template..."
-if (Test-Path $temp) { Remove-Item -Recurse -Force $temp }
-Copy-Item -Recurse $template $temp
+# Validate template exists
+if (-not (Test-Path $template)) {
+    Write-Error "[launcher] Template directory not found at $template"
+    exit 1
+}
+
+Write-Host "[launcher] Syncing template to temp (robocopy)..."
+robocopy "$template" "$temp" /MIR /NJH /NJS /NDL /NP /R:1 /W:1
+if ($LASTEXITCODE -ge 8) {
+    Write-Warning "[launcher] Robocopy reported errors, continuing anyway..."
+}
+
+# Copy map sources and pool config from lobby server if available
+$lobbySources = Join-Path $LobbyRoot "pwp_sources"
+$lobbyMapsJson = Join-Path $LobbyRoot "pwp_maps.json"
+$matchSources = Join-Path $temp "pwp_sources"
+$matchMapsJson = Join-Path $temp "pwp_maps.json"
+
+if (Test-Path $lobbySources) {
+    Write-Host "[launcher] Copying map sources from lobby..."
+    robocopy "$lobbySources" "$matchSources" /MIR /NJH /NJS /NDL /NP /R:1 /W:1
+}
+if (Test-Path $lobbyMapsJson) {
+    Copy-Item -Force $lobbyMapsJson $matchMapsJson
+    Write-Host "[launcher] Copied pwp_maps.json from lobby"
+}
 
 $serverProps = Join-Path $temp "server.properties"
 if (Test-Path $serverProps) {
@@ -44,7 +74,19 @@ if (-not (Test-Path $fullArgsFile)) {
 }
 
 Write-Host "[launcher] Starting Forge server..."
-$proc = Start-Process -FilePath "java" -ArgumentList "@user_jvm_args.txt -Dteamsystem.mode=match @$argsFile nogui" -WorkingDirectory $temp -NoNewWindow -PassThru -WindowStyle Hidden
+
+# Disable NightConfig file watcher to prevent ConcurrentModificationException
+# from ModernFix's NightConfigWatchThrottler during class loading
+$jvmOpts = @(
+    "@user_jvm_args.txt"
+    "-Dpwp.mode=match"
+    "-Dforge.configWatcher=false"
+    "-Dcom.electronwill.nightconfig.core.file.FileWatcher.disabled=true"
+    "@$argsFile"
+    "nogui"
+)
+
+$proc = Start-Process -FilePath "java" -ArgumentList $jvmOpts -WorkingDirectory $temp -NoNewWindow -PassThru -WindowStyle Hidden
 
 $logFile = Join-Path $temp "logs\latest.log"
 $elapsed = 0
@@ -55,7 +97,7 @@ $doneFound = $false
 Write-Host "[launcher] Waiting for server to start..."
 while ($elapsed -lt $timeout) {
     if (Test-Path $logFile) {
-        $lines = Get-Content $logFile -Tail 10
+        $lines = Get-Content $logFile -Tail 20
         foreach ($line in $lines) {
             if (-not $doneFound -and $line -match $doneRegex) {
                 $doneFound = $true
@@ -70,6 +112,8 @@ while ($elapsed -lt $timeout) {
                 exit 0
             }
         }
+    } else {
+        Write-Host "[launcher] Waiting for log file..."
     }
     Start-Sleep -Seconds 2
     $elapsed += 2

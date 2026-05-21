@@ -3,7 +3,7 @@ plugins {
 }
 
 version = '1.0.0'
-group = 'com.yourmod.teamsystem'
+group = 'com.pigeostudios.pwp'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
@@ -15,9 +15,9 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', 'teamsystem'
+            property 'forge.enabledGameTestNamespaces', 'pwp'
             mods {
-                teamsystem {
+                pwp {
                     source sourceSets.main
                 }
             }
@@ -27,10 +27,10 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', 'teamsystem'
+            property 'forge.enabledGameTestNamespaces', 'pwp'
             args '--nogui'
             mods {
-                teamsystem {
+                pwp {
                     source sourceSets.main
                 }
             }
@@ -60,7 +60,7 @@ jar {
 }
 
 base {
-    archivesName = 'teamsystem'
+    archivesName = 'pwp'
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -70,12 +70,12 @@ tasks.withType(ProcessResources).configureEach {
             forge_version          : '47.3.0',
             forge_version_range    : '[47.1,48)',
             loader_version_range   : '[47,)',
-            mod_id                 : 'teamsystem',
-            mod_name               : 'Team System',
-            mod_license            : 'MIT',
+            mod_id                 : 'pwp',
+            mod_name               : 'Project Warfare Pigeo',
+            mod_license            : 'All Rights Reserved',
             mod_version            : version,
-            mod_authors            : 'YourName',
-            mod_description        : 'Squad-like team system for Minecraft'
+            mod_authors            : 'Pigeo Studios',
+            mod_description        : 'Project Warfare Pigeo (PWP) — tactical PvP mod for Minecraft Forge 1.20.1. Squad-based combat, capture points, vehicles, ranks, and more.'
     ]
     inputs.properties replaceProperties
 
@@ -117,7 +117,7 @@ private void deployJar(String targetKey) {
     def jarName = jarFile.name
 
     // Delete old versions
-    fileTree(modsDir).include('teamsystem-*.jar').each { oldJar ->
+    fileTree(modsDir).include('pwp-*.jar').each { oldJar ->
         if (oldJar.name != jarName) {
             delete oldJar
             logger.lifecycle("  [{}] removed old: {}", targetKey, oldJar.name)
