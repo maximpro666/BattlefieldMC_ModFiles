@@ -4,6 +4,7 @@ import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.core.*;
 import com.yourmod.teamsystem.network.OpenTeamSelectionScreenPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.proxy.ProxyMessenger;
 import net.minecraft.ChatFormatting;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -22,9 +23,14 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.server.MinecraftServer;
 
 public class PlayerEventHandler {
     private final TeamManager teamManager;
@@ -95,7 +101,9 @@ public class PlayerEventHandler {
                     game.setLobbyRespawn(player);
                 }
 
-                PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new OpenTeamSelectionScreenPacket());
+                if (ProxyMessenger.isMatchServer()) {
+                    PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new OpenTeamSelectionScreenPacket());
+                }
 
                 if (game.isPlaying() || game.isVoting()) {
                     player.sendSystemMessage(Component.literal("§6=== Game in progress ===")
@@ -123,6 +131,37 @@ public class PlayerEventHandler {
                 ensureDogTag(player);
             }
             TeamSystem.LOGGER.info("Synced team data for player: {}", player.getName().getString());
+            checkAndAutoStartCycle(player.server);
+            // On lobby server: auto-transfer late joiners if match server is running
+            if (!ProxyMessenger.isMatchServer()) {
+                try (Socket s = new Socket()) {
+                    s.connect(new InetSocketAddress("127.0.0.1", 25566), 300);
+                    com.yourmod.teamsystem.network.PacketHandler.CHANNEL.send(
+                        net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
+                        new com.yourmod.teamsystem.network.TransferPacket("127.0.0.1:25566"));
+                    TeamSystem.LOGGER.info("Late joiner {} transferred to match server", player.getName().getString());
+                } catch (Exception e) {
+                    // No match server running, stay in lobby
+                }
+            }
+        }
+    }
+
+    private static void checkAndAutoStartCycle(MinecraftServer srv) {
+        try {
+            Path flagFile = Path.of(System.getProperty("user.dir")).resolve("../launcher/match_cycle_done.flag").normalize();
+            if (Files.exists(flagFile)) {
+                Files.delete(flagFile);
+                TeamSystem.LOGGER.info("Match cycle flag detected, auto-starting next match in 5s...");
+                new Thread(() -> {
+                    try { Thread.sleep(5000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+                    srv.execute(() -> {
+                        srv.getCommands().performPrefixedCommand(srv.createCommandSourceStack(), "startmatch");
+                    });
+                }, "AutoMatchStarter").start();
+            }
+        } catch (Exception e) {
+            TeamSystem.LOGGER.error("Failed to check cycle flag", e);
         }
     }
 

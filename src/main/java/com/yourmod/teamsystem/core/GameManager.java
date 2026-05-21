@@ -30,6 +30,8 @@ import com.yourmod.teamsystem.network.OpenTeamSelectionScreenPacket;
 import com.yourmod.teamsystem.network.TeamBaseSyncPacket;
 import com.yourmod.teamsystem.network.BorderSyncPacket;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -393,6 +395,13 @@ public class GameManager {
             for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                 PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
                     new TransferPacket("127.0.0.1:25565"));
+            }
+            // Signal lobby server to auto-start next match
+            try {
+                Path flagFile = Path.of(System.getProperty("user.dir")).resolve("../launcher/match_cycle_done.flag").normalize();
+                Files.write(flagFile, new byte[0]);
+            } catch (Exception e) {
+                TeamSystem.LOGGER.error("Failed to write cycle flag", e);
             }
             server.execute(() -> {
                 try { Thread.sleep(3000); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }

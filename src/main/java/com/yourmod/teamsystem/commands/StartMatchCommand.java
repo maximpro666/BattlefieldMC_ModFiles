@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class StartMatchCommand {
@@ -33,6 +34,8 @@ public class StartMatchCommand {
         Thread launcher = new Thread(() -> {
             try {
                 Path launcherDir = Path.of(System.getProperty("user.dir")).resolve("../launcher").normalize();
+                // Clean up stale flag from previous cycle
+                try { Files.deleteIfExists(launcherDir.resolve("match_cycle_done.flag")); } catch (Exception ignored) {}
                 ProcessBuilder pb = new ProcessBuilder(
                     "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass",
                     "-File", launcherDir.resolve("start-match.ps1").toString()
@@ -41,34 +44,47 @@ public class StartMatchCommand {
                 pb.redirectErrorStream(true);
                 Process proc = pb.start();
 
-                // Read output for logging
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        com.yourmod.teamsystem.TeamSystem.LOGGER.info("[launcher] " + line);
-                    }
-                }
-                int exitCode = proc.waitFor();
-                com.yourmod.teamsystem.TeamSystem.LOGGER.info("Launcher exited with code {}", exitCode);
+                java.util.concurrent.atomic.AtomicBoolean doneSeen = new java.util.concurrent.atomic.AtomicBoolean(false);
 
-                // Poll for server readiness
+                // Consume process output in a separate thread
+                Thread outputReader = new Thread(() -> {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            com.yourmod.teamsystem.TeamSystem.LOGGER.info("[launcher] " + line);
+                            if (line.contains("Done (")) {
+                                doneSeen.set(true);
+                            }
+                        }
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }, "MatchOutputReader");
+                outputReader.setDaemon(true);
+                outputReader.start();
+
+                // Wait for port open AND "Done" message in output
                 String[] parts = MATCH_ADDRESS.split(":");
                 String host = parts[0];
                 int port = Integer.parseInt(parts[1]);
                 long deadline = System.currentTimeMillis() + 120_000;
-                boolean ready = false;
+                boolean portOpen = false;
 
                 while (System.currentTimeMillis() < deadline) {
-                    try (Socket s = new Socket()) {
-                        s.connect(new InetSocketAddress(host, port), 2000);
-                        ready = true;
-                        break;
-                    } catch (Exception e) {
-                        Thread.sleep(5000);
+                    if (!portOpen) {
+                        try (Socket s = new Socket()) {
+                            s.connect(new InetSocketAddress(host, port), 2000);
+                            portOpen = true;
+                        } catch (Exception e) {
+                            Thread.sleep(5000);
+                            continue;
+                        }
                     }
+                    if (doneSeen.get()) break;
+                    Thread.sleep(500);
                 }
 
-                if (ready) {
+                if (portOpen && doneSeen.get()) {
                     server.execute(() -> {
                         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
@@ -79,6 +95,9 @@ public class StartMatchCommand {
                 } else {
                     com.yourmod.teamsystem.TeamSystem.LOGGER.error("Match server did not start in time");
                 }
+
+                int exitCode = proc.waitFor();
+                com.yourmod.teamsystem.TeamSystem.LOGGER.info("Launcher exited with code {}", exitCode);
             } catch (Exception e) {
                 com.yourmod.teamsystem.TeamSystem.LOGGER.error("Failed to start match server", e);
             }
