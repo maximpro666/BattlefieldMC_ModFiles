@@ -3,8 +3,8 @@
   "minVersion": "0.8",
   "package": "com.yourmod.teamsystem.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "mixins.teamsystem.refmap.json",
-  "client": [
-    "ForgeLoadingOverlayMixin"
-  ]
+  "server": [
+    "IndexedMessageCodecMixin"
+  ],
+  "client": []
 }

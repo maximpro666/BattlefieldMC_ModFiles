@@ -41,7 +41,6 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
-import org.spongepowered.asm.mixin.Mixins;
 
 @Mod("teamsystem")
 public class TeamSystem {
@@ -91,7 +90,6 @@ public class TeamSystem {
     private static CaptureParticleManager captureParticleManager;
 
     public TeamSystem() {
-        Mixins.addConfiguration("mixins.teamsystem.json");
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);

@@ -3,6 +3,7 @@ package com.yourmod.teamsystem.core;
 import com.yourmod.teamsystem.TeamSystem;
 import com.yourmod.teamsystem.network.GameStateSyncPacket;
 import com.yourmod.teamsystem.network.PacketHandler;
+import com.yourmod.teamsystem.network.TransferPacket;
 import com.yourmod.teamsystem.proxy.ProxyMessenger;
 import static com.yourmod.teamsystem.core.ChatHelper.*;
 import static com.yourmod.teamsystem.core.TeamSystemColors.*;
@@ -388,7 +389,11 @@ public class GameManager {
 
     private void finishMatchCycle() {
         if (ProxyMessenger.isMatchServer()) {
-            ProxyMessenger.send("end_match");
+            // Send players back to lobby via TransferPacket
+            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+                PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
+                    new TransferPacket("127.0.0.1:25565"));
+            }
             server.execute(() -> {
                 try { Thread.sleep(3000); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
                 server.halt(false);

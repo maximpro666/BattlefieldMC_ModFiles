@@ -284,5 +284,11 @@ public class PacketHandler {
             .encoder(KitConfigSyncPacket::toBytes)
             .consumerMainThread(KitConfigSyncPacket::handle)
             .add();
+
+        CHANNEL.messageBuilder(TransferPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(TransferPacket::new)
+            .encoder(TransferPacket::toBytes)
+            .consumerMainThread(TransferPacket::handle)
+            .add();
     }
 }

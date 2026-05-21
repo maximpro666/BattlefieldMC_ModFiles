@@ -5,12 +5,12 @@ plugins {
 repositories {
     mavenCentral()
     maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots'
+        url 'https://repo.papermc.io/repository/maven-public/'
     }
 }
 
 dependencies {
-    implementation 'net.md-5:bungeecord-api:1.20-R0.2-SNAPSHOT'
+    implementation 'io.github.waterfallmc:waterfall-api:1.20-R0.2-SNAPSHOT'
 }
 
 java {
