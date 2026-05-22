@@ -1,9 +1,11 @@
 package com.pigeostudios.pwp.core;
 
 import com.pigeostudios.pwp.PWP;
+import com.pigeostudios.pwp.commands.StartMatchCommand;
 import com.pigeostudios.pwp.network.GameStateSyncPacket;
 import com.pigeostudios.pwp.network.NotificationPacket;
 import com.pigeostudios.pwp.network.OpenMatchResultsPacket;
+import com.pigeostudios.pwp.network.OpenVoteScreenPacket;
 import com.pigeostudios.pwp.network.PacketHandler;
 import com.pigeostudios.pwp.network.TransferPacket;
 import com.pigeostudios.pwp.proxy.ProxyMessenger;
@@ -32,10 +34,6 @@ import com.pigeostudios.pwp.network.VoiceSpeakingStatePacket;
 import com.pigeostudios.pwp.network.OpenTeamSelectionScreenPacket;
 import com.pigeostudios.pwp.network.TeamBaseSyncPacket;
 import com.pigeostudios.pwp.network.BorderSyncPacket;
-import de.maxhenkel.voicechat.api.Group;
-import de.maxhenkel.voicechat.api.VoicechatServerApi;
-import de.maxhenkel.voicechat.api.VoicechatConnection;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -57,7 +55,7 @@ public class GameManager {
 
     private static final ResourceLocation LOBBY_DIMENSION_ID = new ResourceLocation("minecraft", "overworld");
     private static final BlockPos LOBBY_SPAWN = new BlockPos(136, 68, -140);
-    private static final int VOTE_SECONDS = 20;
+    private static final int VOTE_SECONDS = 30;
     private static final int COUNTDOWN_SECONDS = 15;
     private static final int MATCH_SECONDS = 1800;
     private static final int OVERTIME_TICKETS = 15;
@@ -80,6 +78,8 @@ public class GameManager {
     private int currentMatchIndex;
     private boolean mapReady;
     private BorderManager borderManager;
+    private List<String> currentVoteCandidates = new ArrayList<>();
+    private boolean pendingAutoStart = false;
 
     public GameManager(MinecraftServer server) {
         this.server = server;
@@ -135,19 +135,39 @@ public class GameManager {
         TeamManager teamManager = PWP.getTeamManager();
         MapPoolManager mapPool = PWP.getMapPoolManager();
 
+        PWP.LOGGER.info("=== startGame: hasAvailableMaps={}, total maps={} ===", mapPool.hasAvailableMaps(), mapPool.getMaps().size());
+        for (MapConfig mc : mapPool.getMaps()) {
+            PWP.LOGGER.info("Map: {} enabled={} state={} nato={} rus={} hasCP={} cp={} wbs={} playable={}",
+                mc.getName(), mc.isEnabled(), mc.getState(),
+                mc.hasTeamSpawns() ? java.util.Arrays.toString(mc.getNatoSpawn()) : "null",
+                mc.hasTeamSpawns() ? java.util.Arrays.toString(mc.getRussiaSpawn()) : "null",
+                mc.hasCapturePoints(),
+                mc.getCapturePoints() == null ? "null" : String.valueOf(mc.getCapturePoints().size()),
+                mc.getWorldBorderSize(),
+                mc.isPlayable());
+        }
+
         if (!mapPool.hasAvailableMaps()) {
-            broadcast("No available maps!", CHAT_ERROR);
+            broadcast("Нет доступных карт! Настройте карты.", CHAT_ERROR);
+            currentPhase = GamePhase.LOBBY;
+            phaseTimer = 0;
             return;
         }
 
         MapConfig map = mapPool.getCurrentMap().orElse(null);
         if (map == null) {
             map = mapPool.pickNextAvailable();
-            if (map == null) return;
+            if (map == null) {
+                currentPhase = GamePhase.LOBBY;
+                phaseTimer = 0;
+                return;
+            }
         }
 
         if (!mapPool.copyToLive(map)) {
-            broadcast("Failed to deploy map " + map.getName(), CHAT_ERROR);
+            broadcast("Не удалось загрузить карту " + map.getName(), CHAT_ERROR);
+            currentPhase = GamePhase.LOBBY;
+            phaseTimer = 0;
             return;
         }
 
@@ -268,6 +288,15 @@ public class GameManager {
         winningTeam = winner;
         phaseTimer = 80;
 
+        TicketManager ticketMgr = PWP.getTicketManager();
+        int natoTk = ticketMgr != null ? ticketMgr.getTickets(Team.NATO) : 0;
+        int russiaTk = ticketMgr != null ? ticketMgr.getTickets(Team.RUSSIA) : 0;
+
+        if (currentMap != null) {
+            com.pigeostudios.pwp.data.CentralDatabase.recordMatchPlayed(currentMap.getName(),
+                winner != null ? winner.getName() : "DRAW", natoTk, russiaTk);
+        }
+
         String winName = winner != null ? winner.getName() : "DRAW";
         String winMsg = "\u2694 " + winName + " \u043f\u043e\u0431\u0435\u0436\u0434\u0430\u0435\u0442!";
         sendNotificationToAll(winMsg, "match", 6000);
@@ -278,17 +307,23 @@ public class GameManager {
 
         Map<UUID, Integer> bcEarned = new HashMap<>();
         Map<UUID, Integer> wcEarned = new HashMap<>();
+        List<UUID> winningPlayers = new ArrayList<>();
+        List<UUID> losingPlayers = new ArrayList<>();
+
+        double winnerAvgRating = 0;
+        double loserAvgRating = 0;
 
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             int baseBC = cfg != null ? cfg.getWinRewardBC() : 25;
             int baseWC = cfg != null ? cfg.getWinRewardWC() : 50;
-            if (winner != null && tm.getOrCreatePlayerData(p.getUUID()).getTeam() == winner) {
+            PlayerCombatData pcd = tm.getOrCreatePlayerData(p.getUUID());
+            boolean isWinner = winner != null && pcd.getTeam() == winner;
+            if (isWinner) {
                 baseBC += 50;
                 baseWC += 50;
             }
             runtime.addBC(p.getUUID(), baseBC);
             runtime.addWC(p.getUUID(), baseWC);
-            PlayerCombatData pcd = tm.getOrCreatePlayerData(p.getUUID());
             pcd.setWarCredits(runtime.getWC(p.getUUID()));
             pcd.addBattleCredits(baseBC);
             runtime.syncAll(p);
@@ -298,7 +333,41 @@ public class GameManager {
             String rewardMsg = "+" + baseBC + " BC, +" + baseWC + " WC";
             NotificationPacket rewardPkt = new NotificationPacket(rewardMsg, "success", 4000, "");
             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p), rewardPkt);
+
+            if (pcd.getTeam().isPlayable()) {
+                if (isWinner) {
+                    winningPlayers.add(p.getUUID());
+                    winnerAvgRating += pcd.getRating();
+                } else if (winner != null) {
+                    losingPlayers.add(p.getUUID());
+                    loserAvgRating += pcd.getRating();
+                }
+            }
         }
+
+        if (!winningPlayers.isEmpty()) winnerAvgRating /= winningPlayers.size();
+        if (!losingPlayers.isEmpty()) loserAvgRating /= losingPlayers.size();
+
+        // Update wins and rating for all playable players
+        int K = 32;
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            PlayerCombatData pcd = tm.getOrCreatePlayerData(p.getUUID());
+            if (!pcd.getTeam().isPlayable() || winner == null) continue;
+            boolean isWinner = pcd.getTeam() == winner;
+            if (isWinner) {
+                pcd.addWin();
+                double opponentAvg = loserAvgRating > 0 ? loserAvgRating : 1000;
+                double expected = 1.0 / (1.0 + Math.pow(10, (opponentAvg - pcd.getRating()) / 400.0));
+                int ratingChange = (int) Math.round(K * (1.0 - expected));
+                pcd.setRating(pcd.getRating() + ratingChange);
+            } else {
+                double opponentAvg = winnerAvgRating > 0 ? winnerAvgRating : 1000;
+                double expected = 1.0 / (1.0 + Math.pow(10, (opponentAvg - pcd.getRating()) / 400.0));
+                int ratingChange = (int) Math.round(K * (0.0 - expected));
+                pcd.setRating(pcd.getRating() + ratingChange);
+            }
+        }
+
         tm.setDirty();
 
         CapturePointManager cp = PWP.getCapturePointManager();
@@ -348,10 +417,6 @@ public class GameManager {
 
             contrib.resetMatch();
 
-            TicketManager ticketMgr = PWP.getTicketManager();
-            int natoTk = ticketMgr != null ? ticketMgr.getTickets(Team.NATO) : 0;
-            int russiaTk = ticketMgr != null ? ticketMgr.getTickets(Team.RUSSIA) : 0;
-
             OpenMatchResultsPacket resultsPkt = new OpenMatchResultsPacket(
                 winner != null ? winner.ordinal() : -1,
                 currentMap != null ? currentMap.getName() : "",
@@ -394,8 +459,17 @@ public class GameManager {
             phaseTimer--;
             if (phaseTimer <= 0) resolveVoting();
 
-            if (phaseTimer % 20 == 0 && phaseTimer > 0) {
+            if (phaseTimer > 0 && phaseTimer % 20 == 0) {
                 int sec = phaseTimer / 20;
+                MapPoolManager pool = PWP.getMapPoolManager();
+                Map<String, Integer> tally = pool.getVoteTally();
+                int[] votes = new int[currentVoteCandidates.size()];
+                for (int i = 0; i < currentVoteCandidates.size(); i++) {
+                    votes[i] = tally.getOrDefault(currentVoteCandidates.get(i).toLowerCase(), 0);
+                }
+                PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(),
+                    new com.pigeostudios.pwp.network.VoteSyncPacket(sec, votes));
+
                 if (sec <= 5 || sec % 5 == 0) {
                     sendNotificationToAll("\u0413\u043e\u043b\u043e\u0441\u043e\u0432\u0430\u043d\u0438\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u0441\u044f \u0447\u0435\u0440\u0435\u0437 " + sec + "\u0441", "warning", 3000);
                 }
@@ -520,7 +594,7 @@ public class GameManager {
                 PWP.LOGGER.error("Failed to write cycle flag", e);
             }
             server.execute(() -> {
-                try { Thread.sleep(5000); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
+                try { Thread.sleep(15000); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
                 server.halt(false);
             });
             return;
@@ -534,7 +608,57 @@ public class GameManager {
         startVoting();
     }
 
-    private void startVoting() {
+    public void startVotingWithAutoStart() {
+        pendingAutoStart = true;
+        startVoting();
+    }
+
+    public void startMatchServerGame() {
+        MapPoolManager pool = PWP.getMapPoolManager();
+        pool.clearVotes();
+
+        // Read selected map from flag file (written by lobby server after voting)
+        try {
+            Path launcherDir = StartMatchCommand.findLauncherDir();
+            Path flagFile = launcherDir.resolve("pwp_selected_map.txt");
+            if (Files.exists(flagFile)) {
+                String mapName = Files.readString(flagFile).trim();
+                Files.deleteIfExists(flagFile);
+                if (!mapName.isEmpty() && pool.selectMap(mapName)) {
+                    PWP.LOGGER.info("Selected map from flag file: {}", mapName);
+                } else {
+                    PWP.LOGGER.warn("Flag file contained '{}' but selectMap failed, falling back", mapName);
+                }
+            }
+        } catch (Exception e) {
+            PWP.LOGGER.warn("Failed to read selected map flag: {}", e.getMessage());
+        }
+
+        MapConfig map = pool.getCurrentMap().orElse(null);
+        if (map == null) {
+            map = pool.pickNextAvailable();
+        }
+        if (map == null) {
+            PWP.LOGGER.error("No available maps on match server!");
+            broadcast("Нет доступных карт! Настройте карты и включите их.", CHAT_ERROR);
+            currentPhase = GamePhase.LOBBY;
+            phaseTimer = 0;
+            return;
+        }
+
+        currentPhase = GamePhase.LOBBY;
+        phaseTimer = COUNTDOWN_SECONDS * 20;
+        currentMap = null;
+        winningTeam = null;
+        currentVoteCandidates.clear();
+
+        sendNotificationToAll("Игра начнётся через " + COUNTDOWN_SECONDS + "с на " + map.getName(), "success", 5000);
+        applyLobbyRules();
+        syncPhaseToAll();
+        PWP.LOGGER.info("Match server started, game will begin on map: {}", map.getName());
+    }
+
+    public void startVoting() {
         currentPhase = GamePhase.VOTING;
         phaseTimer = VOTE_SECONDS * 20;
         winningTeam = null;
@@ -543,26 +667,43 @@ public class GameManager {
         MapPoolManager pool = PWP.getMapPoolManager();
         pool.clearVotes();
 
-        List<MapConfig> available = pool.getPlayableMaps();
-        if (available.isEmpty()) {
-            broadcast("No playable maps! Please configure maps and enable them.", CHAT_ERROR);
+        // Clean up stale flag file from previous match
+        try {
+            Files.deleteIfExists(StartMatchCommand.findLauncherDir().resolve("pwp_selected_map.txt"));
+        } catch (Exception ignored) {}
+
+        List<String> recentPlayed;
+        try {
+            recentPlayed = com.pigeostudios.pwp.data.CentralDatabase.getRecentPlayedMaps(3);
+        } catch (Exception e) {
+            recentPlayed = new ArrayList<>();
+        }
+        List<MapConfig> candidates = pool.pickVotingCandidates(9, recentPlayed);
+        if (candidates.isEmpty()) {
+            broadcast("Нет доступных карт для голосования! Настройте карты.", CHAT_ERROR);
             currentPhase = GamePhase.LOBBY;
             phaseTimer = 0;
-            returnToLobby();
+            pendingAutoStart = false;
             return;
         }
 
-        sendNotificationToAll("\u0413\u043e\u043b\u043e\u0441\u043e\u0432\u0430\u043d\u0438\u0435 \u0437\u0430 \u043d\u043e\u0432\u0443\u044e \u043a\u0430\u0440\u0442\u0443!", "match", 5000);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < available.size(); i++) {
-            sb.append("\n").append(i + 1).append(". ").append(available.get(i).getName());
+        currentVoteCandidates = new ArrayList<>();
+        List<String> availNames = new ArrayList<>();
+        int[] voteCounts = new int[candidates.size()];
+        for (int i = 0; i < candidates.size(); i++) {
+            MapConfig m = candidates.get(i);
+            currentVoteCandidates.add(m.getName());
+            availNames.add(m.getName());
+            voteCounts[i] = 0;
         }
-        broadcast(sb.toString(), CHAT_WARNING);
-        sendNotificationToAll("\u0418\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0439\u0442\u0435 /map vote <\u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435>", "info", 4000);
+
+        sendNotificationToAll("\u0413\u043e\u043b\u043e\u0441\u043e\u0432\u0430\u043d\u0438\u0435 \u0437\u0430 \u043d\u043e\u0432\u0443\u044e \u043a\u0430\u0440\u0442\u0443!", "match", 5000);
+        PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(),
+            new OpenVoteScreenPacket(availNames, voteCounts, phaseTimer / 20));
 
         applyLobbyRules();
         syncPhaseToAll();
-        PWP.LOGGER.info("Voting started. {} maps available", available.size());
+        PWP.LOGGER.info("Voting started with {} candidates", candidates.size());
     }
 
     private void resolveVoting() {
@@ -575,7 +716,9 @@ public class GameManager {
             MapConfig picked = pool.pickNextAvailable();
             if (picked == null) {
                 sendNotificationToAll("\u041d\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b\u0445 \u043a\u0430\u0440\u0442!", "error", 4000);
-                startVoting();
+                pendingAutoStart = false;
+                currentPhase = GamePhase.LOBBY;
+                phaseTimer = 0;
                 return;
             }
             sendNotificationToAll("\u0410\u0432\u0442\u043e\u0432\u044b\u0431\u043e\u0440 \u043a\u0430\u0440\u0442\u044b: " + picked.getName(), "warning", 4000);
@@ -586,6 +729,25 @@ public class GameManager {
         phaseTimer = COUNTDOWN_SECONDS * 20;
         String mapName = pool.getCurrentMap().map(MapConfig::getName).orElse("?");
         sendNotificationToAll("\u0418\u0433\u0440\u0430 \u043d\u0430\u0447\u043d\u0435\u0442\u0441\u044f \u0447\u0435\u0440\u0435\u0437 " + COUNTDOWN_SECONDS + "\u0441 \u043d\u0430 " + mapName, "success", 4000);
+
+        // Write selected map name to launcher directory for match server
+        if (!mapName.equals("?")) {
+            try {
+                Path launcherDir = StartMatchCommand.findLauncherDir();
+                Path flagFile = launcherDir.resolve("pwp_selected_map.txt");
+                Files.writeString(flagFile, mapName);
+                PWP.LOGGER.info("Wrote selected map '{}' to {}", mapName, flagFile);
+            } catch (Exception e) {
+                PWP.LOGGER.warn("Failed to write selected map flag: {}", e.getMessage());
+            }
+        }
+
+        if (pendingAutoStart) {
+            pendingAutoStart = false;
+            PWP.LOGGER.info("Auto-starting match server after voting...");
+            StartMatchCommand.startMatchServerAsync(server);
+            phaseTimer = 0;
+        }
     }
 
     private void returnToLobby() {
@@ -625,6 +787,18 @@ public class GameManager {
     }
 
     // ========== Timer Overrides ==========
+
+    public void sendVoteScreenToPlayer(ServerPlayer player) {
+        if (currentPhase != GamePhase.VOTING) return;
+        MapPoolManager pool = PWP.getMapPoolManager();
+        Map<String, Integer> tally = pool.getVoteTally();
+        int[] votes = new int[currentVoteCandidates.size()];
+        for (int i = 0; i < currentVoteCandidates.size(); i++) {
+            votes[i] = tally.getOrDefault(currentVoteCandidates.get(i).toLowerCase(), 0);
+        }
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+            new OpenVoteScreenPacket(new ArrayList<>(currentVoteCandidates), votes, phaseTimer / 20));
+    }
 
     public void startCountdown(int seconds) {
         if (currentPhase != GamePhase.VOTING && currentPhase != GamePhase.LOBBY) return;
@@ -675,6 +849,8 @@ public class GameManager {
         gamerule(l, "doMobSpawning", "false");
         gamerule(l, "mobGriefing", "false");
         gamerule(l, "doFireTick", "true");
+        gamerule(l, "doDaylightCycle", map.hasDaylightCycle() ? "true" : "false");
+        gamerule(l, "doWeatherCycle", "false");
         gamerule(l, "keepInventory", "false");
         gamerule(l, "fallDamage", "true");
         l.getWorldBorder().setCenter(map.getWorldBorderCenterX(), map.getWorldBorderCenterZ() + zOffset);
@@ -682,7 +858,7 @@ public class GameManager {
     }
 
     private void gamerule(ServerLevel l, String rule, String val) {
-        server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "gamerule " + rule + " " + val);
+        server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withLevel(l), "gamerule " + rule + " " + val);
     }
 
     private void updateLiberateAttachment() {
@@ -769,21 +945,36 @@ public class GameManager {
         }
     }
 
+    private BlockPos getLobbySpawn(ServerLevel level) {
+        if (ProxyMessenger.isMatchServer()) {
+            return level.getSharedSpawnPos();
+        }
+        return LOBBY_SPAWN;
+    }
+
     public void teleportAllToLobby() {
         ServerLevel l = getOrCreateLobbyWorld();
-        if (l != null)
+        if (l != null) {
+            BlockPos spawn = getLobbySpawn(l);
             for (ServerPlayer p : server.getPlayerList().getPlayers())
-                safeTeleport(p, l, LOBBY_SPAWN.getX() + 0.5, LOBBY_SPAWN.getY(), LOBBY_SPAWN.getZ() + 0.5);
+                safeTeleport(p, l, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5);
+        }
     }
 
     public void teleportPlayerToLobby(ServerPlayer p) {
         ServerLevel l = getOrCreateLobbyWorld();
-        if (l != null) safeTeleport(p, l, LOBBY_SPAWN.getX() + 0.5, LOBBY_SPAWN.getY(), LOBBY_SPAWN.getZ() + 0.5);
+        if (l != null) {
+            BlockPos spawn = getLobbySpawn(l);
+            safeTeleport(p, l, spawn.getX() + 0.5, spawn.getY(), spawn.getZ() + 0.5);
+        }
     }
 
     public void setLobbyRespawn(ServerPlayer p) {
         ServerLevel l = getOrCreateLobbyWorld();
-        if (l != null) p.setRespawnPosition(l.dimension(), LOBBY_SPAWN, 0, false, false);
+        if (l != null) {
+            BlockPos spawn = getLobbySpawn(l);
+            p.setRespawnPosition(l.dimension(), spawn, 0, false, false);
+        }
     }
 
     public void setLobbyRespawnAtPlayer(ServerPlayer p) {
@@ -914,8 +1105,7 @@ public class GameManager {
             currentPhase.ordinal(),
             currentMap != null ? currentMap.getName() : "",
             winningTeam != null ? winningTeam.ordinal() : -1);
-        for (ServerPlayer p : server.getPlayerList().getPlayers())
-            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p), pkt);
+        PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), pkt);
 
         if (currentPhase == GamePhase.LOBBY || currentPhase == GamePhase.VOTING) {
             TeamManager tm = PWP.getTeamManager();
@@ -937,12 +1127,7 @@ public class GameManager {
     }
 
     private void broadcastVoiceSpeakers() {
-        var gmgr = TeamVoicePlugin.getGroupManager();
-        if (gmgr == null) return;
-        VoicechatServerApi svApi = gmgr.getApi();
-        if (svApi == null) return;
         if (server == null) return;
-
         long now = System.currentTimeMillis();
         var activeSpeakers = TeamVoicePlugin.activeSpeakers;
         Iterator<Map.Entry<UUID, TeamVoicePlugin.VoiceSpeakerState>> it = activeSpeakers.entrySet().iterator();
@@ -955,29 +1140,9 @@ public class GameManager {
             }
 
             VoiceSpeakingStatePacket pkt = new VoiceSpeakingStatePacket(entry.getKey(), state.name, state.channel);
-            ServerPlayer senderPlayer = server.getPlayerList().getPlayer(entry.getKey());
-            if (senderPlayer == null) continue;
-
             for (ServerPlayer listener : server.getPlayerList().getPlayers()) {
                 if (listener.getUUID().equals(entry.getKey())) continue;
-                VoicechatConnection conn = svApi.getConnectionOf(listener.getUUID());
-                if (conn == null || conn.isDisabled()) continue;
-
-                boolean canHear;
-                Group connGroup = conn.getGroup();
-                if (state.channel == 0) {
-                    canHear = connGroup == null
-                        && listener.distanceToSqr(senderPlayer) <= 48.0 * 48.0;
-                } else if (state.channel == 1) {
-                    canHear = connGroup != null && connGroup.getName().startsWith("ts_squad");
-                } else {
-                    String gname = connGroup != null ? connGroup.getName() : "";
-                    canHear = gname.equals("ts_nato") || gname.equals("ts_russia");
-                }
-
-                if (canHear) {
-                    PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> listener), pkt);
-                }
+                PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> listener), pkt);
             }
         }
     }

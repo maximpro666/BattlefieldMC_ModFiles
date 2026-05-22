@@ -4,7 +4,6 @@ import com.pigeostudios.pwp.PWP;
 import de.maxhenkel.voicechat.api.Group;
 import de.maxhenkel.voicechat.api.VoicechatServerApi;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import javax.annotation.Nullable;
@@ -57,8 +56,6 @@ public class VoiceGroupManager {
     public void joinChannel(ServerPlayer player, int channel) {
         if (!available) return;
         UUID uuid = player.getUUID();
-        MinecraftServer server = player.getServer();
-        if (server == null) return;
 
         if (channel == CHANNEL_LOCAL) {
             leaveChannel(uuid);
@@ -70,9 +67,9 @@ public class VoiceGroupManager {
 
         if (channel == CHANNEL_SQUAD) {
             SquadManager sm = PWP.getSquadManager();
-            if (sm == null) return;
+            if (sm == null) { leaveChannel(uuid); return; }
             Squad squad = sm.getPlayerSquad(uuid);
-            if (squad == null) return;
+            if (squad == null) { leaveChannel(uuid); return; }
             Group group = getOrCreateSquadGroup(squad.getSquadId());
             conn.setGroup(group);
         } else if (channel == CHANNEL_TEAM) {
@@ -81,6 +78,8 @@ public class VoiceGroupManager {
                 conn.setGroup(natoGroup);
             } else if (team == Team.RUSSIA) {
                 conn.setGroup(russiaGroup);
+            } else {
+                leaveChannel(uuid);
             }
         }
     }

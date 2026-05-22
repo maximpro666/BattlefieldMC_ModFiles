@@ -44,6 +44,10 @@ Get-ChildItem -Path (Split-Path $temp -Parent) -Directory -Filter "match-*" | Fo
     Remove-Item -Path $flag -Force -ErrorAction SilentlyContinue
 }
 
+# Clean up launcher-level flags
+Remove-Item -Path "$PSScriptRoot\match_cycle_done.flag" -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "$PSScriptRoot\match_active.flag" -Force -ErrorAction SilentlyContinue
+
 Start-Sleep -Seconds 2
 if (Test-Path $temp) {
     Remove-Item -Recurse -Force $temp -ErrorAction SilentlyContinue

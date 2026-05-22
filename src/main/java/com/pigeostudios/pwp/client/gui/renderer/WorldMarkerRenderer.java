@@ -239,7 +239,7 @@ public class WorldMarkerRenderer {
             // === Letter ===
             float textZoom = 5.0f;
             float textScale = Math.min(4.0f, (hs * textZoom * 1.2f) / Math.max(lw, 1));
-            float bgPad = 1.5f;
+            float bgPad = Math.max(4.0f, 4.0f / (textScale * 0.5f));
             poseStack.pushPose();
             poseStack.translate(0, 0, 0.001f);
             drawRectDepth(poseStack, bufferSource,
@@ -373,7 +373,7 @@ public class WorldMarkerRenderer {
             float lh = font.lineHeight;
             float textZoom = 4.0f;
             float textScale = Math.min(3.0f, (hs * textZoom * 1.2f) / Math.max(lw, 1));
-            float bgPad = 1.5f;
+            float bgPad = Math.max(4.0f, 4.0f / (textScale * 0.5f));
             poseStack.pushPose();
             poseStack.translate(0, 0, 0.001f);
             drawRectDepth(poseStack, bufferSource,

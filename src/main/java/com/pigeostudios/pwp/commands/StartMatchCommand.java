@@ -1,6 +1,8 @@
 package com.pigeostudios.pwp.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.pigeostudios.pwp.PWP;
+import com.pigeostudios.pwp.core.GameManager;
 import com.pigeostudios.pwp.core.LifecycleNotifier;
 import com.pigeostudios.pwp.network.PacketHandler;
 import com.pigeostudios.pwp.network.TransferPacket;
@@ -26,14 +28,27 @@ public class StartMatchCommand {
         dispatcher.register(Commands.literal("startmatch")
             .requires(src -> src.hasPermission(2))
             .executes(ctx -> {
-                ctx.getSource().sendSuccess(() -> Component.literal("§aStarting match server..."), true);
-                startMatchServerAsync(ctx.getSource().getServer());
+                GameManager game = PWP.getGameManager();
+                if (game == null) {
+                    ctx.getSource().sendFailure(Component.literal("§cGame manager not available!"));
+                    return 0;
+                }
+                if (game.isVoting()) {
+                    ctx.getSource().sendFailure(Component.literal("§cVoting is already in progress!"));
+                    return 0;
+                }
+                if (game.isPlaying()) {
+                    ctx.getSource().sendFailure(Component.literal("§cA match is already in progress!"));
+                    return 0;
+                }
+                ctx.getSource().sendSuccess(() -> Component.literal("§aНачинается голосование за карту..."), true);
+                game.startVotingWithAutoStart();
                 return 1;
             })
         );
     }
 
-    private static Path findLauncherDir() {
+    public static Path findLauncherDir() {
         // Try relative to user.dir (servar/lobby directory)
         Path fromUserDir = Path.of(System.getProperty("user.dir")).resolve("../launcher").normalize();
         if (Files.exists(fromUserDir.resolve("start-match.ps1"))) {
@@ -55,7 +70,7 @@ public class StartMatchCommand {
         return fromUserDir;
     }
 
-    private static void startMatchServerAsync(net.minecraft.server.MinecraftServer server) {
+    public static void startMatchServerAsync(net.minecraft.server.MinecraftServer server) {
         Thread launcher = new Thread(() -> {
             Path launcherDir = null;
             Process proc = null;
@@ -67,8 +82,9 @@ public class StartMatchCommand {
                     server.execute(() -> LifecycleNotifier.broadcastToAll(server, "match_failed"));
                     return;
                 }
-                // Clean up stale flag from previous cycle
+                // Clean up stale flags from previous cycle
                 try { Files.deleteIfExists(launcherDir.resolve("match_cycle_done.flag")); } catch (Exception ignored) {}
+                try { Files.deleteIfExists(launcherDir.resolve("match_active.flag")); } catch (Exception ignored) {}
                 // Broadcast: cleaning up old match server
                 server.execute(() -> LifecycleNotifier.broadcastToAll(server, "match_cleaning"));
                 // Kill any existing match server process and clean up temp dir
@@ -137,7 +153,7 @@ public class StartMatchCommand {
                 boolean readySeen = false;
 
                 while (System.currentTimeMillis() < deadline) {
-                    if (doneSeen.get()) {
+                    if (doneSeen.get() && portOpen) {
                         readySeen = true;
                         break;
                     }
@@ -151,26 +167,32 @@ public class StartMatchCommand {
                             continue;
                         }
                     }
-                    if (doneSeen.get()) {
+                    if (doneSeen.get() && portOpen) {
                         readySeen = true;
                         break;
                     }
-                    // Check if the script process has exited (may have written flag file)
+                    // Check if the script process has exited
                     if (!startedProc.isAlive()) {
-                        // Give the output reader a moment to process final lines
                         try { Thread.sleep(500); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
-                        if (doneSeen.get()) {
+                        if (doneSeen.get() && portOpen) {
                             readySeen = true;
                             break;
                         }
-                        // Process exited without ready signal — wait for timeout
                     }
                     Thread.sleep(500);
                 }
 
                 if (readySeen) {
+                    // Write match_active.flag so late joiners can be auto-transferred
+                    try {
+                        Path flag = launcherDir.resolve("match_active.flag");
+                        Files.writeString(flag, MATCH_ADDRESS);
+                        com.pigeostudios.pwp.PWP.LOGGER.info("Written match_active.flag");
+                    } catch (Exception e) {
+                        com.pigeostudios.pwp.PWP.LOGGER.warn("Failed to write match_active.flag: {}", e.getMessage());
+                    }
                     server.execute(() -> LifecycleNotifier.broadcastNotification(server, "match_ready", 5000));
-                    try { Thread.sleep(1000); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
+                    try { Thread.sleep(4000); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
                     server.execute(() -> {
                         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),

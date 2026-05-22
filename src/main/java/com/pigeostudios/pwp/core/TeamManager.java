@@ -1,6 +1,7 @@
 package com.pigeostudios.pwp.core;
 
 import com.pigeostudios.pwp.PWP;
+import com.pigeostudios.pwp.data.CentralDatabase;
 import com.pigeostudios.pwp.data.KitConfig;
 import com.pigeostudios.pwp.data.KitConfigServerHelper;
 import com.pigeostudios.pwp.network.CombatDataSyncPacket;
@@ -8,6 +9,7 @@ import com.pigeostudios.pwp.network.KitConfigSyncPacket;
 import com.pigeostudios.pwp.network.PacketHandler;
 import com.pigeostudios.pwp.network.RankSyncPacket;
 import com.pigeostudios.pwp.network.TeamSyncPacket;
+import com.pigeostudios.pwp.proxy.ProxyMessenger;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -65,6 +67,57 @@ public class TeamManager extends SavedData {
         }
         nbt.put("Players", playerList);
         return nbt;
+    }
+
+    public void loadFromCentralDatabase() {
+        CentralDatabase.init();
+        Map<UUID, PlayerCombatData> dbData = CentralDatabase.loadAllPlayers();
+        if (dbData.isEmpty()) return;
+        int count = 0;
+        for (Map.Entry<UUID, PlayerCombatData> entry : dbData.entrySet()) {
+            UUID uuid = entry.getKey();
+            PlayerCombatData dbPlayer = entry.getValue();
+            PlayerCombatData existing = playerData.get(uuid);
+            if (existing != null) {
+                mergeData(dbPlayer, existing);
+            } else {
+                playerData.put(uuid, dbPlayer);
+            }
+            count++;
+        }
+        setDirty();
+        PWP.LOGGER.info("Loaded {} players from CentralDatabase", count);
+    }
+
+    private void mergeData(PlayerCombatData from, PlayerCombatData to) {
+        to.setKills(Math.max(to.getKills(), from.getKills()));
+        to.setDeaths(Math.max(to.getDeaths(), from.getDeaths()));
+        to.setWins(Math.max(to.getWins(), from.getWins()));
+        to.setRating(Math.max(to.getRating(), from.getRating()));
+        to.setRankOrdinal(Math.max(to.getRankOrdinal(), from.getRankOrdinal()));
+        to.setBattleCredits(from.getBattleCredits());
+        to.setWarCredits(from.getWarCredits());
+        to.setCallsign(from.getCallsign());
+        to.setDisplayName(from.getDisplayName());
+        to.setHasReceivedDogTag(from.hasReceivedDogTag());
+        to.setAdmin(from.isAdmin());
+        to.setDonatTier(from.getDonatTier());
+        to.setPlayerTitle(from.getPlayerTitle());
+        to.setLoadoutConfig(from.getLoadoutConfig());
+        for (String k : from.getUnlockedKits()) to.unlockKit(k);
+        for (String r : from.getUnlockedRoles()) to.unlockRole(r);
+        for (String l : from.getUnlockedLoadouts()) to.unlockLoadout(l);
+        for (String c : from.getCertifications()) to.grantCertification(c);
+        for (Map.Entry<String, net.minecraft.nbt.CompoundTag> att : from.getSavedAttachments().entrySet()) {
+            to.getSavedAttachments().put(att.getKey(), att.getValue());
+        }
+    }
+
+    public void syncToDatabase() {
+        if (ProxyMessenger.isMatchServer()) return;
+        CentralDatabase.init();
+        CentralDatabase.saveAllPlayers(playerData);
+        PWP.LOGGER.info("Synced {} players to CentralDatabase", playerData.size());
     }
 
     // ===== Player Name Display =====

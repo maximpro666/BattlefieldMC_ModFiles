@@ -123,8 +123,6 @@ public class TicketManager {
         MapConfig map = gm.getCurrentMap();
         int maxTickets = map != null ? map.getTickets() : 100;
         TeamTicketSyncPacket packet = new TeamTicketSyncPacket(natoTickets, russiaTickets, time, maxTickets);
-        for (ServerPlayer player : gm.getServer().getPlayerList().getPlayers()) {
-            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
-        }
+        PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
     }
 }

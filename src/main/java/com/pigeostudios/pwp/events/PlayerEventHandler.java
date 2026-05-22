@@ -123,6 +123,10 @@ public class PlayerEventHandler {
                     game.setLobbyRespawn(player);
                     player.sendSystemMessage(Component.literal("§eMap is loading, please wait...")
                         .withStyle(ChatFormatting.YELLOW));
+                } else if (game.isVoting()) {
+                    game.sendVoteScreenToPlayer(player);
+                    game.teleportPlayerToLobby(player);
+                    game.setLobbyRespawn(player);
                 } else {
                     game.teleportPlayerToLobby(player);
                     game.setLobbyRespawn(player);
@@ -150,10 +154,18 @@ public class PlayerEventHandler {
                 cp.syncToPlayer(player);
             }
             var pcd = teamManager.getOrCreatePlayerData(player.getUUID());
-            if (pcd.getDisplayName().isEmpty() && pcd.getCallsign().isEmpty()) {
-                player.sendSystemMessage(Component.translatable("pwp.chat.welcome.title"));
-                player.sendSystemMessage(Component.translatable("pwp.chat.welcome.set_callsign"));
-                ensureDogTag(player);
+            if (!pcd.hasReceivedDogTag()) {
+                if (hasDogTagInCurios(player)) {
+                    pcd.setHasReceivedDogTag(true);
+                    teamManager.setDirty();
+                } else if (pcd.getDisplayName().isEmpty() && pcd.getCallsign().isEmpty()) {
+                    player.sendSystemMessage(Component.translatable("pwp.chat.welcome.title"));
+                    player.sendSystemMessage(Component.translatable("pwp.chat.welcome.set_callsign"));
+                    if (ensureDogTag(player)) {
+                        pcd.setHasReceivedDogTag(true);
+                        teamManager.setDirty();
+                    }
+                }
             }
             PWP.LOGGER.info("Synced team data for player: {}", player.getName().getString());
             // Check cycle flag BEFORE checkAndAutoStartCycle deletes it
@@ -164,16 +176,21 @@ public class PlayerEventHandler {
             }
             checkAndAutoStartCycle(player.server);
             // On lobby server: auto-transfer late joiners if match server is running
-            if (!ProxyMessenger.isMatchServer() && !cycleInProgress) {
-                int matchPort = 25566;
-                if (player.server.getPort() != matchPort && isMatchPortReachable(matchPort)) {
-                    com.pigeostudios.pwp.network.PacketHandler.CHANNEL.send(
-                        net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
-                        new com.pigeostudios.pwp.network.TransferPacket("127.0.0.1:" + matchPort));
-                    PWP.LOGGER.info("Late joiner {} transferred to match server", player.getName().getString());
+            if (!ProxyMessenger.isMatchServer()) {
+                Path matchFlag = Path.of(System.getProperty("user.dir")).resolve("../launcher/match_active.flag").normalize();
+                if (Files.exists(matchFlag)) {
+                    try {
+                        String target = Files.readString(matchFlag).trim();
+                        if (!target.isEmpty()) {
+                            com.pigeostudios.pwp.network.PacketHandler.CHANNEL.send(
+                                net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
+                                new com.pigeostudios.pwp.network.TransferPacket(target));
+                            PWP.LOGGER.info("Late joiner {} transferred to {}", player.getName().getString(), target);
+                        }
+                    } catch (Exception e) {
+                        PWP.LOGGER.error("Failed to read match_active.flag", e);
+                    }
                 }
-            } else if (cycleInProgress) {
-                PWP.LOGGER.info("Match cycle in progress, skipping auto-transfer for {}", player.getName().getString());
             }
         }
     }
@@ -326,6 +343,31 @@ public class PlayerEventHandler {
             AttachmentEventHandler.clearPlayerAttachments(player);
             PWP.LOGGER.info("Cleaned up player data: {}", player.getName().getString());
         }
+    }
+
+    private boolean hasDogTagInCurios(ServerPlayer player) {
+        if (dogTagItem == null || !curiosDetected) return false;
+        try {
+            Optional<?> opt = getCuriosHandler(player);
+            if (opt.isEmpty()) return false;
+            Object handler = opt.get();
+            Map<String, ?> curiosMap = (Map<String, ?>) curiosGetCurios.invoke(handler);
+            for (Map.Entry<String, ?> entry : curiosMap.entrySet()) {
+                Object stacksHandler = entry.getValue();
+                if (stacksHandler == null) continue;
+                Object stacks = curiosGetStacks.invoke(stacksHandler);
+                int size = (int) curiosGetSlots.invoke(stacks);
+                for (int i = 0; i < size; i++) {
+                    ItemStack existing = (ItemStack) curiosGetStackInSlot.invoke(stacks, i);
+                    if (!existing.isEmpty() && existing.getItem() == dogTagItem) {
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            PWP.LOGGER.warn("Failed to check dog tag in curios: {}", e.getMessage());
+        }
+        return false;
     }
 
     private Optional<?> getCuriosHandler(ServerPlayer player) {

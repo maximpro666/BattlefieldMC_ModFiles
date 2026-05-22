@@ -1,0 +1,24 @@
+{
+  "id": "stalker_dump_conquest",
+  "world": "overworld",
+  "map": "stalker_dump",
+  "mode": "conquest",
+  "tickets": 500,
+  "maxPlayers": 64,
+  "factions": [
+    "team_a",
+    "team_b"
+  ],
+  "objectives": [],
+  "spawns": [],
+  "vehicles": [],
+  "weatherPreset": "clear",
+  "commanderEnabled": true,
+  "weight": 10,
+  "minPlayers": 0,
+  "maxPlayersRotation": 128,
+  "cooldownRounds": 0,
+  "disabled": false,
+  "objectiveLayout": {},
+  "spawnLayout": {}
+}

@@ -1,6 +1,7 @@
 package com.pigeostudios.pwp.core;
 
 import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -15,7 +16,7 @@ public class MapConfig {
     @Expose private String worldFolder;
     @Expose private boolean enabled;
     @Expose(serialize = false) private boolean hasRespawn;
-    @Expose(serialize = false) private boolean hasCapturePoints;
+    @Expose private boolean hasCapturePoints;
     @Expose(serialize = false) private boolean hasRegen;
     @Expose(serialize = false) private boolean hasWorldBorder;
     @Expose private int worldBorderCenterX;
@@ -31,11 +32,14 @@ public class MapConfig {
     @Expose private MapState state;
     @Expose private List<CapturePointEntry> capturePoints;
     @Expose private boolean teamRotation;
+    @Expose private boolean hasDaylightCycle;
     @Expose private int maxFOBs = -1;
     @Expose private List<BorderZone> borderZones;
 
     public boolean isTeamRotation() { return teamRotation; }
     public void setTeamRotation(boolean v) { this.teamRotation = v; }
+    public boolean hasDaylightCycle() { return hasDaylightCycle; }
+    public void setHasDaylightCycle(boolean v) { this.hasDaylightCycle = v; }
     public int getMaxFOBs() { return maxFOBs; }
     public void setMaxFOBs(int v) { maxFOBs = v; }
 
@@ -46,12 +50,14 @@ public class MapConfig {
     public boolean hasBorderZones() { return borderZones != null && !borderZones.isEmpty(); }
 
     public static class CapturePointEntry {
-        public String name;
-        public int x, y, z;
-        public double radius;
-        public double captureSpeed;
-        public boolean main;
-        public String type = "small";
+        @Expose public String name;
+        @Expose public int x;
+        @Expose public int y;
+        @Expose public int z;
+        @Expose public double radius;
+        @Expose @SerializedName("captureSpeed") public double captureSpeed;
+        @Expose public boolean main;
+        @Expose public String type = "small";
 
         public CapturePointEntry() {
             this.radius = 5.0;
@@ -91,6 +97,7 @@ public class MapConfig {
         this.worldBorderSize = 1000;
         this.tickets = 100;
         this.lobbyWaitTime = 30;
+        this.hasDaylightCycle = true;
         this.natoSpawn = new int[]{0, 64, 0};
         this.russiaSpawn = new int[]{0, 64, 0};
         this.natoVehicleSpawn = new int[]{0, 64, 0};
@@ -122,6 +129,7 @@ public class MapConfig {
         this.natoVehicleSpawn = natoVehicleSpawn != null ? natoVehicleSpawn : new int[]{0, 64, 0};
         this.russiaVehicleSpawn = russiaVehicleSpawn != null ? russiaVehicleSpawn : new int[]{0, 64, 0};
         this.baseRadius = baseRadius > 0 ? baseRadius : 30;
+        this.hasDaylightCycle = true;
         this.state = MapState.AVAILABLE;
         this.capturePoints = new ArrayList<>();
     }
@@ -248,6 +256,7 @@ public class MapConfig {
         tag.putInt("BaseRadius", baseRadius);
         tag.putString("State", state.name());
         tag.putBoolean("TeamRotation", teamRotation);
+        tag.putBoolean("HasDaylightCycle", hasDaylightCycle);
         if (maxFOBs > 0) tag.putInt("MaxFOBs", maxFOBs);
         if (capturePoints != null && !capturePoints.isEmpty()) {
             var mainPoint = capturePoints.stream().filter(cp -> cp.main).findFirst();
@@ -288,6 +297,7 @@ public class MapConfig {
         config.baseRadius = tag.getInt("BaseRadius");
         config.state = MapState.valueOf(tag.getString("State"));
         config.teamRotation = tag.getBoolean("TeamRotation");
+        config.hasDaylightCycle = !tag.contains("HasDaylightCycle") || tag.getBoolean("HasDaylightCycle");
         if (tag.contains("MaxFOBs")) config.maxFOBs = tag.getInt("MaxFOBs");
         return config;
     }

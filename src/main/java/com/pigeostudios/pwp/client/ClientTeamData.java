@@ -50,6 +50,38 @@ public class ClientTeamData {
     public static float guiOpacity = 1.0f;
     public static int maxTickets = 100;
     public static List<ClientBeaconData> beacons = new ArrayList<>();
+
+    // Vote overlay data
+    private static List<String> voteMapNames = new ArrayList<>();
+    private static int[] voteCounts = new int[0];
+    private static int voteRemainingSeconds = 0;
+    private static String votedMap = "";
+
+    public static void setVoteData(List<String> mapNames, int[] counts, int remainingSecs) {
+        voteMapNames = mapNames != null ? new ArrayList<>(mapNames) : new ArrayList<>();
+        voteCounts = counts != null ? counts.clone() : new int[0];
+        voteRemainingSeconds = remainingSecs;
+    }
+
+    public static void resetVoteData() {
+        voteMapNames = new ArrayList<>();
+        voteCounts = new int[0];
+        voteRemainingSeconds = 0;
+        votedMap = "";
+    }
+
+    public static void updateVoteCounts(int remainingSecs, int[] counts) {
+        voteRemainingSeconds = remainingSecs;
+        if (counts != null && voteCounts.length == counts.length) {
+            voteCounts = counts.clone();
+        }
+    }
+
+    public static List<String> getVoteMapNames() { return voteMapNames; }
+    public static int[] getVoteCounts() { return voteCounts; }
+    public static int getVoteRemainingSeconds() { return voteRemainingSeconds; }
+    public static String getVotedMap() { return votedMap; }
+    public static void setVotedMap(String name) { votedMap = name != null ? name : ""; }
     public static Map<UUID, Integer> squadmateStatuses = new HashMap<>();
 
     public static int currentVoiceChannel = 0;

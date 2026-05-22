@@ -142,6 +142,10 @@ public class MapPoolManager {
                     matchSequence = root.get("matchSequence").getAsInt();
                 }
 
+                if (root.has("currentMapIndex")) {
+                    currentMapIndex = root.get("currentMapIndex").getAsInt();
+                }
+
                 if (root.has("maps") && root.get("maps").isJsonArray()) {
                     Type listType = new TypeToken<List<MapConfig>>() {}.getType();
                     List<MapConfig> loaded = GSON.fromJson(root.get("maps"), listType);
@@ -186,7 +190,7 @@ public class MapPoolManager {
                         config.setWorldFolder(folderName);
                         config.setEnabled(true);
                         config.setHasRespawn(true);
-                        config.setHasCapturePoints(true);
+                        config.setHasCapturePoints(false);
                         config.setHasRegen(true);
                         config.setHasWorldBorder(true);
                         config.setWorldBorderCenterX(0);
@@ -196,7 +200,6 @@ public class MapPoolManager {
                         config.setLobbyWaitTime(30);
                         config.setState(MapState.AVAILABLE);
                         autoDetectMapCenter(config);
-                        config.setState(MapState.DISABLED);
                         found.add(config);
                     }
                 });
@@ -213,6 +216,7 @@ public class MapPoolManager {
             try (Writer writer = Files.newBufferedWriter(configPath, StandardCharsets.UTF_8)) {
                 Map<String, Object> root = new LinkedHashMap<>();
                 root.put("matchSequence", matchSequence);
+                root.put("currentMapIndex", currentMapIndex);
                 root.put("maps", maps);
                 GSON.toJson(root, writer);
             }
@@ -363,8 +367,8 @@ public class MapPoolManager {
 
             map.setWorldBorderCenterX(centerX);
             map.setWorldBorderCenterZ(centerZ);
-            map.setNatoSpawn(new int[]{centerX, 64, centerZ});
-            map.setRussiaSpawn(new int[]{centerX, 64, centerZ});
+            map.setNatoSpawn(new int[]{centerX - 10, 64, centerZ});
+            map.setRussiaSpawn(new int[]{centerX + 10, 64, centerZ});
 
             PWP.LOGGER.info("Auto-detected map center for {} at ({}, {})",
                 map.getName(), centerX, centerZ);
@@ -533,13 +537,40 @@ public class MapPoolManager {
 
     public boolean castVote(ServerPlayer player, String mapName) {
         String uuid = player.getUUID().toString();
-        if (votes.containsKey(uuid)) {
-            player.sendSystemMessage(error("You already voted! Use /map votes to see results."));
-            return false;
-        }
         votes.put(uuid, mapName.toLowerCase());
-        broadcastVoteUpdate();
         return true;
+    }
+
+    public List<MapConfig> pickVotingCandidates(int maxCount, List<String> excludeRecent) {
+        List<MapConfig> playable = getPlayableMaps();
+        if (playable.isEmpty()) return playable;
+
+        List<MapConfig> pool = new ArrayList<>(playable);
+        List<MapConfig> recentMaps = new ArrayList<>();
+
+        if (excludeRecent != null && !excludeRecent.isEmpty()) {
+            Iterator<MapConfig> it = pool.iterator();
+            while (it.hasNext()) {
+                MapConfig m = it.next();
+                if (excludeRecent.stream().anyMatch(n -> n.equalsIgnoreCase(m.getName()))) {
+                    recentMaps.add(m);
+                    it.remove();
+                }
+            }
+        }
+
+        Collections.shuffle(pool, random);
+
+        int slotsForNonRecent = Math.min(maxCount - Math.min(recentMaps.size(), maxCount), pool.size());
+        List<MapConfig> candidates = new ArrayList<>(pool.subList(0, slotsForNonRecent));
+
+        for (MapConfig recent : recentMaps) {
+            if (candidates.size() < maxCount) {
+                candidates.add(recent);
+            }
+        }
+
+        return candidates;
     }
 
     public void broadcastVoteUpdate() {

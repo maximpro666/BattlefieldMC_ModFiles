@@ -18,6 +18,8 @@ public class PlayerCombatData {
     private String displayName;
     private int battleCredits;
     private int warCredits;
+    private int wins;
+    private int rating = 1000;
     private final Set<String> unlockedKits;
     private final Set<String> certifications;
     private final Map<String, CompoundTag> savedAttachments;
@@ -35,6 +37,10 @@ public class PlayerCombatData {
     private final Set<String> unlockedLoadouts = new HashSet<>();
 
     private boolean hasChosenTeam = false;
+    private boolean hasReceivedDogTag = false;
+
+    public boolean hasReceivedDogTag() { return hasReceivedDogTag; }
+    public void setHasReceivedDogTag(boolean v) { this.hasReceivedDogTag = v; }
 
     public PlayerCombatData() {
         this.team = Team.SPECTATOR;
@@ -158,6 +164,13 @@ public class PlayerCombatData {
         this.warCredits -= amount;
         return true;
     }
+    public int getWins() { return wins; }
+    public void setWins(int wins) { this.wins = Math.max(0, wins); }
+    public void addWin() { this.wins++; }
+
+    public int getRating() { return rating; }
+    public void setRating(int rating) { this.rating = Math.max(0, rating); }
+
     public Set<String> getUnlockedKits() { return unlockedKits; }
     public boolean isKitUnlocked(String kitName) { return unlockedKits.contains(kitName); }
     public void unlockKit(String kitName) { unlockedKits.add(kitName); }
@@ -230,6 +243,8 @@ public class PlayerCombatData {
         tag.putString("DisplayName", displayName);
         tag.putInt("BattleCredits", battleCredits);
         tag.putInt("WarCredits", warCredits);
+        tag.putInt("Wins", wins);
+        tag.putInt("Rating", rating);
         tag.putString("Callsign", callsign);
         tag.putString("RankPrefix", rankPrefix);
         tag.putBoolean("IsAdmin", isAdmin);
@@ -239,6 +254,7 @@ public class PlayerCombatData {
         tag.putString("SelectedKit", selectedKit);
         tag.putString("SelectedRole", selectedRole);
         tag.putString("SelectedLoadout", selectedLoadout);
+        tag.putBoolean("HasReceivedDogTag", hasReceivedDogTag);
         {
             CompoundTag attTag = new CompoundTag();
             for (Map.Entry<String, CompoundTag> e : savedAttachments.entrySet()) {
@@ -289,6 +305,8 @@ public class PlayerCombatData {
         this.battleCredits = tag.getInt("BattleCredits");
         this.warCredits = tag.contains("WarCredits") ? tag.getInt("WarCredits") : 0;
         this.callsign = tag.getString("Callsign");
+        this.wins = tag.contains("Wins") ? tag.getInt("Wins") : 0;
+        this.rating = tag.contains("Rating") ? tag.getInt("Rating") : 1000;
         this.rankPrefix = tag.getString("RankPrefix");
         this.isAdmin = tag.getBoolean("IsAdmin");
         this.donatTier = tag.getInt("DonatTier");
@@ -297,6 +315,7 @@ public class PlayerCombatData {
         this.selectedKit = tag.contains("SelectedKit") ? tag.getString("SelectedKit") : "";
         this.selectedRole = tag.contains("SelectedRole") ? tag.getString("SelectedRole") : "";
         this.selectedLoadout = tag.contains("SelectedLoadout") ? tag.getString("SelectedLoadout") : "";
+        this.hasReceivedDogTag = tag.contains("HasReceivedDogTag") && tag.getBoolean("HasReceivedDogTag");
         if (tag.contains("SavedAttachments")) {
             CompoundTag attTag = tag.getCompound("SavedAttachments");
             savedAttachments.clear();
@@ -342,7 +361,7 @@ public class PlayerCombatData {
 
     @Override
     public String toString() {
-        return String.format("PlayerCombatData{team=%s, kills=%d, deaths=%d, kd=%.2f, squad=%d, callsign='%s', rankPrefix='%s', displayName='%s'}",
-                team.getName(), kills, deaths, getKDRatio(), squadId, callsign, rankPrefix, displayName);
+        return String.format("PlayerCombatData{team=%s, kills=%d, deaths=%d, kd=%.2f, wins=%d, rating=%d, squad=%d, callsign='%s', rankPrefix='%s', displayName='%s'}",
+                team.getName(), kills, deaths, getKDRatio(), wins, rating, squadId, callsign, rankPrefix, displayName);
     }
 }

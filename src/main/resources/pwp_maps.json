@@ -12,5 +12,58 @@
     "worldBorderSize": 1000,
     "tickets": 100,
     "lobbyWaitTime": 30
+  },
+  {
+    "name": "stalker_dump",
+    "worldFolder": "stalker_dump",
+    "enabled": true,
+    "hasRespawn": true,
+    "hasCapturePoints": true,
+    "hasRegen": true,
+    "hasWorldBorder": true,
+    "worldBorderCenterX": 350,
+    "worldBorderCenterZ": 0,
+    "worldBorderSize": 1000,
+    "tickets": 100,
+    "lobbyWaitTime": 30,
+    "natoSpawn": [538, 23, 135],
+    "russiaSpawn": [231, 26, -279],
+    "natoVehicleSpawn": [503, 26, 109],
+    "russiaVehicleSpawn": [227, 26, -248],
+    "baseRadius": 100,
+    "teamRotation": true,
+    "hasDaylightCycle": true,
+    "capturePoints": [
+      {
+        "name": "A",
+        "x": 371,
+        "y": 44,
+        "z": -83,
+        "radius": 10,
+        "captureSpeed": 1.0,
+        "main": true,
+        "type": "major"
+      },
+      {
+        "name": "B",
+        "x": 371,
+        "y": 27,
+        "z": -221,
+        "radius": 5,
+        "captureSpeed": 1.0,
+        "main": false,
+        "type": "small"
+      },
+      {
+        "name": "C",
+        "x": 99,
+        "y": 5,
+        "z": 26,
+        "radius": 5,
+        "captureSpeed": 1.0,
+        "main": false,
+        "type": "small"
+      }
+    ]
   }
 ]

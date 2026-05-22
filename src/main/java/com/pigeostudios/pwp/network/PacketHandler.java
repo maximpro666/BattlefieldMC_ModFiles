@@ -322,5 +322,17 @@ public class PacketHandler {
             .encoder(OpenMatchResultsPacket::toBytes)
             .consumerMainThread(OpenMatchResultsPacket::handle)
             .add();
+
+        CHANNEL.messageBuilder(OpenVoteScreenPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(OpenVoteScreenPacket::new)
+            .encoder(OpenVoteScreenPacket::toBytes)
+            .consumerMainThread(OpenVoteScreenPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(VoteSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(VoteSyncPacket::new)
+            .encoder(VoteSyncPacket::toBytes)
+            .consumerMainThread(VoteSyncPacket::handle)
+            .add();
     }
 }

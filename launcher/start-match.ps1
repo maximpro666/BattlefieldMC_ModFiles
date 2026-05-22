@@ -1,7 +1,14 @@
 param(
     [string]$ConfigPath = (Join-Path $PSScriptRoot "match-config.json"),
-    [string]$LobbyRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\run")).Path
+    [string]$LobbyRoot = ""
 )
+
+# Resolve lobby root path
+if (-not $LobbyRoot) {
+    $LobbyRoot = Join-Path $PSScriptRoot "..\servar"
+    $resolved = Resolve-Path -LiteralPath $LobbyRoot -ErrorAction SilentlyContinue
+    if ($resolved) { $LobbyRoot = $resolved.Path }
+}
 
 # Check config exists
 if (-not (Test-Path $ConfigPath)) {
@@ -22,20 +29,26 @@ if (-not (Test-Path $template)) {
 }
 
 Write-Host "[launcher] Syncing template to temp (robocopy)..."
-robocopy "$template" "$temp" /MIR /NJH /NJS /NDL /NP /R:1 /W:1
+robocopy "$template" "$temp" /MIR /NJH /NJS /NDL /NFL /NP /R:1 /W:1
 if ($LASTEXITCODE -ge 8) {
     Write-Warning "[launcher] Robocopy reported errors, continuing anyway..."
 }
 
 # Copy map sources and pool config from lobby server if available
 $lobbySources = Join-Path $LobbyRoot "pwp_sources"
-$lobbyMapsJson = Join-Path $LobbyRoot "pwp_maps.json"
+$lobbyMapsJson = Join-Path $LobbyRoot "world\pwp_maps.json"
 $matchSources = Join-Path $temp "pwp_sources"
-$matchMapsJson = Join-Path $temp "pwp_maps.json"
+$matchMapsJson = Join-Path $temp "world\pwp_maps.json"
 
 if (Test-Path $lobbySources) {
     Write-Host "[launcher] Copying map sources from lobby..."
-    robocopy "$lobbySources" "$matchSources" /MIR /NJH /NJS /NDL /NP /R:1 /W:1
+    robocopy "$lobbySources" "$matchSources" /MIR /NJH /NJS /NDL /NFL /NP /R:1 /W:1
+}
+# Ensure world directory exists in match server (template excludes world/)
+$matchWorld = Join-Path $temp "world"
+if (-not (Test-Path $matchWorld)) {
+    New-Item -ItemType Directory -Path $matchWorld -Force | Out-Null
+    Write-Host "[launcher] Created world directory for match server"
 }
 if (Test-Path $lobbyMapsJson) {
     Copy-Item -Force $lobbyMapsJson $matchMapsJson
@@ -48,7 +61,8 @@ if (Test-Path $serverProps) {
     Write-Host "[launcher] Port set to $port"
 }
 
-Remove-Item -Recurse -Force (Join-Path $temp "world") -ErrorAction SilentlyContinue
+# Clean map dimension data but keep lobby world (AutumnLobby)
+Remove-Item -Recurse -Force (Join-Path $temp "world\dimensions\pwp\map") -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force (Join-Path $temp "logs") -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force (Join-Path $temp "crash-reports") -ErrorAction SilentlyContinue
 Remove-Item -Force (Join-Path $temp ".ready") -ErrorAction SilentlyContinue
@@ -86,7 +100,7 @@ $jvmOpts = @(
     "nogui"
 )
 
-$proc = Start-Process -FilePath "java" -ArgumentList $jvmOpts -WorkingDirectory $temp -NoNewWindow -PassThru -WindowStyle Hidden
+$proc = Start-Process -FilePath "C:\Users\maska\AppData\Roaming\PrismLauncher\java\java-runtime-gamma\bin\java.exe" -ArgumentList $jvmOpts -WorkingDirectory $temp -NoNewWindow -PassThru
 
 $logFile = Join-Path $temp "logs\latest.log"
 $elapsed = 0
@@ -96,6 +110,16 @@ $doneFound = $false
 
 Write-Host "[launcher] Waiting for server to start..."
 while ($elapsed -lt $timeout) {
+    # Check for match_ready.flag first (synchronous disk write, most reliable)
+    $readyFlag = Join-Path $temp "match_ready.flag"
+    if (Test-Path $readyFlag) {
+        $procId = $proc.Id
+        Set-Content -Path (Join-Path $temp ".ready") -Value $procId
+        Write-Host "[launcher] Match server ready (flag)!"
+        exit 0
+    }
+
+    # Fallback: check the log file for "Done" + countdown signal
     if (Test-Path $logFile) {
         $lines = Get-Content $logFile -Tail 20
         foreach ($line in $lines) {

@@ -21,12 +21,17 @@ public class EconomySystem {
     private static final int VC_INTERVAL = 1200;
 
     private int incomeTickCounter = 0;
+    private int vehicleCrewTickCounter = 0;
     private int vcTickCounter = 0;
 
     public void tick(ServerLevel level, EconomyState eState, FrontlineState fState,
                      GameManager gm, TeamManager tm) {
         tickFrontlineIncome(level, eState, fState, tm);
-        tickVehicleCrewIncome(level, eState, tm);
+        vehicleCrewTickCounter++;
+        if (vehicleCrewTickCounter >= INCOME_INTERVAL) {
+            vehicleCrewTickCounter = 0;
+            tickVehicleCrewIncome(level, eState, tm);
+        }
         tickVehicleCredits(eState, gm);
     }
 
@@ -126,6 +131,7 @@ public class EconomySystem {
 
     public void reset() {
         incomeTickCounter = 0;
+        vehicleCrewTickCounter = 0;
         vcTickCounter = 0;
     }
 }

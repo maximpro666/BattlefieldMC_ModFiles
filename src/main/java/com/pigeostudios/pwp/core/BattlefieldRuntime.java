@@ -3,7 +3,7 @@ package com.pigeostudios.pwp.core;
 import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.ammo.AmmoCooldownManager;
 import com.pigeostudios.pwp.ammo.AmmoService;
-import com.pigeostudios.pwp.integration.ReviveMeIntegration;
+import com.pigeostudios.pwp.integration.PlayerReviveIntegration;
 import com.pigeostudios.pwp.state.*;
 import com.pigeostudios.pwp.system.*;
 import com.pigeostudios.pwp.vehicle.VehicleDefinition;
@@ -53,6 +53,9 @@ public class BattlefieldRuntime {
     private final EconomySystem economySystem = new EconomySystem();
     private final EscalationSystem escalationSystem = new EscalationSystem();
     private final VehicleUpkeepSystem vehicleUpkeepSystem = new VehicleUpkeepSystem();
+
+    private int recalcTickCounter = 0;
+    private static final int RECALC_INTERVAL = 20;
 
     // ===== Экономика: BC =====
     public int getBC(UUID uuid) { return economy.getBC(uuid); }
@@ -209,6 +212,7 @@ public class BattlefieldRuntime {
         pressureSystem.reset();
         economySystem.reset();
         vehicleUpkeepSystem.reset();
+        recalcTickCounter = 0;
         ammoService.clear();
         ammoCooldownManager.resetAll();
     }
@@ -231,10 +235,14 @@ public class BattlefieldRuntime {
 
         TicketManager tm = PWP.getTicketManager();
         escalationSystem.tick(match, pressure, tm, gm);
-        frontline.recalcActive(gm.getServer());
+        recalcTickCounter++;
+        if (recalcTickCounter >= RECALC_INTERVAL) {
+            recalcTickCounter = 0;
+            frontline.recalcActive(gm.getServer());
+        }
 
-        if (ReviveMeIntegration.isModPresent()) {
-            ReviveMeIntegration.getInstance().tick(gm.getServer());
+        if (PlayerReviveIntegration.isModPresent()) {
+            PlayerReviveIntegration.getInstance().tick(gm.getServer());
         }
 
         var cpManager = PWP.getCapturePointManager();

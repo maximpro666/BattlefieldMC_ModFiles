@@ -9,6 +9,8 @@ import com.pigeostudios.pwp.client.gui.screen.SpawnScreenHelper;
 import com.pigeostudios.pwp.client.gui.screen.BattlefieldPauseScreen;
 import com.pigeostudios.pwp.client.ClientTeamData;
 import com.pigeostudios.pwp.client.gui.screen.VoteScreen;
+import com.pigeostudios.pwp.vehicle.adapter.SuperbVehicleAdapter;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.LoadingOverlay;
@@ -18,10 +20,12 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.lwjgl.glfw.GLFW;
 
 @Mod.EventBusSubscriber(modid = "pwp", bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ClientGuiHandler {
@@ -38,6 +42,7 @@ public class ClientGuiHandler {
     private static final KillFeedOverlay     killFeedOverlay = new KillFeedOverlay();
     private static final CaptureNotificationOverlay captureNotifOverlay = new CaptureNotificationOverlay();
     private static final CompassOverlay             compassOverlay      = new CompassOverlay();
+    private static final VoteOverlay                voteOverlay         = new VoteOverlay();
 
     public static BattlefieldTabOverlay getTabOverlay() {
         return tabOverlay;
@@ -99,6 +104,7 @@ public class ClientGuiHandler {
             voiceChatHudOverlay.render(g, w, h);
             killFeedOverlay.render(g, w);
             captureNotifOverlay.render(g, w, h);
+            voteOverlay.render(g, w, h);
         }
 
         tabOverlay.render(g, w, h);
@@ -123,10 +129,10 @@ public class ClientGuiHandler {
         if (mc.player == null || mc.level == null) return;
         if (!mc.options.keyTogglePerspective.consumeClick()) return;
         if (isInBattleVehicle(mc)) {
-            net.minecraft.client.CameraType next = switch (mc.options.getCameraType()) {
-                case FIRST_PERSON -> net.minecraft.client.CameraType.THIRD_PERSON_BACK;
-                case THIRD_PERSON_BACK -> net.minecraft.client.CameraType.THIRD_PERSON_FRONT;
-                case THIRD_PERSON_FRONT -> net.minecraft.client.CameraType.FIRST_PERSON;
+            CameraType next = switch (mc.options.getCameraType()) {
+                case FIRST_PERSON -> CameraType.THIRD_PERSON_BACK;
+                case THIRD_PERSON_BACK -> CameraType.THIRD_PERSON_FRONT;
+                case THIRD_PERSON_FRONT -> CameraType.FIRST_PERSON;
             };
             mc.options.setCameraType(next);
         }
@@ -135,11 +141,19 @@ public class ClientGuiHandler {
     private static boolean isInBattleVehicle(Minecraft mc) {
         net.minecraft.world.entity.Entity vehicle = mc.player.getVehicle();
         if (vehicle == null) return false;
-        if (vehicle.getTeam() != null) {
-            String name = vehicle.getTeam().getName();
-            if ("NATO".equalsIgnoreCase(name) || "RUSSIA".equalsIgnoreCase(name)) return true;
+        return new SuperbVehicleAdapter().isApplicable(vehicle);
+    }
+
+    @SubscribeEvent
+    public static void onEntityMount(EntityMountEvent event) {
+        if (event.isMounting()) return;
+        if (!(event.getEntityMounting() instanceof net.minecraft.client.player.LocalPlayer)) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.options.getCameraType() == CameraType.FIRST_PERSON) return;
+        net.minecraft.world.entity.Entity vehicle = event.getEntityBeingMounted();
+        if (vehicle != null && new SuperbVehicleAdapter().isApplicable(vehicle)) {
+            mc.options.setCameraType(CameraType.FIRST_PERSON);
         }
-        return false;
     }
 
     @SubscribeEvent
@@ -192,6 +206,7 @@ public class ClientGuiHandler {
     @SubscribeEvent
     public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
         SpawnScreenHelper.clear();
+        ClientTeamData.resetVoteData();
         BattlefieldLoadingScreen.show();
     }
 }

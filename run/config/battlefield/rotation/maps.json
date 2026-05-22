@@ -2,7 +2,7 @@
   "strategy": "weighted_random",
   "playlist": [
     "default_conquest",
-    "metro_conquest"
+    "stalker_dump_conquest"
   ],
   "disabledScenarios": [],
   "respectCooldown": true

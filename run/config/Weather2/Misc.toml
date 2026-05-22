@@ -11,7 +11,7 @@
 	overcastMode = false
 	#Used if overcastMode is off, 1 = lock weather on, 0 = lock weather off, -1 = dont lock anything, let server do whatever
 	#Range: > -2147483648
-	lockServerWeatherMode = 0
+	lockServerWeatherMode = -1
 	#How many ticks between cloud particle spawning
 	#Range: > -2147483648
 	Cloud_ParticleSpawnDelay = 2
@@ -52,7 +52,7 @@
 	#-
 	blockBreakingInvokesCancellableEvent = false
 	#Server and client side, Locks down the mod to only do wind, leaves, foliage shader if on, etc. No weather systems, turns overcast mode on
-	Aesthetic_Only_Mode = false
+	Aesthetic_Only_Mode = true
 	#Runs regardless of Aesthetic_Only_Mode, makes snowstorms possible everywhere
 	Winter_Wonderland = false
 

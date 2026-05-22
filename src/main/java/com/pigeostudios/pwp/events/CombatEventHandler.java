@@ -2,7 +2,7 @@ package com.pigeostudios.pwp.events;
 
 import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.core.*;
-import com.pigeostudios.pwp.integration.ReviveMeIntegration;
+import com.pigeostudios.pwp.integration.PlayerReviveIntegration;
 import com.pigeostudios.pwp.network.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -300,7 +300,7 @@ public class CombatEventHandler {
         }
 
         if (isPlaying) {
-            if (ReviveMeIntegration.isModPresent()) {
+            if (PlayerReviveIntegration.isModPresent()) {
                 // ReviveMe handles the downed state — don't cancel death or respawn
             } else {
                 event.setCanceled(true);

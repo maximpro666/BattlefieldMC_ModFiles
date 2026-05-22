@@ -28,11 +28,22 @@ public class CaptureProcessor {
         List<CaptureZone> zones = data.getZones(dimId);
         if (zones.isEmpty()) return;
 
-        // Pre-cache team data once per tick to avoid repeated NBT lookups
-        Map<UUID, Team> teamCache = new HashMap<>();
+        // Single pass: build player-in-zone map
+        Map<CaptureZone, Map<Team, List<ServerPlayer>>> zonePlayers = new HashMap<>();
+        for (CaptureZone zone : zones) {
+            zonePlayers.put(zone, new HashMap<>());
+        }
         for (ServerPlayer p : level.players()) {
-            teamCache.put(p.getUUID(),
-                PWP.getTeamManager().getOrCreatePlayerData(p.getUUID()).getTeam());
+            UUID uuid = p.getUUID();
+            Team team = PWP.getTeamManager().getOrCreatePlayerData(uuid).getTeam();
+            if (!team.isPlayable()) continue;
+            for (CaptureZone zone : zones) {
+                if (zone.contains(p)) {
+                    zonePlayers.get(zone)
+                        .computeIfAbsent(team, k -> new ArrayList<>())
+                        .add(p);
+                }
+            }
         }
 
         boolean changed = false;
@@ -42,7 +53,7 @@ public class CaptureProcessor {
         for (CaptureZone zone : zones) {
             zone.setContested(false);
             Team prevCapturing = zone.getCapturingTeam();
-            Map<Team, Integer> counts = countPlayersInZone(level, zone, teamCache);
+            Map<Team, Integer> counts = countPlayersInZone(zone, zonePlayers);
             if (counts.isEmpty()) {
                 if (zone.getOwnerTeam().isPlayable() && zone.getProgress() < 1.0f) {
                     zone.addProgress((float) -DECAY_SPEED);
@@ -121,7 +132,7 @@ public class CaptureProcessor {
             if (zone.getOwnerTeam().isPlayable()) {
                 zone.setCapturingTeam(dominant);
                 float neutralize = (float) (BASE_SPEED * speedMult * dominantCount / zone.getCaptureSeconds() / 20.0);
-                trackCaptureProgress(zone, dominant, dominantCount, speedMult, level);
+                trackCaptureProgress(zone, dominant, speedMult, zonePlayers);
                 zone.addProgress(-neutralize);
                 changed = true;
                 if (prevCapturing != dominant) broadcastNeutralizing(zone, dominant, level);
@@ -137,7 +148,7 @@ public class CaptureProcessor {
 
             zone.setCapturingTeam(dominant);
             float capSpeed = (float) (BASE_SPEED * speedMult * dominantCount / zone.getCaptureSeconds() / 20.0);
-            trackCaptureProgress(zone, dominant, dominantCount, speedMult, level);
+            trackCaptureProgress(zone, dominant, speedMult, zonePlayers);
             zone.addProgress(capSpeed);
             changed = true;
             if (prevCapturing != dominant) broadcastCapturing(zone, dominant, level);
@@ -160,23 +171,19 @@ public class CaptureProcessor {
         if (changed) syncToAll(level, zones);
     }
 
-    private static Map<Team, Integer> countPlayersInZone(ServerLevel level, CaptureZone zone, Map<UUID, Team> teamCache) {
+    private static Map<Team, Integer> countPlayersInZone(CaptureZone zone, Map<CaptureZone, Map<Team, List<ServerPlayer>>> zonePlayers) {
         Map<Team, Integer> counts = new HashMap<>();
-        for (ServerPlayer player : level.players()) {
-            if (!zone.contains(player)) continue;
-            Team team = teamCache.get(player.getUUID());
-            if (team != null && team.isPlayable()) counts.merge(team, 1, Integer::sum);
+        Map<Team, List<ServerPlayer>> players = zonePlayers.get(zone);
+        if (players == null) return counts;
+        for (Map.Entry<Team, List<ServerPlayer>> e : players.entrySet()) {
+            counts.put(e.getKey(), e.getValue().size());
         }
         return counts;
     }
 
     private static void notifyAll(ServerLevel level, String text, String type, int durationMs) {
         NotificationPacket pkt = new NotificationPacket(text, type, durationMs, "");
-        for (net.minecraft.world.entity.player.Player p : level.players()) {
-            if (p instanceof ServerPlayer sp) {
-                PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> sp), pkt);
-            }
-        }
+        PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), pkt);
     }
 
     private static void broadcastCapturing(CaptureZone zone, Team team, ServerLevel level) {
@@ -214,14 +221,14 @@ public class CaptureProcessor {
         }
     }
 
-    private static void trackCaptureProgress(CaptureZone zone, Team capturingTeam, int playerCount, double speedMult, ServerLevel level) {
+    private static void trackCaptureProgress(CaptureZone zone, Team capturingTeam, double speedMult, Map<CaptureZone, Map<Team, List<ServerPlayer>>> zonePlayers) {
         double perPlayer = BASE_SPEED * speedMult / zone.getCaptureSeconds() / 20.0;
-        for (ServerPlayer p : level.players()) {
-            if (!zone.contains(p)) continue;
-            Team t = PWP.getTeamManager().getOrCreatePlayerData(p.getUUID()).getTeam();
-            if (t == capturingTeam) {
-                zone.addContribution(p.getUUID(), perPlayer);
-            }
+        Map<Team, List<ServerPlayer>> players = zonePlayers.get(zone);
+        if (players == null) return;
+        List<ServerPlayer> capturers = players.get(capturingTeam);
+        if (capturers == null) return;
+        for (ServerPlayer p : capturers) {
+            zone.addContribution(p.getUUID(), perPlayer);
         }
     }
 
@@ -260,9 +267,7 @@ public class CaptureProcessor {
 
     public static void syncToAll(ServerLevel level, List<CaptureZone> zones) {
         CapturePointSyncPacket packet = buildPacket(zones);
-        for (ServerPlayer player : PWP.getGameManager().getServer().getPlayerList().getPlayers()) {
-            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
-        }
+        PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
     }
 
     public static void syncToPlayer(ServerPlayer player, List<CaptureZone> zones) {

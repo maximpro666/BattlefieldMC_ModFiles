@@ -18,9 +18,10 @@ import com.pigeostudios.pwp.commands.DeployCommand;
 import com.pigeostudios.pwp.commands.KitSelectCommand;
 import com.pigeostudios.pwp.core.*;
 import com.pigeostudios.pwp.core.ModSounds;
+import com.pigeostudios.pwp.data.CentralDatabase;
+import com.pigeostudios.pwp.data.KitConfig;
 import com.pigeostudios.pwp.events.CombatEventHandler;
 import com.pigeostudios.pwp.events.PlayerEventHandler;
-import com.pigeostudios.pwp.data.KitConfig;
 import com.pigeostudios.pwp.network.PacketHandler;
 import com.pigeostudios.pwp.system.RoleSystem;
 import com.pigeostudios.pwp.proxy.ProxyMessenger;
@@ -137,23 +138,19 @@ public class PWP {
 
     @SubscribeEvent
     public void onServerStarted(ServerStartedEvent event) {
-        // Kill any orphaned match server from previous run
-        try {
-            Path launcherDir = Path.of(System.getProperty("user.dir")).resolve("../launcher").normalize();
-            ProcessBuilder stopPb = new ProcessBuilder(
-                "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass",
-                "-File", launcherDir.resolve("stop-match.ps1").toString()
-            );
-            stopPb.directory(launcherDir.toFile());
-            stopPb.redirectErrorStream(true);
-            Process stopProc = stopPb.start();
-            stopProc.waitFor(10, TimeUnit.SECONDS);
-        } catch (Exception ignored) {}
-
-        // Write ready flag for match server (persists on disk even if JVM crashes)
-        if (ProxyMessenger.isMatchServer()) {
+        // Kill any orphaned match server from previous run (only on lobby server,
+        // match server must NOT kill itself via stop-match.ps1)
+        if (!ProxyMessenger.isMatchServer()) {
             try {
-                Files.write(Path.of("match_ready.flag"), "ready".getBytes());
+                Path launcherDir = Path.of(System.getProperty("user.dir")).resolve("../launcher").normalize();
+                ProcessBuilder stopPb = new ProcessBuilder(
+                    "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass",
+                    "-File", launcherDir.resolve("stop-match.ps1").toString()
+                );
+                stopPb.directory(launcherDir.toFile());
+                stopPb.redirectErrorStream(true);
+                Process stopProc = stopPb.start();
+                stopProc.waitFor(10, TimeUnit.SECONDS);
             } catch (Exception ignored) {}
         }
 
@@ -165,6 +162,9 @@ public class PWP {
                 () -> new TeamManager(event.getServer()),
                 "pwp_data"
             );
+
+        CentralDatabase.init();
+        teamManager.loadFromCentralDatabase();
 
         config = PWPConfig.load(event.getServer());
 
@@ -181,9 +181,9 @@ public class PWP {
 
         gameManager = new GameManager(event.getServer());
         MinecraftForge.EVENT_BUS.register(gameManager);
-        // Only auto-start on match server; lobby waits for /startmatch
+        // Match server: pick a map and start directly; Lobby server waits for /startmatch
         if (ProxyMessenger.isMatchServer()) {
-            gameManager.startInitialCountdown();
+            gameManager.startMatchServerGame();
         }
 
         markerManager = new MarkerManager();
@@ -218,12 +218,23 @@ public class PWP {
         fobManager = new FOBManager();
         captureParticleManager = new CaptureParticleManager();
 
+        // Write ready flag ONLY after all initialization is complete
+        if (ProxyMessenger.isMatchServer()) {
+            try {
+                Files.write(Path.of("match_ready.flag"), "ready".getBytes());
+            } catch (Exception ignored) {}
+        }
+
         LOGGER.info("Team System initialized");
     }
 
     @SubscribeEvent
     public void onServerStopping(ServerStoppingEvent event) {
         MinecraftForge.EVENT_BUS.unregister(gameManager);
+        if (teamManager != null) {
+            teamManager.syncToDatabase();
+        }
+        CentralDatabase.close();
     }
 
     @SubscribeEvent
@@ -251,6 +262,7 @@ public class PWP {
         com.pigeostudios.pwp.commands.RedeployCommand.register(event.getDispatcher());
         com.pigeostudios.pwp.commands.StartMatchCommand.register(event.getDispatcher());
         com.pigeostudios.pwp.commands.GiveCoinsCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.FlySpeedCommand.register(event.getDispatcher());
 
     }
 

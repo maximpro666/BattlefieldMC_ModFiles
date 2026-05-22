@@ -1,6 +1,7 @@
 package com.pigeostudios.pwp.core;
 
 import com.pigeostudios.pwp.PWP;
+import com.pigeostudios.pwp.core.VehicleManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -13,6 +14,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class BorderManager {
 
@@ -85,11 +87,18 @@ public class BorderManager {
 
         VehicleManager vm = PWP.getVehicleManager();
 
-        for (Entity entity : level.getAllEntities()) {
+        List<Entity> targets = new ArrayList<>(level.players());
+        if (vm != null) {
+            for (UUID vid : vm.getSpawnedVehicleIds()) {
+                Entity e = level.getEntity(vid);
+                if (e != null && e.isAlive()) targets.add(e);
+            }
+        }
+
+        for (Entity entity : targets) {
             if (!entity.isAlive()) continue;
             boolean isPlayer = entity instanceof ServerPlayer;
-            boolean isVehicle = vm != null && vm.isVehicleEntityType(entity);
-            if (!isPlayer && !isVehicle) continue;
+            boolean isVehicle = !isPlayer;
 
             double x = entity.getX();
             double z = entity.getZ();

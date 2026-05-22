@@ -39,10 +39,15 @@ public class RankCommand {
         TeamManager tm = PWP.getTeamManager();
         int rankOrdinal = tm.getPlayerRank(player.getUUID());
         Rank rank = Rank.fromOrdinal(rankOrdinal);
-        int kills = tm.getOrCreatePlayerData(player.getUUID()).getKills();
+        var data = tm.getOrCreatePlayerData(player.getUUID());
+        int kills = data.getKills();
+        int wins = data.getWins();
+        int rating = data.getRating();
 
         source.sendSuccess(() -> Component.literal(
             String.format("§6Your rank: §b%s §7(%d kills)", rank.getDisplayName(), kills)), false);
+        source.sendSuccess(() -> Component.literal(
+            String.format("§7Wins: §b%d §7| Rating: §b%d", wins, rating)), false);
 
         Rank next = rankOrdinal < Rank.values().length - 1 ? Rank.values()[rankOrdinal + 1] : null;
         if (next != null) {

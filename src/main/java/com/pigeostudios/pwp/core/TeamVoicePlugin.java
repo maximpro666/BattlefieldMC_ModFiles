@@ -15,6 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,11 +29,13 @@ public class TeamVoicePlugin implements VoicechatPlugin {
     static final class VoiceSpeakerState {
         final String name;
         final int channel;
+        @Nullable final String groupName;
         long lastSeen;
 
-        VoiceSpeakerState(String name, int channel) {
+        VoiceSpeakerState(String name, int channel, @Nullable String groupName) {
             this.name = name;
             this.channel = channel;
+            this.groupName = groupName;
             this.lastSeen = System.currentTimeMillis();
         }
     }
@@ -66,9 +69,10 @@ public class TeamVoicePlugin implements VoicechatPlugin {
 
         Group senderGroup = sender.getGroup();
         int channel = VoiceGroupManager.CHANNEL_LOCAL;
+        String groupName = null;
         if (senderGroup != null) {
-            String gname = senderGroup.getName();
-            channel = gname.startsWith("ts_squad") ? VoiceGroupManager.CHANNEL_SQUAD : VoiceGroupManager.CHANNEL_TEAM;
+            groupName = senderGroup.getName();
+            channel = groupName.startsWith("ts_squad") ? VoiceGroupManager.CHANNEL_SQUAD : VoiceGroupManager.CHANNEL_TEAM;
         }
 
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
@@ -77,7 +81,7 @@ public class TeamVoicePlugin implements VoicechatPlugin {
         if (senderPlayer == null) return;
 
         String senderName = senderPlayer.getName().getString();
-        activeSpeakers.put(senderUUID, new VoiceSpeakerState(senderName, channel));
+        activeSpeakers.put(senderUUID, new VoiceSpeakerState(senderName, channel, groupName));
     }
 
     public static VoiceGroupManager getGroupManager() {

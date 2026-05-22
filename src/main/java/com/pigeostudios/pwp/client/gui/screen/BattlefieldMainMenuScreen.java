@@ -10,15 +10,11 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-
 public class BattlefieldMainMenuScreen extends Screen {
 
     private static final ResourceLocation[] BACKGROUNDS = {
         new ResourceLocation("pwp", "textures/gui/bg_0.png"),
         new ResourceLocation("pwp", "textures/gui/bg_1.png"),
-        new ResourceLocation("pwp", "textures/gui/bg_2.png"),
-        new ResourceLocation("pwp", "textures/gui/bg_main_0.png"),
-        new ResourceLocation("pwp", "textures/gui/bg_main_1.png"),
     };
 
     private int    bgIndex      = 0;
@@ -97,9 +93,6 @@ public class BattlefieldMainMenuScreen extends Screen {
             g.blit(BACKGROUNDS[nextIdx], 0, 0, 0, 0, width, height, width, height);
             g.setColor(1f, 1f, 1f, 1f);
         }
-
-        g.fill(0, 0, width, height,
-            AnimationHelper.withAlpha(UITheme.BG_BLACK, (int)(fadeAlpha * 0x88)));
 
         int logoY = Math.max(60, height / 2 - 100) + (int)logoFloat;
         String line1 = "BATTLEFIELD";
