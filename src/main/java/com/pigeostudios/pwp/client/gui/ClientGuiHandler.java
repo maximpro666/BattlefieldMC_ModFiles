@@ -10,6 +10,7 @@ import com.pigeostudios.pwp.client.gui.screen.BattlefieldPauseScreen;
 import com.pigeostudios.pwp.client.ClientTeamData;
 import com.pigeostudios.pwp.client.gui.screen.VoteScreen;
 import com.pigeostudios.pwp.vehicle.adapter.SuperbVehicleAdapter;
+import com.pigeostudios.pwp.vehicle.adapter.VehicleAdapterRegistry;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -37,7 +38,6 @@ public class ClientGuiHandler {
     private static final NotificationOverlay notifOverlay    = new NotificationOverlay();
     private static final HotbarOverlay       hotbarOverlay   = new HotbarOverlay();
     private static final BattlefieldTabOverlay tabOverlay    = new BattlefieldTabOverlay();
-    private static final PlayerLabelOverlay  playerLabelOverlay = new PlayerLabelOverlay();
     private static final VoiceChatHudOverlay voiceChatHudOverlay = new VoiceChatHudOverlay();
     private static final KillFeedOverlay     killFeedOverlay = new KillFeedOverlay();
     private static final CaptureNotificationOverlay captureNotifOverlay = new CaptureNotificationOverlay();
@@ -94,15 +94,14 @@ public class ClientGuiHandler {
         boolean tabVisible = tabOverlay.isVisible();
 
         if (!tabVisible) {
-            compassOverlay.render(g, w);
-            ticketOverlay.render(g, w, event.getPartialTick());
-            squadOverlay.render(g, h);
-            vitalsOverlay.render(g, w, h);
+            if (ClientTeamData.showCompass)    compassOverlay.render(g, w);
+            if (ClientTeamData.showTicketBar)  ticketOverlay.render(g, w, event.getPartialTick());
+            if (ClientTeamData.showSquad)      squadOverlay.render(g, h);
+            if (ClientTeamData.showVitals && ClientTeamData.getGamePhase() >= 2) vitalsOverlay.render(g, w, h);
             notifOverlay.render(g, w);
-            hotbarOverlay.render(g, w, h);
-            playerLabelOverlay.render(g, w, h);
+            if (ClientTeamData.showHotbar)     hotbarOverlay.render(g, w, h);
             voiceChatHudOverlay.render(g, w, h);
-            killFeedOverlay.render(g, w);
+            if (ClientTeamData.showKillFeed)   killFeedOverlay.render(g, w);
             captureNotifOverlay.render(g, w, h);
             voteOverlay.render(g, w, h);
         }
@@ -121,27 +120,32 @@ public class ClientGuiHandler {
         } else {
             tabOverlay.tick();
             ClientVoiceHandler.tick();
+            captureNotifOverlay.tickFromCapturePoints(ClientTeamData.capturePoints);
         }
     }
 
     private static void handlePerspectiveKey() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
-        if (!mc.options.keyTogglePerspective.consumeClick()) return;
+
         if (isInBattleVehicle(mc)) {
-            CameraType next = switch (mc.options.getCameraType()) {
-                case FIRST_PERSON -> CameraType.THIRD_PERSON_BACK;
-                case THIRD_PERSON_BACK -> CameraType.THIRD_PERSON_FRONT;
-                case THIRD_PERSON_FRONT -> CameraType.FIRST_PERSON;
-            };
-            mc.options.setCameraType(next);
+            if (mc.options.keyTogglePerspective.consumeClick()) {
+                CameraType next = switch (mc.options.getCameraType()) {
+                    case FIRST_PERSON -> CameraType.THIRD_PERSON_BACK;
+                    case THIRD_PERSON_BACK -> CameraType.THIRD_PERSON_FRONT;
+                    case THIRD_PERSON_FRONT -> CameraType.FIRST_PERSON;
+                };
+                mc.options.setCameraType(next);
+            }
+        } else if (mc.options.keyTogglePerspective.consumeClick()) {
+            mc.options.setCameraType(CameraType.FIRST_PERSON);
         }
     }
 
     private static boolean isInBattleVehicle(Minecraft mc) {
         net.minecraft.world.entity.Entity vehicle = mc.player.getVehicle();
         if (vehicle == null) return false;
-        return new SuperbVehicleAdapter().isApplicable(vehicle);
+        return VehicleAdapterRegistry.getInstance().hasAdapter(vehicle);
     }
 
     @SubscribeEvent
@@ -149,9 +153,8 @@ public class ClientGuiHandler {
         if (event.isMounting()) return;
         if (!(event.getEntityMounting() instanceof net.minecraft.client.player.LocalPlayer)) return;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.getCameraType() == CameraType.FIRST_PERSON) return;
         net.minecraft.world.entity.Entity vehicle = event.getEntityBeingMounted();
-        if (vehicle != null && new SuperbVehicleAdapter().isApplicable(vehicle)) {
+        if (vehicle != null && VehicleAdapterRegistry.getInstance().hasAdapter(vehicle)) {
             mc.options.setCameraType(CameraType.FIRST_PERSON);
         }
     }

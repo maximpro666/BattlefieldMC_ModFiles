@@ -249,6 +249,11 @@ public class TeamManager extends SavedData {
                 game.setLobbyRespawn(player);
             }
         }
+
+        var vgm = TeamVoicePlugin.getGroupManager();
+        if (vgm != null && vgm.isAvailable()) {
+            vgm.joinChannel(player, 0);
+        }
     }
 
     /**
@@ -328,7 +333,8 @@ public class TeamManager extends SavedData {
             squadName,
             wc,
             bc,
-            rawDonat
+            rawDonat,
+            data.hasReceivedDogTag()
         );
         PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
     }

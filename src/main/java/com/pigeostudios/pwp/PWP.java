@@ -234,6 +234,8 @@ public class PWP {
         if (teamManager != null) {
             teamManager.syncToDatabase();
         }
+        var vgm = TeamVoicePlugin.getGroupManager();
+        if (vgm != null) vgm.cleanup();
         CentralDatabase.close();
     }
 
@@ -263,6 +265,7 @@ public class PWP {
         com.pigeostudios.pwp.commands.StartMatchCommand.register(event.getDispatcher());
         com.pigeostudios.pwp.commands.GiveCoinsCommand.register(event.getDispatcher());
         com.pigeostudios.pwp.commands.FlySpeedCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.DonatorCommand.register(event.getDispatcher());
 
     }
 

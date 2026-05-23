@@ -51,6 +51,14 @@ public class ClientTeamData {
     public static int maxTickets = 100;
     public static List<ClientBeaconData> beacons = new ArrayList<>();
 
+    // HUD element visibility toggles
+    public static boolean showCompass = true;
+    public static boolean showTicketBar = true;
+    public static boolean showSquad = true;
+    public static boolean showVitals = true;
+    public static boolean showHotbar = true;
+    public static boolean showKillFeed = true;
+
     // Vote overlay data
     private static List<String> voteMapNames = new ArrayList<>();
     private static int[] voteCounts = new int[0];
@@ -84,8 +92,7 @@ public class ClientTeamData {
     public static void setVotedMap(String name) { votedMap = name != null ? name : ""; }
     public static Map<UUID, Integer> squadmateStatuses = new HashMap<>();
 
-    public static int currentVoiceChannel = 0;
-    public static final long SPEAKING_TIMEOUT_MS = 1500;
+    public static final long SPEAKING_TIMEOUT_MS = 800;
 
     // Border zone data for client rendering (parallel lists)
     public static List<byte[]> borderZoneTypes = new ArrayList<>();
@@ -111,6 +118,16 @@ public class ClientTeamData {
     }
 
     public static PlayerListEntry getPlayerData(UUID uuid) { return playerDataMap.get(uuid); }
+    private static String lobbyStatus = "";
+
+    public static void setLobbyStatus(String status) {
+        lobbyStatus = status != null ? status : "";
+    }
+
+    public static String getLobbyStatus() {
+        return lobbyStatus;
+    }
+
     public static void setLocalPlayerTeam(Team team) {
         localPlayerTeam = team;
     }

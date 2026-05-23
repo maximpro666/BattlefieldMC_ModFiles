@@ -2,7 +2,10 @@ package com.pigeostudios.pwp.core;
 
 import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.core.TeamVoicePlugin;
+import com.pigeostudios.pwp.network.PacketHandler;
+import com.pigeostudios.pwp.network.SquadSyncPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 
@@ -38,8 +41,6 @@ public class SquadManager {
     public void disbandSquad(int squadId) {
         Squad squad = squads.remove(squadId);
         if (squad != null) {
-            var gm = TeamVoicePlugin.getGroupManager();
-            if (gm != null) gm.removeSquadGroup(squadId);
             PWP.LOGGER.info("Squad disbanded: {}", squad.getName());
         }
     }
@@ -153,5 +154,32 @@ public class SquadManager {
             invites.removeIf(inv -> inv.inviterUUID.equals(playerId));
         }
         invitations.entrySet().removeIf(e -> e.getValue().isEmpty());
+    }
+
+    public void syncToPlayer(ServerPlayer player) {
+        UUID puid = player.getUUID();
+        Squad ps = getPlayerSquad(puid);
+        int playerSquadId = ps != null ? ps.getSquadId() : -1;
+        String playerSquadName = ps != null ? ps.getName() : "";
+
+        List<Integer> squadIds = new ArrayList<>();
+        List<String> squadNames = new ArrayList<>();
+        List<Integer> squadSizes = new ArrayList<>();
+        for (Squad s : getAllSquads()) {
+            squadIds.add(s.getSquadId());
+            squadNames.add(s.getName());
+            squadSizes.add(s.getMemberCount());
+        }
+
+        PacketHandler.CHANNEL.send(
+            PacketDistributor.PLAYER.with(() -> player),
+            new SquadSyncPacket(playerSquadId, playerSquadName, squadIds, squadNames, squadSizes)
+        );
+    }
+
+    public void syncToAll(net.minecraft.server.MinecraftServer server) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            syncToPlayer(player);
+        }
     }
 }

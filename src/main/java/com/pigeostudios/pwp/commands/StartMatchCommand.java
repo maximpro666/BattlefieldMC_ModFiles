@@ -86,7 +86,11 @@ public class StartMatchCommand {
                 try { Files.deleteIfExists(launcherDir.resolve("match_cycle_done.flag")); } catch (Exception ignored) {}
                 try { Files.deleteIfExists(launcherDir.resolve("match_active.flag")); } catch (Exception ignored) {}
                 // Broadcast: cleaning up old match server
-                server.execute(() -> LifecycleNotifier.broadcastToAll(server, "match_cleaning"));
+                server.execute(() -> {
+                    GameManager gm = PWP.getGameManager();
+                    if (gm != null) gm.setLobbyStatus("cleaning");
+                    LifecycleNotifier.broadcastToAll(server, "match_cleaning");
+                });
                 // Kill any existing match server process and clean up temp dir
                 try {
                     ProcessBuilder stopPb = new ProcessBuilder(
@@ -114,7 +118,11 @@ public class StartMatchCommand {
                 }
 
                 // Broadcast: waiting for match server to start
-                server.execute(() -> LifecycleNotifier.broadcastToAll(server, "match_waiting"));
+                server.execute(() -> {
+                    GameManager gm = PWP.getGameManager();
+                    if (gm != null) gm.setLobbyStatus("waiting");
+                    LifecycleNotifier.broadcastToAll(server, "match_waiting");
+                });
 
                 ProcessBuilder pb = new ProcessBuilder(
                     "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass",
@@ -191,7 +199,11 @@ public class StartMatchCommand {
                     } catch (Exception e) {
                         com.pigeostudios.pwp.PWP.LOGGER.warn("Failed to write match_active.flag: {}", e.getMessage());
                     }
-                    server.execute(() -> LifecycleNotifier.broadcastNotification(server, "match_ready", 5000));
+                    server.execute(() -> {
+                        GameManager gm = PWP.getGameManager();
+                        if (gm != null) gm.setLobbyStatus("ready");
+                        LifecycleNotifier.broadcastNotification(server, "match_ready", 5000);
+                    });
                     try { Thread.sleep(4000); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
                     server.execute(() -> {
                         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
@@ -201,7 +213,11 @@ public class StartMatchCommand {
                         com.pigeostudios.pwp.PWP.LOGGER.info("Transfer packet sent to all players");
                     });
                 } else {
-                    server.execute(() -> LifecycleNotifier.broadcastToAll(server, "match_failed"));
+                    server.execute(() -> {
+                        GameManager gm = PWP.getGameManager();
+                        if (gm != null) gm.setLobbyStatus("failed");
+                        LifecycleNotifier.broadcastToAll(server, "match_failed");
+                    });
                     String reason = !portOpen ? "port never opened" : "match server not ready after port open";
                     com.pigeostudios.pwp.PWP.LOGGER.error("Match server did not start in time: {}", reason);
                 }
@@ -211,7 +227,11 @@ public class StartMatchCommand {
             } catch (Exception e) {
                 com.pigeostudios.pwp.PWP.LOGGER.error("Failed to start match server", e);
                 if (server != null) {
-                    server.execute(() -> LifecycleNotifier.broadcastToAll(server, "match_failed"));
+                    server.execute(() -> {
+                        GameManager gm = PWP.getGameManager();
+                        if (gm != null) gm.setLobbyStatus("failed");
+                        LifecycleNotifier.broadcastToAll(server, "match_failed");
+                    });
                 }
             } finally {
                 // If process is still running, kill it on failure

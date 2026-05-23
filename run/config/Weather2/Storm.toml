@@ -14,7 +14,7 @@
 	Storm_Deadly_CollideDistance = 128
 	#-
 	#Range: > -2147483648
-	Storm_LightningStrikeBaseValueOddsTo1 = 200
+	Storm_LightningStrikeBaseValueOddsTo1 = 1000
 	#-
 	Storm_NoRainVisual = false
 	#-

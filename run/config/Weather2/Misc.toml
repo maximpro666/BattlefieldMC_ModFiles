@@ -42,17 +42,17 @@
 	#Range: -1.7976931348623157E308 ~ 1.7976931348623157E308
 	sirenActivateDistance = 256.0
 	#-
-	Dimension_List_Weather = "minecraft:overworld, tropicraft:tropicraft"
+	Dimension_List_Weather = "minecraft:overworld, tropicraft:tropicraft, pwp:map"
 	#-
-	Dimension_List_Clouds = "minecraft:overworld, tropicraft:tropicraft"
+	Dimension_List_Clouds = "minecraft:overworld, tropicraft:tropicraft, pwp:map"
 	#-
-	Dimension_List_Storms = "minecraft:overworld, tropicraft:tropicraft"
+	Dimension_List_Storms = "minecraft:overworld, tropicraft:tropicraft, pwp:map"
 	#-
-	Dimension_List_WindEffects = "minecraft:overworld, tropicraft:tropicraft"
+	Dimension_List_WindEffects = "minecraft:overworld, tropicraft:tropicraft, pwp:map"
 	#-
 	blockBreakingInvokesCancellableEvent = false
 	#Server and client side, Locks down the mod to only do wind, leaves, foliage shader if on, etc. No weather systems, turns overcast mode on
-	Aesthetic_Only_Mode = true
+	Aesthetic_Only_Mode = false
 	#Runs regardless of Aesthetic_Only_Mode, makes snowstorms possible everywhere
 	Winter_Wonderland = false
 

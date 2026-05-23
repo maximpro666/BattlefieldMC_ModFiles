@@ -2,12 +2,12 @@ package com.pigeostudios.pwp.client;
 
 import java.util.UUID;
 
-public record PlayerListEntry(int rank, String callsign, String squad, int kills, int deaths, int teamOrdinal, String squadName, int donatTier, boolean isSquadLeader) {
+public record PlayerListEntry(int rank, String callsign, String squad, int kills, int deaths, int teamOrdinal, String squadName, int donatTier, boolean isSquadLeader, boolean hasReceivedDogTag) {
     public PlayerListEntry(int rank, String callsign, String squad, int kills, int deaths, int teamOrdinal, String squadName) {
-        this(rank, callsign, squad, kills, deaths, teamOrdinal, squadName, 0, false);
+        this(rank, callsign, squad, kills, deaths, teamOrdinal, squadName, 0, false, false);
     }
 
     public PlayerListEntry(int rank, String callsign, String squad, int kills, int deaths, int teamOrdinal, String squadName, int donatTier) {
-        this(rank, callsign, squad, kills, deaths, teamOrdinal, squadName, donatTier, false);
+        this(rank, callsign, squad, kills, deaths, teamOrdinal, squadName, donatTier, false, false);
     }
 }

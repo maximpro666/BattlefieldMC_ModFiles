@@ -51,10 +51,12 @@ public class SquadActionPacket {
                     if (!PacketValidator.checkAndReject(player, PacketValidator.requireTeamPlayable(player))) return;
                     var team = PWP.getTeamManager().getOrCreatePlayerData(player.getUUID()).getTeam();
                     squadManager.createSquad(player.getScoreboardName() + "'s Squad", team, player.getUUID());
+                    squadManager.syncToAll(player.server);
                 }
                 case "LEAVE" -> {
                     if (!PacketValidator.checkAndReject(player, PacketValidator.requireSquadMember(player))) return;
                     squadManager.leaveSquad(player.getUUID());
+                    squadManager.syncToAll(player.server);
                 }
                 case "INVITE" -> {
                     if (!PacketValidator.checkAndReject(player, PacketValidator.requireSquadMember(player))) return;

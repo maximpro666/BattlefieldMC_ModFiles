@@ -4,19 +4,19 @@
 	#Prevents tearing up of dirt, grass, sand and logs, overrides strength based grabbing
 	Storm_Tornado_RefinedGrabRules = true
 	#Makes weather boring! or peacefull?
-	Storm_NoTornadosOrCyclones = false
+	Storm_NoTornadosOrCyclones = true
 	#Grab player or not
-	Storm_Tornado_grabPlayer = true
+	Storm_Tornado_grabPlayer = false
 	#Prevent grabbing of non players
-	Storm_Tornado_grabPlayersOnly = false
+	Storm_Tornado_grabPlayersOnly = true
 	#Grab hostile mobs, overridden by Storm_Tornado_grabPlayersOnly
-	Storm_Tornado_grabMobs = true
+	Storm_Tornado_grabMobs = false
 	#Grab animals, overridden by Storm_Tornado_grabPlayersOnly
-	Storm_Tornado_grabAnimals = true
+	Storm_Tornado_grabAnimals = false
 	#Grab villagers, overridden by Storm_Tornado_grabPlayersOnly
-	Storm_Tornado_grabVillagers = true
+	Storm_Tornado_grabVillagers = false
 	#Tear up blocks from the ground based on conditions defined
-	Storm_Tornado_grabBlocks = true
+	Storm_Tornado_grabBlocks = false
 	#Grab entity items, overridden by Storm_Tornado_grabPlayersOnly
 	Storm_Tornado_grabItems = false
 	#Grab blocks based on how well a diamond axe can mine the block, so mostly wooden blocks
@@ -34,7 +34,7 @@
 	#Range: > -2147483648
 	Storm_Tornado_maxBlocksGrabbedPerTick = 5
 	#Make tornados initial heading aimed towards closest player
-	Storm_Tornado_aimAtPlayerOnSpawn = true
+	Storm_Tornado_aimAtPlayerOnSpawn = false
 	#Accuracy of tornado aimed at player
 	#Range: > -2147483648
 	Storm_Tornado_aimAtPlayerAngleVariance = 5

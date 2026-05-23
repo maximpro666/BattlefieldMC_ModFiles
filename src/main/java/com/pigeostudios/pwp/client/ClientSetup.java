@@ -6,6 +6,7 @@ import com.pigeostudios.pwp.blockentity.RespawnBeaconBlockEntity;
 import com.pigeostudios.pwp.client.gui.ClientGuiHandler;
 import com.pigeostudios.pwp.client.gui.renderer.CaptureParticles;
 import com.pigeostudios.pwp.client.gui.renderer.CustomNametagRenderer;
+import com.pigeostudios.pwp.client.gui.renderer.SquadMarkerRenderer;
 import com.pigeostudios.pwp.client.gui.renderer.WorldMarkerRenderer;
 import com.pigeostudios.pwp.client.gui.screen.ClassSelectionScreen;
 import com.pigeostudios.pwp.client.gui.screen.ResupplyScreen;
@@ -27,6 +28,8 @@ import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.RenderNameTagEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -38,6 +41,7 @@ public class ClientSetup {
     private static final WorldMarkerRenderer markerRenderer = new WorldMarkerRenderer();
     private static final CaptureParticles captureParticles = new CaptureParticles();
     private static final CustomNametagRenderer nametagRenderer = new CustomNametagRenderer();
+    private static final SquadMarkerRenderer squadMarkerRenderer = new SquadMarkerRenderer();
     public static final KeyMapping OPEN_KIT_VEHICLE_KEY = new KeyMapping(
         "key.pwp.open_kit_vehicle",
         GLFW.GLFW_KEY_G,
@@ -148,6 +152,8 @@ public class ClientSetup {
                 mc.setScreen(new ResupplyScreen());
             }
         }
+
+        ClientVoiceHandler.reinforcePtt();
     }
 
     @SubscribeEvent
@@ -179,6 +185,8 @@ public class ClientSetup {
             float partialTick = event.getPartialTick();
             Vec3 camPos = camera.getPosition();
 
+            squadMarkerRenderer.render(poseStack, bufferSource, camera, partialTick);
+
             markerRenderer.render(poseStack, bufferSource, camera, partialTick);
 
             captureParticles.render(poseStack, bufferSource,
@@ -187,10 +195,18 @@ public class ClientSetup {
     }
 
     @SubscribeEvent
+    public static void onRenderNameTag(RenderNameTagEvent event) {
+        if (event.getEntity() instanceof Player) {
+            event.setResult(Event.Result.DENY);
+        }
+    }
+
+    @SubscribeEvent
     public static void onRenderNametag(RenderLivingEvent.Post<?, ?> event) {
         if (event.getEntity() instanceof Player player && !player.isSpectator()) {
             Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-            nametagRenderer.renderNametag(event.getPoseStack(), event.getMultiBufferSource(), player, camera);
+            float partialTick = Minecraft.getInstance().getFrameTime();
+            nametagRenderer.renderNametag(event.getPoseStack(), event.getMultiBufferSource(), player, camera, partialTick);
         }
     }
 }

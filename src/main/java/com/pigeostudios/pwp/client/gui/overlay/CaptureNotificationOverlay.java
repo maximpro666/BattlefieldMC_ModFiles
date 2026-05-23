@@ -1,5 +1,6 @@
 package com.pigeostudios.pwp.client.gui.overlay;
 
+import com.pigeostudios.pwp.client.CapturePointData;
 import com.pigeostudios.pwp.client.gui.UITheme;
 import com.pigeostudios.pwp.client.gui.component.AnimationHelper;
 import com.pigeostudios.pwp.client.gui.component.BProgressBar;
@@ -7,6 +8,8 @@ import com.pigeostudios.pwp.client.gui.component.RenderHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+
+import java.util.List;
 
 public class CaptureNotificationOverlay {
 
@@ -16,6 +19,7 @@ public class CaptureNotificationOverlay {
     private static final int TEXT_Y = 24;
 
     private String pointName = "";
+    private String pointType = "small";
     private int capturingTeam = -1;
     private int ownerTeam = -1;
     private float captureFraction = 0f;
@@ -25,16 +29,46 @@ public class CaptureNotificationOverlay {
     private float glowPhase = 0f;
     private BProgressBar bar;
 
-    public void startCapture(String pointName, int capturingTeamOrdinal, int ownerTeamOrdinal) {
-        this.pointName = pointName;
+    public void startCapture(String pointName, int capturingTeamOrdinal, int ownerTeamOrdinal, String pointType) {
+        this.pointName = pointName != null ? pointName : "";
         this.capturingTeam = capturingTeamOrdinal;
         this.ownerTeam = ownerTeamOrdinal;
+        this.pointType = pointType != null ? pointType : "small";
         this.active = true;
         this.glowPhase = 0f;
     }
 
     public void updateProgress(float fraction) { captureFraction = fraction; }
     public void endCapture() { active = false; }
+
+    public void tickFromCapturePoints(List<CapturePointData> points) {
+        if (points == null || points.isEmpty()) {
+            endCapture();
+            return;
+        }
+
+        CapturePointData nearestActive = null;
+        for (CapturePointData cp : points) {
+            float prog = (float) cp.progress();
+            int capturer = cp.capturingTeamOrdinal();
+            int owner = cp.ownerTeamOrdinal();
+            if (prog > 0.01f && prog < 1.0f) {
+                nearestActive = cp;
+                break;
+            }
+        }
+
+        if (nearestActive != null) {
+            float prog = (float) nearestActive.progress();
+            if (!active || !nearestActive.name().equals(pointName)) {
+                startCapture(nearestActive.name(), nearestActive.capturingTeamOrdinal(),
+                    nearestActive.ownerTeamOrdinal(), nearestActive.pointType());
+            }
+            updateProgress(prog);
+        } else {
+            endCapture();
+        }
+    }
 
     public void render(GuiGraphics g, int screenWidth, int screenHeight) {
         fadeAlpha = AnimationHelper.lerp(fadeAlpha, active ? 1f : 0f, 0.15f);
@@ -69,7 +103,7 @@ public class CaptureNotificationOverlay {
         Font font = Minecraft.getInstance().font;
         int barY = y + 8;
 
-        // ===== PASS 1: Frame (behind everything) =====
+        // ===== PASS 1: Frame =====
         RenderHelper.dropShadow(g, x - 10, y - 14, BAR_W + 20, PANEL_H, 4, (int) (fadeAlpha * 120));
         RenderHelper.roundedRect(g, x - 10, y - 14, BAR_W + 20, PANEL_H, 4,
             AnimationHelper.withAlpha(UITheme.BG_HUD, (int) (fadeAlpha * UITheme.ALPHA_HUD)));
@@ -107,8 +141,13 @@ public class CaptureNotificationOverlay {
                 AnimationHelper.withAlpha(team2Color, (int) (fadeAlpha * 60)));
         }
 
-        // ===== PASS 3: Text (on top, no background) =====
-        String label = "\u2694 " + teamName + " \u00BB " + pointName;
+        // ===== PASS 3: Text =====
+        String label;
+        if ("major".equals(pointType)) {
+            label = "\u2694 " + teamName + " \u00BB " + "\u0413\u043B\u0430\u0432\u043D\u0430\u044F \u0442\u043E\u0447\u043A\u0430";
+        } else {
+            label = "\u2694 " + teamName + " \u00BB " + pointName;
+        }
         int tw = font.width(label);
 
         float glowIntensity = (float) Math.sin(glowPhase * Math.PI * 2) * 0.3f + 0.5f;

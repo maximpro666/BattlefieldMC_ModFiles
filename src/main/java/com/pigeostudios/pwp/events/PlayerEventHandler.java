@@ -133,7 +133,10 @@ public class PlayerEventHandler {
                 }
 
                 if (ProxyMessenger.isMatchServer()) {
-                    PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new OpenTeamSelectionScreenPacket());
+                    Team playerTeam = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
+                    if (playerTeam == Team.SPECTATOR) {
+                        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new OpenTeamSelectionScreenPacket());
+                    }
                 }
 
                 if (game.isPlaying() || game.isVoting()) {
@@ -153,6 +156,14 @@ public class PlayerEventHandler {
             if (cp != null) {
                 cp.syncToPlayer(player);
             }
+            var vgm = TeamVoicePlugin.getGroupManager();
+            if (vgm != null && vgm.isAvailable()) {
+                vgm.joinChannel(player, 0);
+            }
+
+            SquadManager smLogin = PWP.getSquadManager();
+            if (smLogin != null) smLogin.syncToPlayer(player);
+
             var pcd = teamManager.getOrCreatePlayerData(player.getUUID());
             if (!pcd.hasReceivedDogTag()) {
                 if (hasDogTagInCurios(player)) {
@@ -225,6 +236,12 @@ public class PlayerEventHandler {
     public void onBlockBreak(BlockEvent.BreakEvent event) {
         if (event.getPlayer() instanceof ServerPlayer player) {
             net.minecraft.core.BlockPos pos = event.getPos();
+
+            GameManager gm = PWP.getGameManager();
+            if (gm != null && gm.isPlaying() && gm.isInAnyBase(pos)) {
+                event.setCanceled(true);
+                return;
+            }
             if (player.level().getBlockState(pos).getBlock() == PWP.RESPAWN_BEACON_BLOCK.get()) {
                 // Check for player-placed beacon (has block entity with owner)
                 if (player.level().getBlockEntity(pos) instanceof com.pigeostudios.pwp.blockentity.RespawnBeaconBlockEntity beacon
@@ -253,6 +270,9 @@ public class PlayerEventHandler {
     public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             player.setHealth(player.getMaxHealth());
+            player.getPersistentData().remove("playerrevive:bleeding");
+            player.getPersistentData().remove("pwp:bypass_bleed");
+            player.getPersistentData().remove("pwp:direct_kill");
             GameManager game = PWP.getGameManager();
 
             if (game == null) {

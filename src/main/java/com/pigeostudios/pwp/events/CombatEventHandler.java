@@ -213,6 +213,39 @@ public class CombatEventHandler {
         ServerLevel level = (ServerLevel) victim.level();
         ServerPlayer attacker = resolveAttacker(source, level);
 
+        GameManager gm = PWP.getGameManager();
+        if (gm != null && (gm.isInOwnBase(victim) || (attacker != null && gm.isInOwnBase(attacker)))) {
+            event.setCanceled(true);
+            return;
+        }
+
+        // Bypass bleedout for explosions and headshots — instant kill, no knock
+        if (PlayerReviveIntegration.isModPresent()) {
+            boolean bypass = source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION);
+            if (!bypass) {
+                bypass = isHeadShot(source, victim);
+            }
+            if (bypass) {
+                float damage = event.getAmount();
+                boolean lethal = victim.getHealth() - damage <= 0f;
+                if (lethal && attacker != null && attacker != victim
+                        && !teamManager.isFriendly(attacker, victim)) {
+                    event.setCanceled(true);
+                    victim.getPersistentData().putBoolean("pwp:direct_kill", true);
+                    victim.setHealth(0f);
+                    victim.die(source);
+                    return;
+                }
+            }
+        }
+
+        if (PlayerReviveIntegration.isPlayerDowned(victim) && attacker != null && attacker != victim
+                && !teamManager.isFriendly(attacker, victim)) {
+            PlayerReviveIntegration.getInstance().finishPlayer(victim);
+            event.setCanceled(true);
+            return;
+        }
+
         if (attacker != null) {
             if (attacker != victim && teamManager.isFriendly(attacker, victim)) {
                 event.setCanceled(true);
@@ -226,12 +259,28 @@ public class CombatEventHandler {
         SquadmateRespawnCooldownManager.onPlayerAttacked(victim);
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public void onLivingDeath(LivingDeathEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer victim)) {
-            return;
+    private boolean isHeadShot(DamageSource source, ServerPlayer victim) {
+        Entity direct = source.getDirectEntity();
+        if (direct == null || direct instanceof ServerPlayer) return false;
+        // 1) TACZ / SuperbWarfare headshot flag via reflection
+        String[] headshotMethods = {"isHeadShot", "getIsHeadShot"};
+        for (String name : headshotMethods) {
+            try {
+                Method m = resolveMethod(direct.getClass(), name);
+                if (m != null && m.getReturnType() == boolean.class) {
+                    return (boolean) m.invoke(direct);
+                }
+            } catch (Exception ignored) {}
         }
+        // 2) Fallback: Y‑position relative to eye height
+        double projY = direct.getY();
+        double eyeY = victim.getEyeY();
+        return Math.abs(projY - eyeY) < 0.4;
+    }
 
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onLivingDeath(LivingDeathEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer victim)) return;
         if (event.isCanceled()) return;
 
         DamageSource source = event.getSource();
@@ -241,72 +290,96 @@ public class CombatEventHandler {
         GameManager game = PWP.getGameManager();
         boolean isPlaying = game != null && game.isPlaying();
 
-        teamManager.incrementDeaths(victim.getUUID());
-
-        ContributionManager contrib = PWP.getContributionManager();
-        if (contrib != null && isPlaying) {
-            contrib.addDeath(victim.getUUID(), victim.getName().getString());
+        boolean deathAlreadyCounted = false;
+        boolean skipRespawn = false;
+        if (isPlaying && PlayerReviveIntegration.isModPresent()) {
+            if (victim.getPersistentData().getBoolean("pwp:finished_death")) {
+                victim.getPersistentData().remove("pwp:finished_death");
+                deathAlreadyCounted = true;
+                skipRespawn = false;
+            } else if (victim.getPersistentData().getBoolean("pwp:instant_death")) {
+                victim.getPersistentData().remove("pwp:instant_death");
+                deathAlreadyCounted = true;
+                skipRespawn = false;
+            } else if (victim.getPersistentData().getBoolean("pwp:direct_kill")) {
+                victim.getPersistentData().remove("pwp:direct_kill");
+                deathAlreadyCounted = false;
+                skipRespawn = false;
+            } else {
+                deathAlreadyCounted = true;
+                skipRespawn = true;
+            }
         }
 
-        Team victimTeam = teamManager.getOrCreatePlayerData(victim.getUUID()).getTeam();
-        if (victimTeam.isPlayable() && isPlaying) {
-            TicketManager ticketMgr = PWP.getTicketManager();
-            if (ticketMgr != null) ticketMgr.deductTicket(victimTeam);
-        }
+        if (!deathAlreadyCounted) {
+            teamManager.incrementDeaths(victim.getUUID());
 
-        if (killer != null && !killer.getUUID().equals(victim.getUUID())) {
-            if (!isDedupKill(killer, victim)) return;
-            teamManager.incrementKills(killer.getUUID());
-            teamManager.syncPlayerData(killer);
-
+            ContributionManager contrib = PWP.getContributionManager();
             if (contrib != null && isPlaying) {
-                contrib.addKill(killer.getUUID(), killer.getName().getString());
+                contrib.addDeath(victim.getUUID(), victim.getName().getString());
             }
 
-            BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
-            PWPConfig cfg = PWP.getConfig();
-            int bcReward = cfg != null ? cfg.getKillRewardBC() : 5;
-
-            if (isPlaying) {
-                runtime.addBC(killer.getUUID(), bcReward);
-                runtime.addActivity(killer.getUUID(), BattlefieldRuntime.SCORE_DAMAGE);
-                runtime.syncBC(killer);
+            Team victimTeam = teamManager.getOrCreatePlayerData(victim.getUUID()).getTeam();
+            if (victimTeam.isPlayable() && isPlaying) {
+                TicketManager ticketMgr = PWP.getTicketManager();
+                if (ticketMgr != null) ticketMgr.deductTicket(victimTeam);
             }
 
-            Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("killer", killer.getName().getString());
-            placeholders.put("victim", victim.getName().getString());
-            placeholders.put("bc", String.valueOf(bcReward));
+            if (killer != null && !killer.getUUID().equals(victim.getUUID())) {
+                if (!isDedupKill(killer, victim)) return;
+                teamManager.incrementKills(killer.getUUID());
+                teamManager.syncPlayerData(killer);
 
-            victim.sendSystemMessage(Component.translatable("pwp.chat.combat.killed_by",
-                killer.getName().getString(), (int) victim.distanceTo(killer)), false);
-            logKill(killer.getName().getString(), victim.getName().getString(), "player");
-            killer.sendSystemMessage(
-                Component.literal("§6" + victim.getName().getString() + " §a"
-                    + (cfg != null ? cfg.getMessage("kill_reward", placeholders)
-                    : "+" + bcReward + " BC")), false);
+                if (contrib != null && isPlaying) {
+                    contrib.addKill(killer.getUUID(), killer.getName().getString());
+                }
 
-            Rank oldRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills() - 1);
-            Rank newRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills());
-            if (oldRank.ordinal() < newRank.ordinal()) {
-                teamManager.setPlayerRank(killer, newRank.ordinal());
-                Map<String, String> rankPl = new HashMap<>();
-                rankPl.put("rank", newRank.getDisplayName());
+                BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+                PWPConfig cfg = PWP.getConfig();
+                int bcReward = cfg != null ? cfg.getKillRewardBC() : 5;
+
+                if (isPlaying) {
+                    runtime.addBC(killer.getUUID(), bcReward);
+                    runtime.addActivity(killer.getUUID(), BattlefieldRuntime.SCORE_DAMAGE);
+                    runtime.syncBC(killer);
+                }
+
+                Map<String, String> placeholders = new HashMap<>();
+                placeholders.put("killer", killer.getName().getString());
+                placeholders.put("victim", victim.getName().getString());
+                placeholders.put("bc", String.valueOf(bcReward));
+
+                victim.sendSystemMessage(Component.translatable("pwp.chat.combat.killed_by",
+                    killer.getName().getString(), (int) victim.distanceTo(killer)), false);
+                logKill(killer.getName().getString(), victim.getName().getString(), "player");
                 killer.sendSystemMessage(
-                    cfg != null
-                        ? Component.literal(cfg.getMessage("rank_up", rankPl))
-                        : Component.translatable("pwp.chat.combat.rank_up", newRank.getDisplayName()), false);
+                    Component.literal("§6" + victim.getName().getString() + " §a"
+                        + (cfg != null ? cfg.getMessage("kill_reward", placeholders)
+                        : "+" + bcReward + " BC")), false);
+
+                Rank oldRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills() - 1);
+                Rank newRank = Rank.fromKills(teamManager.getOrCreatePlayerData(killer.getUUID()).getKills());
+                if (oldRank.ordinal() < newRank.ordinal()) {
+                    teamManager.setPlayerRank(killer, newRank.ordinal());
+                    Map<String, String> rankPl = new HashMap<>();
+                    rankPl.put("rank", newRank.getDisplayName());
+                    killer.sendSystemMessage(
+                        cfg != null
+                            ? Component.literal(cfg.getMessage("rank_up", rankPl))
+                            : Component.translatable("pwp.chat.combat.rank_up", newRank.getDisplayName()), false);
+                }
             }
         }
+
+        victim.getPersistentData().remove("pwp:instant_death");
+        victim.getPersistentData().remove("pwp:finished_death");
+        victim.getPersistentData().remove("pwp:direct_kill");
 
         if (isPlaying) {
-            if (PlayerReviveIntegration.isModPresent()) {
-                // ReviveMe handles the downed state — don't cancel death or respawn
-            } else {
-                event.setCanceled(true);
-                onPlayerDeath(victim, killer);
-                instantRespawn(victim);
-            }
+            if (skipRespawn) return;
+            event.setCanceled(true);
+            onPlayerDeath(victim, killer);
+            instantRespawn(victim);
         }
         teamManager.syncPlayerData(victim);
     }
@@ -339,6 +412,10 @@ public class CombatEventHandler {
         Team team = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
         player.setHealth(player.getMaxHealth());
         player.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
+
+        player.getPersistentData().remove("playerrevive:bleeding");
+        player.getPersistentData().remove("pwp:bypass_bleed");
+        player.getPersistentData().remove("pwp:direct_kill");
 
         game.teleportPlayerToLobby(player);
         openSpawnSelectionScreen(player, team);
@@ -449,9 +526,11 @@ public class CombatEventHandler {
         Level level = event.getLevel();
         if (level.isClientSide) return;
         // Copy and clear so vanilla won't re-destroy, then destroy blocks without drops
+        GameManager gm = PWP.getGameManager();
         List<BlockPos> blocks = List.copyOf(event.getExplosion().getToBlow());
         event.getExplosion().clearToBlow();
         for (BlockPos pos : blocks) {
+            if (gm != null && gm.isInAnyBase(pos)) continue;
             // Clean up FOBs destroyed by explosion (BreakEvent is not fired)
             if (level instanceof ServerLevel serverLevel) {
                 String dim = serverLevel.dimension().location().toString();

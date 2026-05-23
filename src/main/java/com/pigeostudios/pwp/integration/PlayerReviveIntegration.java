@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,6 +20,10 @@ public class PlayerReviveIntegration {
     private final Map<UUID, Boolean> previousBleedingState = new ConcurrentHashMap<>();
     private boolean modChecked = false;
     private boolean modPresent = false;
+
+    private final Map<UUID, UUID> downedByAttacker = new ConcurrentHashMap<>();
+    private final Map<UUID, String> downedByAttackerName = new ConcurrentHashMap<>();
+    private final Set<UUID> bypassBleed = ConcurrentHashMap.newKeySet();
 
     private static final Map<Class<?>, Map<String, Method>> REFLECT_METHOD_CACHE = new HashMap<>();
 
@@ -64,39 +69,41 @@ public class PlayerReviveIntegration {
             Boolean wasBleeding = previousBleedingState.getOrDefault(uuid, false);
 
             if (wasBleeding && !isBleeding) {
-                String name = player.getName().getString();
-                contrib.addRevive(uuid, name);
-                runtime.addActivity(uuid, BattlefieldRuntime.SCORE_REVIVE);
-                runtime.syncAll(player);
+                if (player.isAlive() && player.getHealth() > 0f) {
+                    String name = player.getName().getString();
+                    contrib.addRevive(uuid, name);
+                    runtime.addActivity(uuid, BattlefieldRuntime.SCORE_REVIVE);
+                    runtime.syncAll(player);
+                } else {
+                    awardKill(tm, contrib, runtime, game, ticketMgr, player, uuid, server);
+                }
+                downedByAttacker.remove(uuid);
+                downedByAttackerName.remove(uuid);
             }
 
             if (!wasBleeding && isBleeding) {
-                tm.incrementDeaths(uuid);
-                contrib.addDeath(uuid, player.getName().getString());
-
-                if (game != null && game.isPlaying()) {
-                    Team victimTeam = tm.getOrCreatePlayerData(uuid).getTeam();
-                    if (victimTeam != null && victimTeam.isPlayable() && ticketMgr != null) {
-                        ticketMgr.deductTicket(victimTeam);
-                    }
+                DamageSource lastSrc = player.getLastDamageSource();
+                ServerPlayer attacker = null;
+                if (lastSrc != null) {
+                    attacker = resolveAttacker(lastSrc, server);
                 }
 
-                DamageSource lastSrc = player.getLastDamageSource();
-                if (lastSrc != null) {
-                    ServerPlayer attacker = resolveAttacker(lastSrc, server);
-                    if (attacker != null && !attacker.getUUID().equals(uuid)) {
-                        tm.incrementKills(attacker.getUUID());
-                        tm.syncPlayerData(attacker);
-                        contrib.addKill(attacker.getUUID(), attacker.getName().getString());
+                if (attacker != null && !attacker.getUUID().equals(uuid)) {
+                    downedByAttacker.put(uuid, attacker.getUUID());
+                    downedByAttackerName.put(uuid, attacker.getName().getString());
+                }
 
-                        if (game != null && game.isPlaying()) {
-                            PWPConfig cfg = PWP.getConfig();
-                            int bcReward = cfg != null ? cfg.getKillRewardBC() : 5;
-                            runtime.addBC(attacker.getUUID(), bcReward);
-                            runtime.addActivity(attacker.getUUID(), BattlefieldRuntime.SCORE_DAMAGE);
-                            runtime.syncBC(attacker);
-                        }
-                    }
+                if (bypassBleed.remove(uuid)) {
+                    awardKill(tm, contrib, runtime, game, ticketMgr, player, uuid, server);
+                    downedByAttacker.remove(uuid);
+                    downedByAttackerName.remove(uuid);
+                    CompoundTag data = player.getPersistentData();
+                    data.putBoolean("pwp:instant_death", true);
+                    data.remove("playerrevive:bleeding");
+                    player.setHealth(0f);
+                    player.die(player.damageSources().fellOutOfWorld());
+                    previousBleedingState.put(uuid, false);
+                    continue;
                 }
             }
 
@@ -106,6 +113,42 @@ public class PlayerReviveIntegration {
         for (UUID uuid : previousBleedingState.keySet()) {
             if (server.getPlayerList().getPlayer(uuid) == null) {
                 previousBleedingState.remove(uuid);
+                downedByAttacker.remove(uuid);
+                downedByAttackerName.remove(uuid);
+            }
+        }
+    }
+
+    private void awardKill(TeamManager tm, ContributionManager contrib, BattlefieldRuntime runtime,
+                           GameManager game, TicketManager ticketMgr, ServerPlayer victim,
+                           UUID victimUUID, MinecraftServer server) {
+        UUID attackerUUID = downedByAttacker.get(victimUUID);
+        String attackerName = downedByAttackerName.get(victimUUID);
+
+        tm.incrementDeaths(victimUUID);
+        contrib.addDeath(victimUUID, victim.getName().getString());
+
+        if (game != null && game.isPlaying()) {
+            Team vTeam = tm.getOrCreatePlayerData(victimUUID).getTeam();
+            if (vTeam != null && vTeam.isPlayable() && ticketMgr != null) {
+                ticketMgr.deductTicket(vTeam);
+            }
+        }
+
+        if (attackerUUID != null && !attackerUUID.equals(victimUUID)) {
+            ServerPlayer attacker = server.getPlayerList().getPlayer(attackerUUID);
+            if (attacker != null) {
+                tm.incrementKills(attackerUUID);
+                tm.syncPlayerData(attacker);
+                contrib.addKill(attackerUUID, attackerName != null ? attackerName : attacker.getName().getString());
+
+                if (game != null && game.isPlaying()) {
+                    PWPConfig cfg = PWP.getConfig();
+                    int bcReward = cfg != null ? cfg.getKillRewardBC() : 5;
+                    runtime.addBC(attackerUUID, bcReward);
+                    runtime.addActivity(attackerUUID, BattlefieldRuntime.SCORE_DAMAGE);
+                    runtime.syncBC(attacker);
+                }
             }
         }
     }
@@ -169,4 +212,37 @@ public class PlayerReviveIntegration {
         if (!isModPresent()) return false;
         return isPlayerBleeding(player);
     }
+
+    public void finishPlayer(ServerPlayer victim) {
+        UUID victimUUID = victim.getUUID();
+        if (!isPlayerBleeding(victim)) return;
+
+        TeamManager tm = PWP.getTeamManager();
+        ContributionManager contrib = PWP.getContributionManager();
+        BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+        GameManager game = PWP.getGameManager();
+        TicketManager ticketMgr = PWP.getTicketManager();
+        if (tm == null || contrib == null) return;
+
+        awardKill(tm, contrib, runtime, game, ticketMgr, victim, victimUUID, victim.getServer());
+        downedByAttacker.remove(victimUUID);
+        downedByAttackerName.remove(victimUUID);
+
+        CompoundTag data = victim.getPersistentData();
+        data.remove("playerrevive:bleeding");
+        data.putBoolean("pwp:finished_death", true);
+        previousBleedingState.put(victimUUID, false);
+
+        victim.setHealth(0f);
+        victim.die(victim.damageSources().fellOutOfWorld());
+    }
+
+    public UUID getDownedBy(UUID victimUUID) {
+        return downedByAttacker.get(victimUUID);
+    }
+
+    public void markBypassBleed(UUID playerUUID) {
+        bypassBleed.add(playerUUID);
+    }
 }
+

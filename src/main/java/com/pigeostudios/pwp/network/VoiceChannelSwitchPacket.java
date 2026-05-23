@@ -27,9 +27,10 @@ public class VoiceChannelSwitchPacket {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
             if (player == null) return;
+            int ch = msg.channel;
             var gm = TeamVoicePlugin.getGroupManager();
             if (gm != null) {
-                gm.joinChannel(player, msg.channel);
+                gm.setPlayerChannel(player.getUUID(), ch);
             }
         });
         ctx.get().setPacketHandled(true);

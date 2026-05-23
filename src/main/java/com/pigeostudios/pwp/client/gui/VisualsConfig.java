@@ -20,6 +20,15 @@ public class VisualsConfig {
     public BorderVisual border = new BorderVisual();
     public RingVisual rings = new RingVisual();
     public BaseRingVisual baseRings = new BaseRingVisual();
+    public SquadMarkerVisual squadMarker = new SquadMarkerVisual();
+
+    public static class SquadMarkerVisual {
+        public boolean enabled = true;
+        public double size = 0.4;
+        public double opacity = 0.45;
+        public int color = 0;
+        public int leaderColor = 0;
+    }
 
     public static class PointVisual {
         public double markerSize = 14.0;
@@ -84,7 +93,12 @@ public class VisualsConfig {
         if (instance == null) {
             instance = load();
         }
+        ensureDefaults(instance);
         return instance;
+    }
+
+    private static void ensureDefaults(VisualsConfig cfg) {
+        if (cfg.squadMarker == null) cfg.squadMarker = new SquadMarkerVisual();
     }
 
     public static void reload() {
@@ -107,6 +121,12 @@ public class VisualsConfig {
         VisualsConfig def = new VisualsConfig();
         save(def);
         return def;
+    }
+
+    public static void save() {
+        if (instance != null) {
+            save(instance);
+        }
     }
 
     private static void save(VisualsConfig cfg) {

@@ -24,16 +24,21 @@ public class CombatDataSyncPacket {
     private final int warCredits;
     private final int battleCredits;
     private final int donatTier;
+    private final boolean hasReceivedDogTag;
 
     public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName) {
-        this(playerId, teamOrdinal, kills, deaths, prefix, suffix, displayName, callsign, rankOrdinal, squadName, 0, 0, 0);
+        this(playerId, teamOrdinal, kills, deaths, prefix, suffix, displayName, callsign, rankOrdinal, squadName, 0, 0, 0, false);
     }
 
     public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName, int warCredits, int battleCredits) {
-        this(playerId, teamOrdinal, kills, deaths, prefix, suffix, displayName, callsign, rankOrdinal, squadName, warCredits, battleCredits, 0);
+        this(playerId, teamOrdinal, kills, deaths, prefix, suffix, displayName, callsign, rankOrdinal, squadName, warCredits, battleCredits, 0, false);
     }
 
     public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName, int warCredits, int battleCredits, int donatTier) {
+        this(playerId, teamOrdinal, kills, deaths, prefix, suffix, displayName, callsign, rankOrdinal, squadName, warCredits, battleCredits, donatTier, false);
+    }
+
+    public CombatDataSyncPacket(UUID playerId, int teamOrdinal, int kills, int deaths, String prefix, String suffix, String displayName, String callsign, int rankOrdinal, String squadName, int warCredits, int battleCredits, int donatTier, boolean hasReceivedDogTag) {
         this.playerId = playerId;
         this.teamOrdinal = teamOrdinal;
         this.kills = kills;
@@ -47,6 +52,7 @@ public class CombatDataSyncPacket {
         this.warCredits = warCredits;
         this.battleCredits = battleCredits;
         this.donatTier = donatTier;
+        this.hasReceivedDogTag = hasReceivedDogTag;
     }
 
     public static void encode(CombatDataSyncPacket msg, FriendlyByteBuf buf) {
@@ -63,6 +69,7 @@ public class CombatDataSyncPacket {
         buf.writeInt(msg.warCredits);
         buf.writeInt(msg.battleCredits);
         buf.writeInt(msg.donatTier);
+        buf.writeBoolean(msg.hasReceivedDogTag);
     }
 
     public static CombatDataSyncPacket decode(FriendlyByteBuf buf) {
@@ -70,7 +77,8 @@ public class CombatDataSyncPacket {
             buf.readUUID(), buf.readInt(), buf.readInt(), buf.readInt(),
             buf.readUtf(), buf.readUtf(), buf.readUtf(),
             buf.readUtf(), buf.readInt(), buf.readUtf(256),
-            buf.readInt(), buf.readInt(), buf.readInt()
+            buf.readInt(), buf.readInt(), buf.readInt(),
+            buf.readBoolean()
         );
     }
 
@@ -90,7 +98,7 @@ public class CombatDataSyncPacket {
             boolean isLeader = (rawDonat & 128) != 0;
             int actualDonat = rawDonat & 0x7F;
             ClientTeamData.playerDataMap.put(msg.playerId, new PlayerListEntry(
-                msg.rankOrdinal, msg.callsign, "", msg.kills, msg.deaths, msg.teamOrdinal, msg.squadName, actualDonat, isLeader
+                msg.rankOrdinal, msg.callsign, "", msg.kills, msg.deaths, msg.teamOrdinal, msg.squadName, actualDonat, isLeader, msg.hasReceivedDogTag
             ));
         });
         ctx.get().setPacketHandled(true);

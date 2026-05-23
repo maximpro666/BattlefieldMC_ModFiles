@@ -4,6 +4,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.core.GameManager;
+import com.pigeostudios.pwp.core.TeamManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -35,7 +36,14 @@ public class RedeployCommand {
                     }
                     lastRedeployTime.put(player.getUUID(), now);
                     player.getInventory().clearContent();
-                    player.hurt(player.damageSources().genericKill(), Float.MAX_VALUE);
+                    TeamManager tm = PWP.getTeamManager();
+                    if (tm != null) {
+                        tm.incrementDeaths(player.getUUID());
+                    }
+                    player.getPersistentData().remove("playerrevive:bleeding");
+                    player.getPersistentData().putBoolean("pwp:instant_death", true);
+                    player.setHealth(0f);
+                    player.die(player.damageSources().fellOutOfWorld());
                 }
                 return Command.SINGLE_SUCCESS;
             }));

@@ -30,7 +30,7 @@
     "russiaSpawn": [231, 26, -279],
     "natoVehicleSpawn": [503, 26, 109],
     "russiaVehicleSpawn": [227, 26, -248],
-    "baseRadius": 100,
+    "baseRadius": 45,
     "teamRotation": true,
     "hasDaylightCycle": true,
     "capturePoints": [

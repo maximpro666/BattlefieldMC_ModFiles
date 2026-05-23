@@ -37,7 +37,7 @@ import com.pigeostudios.pwp.network.BorderSyncPacket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Iterator;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -54,6 +54,7 @@ public class GameManager {
     }
 
     private static final ResourceLocation LOBBY_DIMENSION_ID = new ResourceLocation("minecraft", "overworld");
+    private static final ResourceLocation MATCH_LOBBY_DIMENSION_ID = new ResourceLocation("pwp", "lobby");
     private static final BlockPos LOBBY_SPAWN = new BlockPos(136, 68, -140);
     private static final int VOTE_SECONDS = 30;
     private static final int COUNTDOWN_SECONDS = 15;
@@ -80,6 +81,12 @@ public class GameManager {
     private BorderManager borderManager;
     private List<String> currentVoteCandidates = new ArrayList<>();
     private boolean pendingAutoStart = false;
+    private String lobbyStatus = "";
+
+    public void setLobbyStatus(String status) {
+        this.lobbyStatus = status != null ? status : "";
+        syncPhaseToAll();
+    }
 
     public GameManager(MinecraftServer server) {
         this.server = server;
@@ -849,7 +856,9 @@ public class GameManager {
         gamerule(l, "doMobSpawning", "false");
         gamerule(l, "mobGriefing", "false");
         gamerule(l, "doFireTick", "true");
-        gamerule(l, "doDaylightCycle", map.hasDaylightCycle() ? "true" : "false");
+        boolean daylight = map.hasDaylightCycle();
+        gamerule(l, "doDaylightCycle", daylight ? "true" : "false");
+        if (!daylight) l.setDayTime(6000);
         gamerule(l, "doWeatherCycle", "false");
         gamerule(l, "keepInventory", "false");
         gamerule(l, "fallDamage", "true");
@@ -943,6 +952,39 @@ public class GameManager {
             }
             safeTeleport(p, target, x, y, z);
         }
+    }
+
+    public boolean isInOwnBase(ServerPlayer player) {
+        if (currentMap == null || !currentMap.hasTeamSpawns()) return false;
+        TeamManager tm = PWP.getTeamManager();
+        if (tm == null) return false;
+        Team team = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
+        if (!team.isPlayable()) return false;
+        int[] spawn = team == Team.NATO ? currentMap.getNatoSpawn() : currentMap.getRussiaSpawn();
+        if (spawn == null) return false;
+        int radius = currentMap.getBaseRadius();
+        double dx = player.getX() - spawn[0];
+        double dz = player.getZ() - spawn[2];
+        return dx * dx + dz * dz <= radius * radius;
+    }
+
+    public boolean isInAnyBase(BlockPos pos) {
+        if (currentMap == null || !currentMap.hasTeamSpawns()) return false;
+        int radius = currentMap.getBaseRadius();
+        int radiusSq = radius * radius;
+        int[] nato = currentMap.getNatoSpawn();
+        if (nato != null) {
+            double dx = pos.getX() - nato[0];
+            double dz = pos.getZ() - nato[2];
+            if (dx * dx + dz * dz <= radiusSq) return true;
+        }
+        int[] russia = currentMap.getRussiaSpawn();
+        if (russia != null) {
+            double dx = pos.getX() - russia[0];
+            double dz = pos.getZ() - russia[2];
+            if (dx * dx + dz * dz <= radiusSq) return true;
+        }
+        return false;
     }
 
     private BlockPos getLobbySpawn(ServerLevel level) {
@@ -1054,12 +1096,18 @@ public class GameManager {
 
     // ========== World Resolution ==========
 
+    private static ResourceLocation getEffectiveLobbyId() {
+        if (ProxyMessenger.isMatchServer()) return MATCH_LOBBY_DIMENSION_ID;
+        return LOBBY_DIMENSION_ID;
+    }
+
     private ServerLevel getOrCreateLobbyWorld() {
-        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, LOBBY_DIMENSION_ID);
+        ResourceLocation id = getEffectiveLobbyId();
+        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, id);
         ServerLevel w = server.getLevel(key);
         if (w == null && !lobbyLoaded) {
             lobbyLoaded = true;
-            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "execute in pwp:lobby run say Lobby loaded");
+            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "execute in " + id + " run say Lobby loaded");
             w = server.getLevel(key);
         }
         return w != null ? w : server.overworld();
@@ -1076,7 +1124,7 @@ public class GameManager {
     }
 
     private ServerLevel getLobbyWorld() {
-        ServerLevel w = server.getLevel(ResourceKey.create(Registries.DIMENSION, LOBBY_DIMENSION_ID));
+        ServerLevel w = server.getLevel(ResourceKey.create(Registries.DIMENSION, getEffectiveLobbyId()));
         return w != null ? w : server.overworld();
     }
 
@@ -1104,7 +1152,8 @@ public class GameManager {
         GameStateSyncPacket pkt = new GameStateSyncPacket(
             currentPhase.ordinal(),
             currentMap != null ? currentMap.getName() : "",
-            winningTeam != null ? winningTeam.ordinal() : -1);
+            winningTeam != null ? winningTeam.ordinal() : -1,
+            lobbyStatus);
         PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), pkt);
 
         if (currentPhase == GamePhase.LOBBY || currentPhase == GamePhase.VOTING) {
@@ -1123,25 +1172,28 @@ public class GameManager {
         PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
             new GameStateSyncPacket(currentPhase.ordinal(),
                 currentMap != null ? currentMap.getName() : "",
-                winningTeam != null ? winningTeam.ordinal() : -1));
+                winningTeam != null ? winningTeam.ordinal() : -1,
+                lobbyStatus));
     }
 
     private void broadcastVoiceSpeakers() {
         if (server == null) return;
-        long now = System.currentTimeMillis();
+        TeamVoicePlugin.cleanupStaleSpeakers();
         var activeSpeakers = TeamVoicePlugin.activeSpeakers;
-        Iterator<Map.Entry<UUID, TeamVoicePlugin.VoiceSpeakerState>> it = activeSpeakers.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<UUID, TeamVoicePlugin.VoiceSpeakerState> entry = it.next();
+        if (activeSpeakers.isEmpty()) return;
+
+        TeamManager tm = PWP.getTeamManager();
+        if (tm == null) return;
+
+        for (Map.Entry<UUID, TeamVoicePlugin.VoiceSpeakerState> entry : activeSpeakers.entrySet()) {
             TeamVoicePlugin.VoiceSpeakerState state = entry.getValue();
-            if (now - state.lastSeen > 1500) {
-                it.remove();
-                continue;
-            }
+            Team speakerTeam = tm.getOrCreatePlayerData(entry.getKey()).getTeam();
+            if (!speakerTeam.isPlayable()) continue;
 
             VoiceSpeakingStatePacket pkt = new VoiceSpeakingStatePacket(entry.getKey(), state.name, state.channel);
             for (ServerPlayer listener : server.getPlayerList().getPlayers()) {
-                if (listener.getUUID().equals(entry.getKey())) continue;
+                Team listenerTeam = tm.getOrCreatePlayerData(listener.getUUID()).getTeam();
+                if (listenerTeam != speakerTeam) continue;
                 PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> listener), pkt);
             }
         }

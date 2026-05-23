@@ -12,8 +12,12 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 public class TeamSelectionScreen extends Screen {
+
+    private static final ResourceLocation BG_NATO   = new ResourceLocation("pwp", "textures/gui/team_nato.png");
+    private static final ResourceLocation BG_RUSSIA = new ResourceLocation("pwp", "textures/gui/team_ru.png");
 
     private static final int COLOR_ORANGE    = UITheme.ACCENT;
     private static final int COLOR_BG        = UITheme.BG_SCREEN;
@@ -91,14 +95,14 @@ public class TeamSelectionScreen extends Screen {
         boolean natoHovered = mx >= natoX && mx <= natoX + cardW && my >= natoY && my <= natoY + cardH;
         natoHover = AnimationHelper.lerp(natoHover, natoHovered ? 1f : 0f, 0.15f);
         drawTeamCard(g, natoX, natoY, cardW, cardH, "NATO", "North Atlantic\nTreaty Organization",
-            COLOR_NATO_ACCENT, natoHover, fadeAlpha);
+            COLOR_NATO_ACCENT, natoHover, fadeAlpha, BG_NATO);
 
         int rusX = cx + gap / 2;
         int rusY = cy - cardH / 2;
         boolean rusHovered = mx >= rusX && mx <= rusX + cardW && my >= rusY && my <= rusY + cardH;
         russiaHover = AnimationHelper.lerp(russiaHover, rusHovered ? 1f : 0f, 0.15f);
         drawTeamCard(g, rusX, rusY, cardW, cardH, "RUSSIA", "Russian Armed\nForces",
-            COLOR_RUSSIA_ACCENT, russiaHover, fadeAlpha);
+            COLOR_RUSSIA_ACCENT, russiaHover, fadeAlpha, BG_RUSSIA);
 
         int natoTickets   = ClientTeamData.getNatoTickets();
         int russiaTickets = ClientTeamData.getRussiaTickets();
@@ -114,11 +118,15 @@ public class TeamSelectionScreen extends Screen {
 
     private void drawTeamCard(GuiGraphics g, int x, int y, int w, int h,
                                String teamName, String subName,
-                               int accentColor, float hover, float alpha) {
+                               int accentColor, float hover, float alpha,
+                               ResourceLocation bgTex) {
         int bgAlpha  = (int)(alpha * (0xDD + hover * 0x11));
         int brdAlpha = (int)(alpha * (0x88 + hover * 0x77));
 
-        g.fill(x, y, x + w, y + h, AnimationHelper.withAlpha(COLOR_CARD_BG, bgAlpha));
+        g.setColor(1f, 1f, 1f, alpha * 0.6f);
+        g.blit(bgTex, x, y, 0, 0, w, h, w, h);
+        g.setColor(1f, 1f, 1f, 1f);
+        g.fill(x, y, x + w, y + h, AnimationHelper.withAlpha(COLOR_BG, (int)(alpha * (0x66 + hover * 0x22))));
 
         int barH = (int)(4 + hover * 2);
         g.fill(x, y, x + w, y + barH, AnimationHelper.withAlpha(accentColor, (int)(alpha * 255)));

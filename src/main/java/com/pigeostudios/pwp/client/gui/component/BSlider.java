@@ -1,5 +1,6 @@
 package com.pigeostudios.pwp.client.gui.component;
 
+import com.pigeostudios.pwp.client.gui.UITheme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -9,15 +10,18 @@ import java.util.function.Consumer;
 
 public class BSlider extends AbstractWidget {
 
-    private static final int COLOR_BG       = 0xAA0A0A0A;
     private static final int COLOR_BORDER   = 0xFF2E2E2E;
-    private static final int COLOR_TRACK    = 0xFF555555;
+    private static final int COLOR_TRACK    = 0xFF3A3A3A;
     private static final int COLOR_FILL     = 0xFFE07B00;
     private static final int COLOR_HANDLE   = 0xFFFFFFFF;
-    private static final int COLOR_TEXT     = 0xFFEFEFEF;
+    private static final int COLOR_HANDLE_HOVER = 0xFFFFE0B0;
+    private static final int COLOR_TEXT     = 0xFFB0B0B0;
+    private static final int COLOR_VALUE    = 0xFFEFEFEF;
 
     private float value;
     private final Consumer<Float> onChange;
+    private float hoverAnim = 0f;
+    private boolean wasHovered = false;
 
     public BSlider(int x, int y, int width, int height, Component label, float initial, Consumer<Float> onChange) {
         super(x, y, width, height, label);
@@ -27,23 +31,74 @@ public class BSlider extends AbstractWidget {
 
     @Override
     public void renderWidget(GuiGraphics g, int mx, int my, float pt) {
-        int trackY = getY() + height / 2 - 2;
-        int trackH = 4;
+        boolean hovered = isHoveredOrFocused();
+        wasHovered = hovered;
+        hoverAnim = AnimationHelper.lerp(hoverAnim, hovered ? 1f : 0f, 0.12f);
 
-        g.fill(getX(), getY(), getX() + width, getY() + height, COLOR_BG);
-        g.fill(getX(), getY(), getX() + width, getY() + 1, COLOR_BORDER);
-        g.fill(getX(), getY() + height - 1, getX() + width, getY() + height, COLOR_BORDER);
+        int sx = getX();
+        int sy = getY();
+        int sw = width;
+        int sh = height;
 
-        int fillW = (int)(value * (width - 10));
-        g.fill(getX() + 5, trackY, getX() + 5 + fillW, trackY + trackH, COLOR_FILL);
-        g.fill(getX() + 5 + fillW, trackY, getX() + width - 5, trackY + trackH, COLOR_TRACK);
+        // Background
+        int bgColor = AnimationHelper.blendColors(0xDD141414, 0xDD1E1E1E, hoverAnim);
+        g.fill(sx + 2, sy, sx + sw - 2, sy + sh, bgColor);
+        g.fill(sx, sy + 2, sx + 2, sy + sh - 2, bgColor);
+        g.fill(sx + sw - 2, sy + 2, sx + sw, sy + sh - 2, bgColor);
 
-        int hx = getX() + 5 + fillW;
-        g.fill(hx - 3, trackY - 2, hx + 3, trackY + trackH + 2, COLOR_HANDLE);
+        // Borders
+        int borderColor = AnimationHelper.blendColors(COLOR_BORDER, UITheme.ACCENT_DIM, hoverAnim);
+        g.fill(sx, sy, sx + sw, sy + 1, borderColor);
+        g.fill(sx, sy + sh - 1, sx + sw, sy + sh, borderColor);
+        g.fill(sx, sy, sx + 1, sy + sh, borderColor);
+        g.fill(sx + sw - 1, sy, sx + sw, sy + sh, borderColor);
 
+        // Orange accent bar on left
+        int accentAlpha = (int)(150 + hoverAnim * 105);
+        g.fill(sx + 1, sy + 2, sx + 3, sy + sh - 2, AnimationHelper.withAlpha(UITheme.ACCENT, accentAlpha));
+
+        // Track
+        int trackX = sx + 12;
+        int trackW = sw - 28;
+        int trackY = sy + sh / 2 - 1;
+        int trackH = 3;
+
+        g.fill(trackX, trackY, trackX + trackW, trackY + trackH, COLOR_TRACK);
+
+        // Track fill
+        int fillW = (int)(value * trackW);
+        if (fillW > 0) {
+            g.fill(trackX, trackY, trackX + fillW, trackY + trackH, COLOR_FILL);
+        }
+
+        // Handle (circle)
+        int handleRadius = 5 + (int)(hoverAnim * 1);
+        int handleX = trackX + fillW;
+        int handleY = trackY + trackH / 2;
+        int handleColor = AnimationHelper.blendColors(COLOR_HANDLE, COLOR_HANDLE_HOVER, hoverAnim);
+
+        g.fill(handleX - handleRadius, handleY - handleRadius,
+               handleX + handleRadius, handleY + handleRadius, handleColor);
+        if (hoverAnim > 0.01f) {
+            int glowAlpha = (int)(hoverAnim * 60);
+            int glowColor = AnimationHelper.withAlpha(UITheme.ACCENT, glowAlpha);
+            g.fill(handleX - handleRadius - 2, handleY - handleRadius - 2,
+                   handleX + handleRadius + 2, handleY + handleRadius + 2, glowColor);
+        }
+
+        // Label
         var font = Minecraft.getInstance().font;
-        int tw = font.width(getMessage());
-        g.drawString(font, getMessage(), getX() + 4, getY() + (height - font.lineHeight) / 2, COLOR_TEXT);
+        String label = getMessage().getString();
+        int colonIdx = label.indexOf(": ");
+        String labelText = colonIdx >= 0 ? label.substring(0, colonIdx) : label;
+        String valueText = colonIdx >= 0 ? label.substring(colonIdx + 2) : "";
+
+        g.drawString(font, labelText, sx + 8, sy + (sh - font.lineHeight) / 2, COLOR_TEXT);
+
+        if (!valueText.isEmpty()) {
+            int vw = font.width(valueText);
+            g.drawString(font, valueText, sx + sw - 8 - vw, sy + (sh - font.lineHeight) / 2, COLOR_VALUE);
+        }
     }
 
     @Override
@@ -57,7 +112,9 @@ public class BSlider extends AbstractWidget {
     }
 
     private void updateFromMouse(double mx) {
-        float v = (float)((mx - getX() - 5) / (width - 10));
+        int trackX = getX() + 12;
+        int trackW = width - 28;
+        float v = (float)((mx - trackX) / trackW);
         v = Math.max(0, Math.min(1, v));
         if (Math.abs(v - value) > 0.005f) {
             value = v;

@@ -64,6 +64,7 @@ public class SquadCommand {
 
         Squad squad = sm.createSquad(name, playerTeam, player.getUUID());
         tm.assignSquad(player.getUUID(), squad.getSquadId());
+        sm.syncToAll(source.getServer());
 
         source.sendSuccess(() -> Component.literal("§aSquad created: §b" + name), true);
         return 1;
@@ -136,6 +137,7 @@ public class SquadCommand {
 
                 sm.acceptInvitation(player.getUUID(), squad.getSquadId());
                 tm.assignSquad(player.getUUID(), squad.getSquadId());
+                sm.syncToAll(source.getServer());
 
                 source.sendSuccess(() -> Component.literal("§aJoined squad: §b" + squadName), true);
                 return 1;
@@ -161,6 +163,7 @@ public class SquadCommand {
         String squadName = squad.getName();
         sm.leaveSquad(player.getUUID());
         PWP.getTeamManager().assignSquad(player.getUUID(), -1);
+        sm.syncToAll(source.getServer());
 
         source.sendSuccess(() -> Component.literal("§aLeft squad: §b" + squadName), true);
         return 1;
@@ -185,6 +188,7 @@ public class SquadCommand {
 
         sm.kickMember(sender.getUUID(), target.getUUID());
         PWP.getTeamManager().assignSquad(target.getUUID(), -1);
+        sm.syncToAll(source.getServer());
 
         source.sendSuccess(() -> Component.literal("§aKicked " + target.getName().getString()), true);
         return 1;
@@ -253,6 +257,7 @@ public class SquadCommand {
 
         String squadName = squad.getName();
         sm.disbandSquad(squad.getSquadId());
+        sm.syncToAll(source.getServer());
 
         source.sendSuccess(() -> Component.literal("§aSquad disbanded: §b" + squadName), true);
         return 1;
