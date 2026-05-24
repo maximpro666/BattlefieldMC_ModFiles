@@ -7,7 +7,7 @@ modId="pwp"
 version="1.0.0"
 displayName="Project Warfare Pigeo"
 authors="Pigeo Studios"
-description='''Project Warfare Pigeo (PWP) â€” tactical PvP mod for Minecraft Forge 1.20.1. Squad-based combat, capture points, vehicles, ranks, and more.'''
+description='''Project Warfare Pigeo (PWP) — tactical PvP mod for Minecraft Forge 1.20.1. Squad-based combat, capture points, vehicles, ranks, and more.'''
 
 [[dependencies.pwp]]
     modId="forge"
