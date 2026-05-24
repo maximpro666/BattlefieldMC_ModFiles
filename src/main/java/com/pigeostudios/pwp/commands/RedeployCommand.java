@@ -40,7 +40,6 @@ public class RedeployCommand {
                     if (tm != null) {
                         tm.incrementDeaths(player.getUUID());
                     }
-                    player.getPersistentData().remove("playerrevive:bleeding");
                     player.getPersistentData().putBoolean("pwp:instant_death", true);
                     player.setHealth(0f);
                     player.die(player.damageSources().fellOutOfWorld());

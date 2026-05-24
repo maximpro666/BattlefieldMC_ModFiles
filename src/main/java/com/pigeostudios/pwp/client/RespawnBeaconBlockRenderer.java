@@ -18,7 +18,7 @@ import org.joml.Vector3f;
 import org.joml.Quaternionf;
 
 public class RespawnBeaconBlockRenderer implements BlockEntityRenderer<RespawnBeaconBlockEntity> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation("pwp", "textures/entity/fob_beacon.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation("pwp", "textures/markers/fob.png");
 
     public RespawnBeaconBlockRenderer(BlockEntityRendererProvider.Context ctx) {}
 

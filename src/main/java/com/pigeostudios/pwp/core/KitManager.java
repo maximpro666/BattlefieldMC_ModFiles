@@ -27,6 +27,8 @@ public class KitManager {
     private static Method curiosSetStackInSlot;
     private static Method curiosGetInventory;
 
+    private static net.minecraft.world.item.Item dogTagItem;
+
     static {
         try {
             Class<?> apiClass = Class.forName("top.theillusivec4.curios.api.CuriosApi");
@@ -43,6 +45,13 @@ public class KitManager {
         } catch (Exception e) {
             curiosDetected = false;
             PWP.LOGGER.warn("Curios API not available: {}", e.getMessage());
+        }
+        try {
+            dogTagItem = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+                new net.minecraft.resources.ResourceLocation("superbwarfare:dog_tag"));
+            if (dogTagItem == net.minecraft.world.item.Items.AIR) dogTagItem = null;
+        } catch (Exception e) {
+            dogTagItem = null;
         }
     }
 
@@ -114,6 +123,7 @@ public class KitManager {
                     ItemStack s = (ItemStack) curiosGetStackInSlot.invoke(stacks, i);
                     if (s == null) break;
                     if (s.isEmpty()) continue;
+                    if (dogTagItem != null && s.getItem() == dogTagItem) continue;
                     curiosSetStackInSlot.invoke(stacks, i, ItemStack.EMPTY);
                 } catch (Exception e) { break; }
             }

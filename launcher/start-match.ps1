@@ -3,11 +3,12 @@ param(
     [string]$LobbyRoot = ""
 )
 
-# Resolve lobby root path
+# Load central paths
+. (Join-Path $PSScriptRoot "..\config\paths.ps1")
+
+# Resolve lobby root path — default from central config
 if (-not $LobbyRoot) {
-    $LobbyRoot = Join-Path $PSScriptRoot "..\servar"
-    $resolved = Resolve-Path -LiteralPath $LobbyRoot -ErrorAction SilentlyContinue
-    if ($resolved) { $LobbyRoot = $resolved.Path }
+    $LobbyRoot = $script:DEPLOY_SERVER
 }
 
 # Check config exists
@@ -100,7 +101,7 @@ $jvmOpts = @(
     "nogui"
 )
 
-$proc = Start-Process -FilePath "C:\Users\maska\AppData\Roaming\PrismLauncher\java\java-runtime-gamma\bin\java.exe" -ArgumentList $jvmOpts -WorkingDirectory $temp -NoNewWindow -PassThru
+$proc = Start-Process -FilePath "$script:JAVA_HOME\bin\java.exe" -ArgumentList $jvmOpts -WorkingDirectory $temp -NoNewWindow -PassThru
 
 $logFile = Join-Path $temp "logs\latest.log"
 $elapsed = 0

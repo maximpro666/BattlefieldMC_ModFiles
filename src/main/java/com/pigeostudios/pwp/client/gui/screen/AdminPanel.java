@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 
 public class AdminPanel extends Screen {
 
-    private enum Tab { MATCH, MAPS, KITS, TEAMS, CONFIG }
+    private enum Tab { MATCH, MAPS, KITS, TEAMS, CONFIG, PUNISHMENTS, REPORTS, TICKETS }
 
     private static final int NAV_COLLAPSED = 50;
     private static final int NAV_EXPANDED  = 160;
@@ -21,14 +21,16 @@ public class AdminPanel extends Screen {
     private static final int HEADER_H      = 40;
     private static final int QUICK_BAR_H   = 36;
 
-    private static final String[] TAB_ICONS  = {"\u26A1", "\uD83D\uDDFA\uFE0F", "\u2694\uFE0F", "\uD83D\uDC65", "\u2699\uFE0F"};
-    private static final String[] TAB_LABELS = {"Match", "Maps", "Kits", "Teams", "Config"};
+    private static final String[] TAB_ICONS  = {"\u26A1", "\uD83D\uDDFA\uFE0F", "\u2694\uFE0F", "\uD83D\uDC65", "\u2699\uFE0F", "\uD83D\uDD28", "\uD83D\uDCE2", "\uD83C\uDFAB"};
+    private static final String[] TAB_LABELS = {"Match", "Maps", "Kits", "Teams", "Config", "Punishments", "Reports", "Tickets"};
 
     private Tab currentTab = Tab.MATCH;
     private float fadeAlpha = 0f;
     private long openTime;
     private float navHover = 0f;
     private int activeNavIdx = 0;
+
+    private int ticketScroll = 0;
 
     // ===== Kit Editor State =====
     private com.google.gson.JsonObject kitClassesObj = null;
@@ -95,6 +97,9 @@ public class AdminPanel extends Screen {
             case KITS  -> renderKitsTab(g, contentX, contentY, contentW, contentH, mx, my);
             case TEAMS -> renderTeamsTab(g, contentX, contentY, contentW, contentH);
             case CONFIG -> renderConfigTab(g, contentX, contentY, contentW, contentH);
+            case PUNISHMENTS -> renderPunishmentsTab(g, contentX, contentY, contentW, contentH);
+            case REPORTS -> renderReportsTab(g, contentX, contentY, contentW, contentH);
+            case TICKETS -> renderTicketsTab(g, contentX, contentY, contentW, contentH, mx, my);
         }
 
         super.render(g, mx, my, pt);
@@ -172,6 +177,22 @@ public class AdminPanel extends Screen {
         }
         if (currentTab == Tab.KITS) {
             if (kitHandleClick(mx, my, btn)) return true;
+        }
+        if (currentTab == Tab.TICKETS) {
+            var tickets = ClientTeamData.ticketList;
+            int tx = (int)(NAV_COLLAPSED + (NAV_EXPANDED - NAV_COLLAPSED) * navHover) + 4;
+            int ty = HEADER_H + QUICK_BAR_H + 10;
+            int listX = tx + 4;
+            int listY = ty + 36;
+            int rowH = 20;
+            int vis = Math.max(1, (height - listY - 24) / rowH);
+            for (int i = ticketScroll; i < Math.min(ticketScroll + vis, tickets.size()); i++) {
+                int ry = listY + (i - ticketScroll) * rowH;
+                if (mx >= listX - 4 && mx <= listX + width - tx - 20 && my >= ry && my <= ry + rowH) {
+                    Minecraft.getInstance().setScreen(new TicketScreen(tickets.get(i).id));
+                    return true;
+                }
+            }
         }
         return super.mouseClicked(mx, my, btn);
     }
@@ -879,6 +900,158 @@ public class AdminPanel extends Screen {
             x + 8, cy, AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fadeAlpha * 180)));
     }
 
+    private void renderPunishmentsTab(GuiGraphics g, int x, int y, int w, int h) {
+        g.drawString(font, "PUNISHMENTS", x, y,
+            AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 255)));
+        int cy = y + 20;
+        g.fill(x, cy, x + w, cy + 1, AnimationHelper.withAlpha(UITheme.BORDER, (int)(fadeAlpha * 150)));
+        cy += 16;
+        g.drawString(font, "Commands:", x + 8, cy,
+            AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 200)));
+        cy += 18;
+        String[] cmds = {
+            "§6/warnchat <player> <reason>",
+            "§6/warngame <player> <reason>",
+            "§6/warnvoice <player> <reason>",
+            "§6/warngeneral <player> <reason>",
+            "§6/kick <player> <reason>",
+            "§6/mute <player> <hours> <reason>",
+            "§6/voicemute <player> <hours> <reason>",
+            "§6/tempban <player> <hours> <reason>",
+            "§6/ban <player> <reason>",
+            "§6/unban <uuid>",
+            "§6/unmute <player>",
+            "§6/punishments <player>",
+            "§6/staff add/remove/list"
+        };
+        for (String cmd : cmds) {
+            if (cy > y + h - 10) break;
+            g.drawString(font, cmd, x + 12, cy,
+                AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 200)));
+            cy += 16;
+        }
+    }
+
+    private void renderTicketsTab(GuiGraphics g, int x, int y, int w, int h, int mx, int my) {
+        g.drawString(font, "TICKETS", x, y,
+            AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 255)));
+
+        var tickets = ClientTeamData.ticketList;
+        int headerY = y + 18;
+        g.fill(x, headerY, x + w, headerY + 1, AnimationHelper.withAlpha(UITheme.BORDER, (int)(fadeAlpha * 150)));
+
+        int[] cw = {32, 100, 80, 70, 80};
+        String[] headers = {"ID", "Reporter", "Target", "Type", "Status"};
+        int hx = x + 6;
+        for (int i = 0; i < cw.length; i++) {
+            g.drawString(font, "\u00A78" + headers[i], hx, headerY + 6,
+                AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fadeAlpha * 180)));
+            hx += cw[i];
+        }
+
+        // scrollable list area
+        int listX = x + 4;
+        int listY = headerY + 18;
+        int listW = w - 8;
+        int listH = h - (listY - y) - 14;
+
+        g.fill(listX - 4, listY, listX + listW + 4, listY + listH,
+            AnimationHelper.withAlpha(UITheme.BG_BLACK, (int)(fadeAlpha * 0x33)));
+
+        int rowH = 20;
+        int vis = Math.max(1, listH / rowH);
+        int maxScroll = Math.max(0, tickets.size() - vis);
+        if (ticketScroll > maxScroll) ticketScroll = maxScroll;
+
+        for (int i = ticketScroll; i < Math.min(ticketScroll + vis, tickets.size()); i++) {
+            var t = tickets.get(i);
+            int ry = listY + (i - ticketScroll) * rowH;
+            boolean hov = mx >= listX && mx <= listX + listW && my >= ry && my <= ry + rowH;
+
+            if (hov) {
+                g.fill(listX, ry, listX + listW, ry + rowH,
+                    AnimationHelper.withAlpha(UITheme.ACCENT_GHOST, (int)(fadeAlpha * 255)));
+            }
+            g.fill(listX, ry + rowH - 1, listX + listW, ry + rowH,
+                AnimationHelper.withAlpha(UITheme.BORDER, (int)(fadeAlpha * 40)));
+
+            int cx2 = listX + 2;
+            g.drawString(font, "\u00A7f#" + t.id, cx2, ry + 4,
+                AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 200)));
+            cx2 += cw[0];
+
+            String rep = t.reporterName;
+            if (rep.startsWith("UUID:")) rep = rep.substring(5);
+            if (rep.length() > 10) rep = rep.substring(0, 8) + "..";
+            g.drawString(font, "\u00A7e" + rep, cx2, ry + 4,
+                AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 200)));
+            cx2 += cw[1];
+
+            String target = t.targetName.length() > 10 ? t.targetName.substring(0, 8) + ".." : t.targetName;
+            g.drawString(font, "\u00A7f" + target, cx2, ry + 4,
+                AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 200)));
+            cx2 += cw[2];
+
+            g.drawString(font, "\u00A77" + t.type, cx2, ry + 4,
+                AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 200)));
+            cx2 += cw[3];
+
+            // assigned badge
+            if (t.assignedTo != null && !t.assignedTo.isEmpty()) {
+                String a = t.assignedTo.length() > 8 ? t.assignedTo.substring(0, 6) + ".." : t.assignedTo;
+                g.drawString(font, "\u00A76\u2691" + a, cx2, ry + 4,
+                    AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 220)));
+            } else {
+                g.drawString(font, "\u00A78\u2713 open", cx2, ry + 4,
+                    AnimationHelper.withAlpha(UITheme.STATUS_OK, (int)(fadeAlpha * 180)));
+            }
+        }
+
+        if (tickets.isEmpty()) {
+            g.drawCenteredString(font, "\u00A77No tickets", listX + listW / 2, listY + listH / 2 - 4,
+                AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fadeAlpha * 200)));
+        }
+
+        // scrollbar hint
+        if (maxScroll > 0) {
+            float pct = (float) ticketScroll / maxScroll;
+            int barH = Math.max(8, listH * vis / Math.max(1, tickets.size()));
+            int barY = listY + (int)((listH - barH) * pct);
+            g.fill(listX + listW + 2, barY, listX + listW + 4, barY + barH,
+                AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 150)));
+        }
+    }
+
+    private void renderReportsTab(GuiGraphics g, int x, int y, int w, int h) {
+        g.drawString(font, "REPORTS", x, y,
+            AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fadeAlpha * 255)));
+        int cy = y + 20;
+        g.fill(x, cy, x + w, cy + 1, AnimationHelper.withAlpha(UITheme.BORDER, (int)(fadeAlpha * 150)));
+        cy += 16;
+        g.drawString(font, "Commands:", x + 8, cy,
+            AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 200)));
+        cy += 18;
+        String[] cmds = {
+            "§6/report <player> <type> <desc>",
+            "§6/reports",
+            "§6/report view <id>",
+            "§6/report claim <id>",
+            "§6/report dismiss <id> <reason>",
+            "§6/report punish <id> <punishment_id>",
+            "",
+            "§7Report types:",
+            " TEAM_KILL, CHEATING, TOXIC_CHAT, VOICE_ABUSE,",
+            " GRIEFING, EXPLOITING, AFK, INAPPROPRIATE_NAME,",
+            " TEAM_STACKING, COALITION, OTHER"
+        };
+        for (String cmd : cmds) {
+            if (cy > y + h - 10) break;
+            g.drawString(font, cmd, x + 12, cy,
+                AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, (int)(fadeAlpha * 200)));
+            cy += 16;
+        }
+    }
+
     private void drawLValue(GuiGraphics g, int x, int y, String label, String value, int valueColor) {
         g.drawString(font, label + ":", x, y,
             AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 200)));
@@ -901,6 +1074,19 @@ public class AdminPanel extends Screen {
             case 3 -> "ENDED";
             default -> "UNKNOWN";
         };
+    }
+
+    @Override
+    public boolean mouseScrolled(double mx, double my, double delta) {
+        if (currentTab == Tab.TICKETS) {
+            int listH = height - HEADER_H - QUICK_BAR_H - 10 - 36 - 14;
+            int rowH = 20;
+            int vis = Math.max(1, listH / rowH);
+            int maxScroll = Math.max(0, ClientTeamData.ticketList.size() - vis);
+            ticketScroll = (int) Math.max(0, Math.min(maxScroll, ticketScroll - delta * 3));
+            return true;
+        }
+        return super.mouseScrolled(mx, my, delta);
     }
 
     @Override

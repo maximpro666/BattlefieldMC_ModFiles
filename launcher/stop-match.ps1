@@ -2,6 +2,9 @@ param(
     [string]$ConfigPath = (Join-Path $PSScriptRoot "match-config.json")
 )
 
+# Load central paths
+. (Join-Path $PSScriptRoot "..\config\paths.ps1")
+
 if (-not (Test-Path $ConfigPath)) {
     Write-Warning "[launcher] match-config.json not found at $ConfigPath, skipping stop"
     exit 0

@@ -2,14 +2,17 @@ package com.pigeostudios.pwp.events;
 
 import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.core.*;
-import com.pigeostudios.pwp.integration.PlayerReviveIntegration;
+
 import com.pigeostudios.pwp.network.*;
+import com.pigeostudios.pwp.service.EconomyService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -21,6 +24,8 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,12 +39,41 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CombatEventHandler {
     private final TeamManager teamManager;
     private static net.minecraft.server.MinecraftServer serverInstance;
 
     private static final Map<Class<?>, Map<String, Method>> REFLECT_METHOD_CACHE = new HashMap<>();
+
+    private static BufferedWriter killLogWriter;
+    private static Path killLogPath;
+
+    private static BufferedWriter getKillLogWriter() {
+        if (killLogWriter != null) return killLogWriter;
+        try {
+            killLogPath = Paths.get("world/pwp/logs/kills.log");
+            Files.createDirectories(killLogPath.getParent());
+            killLogWriter = Files.newBufferedWriter(killLogPath, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            PWP.LOGGER.error("Failed to open kill log: {}", e.getMessage());
+        }
+        return killLogWriter;
+    }
+
+    public static void flushKillLog() {
+        if (killLogWriter != null) {
+            try { killLogWriter.flush(); } catch (IOException ignored) {}
+        }
+    }
+
+    public static void closeKillLog() {
+        if (killLogWriter != null) {
+            try { killLogWriter.close(); } catch (IOException ignored) {}
+            killLogWriter = null;
+        }
+    }
 
     private static Method resolveMethod(Class<?> clazz, String name) {
         Map<String, Method> classCache = REFLECT_METHOD_CACHE.get(clazz);
@@ -75,14 +109,13 @@ public class CombatEventHandler {
     }
 
     private void logKill(String killerName, String victimName, String type) {
+        BufferedWriter writer = getKillLogWriter();
+        if (writer == null) return;
         try {
-            Path logDir = Paths.get("world/pwp/logs");
-            Files.createDirectories(logDir);
             String line = String.format("[%s] %s -> %s (%s)%n",
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                 killerName, victimName, type);
-            Files.writeString(logDir.resolve("kills.log"), line,
-                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            writer.write(line);
         } catch (Exception ignored) {}
     }
 
@@ -163,12 +196,12 @@ public class CombatEventHandler {
                 if (method == null) continue;
                 Object result = method.invoke(entity);
 
-                if (result instanceof ServerPlayer) {
-                    return (ServerPlayer) result;
+                if (result instanceof ServerPlayer sp) return sp;
+                if (result instanceof UUID uuid) {
+                    return level.getServer().getPlayerList().getPlayer(uuid);
                 }
-                if (result instanceof UUID) {
-                    return level.getServer().getPlayerList().getPlayer((UUID) result);
-                }
+                if (result instanceof net.minecraft.world.entity.LivingEntity le
+                        && le instanceof ServerPlayer sp2) return sp2;
             } catch (Exception ignored) {
             }
         }
@@ -197,8 +230,26 @@ public class CombatEventHandler {
         return null;
     }
 
+    private ServerPlayer resolveAttackerFallback(DamageSource source, ServerLevel level) {
+        Entity direct = source.getDirectEntity();
+        if (direct == null) return null;
+        try {
+            java.lang.reflect.Method m = direct.getClass().getMethod("getOwner");
+            Object result = m.invoke(direct);
+            if (result instanceof ServerPlayer) return (ServerPlayer) result;
+            if (result instanceof UUID) return level.getServer().getPlayerList().getPlayer((UUID) result);
+        } catch (Exception ignored) {}
+        try {
+            java.lang.reflect.Method m = direct.getClass().getMethod("getShooter");
+            Object result = m.invoke(direct);
+            if (result instanceof ServerPlayer) return (ServerPlayer) result;
+        } catch (Exception ignored) {}
+        return null;
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onLivingAttack(LivingAttackEvent event) {
+        if (event.isCanceled()) return;
         if (!(event.getEntity() instanceof ServerPlayer victim)) {
             return;
         }
@@ -213,37 +264,50 @@ public class CombatEventHandler {
         ServerLevel level = (ServerLevel) victim.level();
         ServerPlayer attacker = resolveAttacker(source, level);
 
+        // Anti-abuse #8: remove attacker's invulnerability on attack
+        if (attacker != null) {
+            attacker.getPersistentData().remove("pwp:spawn_invuln");
+            attacker.getPersistentData().remove("pwp:spawn_invuln_ticks");
+        }
+
         GameManager gm = PWP.getGameManager();
-        if (gm != null && (gm.isInOwnBase(victim) || (attacker != null && gm.isInOwnBase(attacker)))) {
+        if (gm != null && gm.isInOwnBase(victim)) {
             event.setCanceled(true);
             return;
         }
 
-        // Bypass bleedout for explosions and headshots — instant kill, no knock
-        if (PlayerReviveIntegration.isModPresent()) {
-            boolean bypass = source.is(net.minecraft.tags.DamageTypeTags.IS_EXPLOSION);
-            if (!bypass) {
-                bypass = isHeadShot(source, victim);
-            }
-            if (bypass) {
-                float damage = event.getAmount();
-                boolean lethal = victim.getHealth() - damage <= 0f;
-                if (lethal && attacker != null && attacker != victim
-                        && !teamManager.isFriendly(attacker, victim)) {
-                    event.setCanceled(true);
-                    victim.getPersistentData().putBoolean("pwp:direct_kill", true);
-                    victim.setHealth(0f);
-                    victim.die(source);
-                    return;
-                }
-            }
-        }
-
-        if (PlayerReviveIntegration.isPlayerDowned(victim) && attacker != null && attacker != victim
-                && !teamManager.isFriendly(attacker, victim)) {
-            PlayerReviveIntegration.getInstance().finishPlayer(victim);
+        // Anti-abuse #8: protect victim with spawn invulnerability
+        if (victim.getPersistentData().getBoolean("pwp:spawn_invuln")) {
             event.setCanceled(true);
             return;
+        }
+
+        PWPConfig pwpCfg = PWP.getConfig();
+        boolean bleedingEnabled = pwpCfg != null && pwpCfg.isBleedingEnabled();
+
+        // Bleeding player being attacked — finish or cancel damage
+        if (bleedingEnabled && com.pigeostudios.pwp.bleeding.BleedingHandler.isBleeding(victim)) {
+            if (attacker != null && attacker != victim
+                    && !teamManager.isFriendly(attacker, victim)) {
+                event.setCanceled(true);
+                com.pigeostudios.pwp.bleeding.BleedingHandler.getInstance()
+                    .finishPlayer(victim, attacker, source);
+                return;
+            }
+            event.setCanceled(true);
+            return;
+        }
+
+        // Lethal damage — bleed if possible, die if bypass
+        if (bleedingEnabled && victim.getHealth() - event.getAmount() <= 0f
+                && !shouldBypassBleeding(source, victim)) {
+            if (attacker == null || (attacker != victim
+                    && !teamManager.isFriendly(attacker, victim))) {
+                event.setCanceled(true);
+                com.pigeostudios.pwp.bleeding.BleedingHandler.getInstance()
+                    .startBleeding(victim, attacker, source);
+                return;
+            }
         }
 
         if (attacker != null) {
@@ -278,6 +342,24 @@ public class CombatEventHandler {
         return Math.abs(projY - eyeY) < 0.4;
     }
 
+    private boolean shouldBypassBleeding(DamageSource source, ServerPlayer victim) {
+        if (source.is(DamageTypeTags.IS_EXPLOSION)) return true;
+        if (isHeadShot(source, victim)) return true;
+        Entity direct = source.getDirectEntity();
+        if (direct != null) {
+            VehicleManager vm = PWP.getVehicleManager();
+            if (vm != null && vm.isVehicleEntityType(direct)) return true;
+        }
+        PWPConfig cfg = PWP.getConfig();
+        if (cfg != null && cfg.getBleedingBypassSources() != null) {
+            String srcName = source.getMsgId();
+            for (String bypass : cfg.getBleedingBypassSources()) {
+                if (srcName.equals(bypass.strip())) return true;
+            }
+        }
+        return false;
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onLivingDeath(LivingDeathEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer victim)) return;
@@ -290,24 +372,28 @@ public class CombatEventHandler {
         GameManager game = PWP.getGameManager();
         boolean isPlaying = game != null && game.isPlaying();
 
-        boolean deathAlreadyCounted = false;
-        boolean skipRespawn = false;
-        if (isPlaying && PlayerReviveIntegration.isModPresent()) {
-            if (victim.getPersistentData().getBoolean("pwp:finished_death")) {
-                victim.getPersistentData().remove("pwp:finished_death");
-                deathAlreadyCounted = true;
-                skipRespawn = false;
-            } else if (victim.getPersistentData().getBoolean("pwp:instant_death")) {
-                victim.getPersistentData().remove("pwp:instant_death");
-                deathAlreadyCounted = true;
-                skipRespawn = false;
-            } else if (victim.getPersistentData().getBoolean("pwp:direct_kill")) {
-                victim.getPersistentData().remove("pwp:direct_kill");
-                deathAlreadyCounted = false;
-                skipRespawn = false;
-            } else {
-                deathAlreadyCounted = true;
-                skipRespawn = true;
+        // RedeployCommand sets this flag to prevent double-counting deaths
+        boolean deathAlreadyCounted = victim.getPersistentData().getBoolean("pwp:instant_death");
+        victim.getPersistentData().remove("pwp:instant_death");
+
+        // Bleedout death (timer expired) — credit the original attacker who downed the player
+        if (!deathAlreadyCounted && victim.getPersistentData().hasUUID("pwp:bleedout_attacker")) {
+            UUID downerUUID = victim.getPersistentData().getUUID("pwp:bleedout_attacker");
+            victim.getPersistentData().remove("pwp:bleedout_attacker");
+            victim.getPersistentData().remove("pwp:bleedout_attacker_name");
+            ServerPlayer downer = level.getServer().getPlayerList().getPlayer(downerUUID);
+            if (downer != null && !downer.getUUID().equals(victim.getUUID())
+                    && !teamManager.isFriendly(downer, victim)) {
+                killer = downer;
+            }
+        }
+
+        // Clean up bleeding state if player died while bleeding (edge cases)
+        PWPConfig deathCfg = PWP.getConfig();
+        if (deathCfg != null && deathCfg.isBleedingEnabled()) {
+            var bleedHandler = com.pigeostudios.pwp.bleeding.BleedingHandler.getInstance();
+            if (bleedHandler != null) {
+                bleedHandler.removePlayer(victim);
             }
         }
 
@@ -321,8 +407,8 @@ public class CombatEventHandler {
 
             Team victimTeam = teamManager.getOrCreatePlayerData(victim.getUUID()).getTeam();
             if (victimTeam.isPlayable() && isPlaying) {
-                TicketManager ticketMgr = PWP.getTicketManager();
-                if (ticketMgr != null) ticketMgr.deductTicket(victimTeam);
+                var ticketSvc = PWP.getServiceRegistry().getTickets();
+                if (ticketSvc != null) ticketSvc.deductTicket(victimTeam);
             }
 
             if (killer != null && !killer.getUUID().equals(victim.getUUID())) {
@@ -334,14 +420,24 @@ public class CombatEventHandler {
                     contrib.addKill(killer.getUUID(), killer.getName().getString());
                 }
 
-                BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+                EconomyService eco = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getEconomy() : null;
                 PWPConfig cfg = PWP.getConfig();
                 int bcReward = cfg != null ? cfg.getKillRewardBC() : 5;
 
                 if (isPlaying) {
-                    runtime.addBC(killer.getUUID(), bcReward);
-                    runtime.addActivity(killer.getUUID(), BattlefieldRuntime.SCORE_DAMAGE);
-                    runtime.syncBC(killer);
+                    // M1: kill-farm cooldown — skip BC if killing the same victim too fast
+                    var aa = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getAntiAbuse() : null;
+                    boolean passKillFarm = aa == null || aa.checkKillFarm(killer, victim.getUUID());
+                    if (passKillFarm) {
+                        if (eco != null) {
+                            eco.addBCAndActivity(killer.getUUID(), bcReward, BattlefieldRuntime.SCORE_DAMAGE);
+                            eco.syncBC(killer);
+                        } else {
+                            BattlefieldRuntime.getInstance().addBC(killer.getUUID(), bcReward);
+                            BattlefieldRuntime.getInstance().addActivity(killer.getUUID(), BattlefieldRuntime.SCORE_DAMAGE);
+                            BattlefieldRuntime.getInstance().syncBC(killer);
+                        }
+                    }
                 }
 
                 Map<String, String> placeholders = new HashMap<>();
@@ -371,12 +467,10 @@ public class CombatEventHandler {
             }
         }
 
-        victim.getPersistentData().remove("pwp:instant_death");
         victim.getPersistentData().remove("pwp:finished_death");
         victim.getPersistentData().remove("pwp:direct_kill");
 
         if (isPlaying) {
-            if (skipRespawn) return;
             event.setCanceled(true);
             onPlayerDeath(victim, killer);
             instantRespawn(victim);
@@ -409,22 +503,33 @@ public class CombatEventHandler {
             player.setHealth(player.getMaxHealth());
             return;
         }
-        Team team = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
         player.setHealth(player.getMaxHealth());
         player.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);
 
-        player.getPersistentData().remove("playerrevive:bleeding");
-        player.getPersistentData().remove("pwp:bypass_bleed");
         player.getPersistentData().remove("pwp:direct_kill");
 
         game.teleportPlayerToLobby(player);
-        openSpawnSelectionScreen(player, team);
+        openSpawnSelectionScreen(player);
     }
 
-    private void openSpawnSelectionScreen(ServerPlayer player, Team team) {
-        if (serverInstance == null) return;
+    // Anti-abuse #8: spawn invulnerability — called after player actually spawns into the world
+    public static void applySpawnInvulnerability(ServerPlayer player) {
+        PWPConfig cfg = PWP.getConfig();
+        int ticks = cfg != null ? cfg.getSpawnProtectionTicks() : 100;
+        if (ticks <= 0) return;
+        player.getPersistentData().putInt("pwp:spawn_invuln_ticks", ticks);
+        player.getPersistentData().putBoolean("pwp:spawn_invuln", true);
+    }
+
+    public static void openSpawnSelectionScreen(ServerPlayer player) {
+        MinecraftServer server = player.getServer();
+        if (server == null) return;
         GameManager game = PWP.getGameManager();
         if (game == null || !game.isPlaying()) return;
+
+        TeamManager tm = PWP.getTeamManager();
+        if (tm == null) return;
+        Team team = tm.getOrCreatePlayerData(player.getUUID()).getTeam();
 
         List<OpenSpawnSelectionScreenPacket.SquadmateInfo> squadmates = new java.util.ArrayList<>();
         SquadManager squadManager = PWP.getSquadManager();
@@ -433,10 +538,10 @@ public class CombatEventHandler {
             if (squad != null) {
                 for (UUID memberId : squad.getMembers()) {
                     if (memberId.equals(player.getUUID())) continue;
-                    ServerPlayer member = serverInstance.getPlayerList().getPlayer(memberId);
+                    ServerPlayer member = server.getPlayerList().getPlayer(memberId);
                     if (member == null) continue;
-                    String callsign = teamManager.getOrCreatePlayerData(memberId).getCallsign();
-                    int memberTeam = teamManager.getOrCreatePlayerData(memberId).getTeam().ordinal();
+                    String callsign = tm.getOrCreatePlayerData(memberId).getCallsign();
+                    int memberTeam = tm.getOrCreatePlayerData(memberId).getTeam().ordinal();
                     int cd = SquadmateRespawnCooldownManager.getSquadmateCooldownTicks(
                             member.serverLevel(), memberId);
                     squadmates.add(new OpenSpawnSelectionScreenPacket.SquadmateInfo(
@@ -471,7 +576,7 @@ public class CombatEventHandler {
 
         int teamOrd = team != null ? team.ordinal() : 2;
 
-        String selectedKit = PWP.getTeamManager().getOrCreatePlayerData(player.getUUID()).getSelectedKit();
+        String selectedKit = tm.getOrCreatePlayerData(player.getUUID()).getSelectedKit();
         PacketHandler.CHANNEL.send(
                 net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
                 new OpenSpawnSelectionScreenPacket(squadmates, fobList, beacons, teamOrd, selectedKit));
@@ -496,13 +601,26 @@ public class CombatEventHandler {
         if (killer == null) return;
         if (!isDedupKill(killer, le)) return;
 
+        // C5 fix: check team — don't reward killing your own team's vehicle
+        UUID vehicleOwnerId = vm.getVehicleOwner(le.getUUID());
+        if (vehicleOwnerId != null) {
+            Team killerTeam = teamManager.getOrCreatePlayerData(killer.getUUID()).getTeam();
+            Team ownerTeam = teamManager.getOrCreatePlayerData(vehicleOwnerId).getTeam();
+            if (killerTeam == ownerTeam && killerTeam.isPlayable()) return;
+        }
+
         PWPConfig cfg = PWP.getConfig();
         int vBcReward = cfg != null ? cfg.getVehicleKillRewardBC() : 10;
 
-        BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
-        runtime.addBC(killer.getUUID(), vBcReward);
-        runtime.addActivity(killer.getUUID(), BattlefieldRuntime.SCORE_DAMAGE);
-        runtime.syncBC(killer);
+        EconomyService eco = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getEconomy() : null;
+        if (eco != null) {
+            eco.addBCAndActivity(killer.getUUID(), vBcReward, BattlefieldRuntime.SCORE_DAMAGE);
+            eco.syncBC(killer);
+        } else {
+            BattlefieldRuntime.getInstance().addBC(killer.getUUID(), vBcReward);
+            BattlefieldRuntime.getInstance().addActivity(killer.getUUID(), BattlefieldRuntime.SCORE_DAMAGE);
+            BattlefieldRuntime.getInstance().syncBC(killer);
+        }
 
         String name = le.hasCustomName() ? le.getCustomName().getString() : le.getType().getDescription().getString();
         Map<String, String> vPl = new HashMap<>();
@@ -516,7 +634,13 @@ public class CombatEventHandler {
         NotificationPacket rewardPkt = new NotificationPacket("+" + vBcReward + " BC \u0437\u0430 \u0443\u043d\u0438\u0447\u0442\u043e\u0436\u0435\u043d\u0438\u0435 \u0442\u0435\u0445\u043d\u0438\u043a\u0438", "success", 3000, "");
         PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> killer), rewardPkt);
         if (vm != null) vm.unregisterSpawnedVehicle(ent.getUUID());
-        runtime.trackVehicleDestroy(ent.getUUID());
+        BattlefieldRuntime.getInstance().trackVehicleDestroy(ent.getUUID());
+
+        var tkSvc = PWP.getServiceRegistry().getTickets();
+        if (tkSvc != null && vehicleOwnerId != null) {
+            Team ownerTeam = teamManager.getOrCreatePlayerData(vehicleOwnerId).getTeam();
+            if (ownerTeam.isPlayable()) tkSvc.deductVehicleLossCost(ownerTeam);
+        }
     }
 
     @SubscribeEvent
@@ -548,11 +672,85 @@ public class CombatEventHandler {
         }
     }
 
+    // Anti-abuse #4/#5: heal tracking for rate-limit and reward
+    private final Map<UUID, Integer> healCountThisMin = new ConcurrentHashMap<>();
+    private int healRateTickCounter = 0;
+    private static final int HEAL_RATE_LIMIT = 5;
+    // Track last health to detect healing via tick comparison
+    private final Map<UUID, Float> lastPlayerHealth = new ConcurrentHashMap<>();
+
+    private void tickHealTracking() {
+        if (serverInstance == null) return;
+        healRateTickCounter++;
+        boolean resetCounts = false;
+        if (healRateTickCounter >= 1200) {
+            healRateTickCounter = 0;
+            resetCounts = true;
+        }
+        GameManager gm = PWP.getGameManager();
+        boolean isPlaying = gm != null && gm.isPlaying();
+        EconomyService eco = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getEconomy() : null;
+        for (ServerPlayer player : serverInstance.getPlayerList().getPlayers()) {
+            UUID uuid = player.getUUID();
+            float currentHp = player.getHealth();
+            Float lastHp = lastPlayerHealth.get(uuid);
+            if (isPlaying && lastHp != null && currentHp > lastHp) {
+                float healed = currentHp - lastHp;
+                // Try to find who healed them: nearest friendly player within 10 blocks
+                ServerPlayer healer = findNearestFriendlyHealer(player, gm);
+                if (healer != null && healer != player && eco != null) {
+                    var cfg = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getConfig() : null;
+                    int reward = cfg != null ? cfg.getHealRewardBC() : 1;
+                    int count = healCountThisMin.merge(healer.getUUID(), 1, Integer::sum);
+                    if (count <= HEAL_RATE_LIMIT) {
+                        eco.addBCAndActivity(healer.getUUID(), reward, BattlefieldRuntime.SCORE_HEAL);
+                        eco.syncBC(healer);
+                    }
+                }
+            }
+            lastPlayerHealth.put(uuid, currentHp);
+        }
+        if (resetCounts) healCountThisMin.clear();
+    }
+
+    private ServerPlayer findNearestFriendlyHealer(ServerPlayer patient, GameManager gm) {
+        ServerPlayer best = null;
+        double bestDist = 10.0;
+        for (ServerPlayer p : serverInstance.getPlayerList().getPlayers()) {
+            if (p == patient) continue;
+            if (!teamManager.isFriendly(p, patient)) continue;
+            double dist = patient.distanceTo(p);
+            if (dist < bestDist) {
+                bestDist = dist;
+                best = p;
+            }
+        }
+        return best;
+    }
+
     private int squadmateSyncTickCounter = 0;
 
     @SubscribeEvent
     public void onServerTick(ServerTickEvent event) {
         if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) return;
+
+        // Anti-abuse #8: tick spawn invulnerability timers
+        if (serverInstance != null) {
+            for (ServerPlayer p : serverInstance.getPlayerList().getPlayers()) {
+                if (p.getPersistentData().getBoolean("pwp:spawn_invuln")) {
+                    int ticks = p.getPersistentData().getInt("pwp:spawn_invuln_ticks") - 1;
+                    if (ticks <= 0) {
+                        p.getPersistentData().remove("pwp:spawn_invuln");
+                        p.getPersistentData().remove("pwp:spawn_invuln_ticks");
+                    } else {
+                        p.getPersistentData().putInt("pwp:spawn_invuln_ticks", ticks);
+                    }
+                }
+            }
+            // Anti-abuse #4/#5: heal reward tracking
+            tickHealTracking();
+        }
+
         squadmateSyncTickCounter++;
         if (squadmateSyncTickCounter < 40) return;
         squadmateSyncTickCounter = 0;

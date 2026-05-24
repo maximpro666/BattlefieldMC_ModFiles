@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ProxyMessenger {
     private static final ResourceLocation CHANNEL = new ResourceLocation("pwp", "proxy");
-    private static MinecraftServer server;
+    public static MinecraftServer server;
 
     public static void init(MinecraftServer srv) {
         server = srv;

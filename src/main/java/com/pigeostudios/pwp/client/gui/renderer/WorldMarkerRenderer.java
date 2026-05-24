@@ -3,7 +3,7 @@ package com.pigeostudios.pwp.client.gui.renderer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
+import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.client.ClientTeamData;
 import com.pigeostudios.pwp.client.CapturePointData;
 import com.pigeostudios.pwp.client.gui.UITheme;
@@ -23,9 +23,9 @@ import java.util.List;
 
 public class WorldMarkerRenderer {
 
-    private static final double MAX_DIST = 300.0;
-    private static final double BASE_MAX_DIST = 300.0;
-    private static final double FULL_VIS_DIST = 40.0;
+    private static final double MAX_DIST = 5000.0;
+    private static final double BASE_MAX_DIST = 5000.0;
+    private static final double FULL_VIS_DIST = 100.0;
 
     private static final int NEUTRAL_BORDER = 0xFF888888;
     private static final int NEUTRAL_BG = 0xCC333333;
@@ -138,36 +138,23 @@ public class WorldMarkerRenderer {
 
         poseStack.pushPose();
         poseStack.translate(cp.x() - camPos.x, dyActual, cp.z() - camPos.z);
-        poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
-        poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        poseStack.mulPose(mc.getEntityRenderDispatcher().cameraOrientation());
         poseStack.translate(0, 0, (float) (-actualDist * 0.0001));
         poseStack.scale(-scale, -scale, scale);
 
         Font font = mc.font;
         String pointType = cp.pointType() != null ? cp.pointType() : "small";
-        String letter = switch (pointType) {
-            case "major" -> "\u2605";
-            case "medium" -> "\u2666";
-            default -> cp.name().length() > 0 ? cp.name().substring(0, 1).toUpperCase() : "?";
-        };
-        int lw = font.width(letter);
-        int lh = font.lineHeight;
-
-        float minHalf = (float) cfg.markerSize / 2f;
-        float textScale = Math.min(4f, minHalf * 6f / Math.max(lw, 1));
-        float bodyPad = 4f;
-        float halfSize = Math.max(minHalf, Math.max(lw, lh) * textScale / 2f + bodyPad);
+        boolean isMajor = "major".equals(pointType);
+        boolean isMedium = "medium".equals(pointType);
+        String letter = isMajor ? "\u2605" : isMedium ? "\u2666" : (cp.name().length() > 0 ? cp.name().substring(0, 1).toUpperCase() : "?");
+        float halfSize = Math.max(12f, (float) cfg.markerSize / 2f);
 
         // Background
         drawRect(poseStack, bufferSource, -halfSize, -halfSize, halfSize, halfSize,
             applyAlpha(bgColor, alpha));
 
         // Top stripe
-        int stripeColor = switch (pointType) {
-            case "major" -> 0xFFD700;
-            case "medium" -> 0x4488FF;
-            default -> 0x888888;
-        };
+        int stripeColor = isMajor ? 0xFFD700 : isMedium ? 0x4488FF : 0x888888;
         float stripeH = 3f;
         drawRect(poseStack, bufferSource, -halfSize, -halfSize - stripeH, halfSize, -halfSize,
             applyAlpha(stripeColor, alpha));
@@ -211,32 +198,35 @@ public class WorldMarkerRenderer {
             drawRect(poseStack, bufferSource, edgeX - ew, -halfSize, edgeX + ew, halfSize, edgeColor);
         }
 
-        // Icon letter (rendered AFTER all rects so it's on top)
+        // Flush GUI batch so letter renders on top of background
+        if (bufferSource instanceof MultiBufferSource.BufferSource bs) {
+            bs.endBatch(RenderType.gui());
+        }
+
+        // Letter (primary identifier)
         poseStack.pushPose();
-        poseStack.scale(textScale, textScale, 1f);
-        font.drawInBatch(letter,
-            -lw / 2f, -lh / 2f,
-            0xFFFFFFFF, true,
-            poseStack.last().pose(),
-            bufferSource,
-            Font.DisplayMode.SEE_THROUGH,
-            0, 0xF000F0);
+        poseStack.translate(0, 0, 0.06f);
+        int letterColor = isContested ? 0xFFFF4444 : 0xFFFFFFFF;
+        font.drawInBatch(letter, -font.width(letter) / 2f, -font.lineHeight / 2f,
+            applyAlpha(letterColor, alpha), true,
+            poseStack.last().pose(), bufferSource,
+            Font.DisplayMode.SEE_THROUGH, 0, 0xF000F0);
         poseStack.popPose();
 
-        // Distance text
-        if (cfg.showDistance && dist > 60) {
+        // Distance text under icon
+        if (cfg.showDistance) {
             String distStr = (int) dist + "m";
             int dw = font.width(distStr);
             poseStack.pushPose();
-            poseStack.translate(0, halfSize + 3, 0);
-            poseStack.scale(0.5f, 0.5f, 1f);
+            poseStack.translate(0, halfSize + 2, 0);
+            poseStack.scale(0.4f, 0.4f, 1f);
             font.drawInBatch(distStr,
                 -dw / 2f, 0f,
-                (int) (0x88 * alpha) << 24 | 0xCCCCCC, true,
+                (int) (0xBB * alpha) << 24 | 0xFFFFFF, true,
                 poseStack.last().pose(),
                 bufferSource,
                 Font.DisplayMode.SEE_THROUGH,
-                0, 0xF000F0);
+                0, 0);
             poseStack.popPose();
         }
 
@@ -283,6 +273,7 @@ public class WorldMarkerRenderer {
     private void renderBaseMarker(PoseStack poseStack, MultiBufferSource bufferSource, Camera camera,
                                    Vec3 camPos, double x, double y, double z,
                                    String label, int teamColor, float elapsed) {
+        Minecraft mc = Minecraft.getInstance();
         double dx = x - camPos.x;
         double dy = y - camPos.y;
         double dz = z - camPos.z;
@@ -312,8 +303,7 @@ public class WorldMarkerRenderer {
 
         poseStack.pushPose();
         poseStack.translate(dx, dyActual, dz);
-        poseStack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
-        poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        poseStack.mulPose(mc.getEntityRenderDispatcher().cameraOrientation());
         poseStack.translate(0, 0, (float) (-actualDist * 0.0001));
         poseStack.scale(-scale, -scale, scale);
 
@@ -322,10 +312,12 @@ public class WorldMarkerRenderer {
         int lw = font.width(letter);
         int lh = font.lineHeight;
 
-        float minHalf = Math.max(6f, lw / 2f + 2f) * 2f;
-        float textScale = Math.min(3f, minHalf * 4.8f / Math.max(lw, 1));
-        float bodyPad = 4f;
-        float halfSize = Math.max(minHalf, Math.max(lw, lh) * textScale / 2f + bodyPad);
+        float textScale = Math.min(2.5f, 18f / Math.max(lw, 1));
+        textScale = Math.round(textScale * 2f) / 2f;
+        textScale = Math.max(1.5f, textScale);
+        float bodyPad = 6f;
+        float halfSize = Math.max(lw, lh) * textScale / 2f + bodyPad;
+        halfSize = Math.max(halfSize, 12f);
         float bd = 1.2f;
 
         drawRect(poseStack, bufferSource, -halfSize, -halfSize, halfSize, halfSize,
@@ -339,8 +331,14 @@ public class WorldMarkerRenderer {
         drawRect(poseStack, bufferSource, -halfSize, -halfSize, -halfSize + bd, halfSize, borderArgb);
         drawRect(poseStack, bufferSource, halfSize - bd, -halfSize, halfSize, halfSize, borderArgb);
 
+        // Flush GUI batch so text renders on top
+        if (bufferSource instanceof MultiBufferSource.BufferSource bs) {
+            bs.endBatch(RenderType.gui());
+        }
+
         // Icon letter on top
         poseStack.pushPose();
+        poseStack.translate(0, 0, 0.02f);
         poseStack.scale(textScale, textScale, 1f);
         font.drawInBatch(letter,
             -lw / 2f, -lh / 2f,
@@ -348,22 +346,22 @@ public class WorldMarkerRenderer {
             poseStack.last().pose(),
             bufferSource,
             Font.DisplayMode.SEE_THROUGH,
-            0, 0xF000F0);
+            0, 0);
         poseStack.popPose();
 
-        if (dist > 60) {
+        if (VisualsConfig.get().base.showDistance) {
             String distStr = (int) dist + "m";
             int dw = font.width(distStr);
             poseStack.pushPose();
-            poseStack.translate(0, halfSize + 3, 0);
-            poseStack.scale(0.5f, 0.5f, 1f);
+            poseStack.translate(0, halfSize + 2, 0);
+            poseStack.scale(0.4f, 0.4f, 1f);
             font.drawInBatch(distStr,
                 -dw / 2f, 0f,
-                (int) (0x88 * alpha) << 24 | 0xCCCCCC, true,
+                (int) (0xBB * alpha) << 24 | 0xFFFFFF, true,
                 poseStack.last().pose(),
                 bufferSource,
                 Font.DisplayMode.SEE_THROUGH,
-                0, 0xF000F0);
+                0, 0);
             poseStack.popPose();
         }
 

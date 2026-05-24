@@ -7,6 +7,7 @@ import com.pigeostudios.pwp.client.gui.ClientGuiHandler;
 import com.pigeostudios.pwp.client.gui.renderer.CaptureParticles;
 import com.pigeostudios.pwp.client.gui.renderer.CustomNametagRenderer;
 import com.pigeostudios.pwp.client.gui.renderer.SquadMarkerRenderer;
+import com.pigeostudios.pwp.client.gui.renderer.TacticalMarkerRenderer;
 import com.pigeostudios.pwp.client.gui.renderer.WorldMarkerRenderer;
 import com.pigeostudios.pwp.client.gui.screen.ClassSelectionScreen;
 import com.pigeostudios.pwp.client.gui.screen.ResupplyScreen;
@@ -42,6 +43,7 @@ public class ClientSetup {
     private static final CaptureParticles captureParticles = new CaptureParticles();
     private static final CustomNametagRenderer nametagRenderer = new CustomNametagRenderer();
     private static final SquadMarkerRenderer squadMarkerRenderer = new SquadMarkerRenderer();
+    private static final TacticalMarkerRenderer tacticalMarkerRenderer = new TacticalMarkerRenderer();
     public static final KeyMapping OPEN_KIT_VEHICLE_KEY = new KeyMapping(
         "key.pwp.open_kit_vehicle",
         GLFW.GLFW_KEY_G,
@@ -185,12 +187,14 @@ public class ClientSetup {
             float partialTick = event.getPartialTick();
             Vec3 camPos = camera.getPosition();
 
-            squadMarkerRenderer.render(poseStack, bufferSource, camera, partialTick);
-
-            markerRenderer.render(poseStack, bufferSource, camera, partialTick);
-
             captureParticles.render(poseStack, bufferSource,
                 camPos.x, camPos.y, camPos.z, partialTick);
+
+            squadMarkerRenderer.render(poseStack, bufferSource, camera, partialTick);
+
+            tacticalMarkerRenderer.render(poseStack, bufferSource, camera, partialTick);
+
+            markerRenderer.render(poseStack, bufferSource, camera, partialTick);
         }
     }
 

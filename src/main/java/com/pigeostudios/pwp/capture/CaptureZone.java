@@ -35,6 +35,9 @@ public class CaptureZone {
     private static final String TAG_OWNER = "owner";
     private static final String TAG_CAPTURING = "capturing";
     private static final String TAG_PROGRESS = "progress";
+    private static final String TAG_POINT_TYPE = "pointType";
+    private static final String TAG_VC_RATE = "vcRate";
+    private static final String TAG_CONTESTED = "contested";
 
     public CaptureZone(String id, String name, String dimension, BlockPos pos1, BlockPos pos2, int captureSeconds) {
         this(id, name, dimension, pos1, pos2, captureSeconds, "small");
@@ -139,22 +142,29 @@ public class CaptureZone {
         tag.putInt(TAG_OWNER, ownerTeam.ordinal());
         tag.putInt(TAG_CAPTURING, capturingTeam.ordinal());
         tag.putFloat(TAG_PROGRESS, progress);
+        tag.putString(TAG_POINT_TYPE, pointType);
+        tag.putInt(TAG_VC_RATE, vcRate);
+        tag.putBoolean(TAG_CONTESTED, contested);
         return tag;
     }
 
     public static CaptureZone fromNBT(CompoundTag tag) {
         BlockPos min = new BlockPos(tag.getInt(TAG_MIN_X), tag.getInt(TAG_MIN_Y), tag.getInt(TAG_MIN_Z));
         BlockPos max = new BlockPos(tag.getInt(TAG_MAX_X), tag.getInt(TAG_MAX_Y), tag.getInt(TAG_MAX_Z));
+        String pointType = tag.contains(TAG_POINT_TYPE) ? tag.getString(TAG_POINT_TYPE) : "small";
         CaptureZone zone = new CaptureZone(
             tag.getString(TAG_ID),
             tag.getString(TAG_NAME),
             tag.getString(TAG_DIM),
             min, max,
-            tag.getInt(TAG_CAPTURE_SEC)
+            tag.getInt(TAG_CAPTURE_SEC),
+            pointType
         );
         zone.ownerTeam = Team.fromOrdinal(tag.getInt(TAG_OWNER));
         zone.capturingTeam = Team.fromOrdinal(tag.getInt(TAG_CAPTURING));
         zone.progress = tag.getFloat(TAG_PROGRESS);
+        if (tag.contains(TAG_VC_RATE)) zone.vcRate = tag.getInt(TAG_VC_RATE);
+        if (tag.contains(TAG_CONTESTED)) zone.contested = tag.getBoolean(TAG_CONTESTED);
         return zone;
     }
 }

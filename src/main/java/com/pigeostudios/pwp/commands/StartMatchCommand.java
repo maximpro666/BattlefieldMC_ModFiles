@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 public class StartMatchCommand {
     private static final String MATCH_ADDRESS = "127.0.0.1:25566";
-    private static final int TIMEOUT_SECONDS = 180;
+    private static final int TIMEOUT_SECONDS = 300;
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("startmatch")

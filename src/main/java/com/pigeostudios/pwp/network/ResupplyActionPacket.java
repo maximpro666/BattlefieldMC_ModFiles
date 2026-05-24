@@ -11,8 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static com.pigeostudios.pwp.core.ChatHelper.*;
@@ -22,17 +21,21 @@ public class ResupplyActionPacket {
     public enum Action { RESUPPLY_AMMO, BUY_ROCKET }
 
     private final Action action;
+    private final int slotIndex; // -1 = all (rocket/backward compat), 0-8 = specific hotbar slot
 
-    public ResupplyActionPacket(Action action) {
+    public ResupplyActionPacket(Action action, int slotIndex) {
         this.action = action;
+        this.slotIndex = slotIndex;
     }
 
     public ResupplyActionPacket(FriendlyByteBuf buf) {
         this.action = buf.readEnum(Action.class);
+        this.slotIndex = buf.readInt();
     }
 
     public void toBytes(FriendlyByteBuf buf) {
         buf.writeEnum(action);
+        buf.writeInt(slotIndex);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> supplier) {
@@ -49,7 +52,7 @@ public class ResupplyActionPacket {
             IAmmoProvider provider = ammoService.getBestProvider(player);
 
             if (action == Action.RESUPPLY_AMMO) {
-                handleResupplyAmmo(player, rt);
+                handleResupplyAmmo(player, rt, slotIndex);
             } else if (action == Action.BUY_ROCKET) {
                 handleBuyRocket(player, rt, provider);
             }
@@ -57,10 +60,18 @@ public class ResupplyActionPacket {
         return true;
     }
 
-    private static void handleResupplyAmmo(ServerPlayer player, BattlefieldRuntime rt) {
-        boolean refilled = false;
+    private static final int RESUPPLY_AMMO_COST = 5;
 
-        for (int i = 0; i < 9; i++) {
+    private static void handleResupplyAmmo(ServerPlayer player, BattlefieldRuntime rt, int slotIndex) {
+        boolean refilled = false;
+        List<String> refilledWeapons = new ArrayList<>();
+
+        Set<String> hotbarCalibers = getHotbarCalibers(player);
+
+        int startSlot = (slotIndex >= 0) ? slotIndex : 0;
+        int endSlot = (slotIndex >= 0) ? slotIndex + 1 : 9;
+
+        for (int i = startSlot; i < endSlot; i++) {
             ItemStack stack = player.getInventory().getItem(i);
             if (stack.isEmpty()) continue;
             String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
@@ -70,7 +81,7 @@ public class ResupplyActionPacket {
                 String gunId = stack.getTag().getString("GunId");
                 String caliber = TACZ_CALIBER_MAP.get(gunId);
                 if (caliber != null) {
-                    ItemStack ammoBox = findAmmoBox(player);
+                    ItemStack ammoBox = findSuitableAmmoBox(player, caliber, hotbarCalibers);
                     if (ammoBox == null) {
                         ammoBox = createItem("tacz:ammo_box");
                         if (!ammoBox.isEmpty()) {
@@ -82,6 +93,7 @@ public class ResupplyActionPacket {
                                 player.drop(ammoBox, false);
                             }
                             refilled = true;
+                            refilledWeapons.add(getSimpleGunName(gunId));
                         }
                     } else {
                         CompoundTag tag = ammoBox.getOrCreateTag();
@@ -89,6 +101,7 @@ public class ResupplyActionPacket {
                         tag.putInt("AmmoCount", 240);
                         tag.putInt("Level", 1);
                         refilled = true;
+                        refilledWeapons.add(getSimpleGunName(gunId));
                     }
                 }
                 continue;
@@ -104,16 +117,73 @@ public class ResupplyActionPacket {
                         player.drop(give, false);
                     }
                     refilled = true;
+                    String name = id.contains(":") ? id.substring(id.indexOf(':') + 1).replace('_', ' ') : id;
+                    refilledWeapons.add(name);
                 }
             }
         }
 
         if (refilled) {
+            if (RESUPPLY_AMMO_COST > 0) {
+                if (!rt.deductBC(player.getUUID(), RESUPPLY_AMMO_COST)) {
+                    player.displayClientMessage(error("Not enough BC! Need " + RESUPPLY_AMMO_COST + " BC for resupply"), false);
+                    return;
+                }
+                rt.syncBC(player);
+            }
             player.inventoryMenu.broadcastChanges();
-            player.displayClientMessage(accent("Ammo resupplied!"), false);
+            String weaponList = String.join(", ", refilledWeapons);
+            player.displayClientMessage(accent("Resupplied: " + weaponList + " (" + RESUPPLY_AMMO_COST + " BC)"), false);
         } else {
             player.displayClientMessage(error("No weapons in hotbar needing ammo!"), false);
         }
+    }
+
+    private static Set<String> getHotbarCalibers(ServerPlayer player) {
+        Set<String> calibers = new HashSet<>();
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            if (stack.isEmpty()) continue;
+            String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+            if (id.equals("tacz:modern_kinetic_gun") && stack.getTag() != null) {
+                String gunId = stack.getTag().getString("GunId");
+                String cal = TACZ_CALIBER_MAP.get(gunId);
+                if (cal != null) calibers.add(cal);
+            }
+        }
+        return calibers;
+    }
+
+    private static ItemStack findSuitableAmmoBox(ServerPlayer player, String neededCaliber, Set<String> hotbarCalibers) {
+        // First pass: exact caliber match
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            if (!stack.isEmpty() && BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().equals("tacz:ammo_box")) {
+                CompoundTag tag = stack.getTag();
+                if (tag != null && neededCaliber.equals(tag.getString("AmmoId"))) {
+                    return stack;
+                }
+            }
+        }
+        // Second pass: any box whose caliber is not needed by another hotbar gun
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            if (!stack.isEmpty() && BuiltInRegistries.ITEM.getKey(stack.getItem()).toString().equals("tacz:ammo_box")) {
+                CompoundTag tag = stack.getTag();
+                if (tag != null) {
+                    String existing = tag.getString("AmmoId");
+                    if (existing.isEmpty() || !hotbarCalibers.contains(existing)) {
+                        return stack;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String getSimpleGunName(String gunId) {
+        String path = gunId.contains(":") ? gunId.substring(gunId.indexOf(':') + 1) : gunId;
+        return path.replace('_', ' ');
     }
 
     private static void handleBuyRocket(ServerPlayer player, BattlefieldRuntime rt, IAmmoProvider provider) {
@@ -148,6 +218,12 @@ public class ResupplyActionPacket {
             return;
         }
 
+        ItemStack rocket = createItem(def.ammoItemId);
+        if (rocket.isEmpty()) {
+            player.displayClientMessage(error("Failed to create rocket item!"), false);
+            return;
+        }
+
         int cost = provider.getAmmoCost(def.catalogId);
         if (cost > 0) {
             if (!rt.deductBC(player.getUUID(), cost)) {
@@ -155,12 +231,6 @@ public class ResupplyActionPacket {
                 return;
             }
             rt.syncBC(player);
-        }
-
-        ItemStack rocket = createItem(def.ammoItemId);
-        if (rocket.isEmpty()) {
-            player.displayClientMessage(error("Failed to create rocket item!"), false);
-            return;
         }
 
         if (!player.getInventory().add(rocket)) {
@@ -197,16 +267,6 @@ public class ResupplyActionPacket {
             if (!stack.isEmpty()) {
                 String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
                 if (ROCKET_MAP.containsKey(id)) return id;
-            }
-        }
-        return null;
-    }
-
-    private static ItemStack findAmmoBox(ServerPlayer player) {
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            ItemStack s = player.getInventory().getItem(i);
-            if (!s.isEmpty() && BuiltInRegistries.ITEM.getKey(s.getItem()).toString().equals("tacz:ammo_box")) {
-                return s;
             }
         }
         return null;
@@ -274,6 +334,8 @@ public class ResupplyActionPacket {
         TACZ_CALIBER_MAP.put("tacz:hk416d", "tacz:556x45");
         TACZ_CALIBER_MAP.put("tacz:scar_l", "tacz:556x45");
         TACZ_CALIBER_MAP.put("tacz:m16a4", "tacz:556x45");
+        TACZ_CALIBER_MAP.put("tacz:m16a1", "tacz:556x45");
+        TACZ_CALIBER_MAP.put("tacz:spr15hb", "tacz:556x45");
         TACZ_CALIBER_MAP.put("tacz:aug", "tacz:556x45");
         TACZ_CALIBER_MAP.put("tacz:g36k", "tacz:556x45");
         TACZ_CALIBER_MAP.put("tacz:ak47", "tacz:762x39");
@@ -286,10 +348,12 @@ public class ResupplyActionPacket {
         TACZ_CALIBER_MAP.put("tacz:scar_h", "tacz:308");
         TACZ_CALIBER_MAP.put("tacz:hk_g3", "tacz:308");
         TACZ_CALIBER_MAP.put("tacz:fn_fal", "tacz:308");
+        TACZ_CALIBER_MAP.put("tacz:fn_evolys", "tacz:308");
         TACZ_CALIBER_MAP.put("tacz:ai_awp", "tacz:338");
         TACZ_CALIBER_MAP.put("tacz:m107", "tacz:50bmg");
         TACZ_CALIBER_MAP.put("tacz:m95", "tacz:50bmg");
         TACZ_CALIBER_MAP.put("tacz:m700", "tacz:30_06");
+        TACZ_CALIBER_MAP.put("tacz:lonetrail", "tacz:30_06");
         TACZ_CALIBER_MAP.put("tacz:kar98", "tacz:792x57");
         TACZ_CALIBER_MAP.put("tacz:hk_mp5a5", "tacz:9mm");
         TACZ_CALIBER_MAP.put("tacz:uzi", "tacz:9mm");

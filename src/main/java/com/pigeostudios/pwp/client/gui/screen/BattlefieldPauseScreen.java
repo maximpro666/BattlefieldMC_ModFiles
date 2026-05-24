@@ -45,15 +45,20 @@ public class BattlefieldPauseScreen extends Screen {
                 Minecraft.getInstance().setScreen(new SettingsMenuScreen())));
 
         addRenderableWidget(new BButton(bx, startY + (btnH + gap) * 3, btnW, btnH,
+            Component.literal("\uD83D\uDCE2 Reports"), btn ->
+                Minecraft.getInstance().setScreen(new ReportScreen())));
+
+        addRenderableWidget(new BButton(bx, startY + (btnH + gap) * 4, btnW, btnH,
             Component.literal("\u2620 Redeploy"), btn -> {
                 if (Minecraft.getInstance().player != null && Minecraft.getInstance().getConnection() != null)
                     Minecraft.getInstance().getConnection().sendCommand("redeploy");
                 onClose();
             }, BButton.Variant.DANGER));
 
-        addRenderableWidget(new BButton(bx, startY + (btnH + gap) * 4, btnW, btnH,
+        addRenderableWidget(new BButton(bx, startY + (btnH + gap) * 5, btnW, btnH,
             Component.literal("\u21A9 " + I18n.get("pwp.ui.disconnect")), btn -> {
-                Minecraft.getInstance().level.disconnect();
+                if (Minecraft.getInstance().level != null)
+                    Minecraft.getInstance().level.disconnect();
                 Minecraft.getInstance().setScreen(new BattlefieldMainMenuScreen());
             }, BButton.Variant.DANGER));
     }

@@ -28,6 +28,9 @@ public class VisualsConfig {
         public double opacity = 0.45;
         public int color = 0;
         public int leaderColor = 0;
+        public double proximityFadeDist = 5.0;
+        public double crosshairAngle = 10.0;
+        public String shape = "DIAMOND";
     }
 
     public static class PointVisual {

@@ -9,7 +9,7 @@ import com.pigeostudios.pwp.core.GameManager;
 import com.pigeostudios.pwp.core.MapConfig;
 import com.pigeostudios.pwp.core.MapPoolManager;
 import com.pigeostudios.pwp.core.Team;
-import com.pigeostudios.pwp.core.TicketManager;
+
 import static com.pigeostudios.pwp.core.ChatHelper.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -80,11 +80,11 @@ public class GameCommand {
             return 0;
         }
 
-        TicketManager tm = PWP.getTicketManager();
+        var ts = PWP.getServiceRegistry().getTickets();
         Team winner = Team.NATO;
-        if (tm != null) {
-            int nt = tm.getTickets(Team.NATO);
-            int rt = tm.getTickets(Team.RUSSIA);
+        if (ts != null) {
+            int nt = ts.getTickets(Team.NATO);
+            int rt = ts.getTickets(Team.RUSSIA);
             winner = nt >= rt ? Team.NATO : Team.RUSSIA;
         }
         game.endGame(winner);

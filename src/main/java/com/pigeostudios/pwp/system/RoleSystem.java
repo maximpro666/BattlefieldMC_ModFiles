@@ -35,37 +35,7 @@ public class RoleSystem {
     }
 
     public Component selectLoadout(ServerPlayer player, String loadoutId, TeamManager teamManager) {
-        LoadoutDefinition loadout = registry.getLoadout(loadoutId);
-        if (loadout == null) return Component.translatable("pwp.chat.loadout.not_found", loadoutId);
-
-        PlayerCombatData data = teamManager.getOrCreatePlayerData(player.getUUID());
-        Team playerTeam = data.getTeam();
-        if (!playerTeam.isPlayable()) return Component.translatable("pwp.chat.loadout.not_on_team");
-
-        int playerRank = data.getRankOrdinal();
-        KitConfig.KitRequirements req = loadout.getRequirements();
-        int requiredRank = req != null ? req.rank : 1;
-        if (playerRank < requiredRank) return Component.translatable("pwp.chat.loadout.requires_rank", requiredRank);
-
-        if (req != null && req.team != null) {
-            Team requiredTeam = Team.fromString(req.team);
-            if (requiredTeam != null && requiredTeam.isPlayable() && playerTeam != requiredTeam) {
-                return Component.translatable("pwp.chat.loadout.not_for_team");
-            }
-        }
-
-        if (req != null && req.bc_cost > 0) {
-            var runtime = com.pigeostudios.pwp.core.BattlefieldRuntime.getInstance();
-            if (!runtime.deductBC(player.getUUID(), req.bc_cost)) {
-                return Component.translatable("pwp.chat.loadout.insufficient_bc", req.bc_cost);
-            }
-        }
-
-        data.setSelectedLoadout(loadoutId);
-        data.setSelectedRole(loadout.getRoleId());
-        teamManager.setDirty();
-
-        return null;
+        return PWP.getServiceRegistry().getKit().selectLoadout(player, loadoutId, teamManager);
     }
 
     public List<LoadoutDefinition> getAvailableLoadouts(ServerPlayer player, TeamManager teamManager) {

@@ -1,7 +1,18 @@
 param(
-    [string]$SourceServer = "C:\Users\maska\OneDrive\Desktop\servar",
-    [string]$TemplateDir = "C:\Users\maska\OneDrive\Desktop\match-template"
+    [string]$SourceServer = "",
+    [string]$TemplateDir = ""
 )
+
+# Load central paths
+. (Join-Path $PSScriptRoot "..\config\paths.ps1")
+
+# Use central config paths by default
+if (-not $SourceServer) {
+    $SourceServer = $script:DEPLOY_SERVER
+}
+if (-not $TemplateDir) {
+    $TemplateDir = $script:DEPLOY_TEMPLATE
+}
 
 if (-not (Test-Path $SourceServer)) {
     Write-Error "Source server not found at $SourceServer"
@@ -30,7 +41,7 @@ if (Test-Path $props) {
     Write-Host "Port set to 25566"
 }
 
-# Ensure offline-mode=false in template (matches main server)
+# Ensure online-mode=false in template (matches main server)
 if (Test-Path $props) {
     $content = Get-Content $props
     if ($content -match 'online-mode=') {

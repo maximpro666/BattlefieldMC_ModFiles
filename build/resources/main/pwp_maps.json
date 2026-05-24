@@ -11,7 +11,8 @@
     "worldBorderCenterZ": 0,
     "worldBorderSize": 1000,
     "tickets": 100,
-    "lobbyWaitTime": 30
+    "lobbyWaitTime": 30,
+    "hasDaylightCycle": true
   },
   {
     "name": "stalker_dump",

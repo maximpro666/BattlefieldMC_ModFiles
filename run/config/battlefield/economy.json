@@ -1,14 +1,80 @@
 {
-  "startingFactionResources": {
-    "ammunition": 500,
-    "construction": 200,
-    "reinforcement": 100,
-    "repair": 150,
-    "vehicle_supply": 80
+  "bc": {
+    "killReward": 15,
+    "assistReward": 8,
+    "captureReward": 150,
+    "killStreak5": 15,
+    "killStreak10": 40,
+    "killStreak15": 80,
+    "mvp1": 75,
+    "mvp2": 40,
+    "mvp3": 20,
+    "heal4Hp": 1,
+    "revive": 10,
+    "medicStreak": 10,
+    "vehicleDestroy": 25,
+    "vehicleCrewPassive": 1
   },
-  "reinforcementAvailabilityThreshold": 50,
-  "deployAmmunitionCost": 1,
-  "deployReinforcementCost": 5,
-  "economyFlushIntervalTicks": 10,
-  "routeTickInterval": 5
+  "wc": {
+    "winEasy": 20,
+    "lossEasy": 12,
+    "winNormal": 60,
+    "lossNormal": 15,
+    "winHard": 200,
+    "lossHard": 60,
+    "dailyLogin": 10,
+    "firstWinDay": 25,
+    "casualStreak3": 15,
+    "weekly5Wins": 100,
+    "squadMultiplier": 1.25
+  },
+  "caps": {
+    "bc": 9999,
+    "wcPerMatch": 300,
+    "vcPerMatch": 5000,
+    "vcPerMin": 400
+  },
+  "frontlineIncome": {
+    "easyTicks": 45,
+    "normalTicks": 60,
+    "hardTicks": 150,
+    "ratePerInterval": 1
+  },
+  "fob": {
+    "costEasy": 80,
+    "costNormal": 300,
+    "costHard": 150,
+    "maxPerTeam": 2,
+    "cooldownEasy": 60,
+    "cooldownNormal": 90,
+    "cooldownHard": 120,
+    "upkeepPerMin": 5
+  },
+  "vc": {
+    "smallCpPerMin": 50,
+    "mediumCpPerMin": 100,
+    "majorCpPerMin": 120,
+    "defenseBonusPerMin": 30,
+    "vehicleDestroyReward": 10
+  },
+  "dynamicPricing": {
+    "phase2Discount": 0.1,
+    "phase3Discount": 0.2,
+    "phase4Discount": 0.3,
+    "overtimeDiscount": 0.3
+  },
+  "difficultyMultipliers": {
+    "easyVehiclePrice": 0.7,
+    "normalVehiclePrice": 1.0,
+    "hardVehiclePrice": 1.3,
+    "easyUpkeep": 0.3,
+    "normalUpkeep": 1.0,
+    "hardUpkeep": 1.2,
+    "easyAmmoPrice": 0.7,
+    "normalAmmoPrice": 1.0,
+    "hardAmmoPrice": 1.3,
+    "easyXpMultiplier": 0.7,
+    "normalXpMultiplier": 1.0,
+    "hardXpMultiplier": 1.5
+  }
 }

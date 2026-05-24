@@ -63,12 +63,18 @@ public class KitSelectPacket {
                 String classId = parts[0];
                 String kitId = parts[1];
 
-                // Save kit selection FIRST so it persists through death/respawn
+                // H4: kit switch cooldown
+                var antiAbuse = PWP.getServiceRegistry().getAntiAbuse();
+                if (antiAbuse != null && !antiAbuse.checkKitSwitch(player)) {
+                    player.displayClientMessage(Component.translatable("pwp.chat.kit.cooldown"), false);
+                    return;
+                }
+
                 PlayerCombatData pcd = tm.getOrCreatePlayerData(player.getUUID());
                 pcd.setSelectedKit(kitName);
                 tm.setDirty();
 
-                Component result = KitConfigServerHelper.applyKit(player, classId, kitId);
+                Component result = PWP.getServiceRegistry().getKit().applyKit(player, classId, kitId);
                 if (result != null) {
                     player.displayClientMessage(result, false);
                 }

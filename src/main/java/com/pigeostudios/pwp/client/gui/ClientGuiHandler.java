@@ -40,9 +40,11 @@ public class ClientGuiHandler {
     private static final BattlefieldTabOverlay tabOverlay    = new BattlefieldTabOverlay();
     private static final VoiceChatHudOverlay voiceChatHudOverlay = new VoiceChatHudOverlay();
     private static final KillFeedOverlay     killFeedOverlay = new KillFeedOverlay();
-    private static final CaptureNotificationOverlay captureNotifOverlay = new CaptureNotificationOverlay();
+    //private static final CaptureNotificationOverlay captureNotifOverlay = new CaptureNotificationOverlay();
     private static final CompassOverlay             compassOverlay      = new CompassOverlay();
     private static final VoteOverlay                voteOverlay         = new VoteOverlay();
+    private static final ReportHudOverlay           reportHudOverlay     = new ReportHudOverlay();
+    private static final BleedingOverlay            bleedingOverlay      = new BleedingOverlay();
 
     public static BattlefieldTabOverlay getTabOverlay() {
         return tabOverlay;
@@ -102,11 +104,14 @@ public class ClientGuiHandler {
             if (ClientTeamData.showHotbar)     hotbarOverlay.render(g, w, h);
             voiceChatHudOverlay.render(g, w, h);
             if (ClientTeamData.showKillFeed)   killFeedOverlay.render(g, w);
-            captureNotifOverlay.render(g, w, h);
+            //captureNotifOverlay.render(g, w, h);
             voteOverlay.render(g, w, h);
+            reportHudOverlay.render(g, w);
         }
 
         tabOverlay.render(g, w, h);
+
+        bleedingOverlay.render(g, w, h);
 
         if (Math.abs(scale - 1.0f) > 0.01f) {
             g.pose().popPose();
@@ -120,7 +125,8 @@ public class ClientGuiHandler {
         } else {
             tabOverlay.tick();
             ClientVoiceHandler.tick();
-            captureNotifOverlay.tickFromCapturePoints(ClientTeamData.capturePoints);
+            //captureNotifOverlay.tickFromCapturePoints(ClientTeamData.capturePoints);
+            reportHudOverlay.tick();
         }
     }
 
@@ -204,6 +210,7 @@ public class ClientGuiHandler {
     @SubscribeEvent
     public static void onPlayerLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
         BattlefieldLoadingScreen.show();
+        com.pigeostudios.pwp.client.ClientHWID.onPlayerJoin();
     }
 
     @SubscribeEvent
@@ -211,5 +218,6 @@ public class ClientGuiHandler {
         SpawnScreenHelper.clear();
         ClientTeamData.resetVoteData();
         BattlefieldLoadingScreen.show();
+        com.pigeostudios.pwp.client.ClientHWID.reset();
     }
 }

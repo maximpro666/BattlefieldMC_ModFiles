@@ -1,12 +1,7 @@
 package com.pigeostudios.pwp.client.gui.renderer;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.pigeostudios.pwp.client.ClientTeamData;
 import com.pigeostudios.pwp.client.PlayerListEntry;
 import com.pigeostudios.pwp.client.gui.UITheme;
@@ -15,8 +10,8 @@ import com.pigeostudios.pwp.core.Team;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
@@ -27,7 +22,7 @@ public class CustomNametagRenderer {
     private static final double FADE_START = 32.0;
 
     public void renderNametag(PoseStack poseStack, MultiBufferSource bufferSource,
-                               Player player, Camera camera, float partialTick) {
+                                Player player, Camera camera, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
         Player localPlayer = mc.player;
         if (localPlayer == null) return;
@@ -97,25 +92,19 @@ public class CustomNametagRenderer {
         float x2 = hw;
         float y2 = hh;
 
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        RenderSystem.depthMask(false);
+        // Background via gui RenderType (batched through bufferSource)
+        VertexConsumer vc = bufferSource.getBuffer(RenderType.gui());
+        Matrix4f mat = poseStack.last().pose();
 
-        // Background
-        drawRect(poseStack, x1, y1, x2, y2,
-            applyAlpha(0x660A0A0A, alpha), 0);
+        drawRect(vc, mat, x1, y1, x2, y2, applyAlpha(0x660A0A0A, alpha));
 
         // Team color frame with pulse
         float pulse = 0.7f + 0.3f * Mth.sin((float)(System.currentTimeMillis() / 800.0 * Math.PI * 2));
         int borderColor = applyAlpha(teamColor, alpha * pulse);
-        drawRect(poseStack, x1, y1, x2, y1 + borderW, borderColor, 0);
-        drawRect(poseStack, x1, y2 - borderW, x2, y2, borderColor, 0);
-        drawRect(poseStack, x1, y1, x1 + borderW, y2, borderColor, 0);
-        drawRect(poseStack, x2 - borderW, y1, x2, y2, borderColor, 0);
-
-        RenderSystem.depthMask(true);
-        RenderSystem.disableBlend();
+        drawRect(vc, mat, x1, y1, x2, y1 + borderW, borderColor);
+        drawRect(vc, mat, x1, y2 - borderW, x2, y2, borderColor);
+        drawRect(vc, mat, x1, y1, x1 + borderW, y2, borderColor);
+        drawRect(vc, mat, x2 - borderW, y1, x2, y2, borderColor);
 
         // Text
         int textColor = applyAlpha(0xAAEFEFEF, alpha);
@@ -167,20 +156,16 @@ public class CustomNametagRenderer {
         poseStack.popPose();
     }
 
-    private void drawRect(PoseStack poseStack,
-                          float x1, float y1, float x2, float y2, int color, float z) {
-        Matrix4f mat = poseStack.last().pose();
+    private void drawRect(VertexConsumer vc, Matrix4f mat,
+                          float x1, float y1, float x2, float y2, int color) {
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;
         float b = (color & 0xFF) / 255f;
         float a = ((color >> 24) & 0xFF) / 255f;
-        BufferBuilder builder = Tesselator.getInstance().getBuilder();
-        builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        builder.vertex(mat, x1, y2, z).color(r, g, b, a).endVertex();
-        builder.vertex(mat, x2, y2, z).color(r, g, b, a).endVertex();
-        builder.vertex(mat, x2, y1, z).color(r, g, b, a).endVertex();
-        builder.vertex(mat, x1, y1, z).color(r, g, b, a).endVertex();
-        BufferUploader.drawWithShader(builder.end());
+        vc.vertex(mat, x1, y2, 0).color(r, g, b, a).endVertex();
+        vc.vertex(mat, x2, y2, 0).color(r, g, b, a).endVertex();
+        vc.vertex(mat, x2, y1, 0).color(r, g, b, a).endVertex();
+        vc.vertex(mat, x1, y1, 0).color(r, g, b, a).endVertex();
     }
 
     private static int applyAlpha(int color, float alpha) {

@@ -1,7 +1,6 @@
 package com.pigeostudios.pwp.core;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.network.chat.Component;
 
 import java.util.Map;
 import java.util.UUID;
@@ -25,19 +24,20 @@ public final class RateLimiter {
         UUID uuid = player.getUUID();
         Bucket bucket = buckets.computeIfAbsent(uuid, k -> new Bucket());
 
-        long now = System.nanoTime();
-        long elapsed = now - bucket.lastRefillNanos;
-        bucket.lastRefillNanos = now;
+        synchronized (bucket) {
+            long now = System.nanoTime();
+            long elapsed = now - bucket.lastRefillNanos;
+            bucket.lastRefillNanos = now;
 
-        double refill = (double) elapsed / INTERVAL_NANOS * MAX_PACKETS_PER_SECOND;
-        bucket.tokens = Math.min(MAX_BURST, bucket.tokens + refill);
+            double refill = (double) elapsed / INTERVAL_NANOS * MAX_PACKETS_PER_SECOND;
+            bucket.tokens = Math.min(MAX_BURST, bucket.tokens + refill);
 
-        if (bucket.tokens < 1.0) {
-            player.connection.disconnect(Component.literal("Disconnected: too many requests"));
-            return false;
+            if (bucket.tokens < 1.0) {
+                return false;
+            }
+
+            bucket.tokens -= 1.0;
         }
-
-        bucket.tokens -= 1.0;
         return true;
     }
 

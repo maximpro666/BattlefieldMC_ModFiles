@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:overworld",
+  "type": "pwp:map",
   "generator": {
     "type": "minecraft:flat",
     "settings": {

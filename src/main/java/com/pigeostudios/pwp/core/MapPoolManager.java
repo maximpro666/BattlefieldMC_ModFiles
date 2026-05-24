@@ -2,6 +2,7 @@ package com.pigeostudios.pwp.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
 import com.google.gson.reflect.TypeToken;
 import com.pigeostudios.pwp.PWP;
 import net.minecraft.core.registries.Registries;
@@ -23,6 +24,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 public class MapPoolManager {
@@ -33,6 +36,7 @@ public class MapPoolManager {
     private static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
         .excludeFieldsWithoutExposeAnnotation()
+        .registerTypeAdapter(MapConfig.class, (InstanceCreator<MapConfig>) t -> new MapConfig())
         .create();
     private static final int MAINTENANCE_INTERVAL_TICKS = 200;
 
@@ -48,10 +52,10 @@ public class MapPoolManager {
 
     public MapPoolManager(MinecraftServer server) {
         this.server = server;
-        this.maps = new ArrayList<>();
+        this.maps = new CopyOnWriteArrayList<>();
         this.currentMapIndex = -1;
         this.random = new Random();
-        this.votes = new HashMap<>();
+        this.votes = new ConcurrentHashMap<>();
         this.maintenanceRunning = false;
         this.maintenanceCooldown = 0;
         this.restartAfterMaintenance = true;
@@ -315,9 +319,10 @@ public class MapPoolManager {
             try {
                 try (var ch = java.nio.channels.FileChannel.open(target,
                         java.nio.file.StandardOpenOption.WRITE,
-                        java.nio.file.StandardOpenOption.CREATE)) {
+                        java.nio.file.StandardOpenOption.READ,
+                        java.nio.file.StandardOpenOption.CREATE,
+                        java.nio.file.StandardOpenOption.TRUNCATE_EXISTING)) {
                     ch.write(java.nio.ByteBuffer.wrap(data));
-                    try { ch.truncate(data.length); } catch (Exception ignored) {}
                 }
                 return;
             } catch (IOException e) {

@@ -63,15 +63,12 @@ public class VehicleManager {
     }
 
     public boolean isVehicleEntityType(Entity entity) {
+        if (spawnedVehicles.contains(entity.getUUID())) return true;
         VehicleAdapterRegistry registry = BattlefieldRuntime.getInstance().getVehicleAdapterRegistry();
         if (registry.findAdapter(entity) != null) return true;
         String entityTypeId = EntityType.getKey(entity.getType()).toString();
         for (VehicleDefinition def : BattlefieldRuntime.getInstance().getVehicleDefRegistry().getAll()) {
             if (entityTypeId.equals(def.getEntityType())) return true;
-        }
-        if (entity.getTeam() != null) {
-            String teamName = entity.getTeam().getName();
-            if ("NATO".equalsIgnoreCase(teamName) || "RUSSIA".equalsIgnoreCase(teamName)) return true;
         }
         return false;
     }
@@ -106,6 +103,15 @@ public class VehicleManager {
                 PlayerCombatData data = PWP.getTeamManager().getOrCreatePlayerData(ownerUuid);
                 if (data.getTeam() == team) count++;
             }
+        }
+        return count;
+    }
+
+    public int countPlayerVehicles(UUID ownerUUID) {
+        int count = 0;
+        for (UUID vUid : spawnedVehicles) {
+            UUID owner = vehicleToOwner.get(vUid);
+            if (ownerUUID.equals(owner)) count++;
         }
         return count;
     }
@@ -206,6 +212,7 @@ public class VehicleManager {
         ServerLevel level = (ServerLevel) player.level();
         CompoundTag nbt = def.resolveNbt();
         if (nbt != null) {
+            nbt = nbt.copy();
             nbt.remove("UUID"); nbt.remove("uuid"); nbt.remove("Uuid");
         }
         int offsetIdx = countActiveVehicles(playerTeam);
@@ -232,21 +239,34 @@ public class VehicleManager {
 
     public List<VehicleDefinition> getAvailableDefinitions(ServerPlayer player, TeamManager teamManager) {
         List<VehicleDefinition> available = new ArrayList<>();
-        VehicleDefinitionRegistry reg = BattlefieldRuntime.getInstance().getVehicleDefRegistry();
         Team playerTeam = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
+        VehicleDefinitionRegistry reg = BattlefieldRuntime.getInstance().getVehicleDefRegistry();
         for (VehicleDefinition def : reg.getAll()) {
-            available.add(def);
+            String faction = def.getFaction();
+            if ("ALL".equals(faction) ||
+                (playerTeam == Team.NATO && "NATO".equals(faction)) ||
+                (playerTeam == Team.RUSSIA && "RUSSIA".equals(faction))) {
+                available.add(def);
+            }
+        }
+        if (available.isEmpty()) {
+            PWP.LOGGER.warn("No vehicle definitions available! Registry has {} definitions.", reg.getAll().size());
         }
         return available;
     }
 
-    @Deprecated
     public List<VehicleData> getAvailableVehicles(ServerPlayer player, TeamManager teamManager) {
         List<VehicleData> result = new ArrayList<>();
+        Team playerTeam = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
         for (VehicleDefinition def : getAvailableDefinitions(player, teamManager)) {
             VehicleData data = new VehicleData(def.getId(), def.getDisplayName(),
-                Team.SPECTATOR, 0, def.getTicketCost());
+                playerTeam, def.getRequiredAccessLevel(), def.getTicketCost());
             data.setCooldownSeconds(def.getCooldownSeconds());
+            data.setDeployBC(def.getCosts().getDeployBC());
+            data.setDeployVC(def.getCosts().getDeployVC());
+            int totalPlayers = teamManager.getPlayersByTeam(Team.NATO).size() + teamManager.getPlayersByTeam(Team.RUSSIA).size();
+            data.setMaxActive(def.getPopulationLimit(Math.max(totalPlayers, 1)));
+            data.setEntityData(def.getEntityType(), def.resolveNbt());
             result.add(data);
         }
         return result;

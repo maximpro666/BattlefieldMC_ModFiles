@@ -37,7 +37,7 @@ public class FOBPlacePacket {
             if (!PacketValidator.checkAndReject(player, PacketValidator.requireTeamPlayable(player))) return;
             if (!PacketValidator.checkAndReject(player, PacketValidator.requireSquadLeader(player))) return;
 
-            String result = PWP.getFOBManager().placeFOB(player, name);
+            String result = PWP.getServiceRegistry().getFOB().placeFOB(player, name);
             if (result != null) {
                 player.displayClientMessage(error(result), false);
             }

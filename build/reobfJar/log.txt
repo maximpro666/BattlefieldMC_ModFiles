@@ -140,21 +140,21 @@ Conflicting propagated mapping for com/pigeostudios/pwp/blockentity/RespawnBeaco
 Conflicting propagated mapping for com/pigeostudios/pwp/blockentity/RespawnBeaconBlockEntity/load(Lnet/minecraft/nbt/CompoundTag;)V from net/minecraft/world/level/block/entity/BlockEntity/load(Lnet/minecraft/nbt/CompoundTag;)V: load -> m_142466_
 Conflicting propagated mapping for com/pigeostudios/pwp/blockentity/RespawnBeaconBlockEntity/saveAdditional(Lnet/minecraft/nbt/CompoundTag;)V from net/minecraft/world/level/block/entity/BlockEntity/saveAdditional(Lnet/minecraft/nbt/CompoundTag;)V: saveAdditional -> m_183515_
 Conflicting propagated mapping for com/pigeostudios/pwp/blockentity/RespawnBeaconBlockEntity/getUpdatePacket()Lnet/minecraft/network/protocol/Packet; from net/minecraft/world/level/block/entity/BlockEntity/getUpdatePacket()Lnet/minecraft/network/protocol/Packet;: getUpdatePacket -> m_58483_
+Conflicting propagated mapping for com/pigeostudios/pwp/core/TeamManager/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag; from net/minecraft/world/level/saveddata/SavedData/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;: save -> m_7176_
 Conflicting propagated mapping for net/minecraft/world/entity/LivingEntity/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V from net/minecraft/world/entity/player/Player/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V: lambda$addAdditionalSaveData$3 -> m_219754_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/RespawnBeaconBlockRenderer/render(Lnet/minecraft/world/level/block/entity/BlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V from net/minecraft/client/renderer/blockentity/BlockEntityRenderer/render(Lnet/minecraft/world/level/block/entity/BlockEntity;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;II)V: render -> m_6922_
-Conflicting propagated mapping for com/pigeostudios/pwp/core/TeamManager/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag; from net/minecraft/world/level/saveddata/SavedData/save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;: save -> m_7176_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BToggle/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BToggle/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BToggle/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BToggle/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V from net/minecraft/client/gui/components/AbstractWidget/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V: playDownSound -> m_7435_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/onDrag(DDDD)V from net/minecraft/client/gui/components/AbstractWidget/onDrag(DDDD)V: onDrag -> m_7212_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V from net/minecraft/client/gui/components/AbstractWidget/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V: playDownSound -> m_7435_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BButton/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractButton/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BButton/onPress()V from net/minecraft/client/gui/components/Button/onPress()V: onPress -> m_5691_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BButton/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V from net/minecraft/client/gui/components/AbstractWidget/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V: playDownSound -> m_7435_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/onDrag(DDDD)V from net/minecraft/client/gui/components/AbstractWidget/onDrag(DDDD)V: onDrag -> m_7212_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BSlider/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V from net/minecraft/client/gui/components/AbstractWidget/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V: playDownSound -> m_7435_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BToggle/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BToggle/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BToggle/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/component/BToggle/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V from net/minecraft/client/gui/components/AbstractWidget/playDownSound(Lnet/minecraft/client/sounds/SoundManager;)V: playDownSound -> m_7435_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
@@ -162,9 +162,11 @@ Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassS
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ClassSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
@@ -180,57 +182,67 @@ Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VoteSc
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VoteScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/VoteScreen/shouldCloseOnEsc()Z from net/minecraft/client/gui/screens/Screen/shouldCloseOnEsc()Z: shouldCloseOnEsc -> m_6913_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldPauseScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldPauseScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldPauseScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldMainMenuScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldMainMenuScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldMainMenuScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/AdminPanel/charTyped(CI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/charTyped(CI)Z: charTyped -> m_5534_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldLoadingScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/Renderable/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldMainMenuScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldMainMenuScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldMainMenuScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/BattlefieldScreen/renderBackground(Lnet/minecraft/client/gui/GuiGraphics;)V from net/minecraft/client/gui/screens/Screen/renderBackground(Lnet/minecraft/client/gui/GuiGraphics;)V: renderBackground -> m_280273_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TeamSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TeamSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitCustomizationScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/shouldCloseOnEsc()Z from net/minecraft/client/gui/screens/Screen/shouldCloseOnEsc()Z: shouldCloseOnEsc -> m_6913_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TeamSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TicketScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TicketScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TicketScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitLoadoutScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ReportScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ReportScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ReportScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/ReportScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/mouseScrolled(DDD)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseScrolled(DDD)Z: mouseScrolled -> m_6050_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/renderBackground(Lnet/minecraft/client/gui/GuiGraphics;)V from net/minecraft/client/gui/screens/Screen/renderBackground(Lnet/minecraft/client/gui/GuiGraphics;)V: renderBackground -> m_280273_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TeamSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TeamSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/TeamSelectionScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/ContainerEventHandler/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/tick()V from net/minecraft/client/gui/screens/Screen/tick()V: tick -> m_86600_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen/shouldCloseOnEsc()Z from net/minecraft/client/gui/screens/Screen/shouldCloseOnEsc()Z: shouldCloseOnEsc -> m_6913_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen/keyPressed(III)Z from net/minecraft/client/gui/screens/Screen/keyPressed(III)Z: keyPressed -> m_7933_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
@@ -241,20 +253,20 @@ Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SpawnS
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SquadScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SquadScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/screen/SquadScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BDropdown/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BDropdown/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BDropdown/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BLockOverlay/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BLockOverlay/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BCard/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BCard/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BCard/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BLockOverlay/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BLockOverlay/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BDropdown/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BDropdown/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BDropdown/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BNumberInput/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BNumberInput/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BNumberInput/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BTag/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
-Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BToggle/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BTag/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
+Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BToggle/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V from net/minecraft/client/gui/components/AbstractWidget/updateWidgetNarration(Lnet/minecraft/client/gui/narration/NarrationElementOutput;)V: updateWidgetNarration -> m_168797_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BToggle/onClick(DD)V from net/minecraft/client/gui/components/AbstractWidget/onClick(DD)V: onClick -> m_5716_
 Conflicting propagated mapping for com/pigeostudios/pwp/client/gui/widget/BWidgets$BToggle/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/components/AbstractWidget/renderWidget(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: renderWidget -> m_87963_
 Conflicting propagated mapping for net/minecraft/client/gui/screens/OptionsScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
@@ -315,6 +327,17 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   assets/pwp/textures/gui/ranks/ranks.png
   assets/pwp/textures/gui/team_nato.png
   assets/pwp/textures/gui/team_ru.png
+  assets/pwp/textures/markers/
+  assets/pwp/textures/markers/attack.png
+  assets/pwp/textures/markers/capture_point.png
+  assets/pwp/textures/markers/defend.png
+  assets/pwp/textures/markers/fob.png
+  assets/pwp/textures/markers/observe.png
+  assets/pwp/textures/markers/point.png
+  assets/pwp/textures/squad/
+  assets/pwp/textures/squad/chevron.png
+  assets/pwp/textures/squad/diamond.png
+  assets/pwp/textures/squad/square.png
   com/
   com/pigeostudios/
   com/pigeostudios/pwp/
@@ -327,6 +350,9 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/ammo/IAmmoProvider.class
   com/pigeostudios/pwp/ammo/PointAmmoProvider.class
   com/pigeostudios/pwp/ammo/SupplyTruckAmmoProvider.class
+  com/pigeostudios/pwp/bleeding/
+  com/pigeostudios/pwp/bleeding/BleedingHandler.class
+  com/pigeostudios/pwp/bleeding/BleedingState.class
   com/pigeostudios/pwp/blockentity/
   com/pigeostudios/pwp/blockentity/RespawnBeaconBlockEntity.class
   com/pigeostudios/pwp/capture/
@@ -335,6 +361,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/capture/ZoneDataManager.class
   com/pigeostudios/pwp/client/
   com/pigeostudios/pwp/client/CapturePointData.class
+  com/pigeostudios/pwp/client/ClientHWID.class
   com/pigeostudios/pwp/client/ClientHotbarData.class
   com/pigeostudios/pwp/client/ClientMarkerData.class
   com/pigeostudios/pwp/client/ClientSetup$ClientModBus.class
@@ -396,6 +423,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/client/gui/component/TopBar.class
   com/pigeostudios/pwp/client/gui/overlay/
   com/pigeostudios/pwp/client/gui/overlay/BattlefieldTabOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/BleedingOverlay.class
   com/pigeostudios/pwp/client/gui/overlay/CaptureNotificationOverlay.class
   com/pigeostudios/pwp/client/gui/overlay/CompassOverlay.class
   com/pigeostudios/pwp/client/gui/overlay/HotbarOverlay.class
@@ -403,6 +431,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/client/gui/overlay/KillFeedOverlay.class
   com/pigeostudios/pwp/client/gui/overlay/NotificationOverlay$NotifEntry.class
   com/pigeostudios/pwp/client/gui/overlay/NotificationOverlay.class
+  com/pigeostudios/pwp/client/gui/overlay/ReportHudOverlay.class
   com/pigeostudios/pwp/client/gui/overlay/SquadOverlay.class
   com/pigeostudios/pwp/client/gui/overlay/TicketOverlay.class
   com/pigeostudios/pwp/client/gui/overlay/VitalsOverlay.class
@@ -411,7 +440,10 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/client/gui/renderer/
   com/pigeostudios/pwp/client/gui/renderer/CaptureParticles.class
   com/pigeostudios/pwp/client/gui/renderer/CustomNametagRenderer.class
+  com/pigeostudios/pwp/client/gui/renderer/RenderTypes.class
+  com/pigeostudios/pwp/client/gui/renderer/SquadMarkerRenderer$Shape.class
   com/pigeostudios/pwp/client/gui/renderer/SquadMarkerRenderer.class
+  com/pigeostudios/pwp/client/gui/renderer/TacticalMarkerRenderer.class
   com/pigeostudios/pwp/client/gui/renderer/WorldMarkerRenderer$CapturePointRender.class
   com/pigeostudios/pwp/client/gui/renderer/WorldMarkerRenderer.class
   com/pigeostudios/pwp/client/gui/scoreboard/
@@ -438,6 +470,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen$1.class
   com/pigeostudios/pwp/client/gui/screen/KitSelectionScreen.class
   com/pigeostudios/pwp/client/gui/screen/MatchResultsScreen.class
+  com/pigeostudios/pwp/client/gui/screen/ReportScreen.class
   com/pigeostudios/pwp/client/gui/screen/ResupplyScreen$WeaponEntry.class
   com/pigeostudios/pwp/client/gui/screen/ResupplyScreen.class
   com/pigeostudios/pwp/client/gui/screen/SettingsMenuScreen.class
@@ -446,6 +479,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/client/gui/screen/SpawnSelectionScreen.class
   com/pigeostudios/pwp/client/gui/screen/SquadScreen.class
   com/pigeostudios/pwp/client/gui/screen/TeamSelectionScreen.class
+  com/pigeostudios/pwp/client/gui/screen/TicketScreen.class
   com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen.class
   com/pigeostudios/pwp/client/gui/screen/VoteScreen.class
   com/pigeostudios/pwp/client/gui/widget/
@@ -461,6 +495,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/commands/
   com/pigeostudios/pwp/commands/AdminCommand.class
   com/pigeostudios/pwp/commands/AdminNotifyCommand.class
+  com/pigeostudios/pwp/commands/BanCommand.class
   com/pigeostudios/pwp/commands/CallsignCommand.class
   com/pigeostudios/pwp/commands/CapturePointCommand.class
   com/pigeostudios/pwp/commands/DeployCommand.class
@@ -471,21 +506,35 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/commands/GameCommand$1.class
   com/pigeostudios/pwp/commands/GameCommand.class
   com/pigeostudios/pwp/commands/GiveCoinsCommand.class
+  com/pigeostudios/pwp/commands/GiveVCCommand.class
+  com/pigeostudios/pwp/commands/KickCommand.class
   com/pigeostudios/pwp/commands/KitAdminCommand.class
   com/pigeostudios/pwp/commands/KitCommand.class
   com/pigeostudios/pwp/commands/KitSelectCommand.class
   com/pigeostudios/pwp/commands/LobbyCommand.class
   com/pigeostudios/pwp/commands/MapCommand.class
   com/pigeostudios/pwp/commands/MarkerCommand.class
+  com/pigeostudios/pwp/commands/MuteCommand.class
   com/pigeostudios/pwp/commands/PingCommand.class
+  com/pigeostudios/pwp/commands/PunishmentHistoryCommand.class
   com/pigeostudios/pwp/commands/RankCommand.class
   com/pigeostudios/pwp/commands/RedeployCommand.class
+  com/pigeostudios/pwp/commands/ReportCommand.class
   com/pigeostudios/pwp/commands/RespawnCommand.class
+  com/pigeostudios/pwp/commands/RulesCommand.class
+  com/pigeostudios/pwp/commands/SpectateCommand.class
   com/pigeostudios/pwp/commands/SquadCommand.class
+  com/pigeostudios/pwp/commands/StaffCommand.class
   com/pigeostudios/pwp/commands/StartMatchCommand.class
   com/pigeostudios/pwp/commands/TeamCommand.class
+  com/pigeostudios/pwp/commands/TempbanCommand.class
+  com/pigeostudios/pwp/commands/TicketCommand.class
+  com/pigeostudios/pwp/commands/UnbanCommand.class
+  com/pigeostudios/pwp/commands/UnmuteCommand.class
   com/pigeostudios/pwp/commands/VehicleCommand$VehicleDefinitionRegistryHelper.class
   com/pigeostudios/pwp/commands/VehicleCommand.class
+  com/pigeostudios/pwp/commands/VoicemuteCommand.class
+  com/pigeostudios/pwp/commands/WarnCommand.class
   com/pigeostudios/pwp/config/
   com/pigeostudios/pwp/config/ConfigManager.class
   com/pigeostudios/pwp/core/
@@ -539,11 +588,12 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/core/TeamManager.class
   com/pigeostudios/pwp/core/TeamVoicePlugin$VoiceSpeakerState.class
   com/pigeostudios/pwp/core/TeamVoicePlugin.class
-  com/pigeostudios/pwp/core/TicketManager.class
   com/pigeostudios/pwp/core/VehicleData.class
   com/pigeostudios/pwp/core/VehicleManager.class
   com/pigeostudios/pwp/core/VoiceGroupManager.class
   com/pigeostudios/pwp/data/
+  com/pigeostudios/pwp/data/CentralDatabase$SqlExecutor.class
+  com/pigeostudios/pwp/data/CentralDatabase$SqlQuery.class
   com/pigeostudios/pwp/data/CentralDatabase.class
   com/pigeostudios/pwp/data/ItemResolver.class
   com/pigeostudios/pwp/data/KitConfig$AttachmentLimit.class
@@ -566,15 +616,18 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/events/AttachmentEventHandler.class
   com/pigeostudios/pwp/events/CombatEventHandler.class
   com/pigeostudios/pwp/events/PlayerEventHandler.class
+  com/pigeostudios/pwp/events/PunishmentEventHandler.class
   com/pigeostudios/pwp/events/VehicleAccessControl.class
   com/pigeostudios/pwp/integration/
-  com/pigeostudios/pwp/integration/PlayerReviveIntegration.class
+  com/pigeostudios/pwp/integration/Weather2Integration.class
   com/pigeostudios/pwp/mixin/
+  com/pigeostudios/pwp/mixin/ClientPacketListenerMixin.class
   com/pigeostudios/pwp/mixin/ForgeLoadingOverlayMixin.class
   com/pigeostudios/pwp/mixin/IndexedMessageCodecMixin.class
   com/pigeostudios/pwp/mixin/PWPMixinConnector.class
   com/pigeostudios/pwp/network/
   com/pigeostudios/pwp/network/BCSyncPacket.class
+  com/pigeostudios/pwp/network/BleedingSyncPacket.class
   com/pigeostudios/pwp/network/BorderSyncPacket.class
   com/pigeostudios/pwp/network/CapturePointSyncPacket.class
   com/pigeostudios/pwp/network/ClientScreenAccessor.class
@@ -584,6 +637,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/network/FOBPlacePacket.class
   com/pigeostudios/pwp/network/FOBSyncPacket.class
   com/pigeostudios/pwp/network/GameStateSyncPacket.class
+  com/pigeostudios/pwp/network/HWIDPacket.class
   com/pigeostudios/pwp/network/KitAdminConfigSyncPacket.class
   com/pigeostudios/pwp/network/KitAdminRequestPacket.class
   com/pigeostudios/pwp/network/KitAdminSavePacket.class
@@ -599,6 +653,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/network/OpenLoadoutScreenPacket.class
   com/pigeostudios/pwp/network/OpenMatchResultsPacket$PlayerResultEntry.class
   com/pigeostudios/pwp/network/OpenMatchResultsPacket.class
+  com/pigeostudios/pwp/network/OpenReportScreenPacket.class
   com/pigeostudios/pwp/network/OpenSpawnSelectionScreenPacket$BeaconInfo.class
   com/pigeostudios/pwp/network/OpenSpawnSelectionScreenPacket$SquadmateInfo.class
   com/pigeostudios/pwp/network/OpenSpawnSelectionScreenPacket.class
@@ -607,12 +662,16 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/network/PacketHandler.class
   com/pigeostudios/pwp/network/RankSyncPacket.class
   com/pigeostudios/pwp/network/ReloadVisualsPacket.class
+  com/pigeostudios/pwp/network/ReportCountSyncPacket.class
+  com/pigeostudios/pwp/network/ReportSubmitPacket.class
   com/pigeostudios/pwp/network/RespawnAtPointPacket.class
   com/pigeostudios/pwp/network/RespawnBeaconSyncPacket$BeaconData.class
   com/pigeostudios/pwp/network/RespawnBeaconSyncPacket.class
   com/pigeostudios/pwp/network/ResupplyActionPacket$Action.class
   com/pigeostudios/pwp/network/ResupplyActionPacket$RocketDef.class
   com/pigeostudios/pwp/network/ResupplyActionPacket.class
+  com/pigeostudios/pwp/network/ReviveActionPacket$Action.class
+  com/pigeostudios/pwp/network/ReviveActionPacket.class
   com/pigeostudios/pwp/network/SoundPacket.class
   com/pigeostudios/pwp/network/SquadActionPacket.class
   com/pigeostudios/pwp/network/SquadSyncPacket.class
@@ -623,6 +682,11 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/network/TeamSelectPacket.class
   com/pigeostudios/pwp/network/TeamSyncPacket.class
   com/pigeostudios/pwp/network/TeamTicketSyncPacket.class
+  com/pigeostudios/pwp/network/TicketClaimPacket.class
+  com/pigeostudios/pwp/network/TicketListSyncPacket$TicketEntry.class
+  com/pigeostudios/pwp/network/TicketListSyncPacket.class
+  com/pigeostudios/pwp/network/TicketMessagePacket.class
+  com/pigeostudios/pwp/network/TicketMessageSyncPacket.class
   com/pigeostudios/pwp/network/TransferPacket.class
   com/pigeostudios/pwp/network/VehicleCreditsSyncPacket.class
   com/pigeostudios/pwp/network/VehicleDataSyncPacket.class
@@ -635,12 +699,60 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/network/WCSyncPacket.class
   com/pigeostudios/pwp/proxy/
   com/pigeostudios/pwp/proxy/ProxyMessenger.class
+  com/pigeostudios/pwp/punishment/
+  com/pigeostudios/pwp/punishment/AutoEscalationManager$1.class
+  com/pigeostudios/pwp/punishment/AutoEscalationManager.class
+  com/pigeostudios/pwp/punishment/Punishment.class
+  com/pigeostudios/pwp/punishment/PunishmentManager$ActiveBan.class
+  com/pigeostudios/pwp/punishment/PunishmentManager$ActiveMute.class
+  com/pigeostudios/pwp/punishment/PunishmentManager.class
+  com/pigeostudios/pwp/punishment/PunishmentType.class
+  com/pigeostudios/pwp/punishment/StaffManager$1.class
+  com/pigeostudios/pwp/punishment/StaffManager.class
+  com/pigeostudios/pwp/punishment/StaffRole$1.class
+  com/pigeostudios/pwp/punishment/StaffRole.class
+  com/pigeostudios/pwp/punishment/WarnCategory$1.class
+  com/pigeostudios/pwp/punishment/WarnCategory.class
+  com/pigeostudios/pwp/report/
+  com/pigeostudios/pwp/report/Report.class
+  com/pigeostudios/pwp/report/ReportManager.class
+  com/pigeostudios/pwp/report/ReportStatus.class
+  com/pigeostudios/pwp/report/ReportType.class
+  com/pigeostudios/pwp/report/TicketMessage.class
   com/pigeostudios/pwp/role/
   com/pigeostudios/pwp/role/LoadoutDefinition.class
   com/pigeostudios/pwp/role/RoleDefinition.class
   com/pigeostudios/pwp/role/RoleRegistry.class
+  com/pigeostudios/pwp/service/
+  com/pigeostudios/pwp/service/AntiAbuseService.class
+  com/pigeostudios/pwp/service/ConfigService$BCConfig.class
+  com/pigeostudios/pwp/service/ConfigService$CapsConfig.class
+  com/pigeostudios/pwp/service/ConfigService$DifficultyMultipliersConfig.class
+  com/pigeostudios/pwp/service/ConfigService$DynamicPricingConfig.class
+  com/pigeostudios/pwp/service/ConfigService$EconomyConfig.class
+  com/pigeostudios/pwp/service/ConfigService$EventTypeConfig.class
+  com/pigeostudios/pwp/service/ConfigService$EventsConfig.class
+  com/pigeostudios/pwp/service/ConfigService$FOBConfig.class
+  com/pigeostudios/pwp/service/ConfigService$FrontlineIncomeConfig.class
+  com/pigeostudios/pwp/service/ConfigService$ProgressionConfig.class
+  com/pigeostudios/pwp/service/ConfigService$RankConfig.class
+  com/pigeostudios/pwp/service/ConfigService$TicketsConfig.class
+  com/pigeostudios/pwp/service/ConfigService$VCConfig.class
+  com/pigeostudios/pwp/service/ConfigService$WCConfig.class
+  com/pigeostudios/pwp/service/ConfigService$XPBySourceConfig.class
+  com/pigeostudios/pwp/service/ConfigService.class
+  com/pigeostudios/pwp/service/EconomyService.class
+  com/pigeostudios/pwp/service/EventService$1.class
+  com/pigeostudios/pwp/service/EventService$ActiveEvent.class
+  com/pigeostudios/pwp/service/EventService.class
+  com/pigeostudios/pwp/service/FOBService.class
+  com/pigeostudios/pwp/service/KitService.class
+  com/pigeostudios/pwp/service/MatchEventType.class
+  com/pigeostudios/pwp/service/PersistenceService.class
+  com/pigeostudios/pwp/service/ServiceRegistry.class
+  com/pigeostudios/pwp/service/TicketService.class
+  com/pigeostudios/pwp/service/VehicleService.class
   com/pigeostudios/pwp/state/
-  com/pigeostudios/pwp/state/EconomyState.class
   com/pigeostudios/pwp/state/EscalationPhase.class
   com/pigeostudios/pwp/state/FrontlineState.class
   com/pigeostudios/pwp/state/MatchState.class
@@ -649,7 +761,6 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   com/pigeostudios/pwp/state/VehicleState.class
   com/pigeostudios/pwp/system/
   com/pigeostudios/pwp/system/ActivitySystem.class
-  com/pigeostudios/pwp/system/EconomySystem.class
   com/pigeostudios/pwp/system/EscalationSystem.class
   com/pigeostudios/pwp/system/PressureSystem.class
   com/pigeostudios/pwp/system/RoleSystem.class
@@ -668,10 +779,55 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   config/
   config/pwp/
   config/pwp/vehicle_definitions/
-  config/pwp/vehicle_definitions/sample_ah64.json
-  config/pwp/vehicle_definitions/sample_f16.json
-  config/pwp/vehicle_definitions/sample_t90.json
-  config/pwp/vehicle_definitions/test_horse.json
+  config/pwp/vehicle_definitions/2s25_sprut.json
+  config/pwp/vehicle_definitions/a_10.json
+  config/pwp/vehicle_definitions/ac_130.json
+  config/pwp/vehicle_definitions/ah_64_apache.json
+  config/pwp/vehicle_definitions/ah_6_little_bird.json
+  config/pwp/vehicle_definitions/b_2_spirit.json
+  config/pwp/vehicle_definitions/b_52.json
+  config/pwp/vehicle_definitions/bmp_2.json
+  config/pwp/vehicle_definitions/bmp_3.json
+  config/pwp/vehicle_definitions/btr_82a.json
+  config/pwp/vehicle_definitions/challenger_2.json
+  config/pwp/vehicle_definitions/eurofighter_typhoon.json
+  config/pwp/vehicle_definitions/f_16.json
+  config/pwp/vehicle_definitions/f_35b.json
+  config/pwp/vehicle_definitions/fa_18.json
+  config/pwp/vehicle_definitions/hmmwv.json
+  config/pwp/vehicle_definitions/ka_52.json
+  config/pwp/vehicle_definitions/la_revolution.json
+  config/pwp/vehicle_definitions/lav_25.json
+  config/pwp/vehicle_definitions/lav_ad.json
+  config/pwp/vehicle_definitions/leopard_2a7.json
+  config/pwp/vehicle_definitions/m1a2_abrams.json
+  config/pwp/vehicle_definitions/m1a2_sepv3.json
+  config/pwp/vehicle_definitions/m2_bradley.json
+  config/pwp/vehicle_definitions/m6_linebacker.json
+  config/pwp/vehicle_definitions/merkava_mk4.json
+  config/pwp/vehicle_definitions/mi_28_havoc.json
+  config/pwp/vehicle_definitions/mig_29.json
+  config/pwp/vehicle_definitions/mk_42.json
+  config/pwp/vehicle_definitions/mle_1934.json
+  config/pwp/vehicle_definitions/pantsir_s1.json
+  config/pwp/vehicle_definitions/pickup_dshk.json
+  config/pwp/vehicle_definitions/pickup_m2.json
+  config/pwp/vehicle_definitions/plz_05.json
+  config/pwp/vehicle_definitions/rah_66_comanche.json
+  config/pwp/vehicle_definitions/stryker_icv.json
+  config/pwp/vehicle_definitions/stryker_mgs.json
+  config/pwp/vehicle_definitions/su_25.json
+  config/pwp/vehicle_definitions/su_27.json
+  config/pwp/vehicle_definitions/su_57.json
+  config/pwp/vehicle_definitions/t_14_armata.json
+  config/pwp/vehicle_definitions/t_80bvm.json
+  config/pwp/vehicle_definitions/t_90ms.json
+  config/pwp/vehicle_definitions/tos_1.json
+  config/pwp/vehicle_definitions/transport_heli.json
+  config/pwp/vehicle_definitions/tunguska_m1.json
+  config/pwp/vehicle_definitions/type_99a.json
+  config/pwp/vehicle_definitions/uaz_469.json
+  config/pwp/vehicle_definitions/yx_100.json
   data/
   data/pwp/
   data/pwp/dimension/
@@ -679,6 +835,7 @@ Writing Output: C:\Users\maska\OneDrive\Desktop\BattlefieldMC_ModFiles\build\reo
   data/pwp/dimension/map.json
   data/pwp/dimension_type/
   data/pwp/dimension_type/lobby.json
+  data/pwp/dimension_type/map.json
   mixins.pwp.json
   pack.mcmeta
   pwp_maps.json

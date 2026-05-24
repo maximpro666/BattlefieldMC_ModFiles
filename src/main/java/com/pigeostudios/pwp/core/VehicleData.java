@@ -20,6 +20,8 @@ public class VehicleData {
     private int maxActive;
     private String entityType;
     private String nbtData;
+    private int deployBC;
+    private int deployVC;
 
     public VehicleData(String vehicleId, String displayName, Team team, int minRankOrdinal, int ticketCost) {
         this.vehicleId = vehicleId;
@@ -31,6 +33,8 @@ public class VehicleData {
         this.maxActive = 3;
         this.entityType = "";
         this.nbtData = "";
+        this.deployBC = 0;
+        this.deployVC = 0;
     }
 
     public String getVehicleId() { return vehicleId; }
@@ -49,6 +53,11 @@ public class VehicleData {
         this.entityType = entityType;
         this.nbtData = nbt != null ? nbt.toString() : "";
     }
+
+    public int getDeployBC() { return deployBC; }
+    public void setDeployBC(int v) { this.deployBC = v; }
+    public int getDeployVC() { return deployVC; }
+    public void setDeployVC(int v) { this.deployVC = v; }
 
     public EntityType<?> resolveEntityType() {
         if (entityType == null || entityType.isEmpty()) return null;
@@ -72,6 +81,8 @@ public class VehicleData {
         obj.addProperty("maxActive", maxActive);
         if (entityType != null && !entityType.isEmpty()) obj.addProperty("entityType", entityType);
         if (nbtData != null && !nbtData.isEmpty()) obj.addProperty("nbt", nbtData);
+        obj.addProperty("deployBC", deployBC);
+        obj.addProperty("deployVC", deployVC);
         return obj;
     }
 
@@ -86,6 +97,8 @@ public class VehicleData {
         if (obj.has("maxActive")) data.maxActive = obj.get("maxActive").getAsInt();
         if (obj.has("entityType")) data.entityType = obj.get("entityType").getAsString();
         if (obj.has("nbt")) data.nbtData = obj.get("nbt").getAsString();
+        if (obj.has("deployBC")) data.deployBC = obj.get("deployBC").getAsInt();
+        if (obj.has("deployVC")) data.deployVC = obj.get("deployVC").getAsInt();
         return data;
     }
 }

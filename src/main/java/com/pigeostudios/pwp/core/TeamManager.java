@@ -95,8 +95,8 @@ public class TeamManager extends SavedData {
         to.setWins(Math.max(to.getWins(), from.getWins()));
         to.setRating(Math.max(to.getRating(), from.getRating()));
         to.setRankOrdinal(Math.max(to.getRankOrdinal(), from.getRankOrdinal()));
-        to.setBattleCredits(from.getBattleCredits());
-        to.setWarCredits(from.getWarCredits());
+        to.setBattleCredits(Math.max(to.getBattleCredits(), from.getBattleCredits()));
+        to.setWarCredits(Math.max(to.getWarCredits(), from.getWarCredits()));
         to.setCallsign(from.getCallsign());
         to.setDisplayName(from.getDisplayName());
         to.setHasReceivedDogTag(from.hasReceivedDogTag());
@@ -336,7 +336,7 @@ public class TeamManager extends SavedData {
             rawDonat,
             data.hasReceivedDogTag()
         );
-        PacketHandler.CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
     public void fullSyncPlayer(ServerPlayer player) {
@@ -398,14 +398,18 @@ public class TeamManager extends SavedData {
         List<String> displayNames = new ArrayList<>();
         List<Integer> costs = new ArrayList<>();
         List<Integer> minRanks = new ArrayList<>();
+        List<Integer> bcCosts = new ArrayList<>();
+        List<Integer> vcCosts = new ArrayList<>();
         for (VehicleData v : vehicleList) {
             ids.add(v.getVehicleId());
             displayNames.add(v.getDisplayName());
             costs.add(v.getTicketCost());
             minRanks.add(v.getMinRankOrdinal());
+            bcCosts.add(v.getDeployBC());
+            vcCosts.add(v.getDeployVC());
         }
         com.pigeostudios.pwp.network.VehicleSyncPacket packet =
-            new com.pigeostudios.pwp.network.VehicleSyncPacket(ids, displayNames, costs, minRanks);
+            new com.pigeostudios.pwp.network.VehicleSyncPacket(ids, displayNames, costs, minRanks, bcCosts, vcCosts);
         PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 

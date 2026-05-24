@@ -24,6 +24,8 @@ public class VehicleDefinition {
     private String nbt;
     private int cooldownSeconds = 60;
     private int ticketCost = 0;
+    private int requiredAccessLevel = 0;
+    private String faction = "ALL";
 
     public String getId() { return id; }
     public String getDisplayName() { return displayName; }
@@ -38,6 +40,8 @@ public class VehicleDefinition {
     public String getNbt() { return nbt; }
     public int getCooldownSeconds() { return cooldownSeconds; }
     public int getTicketCost() { return ticketCost; }
+    public int getRequiredAccessLevel() { return requiredAccessLevel; }
+    public String getFaction() { return faction != null ? faction : "ALL"; }
 
     public int getAmmoCost(String ammoId) {
         return ammo != null ? ammo.getOrDefault(ammoId, 0) : 0;

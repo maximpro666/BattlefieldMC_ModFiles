@@ -47,6 +47,13 @@ public class PWPConfig {
     private int fobCostSP = 100;
     private boolean beaconsEnabled = false;
 
+    private boolean bleedingEnabled = true;
+    private int bleedoutTimeSeconds = 30;
+    private int reviveTimeSeconds = 6;
+    private float healthAfterRevive = 10.0f;
+    private float bleedingHealth = 10.0f;
+    private java.util.List<String> bleedingBypassSources = new java.util.ArrayList<>(java.util.Arrays.asList("fellOutOfWorld", "genericKill", "outOfBorder"));
+
     private Map<String, String> messages = new LinkedHashMap<>();
 
     public PWPConfig() {
@@ -93,6 +100,13 @@ public class PWPConfig {
     public int getMaxFOBsPerTeam() { return maxFOBsPerTeam; }
     public int getFOBCost() { return fobCostSP; }
     public boolean isBeaconsEnabled() { return beaconsEnabled; }
+
+    public boolean isBleedingEnabled() { return bleedingEnabled; }
+    public int getBleedoutTimeSeconds() { return bleedoutTimeSeconds; }
+    public int getReviveTimeSeconds() { return reviveTimeSeconds; }
+    public float getHealthAfterRevive() { return healthAfterRevive; }
+    public float getBleedingHealth() { return bleedingHealth; }
+    public List<String> getBleedingBypassSources() { return bleedingBypassSources; }
 
     public String getMessage(String key) { return translateColors(messages.getOrDefault(key, "&f" + key)); }
     public String getMessage(String key, Map<String, String> placeholders) {

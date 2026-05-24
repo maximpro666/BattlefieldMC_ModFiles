@@ -154,7 +154,7 @@ public class RespawnAtPointPacket {
         closeScreen(player);
     }
 
-    private static void applySelectedKit(ServerPlayer player) {
+    public static void applySelectedKit(ServerPlayer player) {
         TeamManager tm = PWP.getTeamManager();
         if (tm == null) return;
         PlayerCombatData pcd = tm.getOrCreatePlayerData(player.getUUID());
@@ -162,7 +162,7 @@ public class RespawnAtPointPacket {
         if (kitName == null || kitName.isEmpty() || !kitName.contains(":")) return;
         player.setHealth(player.getMaxHealth());
         String[] parts = kitName.split(":", 2);
-        KitConfigServerHelper.applyKit(player, parts[0], parts[1]);
+        PWP.getServiceRegistry().getKit().applyKit(player, parts[0], parts[1]);
     }
 
     private static void closeScreen(ServerPlayer player) {

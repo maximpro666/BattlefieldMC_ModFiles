@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.Collections;
 
@@ -32,7 +33,7 @@ public class RespawnManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private final MinecraftServer server;
-    private final List<SavedBeacon> beacons = new ArrayList<>();
+    private final List<SavedBeacon> beacons = new CopyOnWriteArrayList<>();
     private RespawnConfig config;
     private final Map<String, List<int[]>> capturePoints = new HashMap<>();
 
@@ -146,18 +147,31 @@ public class RespawnManager {
     }
 
     public boolean removeBeacon(String name, ServerPlayer player) {
-        boolean removed = beacons.removeIf(b ->
-            b.uuid.equals(player.getUUID().toString()) && b.name.equals(name));
-        if (removed) {
-            removeBeaconBlocks(player.getUUID().toString(), name);
-            save();
+        SavedBeacon target = null;
+        for (SavedBeacon b : beacons) {
+            if (b.uuid.equals(player.getUUID().toString()) && b.name.equals(name)) {
+                target = b;
+                break;
+            }
         }
-        return removed;
+        if (target != null) {
+            beacons.remove(target);
+            removeBeaconBlock(target);
+            save();
+            return true;
+        }
+        return false;
     }
 
     public void removeAllBeacons(String playerUUID) {
-        beacons.removeIf(b -> b.uuid.equals(playerUUID));
-        removeBeaconBlocks(playerUUID, null);
+        List<SavedBeacon> toRemove = new ArrayList<>();
+        for (SavedBeacon b : beacons) {
+            if (b.uuid.equals(playerUUID)) toRemove.add(b);
+        }
+        for (SavedBeacon b : toRemove) {
+            beacons.remove(b);
+            removeBeaconBlock(b);
+        }
         save();
     }
 
@@ -167,18 +181,14 @@ public class RespawnManager {
         PWP.LOGGER.info("All respawn beacons cleared");
     }
 
-    private void removeBeaconBlocks(String playerUUID, String name) {
-        for (SavedBeacon b : beacons) {
-            if (b.uuid.equals(playerUUID) && (name == null || b.name.equals(name))) {
-                ServerLevel level = server.getLevel(net.minecraft.resources.ResourceKey.create(
-                    net.minecraft.core.registries.Registries.DIMENSION,
-                    new net.minecraft.resources.ResourceLocation(b.dimension)));
-                if (level != null) {
-                    BlockPos pos = new BlockPos(b.x, b.y, b.z);
-                    if (level.getBlockEntity(pos) instanceof RespawnBeaconBlockEntity) {
-                        level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                    }
-                }
+    private void removeBeaconBlock(SavedBeacon b) {
+        ServerLevel level = server.getLevel(net.minecraft.resources.ResourceKey.create(
+            net.minecraft.core.registries.Registries.DIMENSION,
+            new net.minecraft.resources.ResourceLocation(b.dimension)));
+        if (level != null) {
+            BlockPos pos = new BlockPos(b.x, b.y, b.z);
+            if (level.getBlockEntity(pos) instanceof RespawnBeaconBlockEntity) {
+                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
             }
         }
     }
@@ -243,8 +253,8 @@ public class RespawnManager {
 
         Team team = PWP.getTeamManager().getOrCreatePlayerData(player.getUUID()).getTeam();
         if (team.isPlayable()) {
-            TicketManager tm = PWP.getTicketManager();
-            if (tm != null) tm.deductTicket(team);
+            var ts = PWP.getServiceRegistry().getTickets();
+            if (ts != null) ts.deductTicket(team);
             player.sendSystemMessage(error("-1 ticket for respawn"));
         }
 
@@ -256,6 +266,7 @@ public class RespawnManager {
         BlockPos pos = new BlockPos(beacon.x, beacon.y, beacon.z);
         player.teleportTo(dest, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, 0, 0);
         player.fallDistance = 0;
+        com.pigeostudios.pwp.events.CombatEventHandler.applySpawnInvulnerability(player);
     }
 
     private void load() {

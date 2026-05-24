@@ -4,6 +4,6 @@
     "default_conquest",
     "stalker_dump_conquest"
   ],
-  "disabledScenarios": [],
+  "disabledScenarios": ["default_conquest"],
   "respectCooldown": true
 }

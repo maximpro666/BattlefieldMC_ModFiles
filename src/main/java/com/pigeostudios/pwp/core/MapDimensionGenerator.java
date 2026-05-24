@@ -11,9 +11,31 @@ import java.nio.file.Path;
 
 public class MapDimensionGenerator {
 
+    private static final String MAP_DIMENSION_TYPE = """
+        {
+          "ultrawarm": false,
+          "natural": true,
+          "piglin_safe": true,
+          "respawn_anchor_works": false,
+          "bed_works": false,
+          "has_raids": false,
+          "has_skylight": true,
+          "has_ceiling": false,
+          "coordinate_scale": 1.0,
+          "ambient_light": 0.0,
+          "logical_height": 384,
+          "effects": "minecraft:overworld",
+          "infiniburn": "#minecraft:infiniburn_overworld",
+          "min_y": -64,
+          "height": 384,
+          "monster_spawn_light_level": 15,
+          "monster_spawn_block_light_limit": 0
+        }
+        """;
+
     private static final String MAP_DIMENSION = """
         {
-          "type": "minecraft:overworld",
+          "type": "pwp:map",
           "generator": {
             "type": "minecraft:flat",
             "settings": {
@@ -82,6 +104,7 @@ public class MapDimensionGenerator {
 
         generatePackMeta(datapacksDir);
         generateLobbyDimension(datapacksDir);
+        generateMapDimensionType(datapacksDir);
         generateMapDimension(datapacksDir);
     }
 
@@ -100,6 +123,23 @@ public class MapDimensionGenerator {
             PWP.LOGGER.info("Generated map dimension datapack");
         } catch (IOException e) {
             PWP.LOGGER.error("Failed to generate map dimension: {}", e.getMessage());
+        }
+    }
+
+    private static void generateMapDimensionType(Path datapacksDir) {
+        Path dimTypeDir = datapacksDir.resolve("data").resolve("pwp").resolve("dimension_type");
+        try {
+            Files.createDirectories(dimTypeDir);
+        } catch (IOException e) {
+            PWP.LOGGER.error("Failed to create dimension type directory: {}", e.getMessage());
+            return;
+        }
+        Path dimTypeFile = dimTypeDir.resolve("map.json");
+        try {
+            Files.writeString(dimTypeFile, MAP_DIMENSION_TYPE, StandardCharsets.UTF_8);
+            PWP.LOGGER.info("Generated map dimension type datapack");
+        } catch (IOException e) {
+            PWP.LOGGER.error("Failed to generate map dimension type: {}", e.getMessage());
         }
     }
 

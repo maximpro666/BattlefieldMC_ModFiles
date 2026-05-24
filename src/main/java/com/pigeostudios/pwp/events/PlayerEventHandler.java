@@ -5,6 +5,7 @@ import com.pigeostudios.pwp.core.*;
 import com.pigeostudios.pwp.core.TeamVoicePlugin;
 import com.pigeostudios.pwp.network.OpenTeamSelectionScreenPacket;
 import com.pigeostudios.pwp.network.PacketHandler;
+import com.pigeostudios.pwp.network.RespawnAtPointPacket;
 import com.pigeostudios.pwp.proxy.ProxyMessenger;
 import net.minecraft.ChatFormatting;
 import net.minecraftforge.network.PacketDistributor;
@@ -15,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -104,7 +106,26 @@ public class PlayerEventHandler {
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            PunishmentEventHandler.checkBanOnLogin(player);
             teamManager.fullSyncPlayer(player);
+            var eco = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getEconomy() : null;
+            if (eco != null) {
+                eco.loadForPlayer(player.getUUID());
+                // D10: daily login bonus
+                if (eco.checkAndAwardDailyBonus(player.getUUID())) {
+                    Component bonusMsg = Component.literal("§a+10 WC §7— ежедневный бонус!");
+                    player.displayClientMessage(bonusMsg, false);
+                }
+            }
+            // H7: collect upkeep debt on reconnect
+            var upkeepSystem = BattlefieldRuntime.getInstance().getVehicleUpkeepSystem();
+            if (upkeepSystem != null) {
+                int debt = upkeepSystem.collectDebt(player.getUUID());
+                if (debt > 0 && eco != null) {
+                    eco.deductBC(player.getUUID(), debt);
+                    player.sendSystemMessage(Component.literal("§cUpkeep debt collected: -" + debt + " BC"));
+                }
+            }
             GameManager game = PWP.getGameManager();
             if (game != null) {
                 game.syncPhaseToPlayer(player);
@@ -177,6 +198,10 @@ public class PlayerEventHandler {
                         teamManager.setDirty();
                     }
                 }
+            } else if (!hasDogTagInCurios(player)) {
+                if (ensureDogTag(player)) {
+                    teamManager.setDirty();
+                }
             }
             PWP.LOGGER.info("Synced team data for player: {}", player.getName().getString());
             // Check cycle flag BEFORE checkAndAutoStartCycle deletes it
@@ -233,6 +258,16 @@ public class PlayerEventHandler {
     }
 
     @SubscribeEvent
+    public void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            GameManager gm = PWP.getGameManager();
+            if (gm != null && gm.isPlaying() && gm.isInAnyBase(event.getPos())) {
+                event.setCanceled(true);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public void onBlockBreak(BlockEvent.BreakEvent event) {
         if (event.getPlayer() instanceof ServerPlayer player) {
             net.minecraft.core.BlockPos pos = event.getPos();
@@ -270,8 +305,6 @@ public class PlayerEventHandler {
     public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             player.setHealth(player.getMaxHealth());
-            player.getPersistentData().remove("playerrevive:bleeding");
-            player.getPersistentData().remove("pwp:bypass_bleed");
             player.getPersistentData().remove("pwp:direct_kill");
             GameManager game = PWP.getGameManager();
 
@@ -293,11 +326,10 @@ public class PlayerEventHandler {
                 // Teleport back to map at team spawn
                 Team team = teamManager.getOrCreatePlayerData(player.getUUID()).getTeam();
                 if (team != null && team.isPlayable()) {
+                    player.setGameMode(GameType.SURVIVAL);
                     game.teleportPlayerToMapAtTeamSpawn(player, team);
                     game.setMapRespawn(player, team);
-                    PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
-                        new com.pigeostudios.pwp.network.SoundPacket(
-                            com.pigeostudios.pwp.core.ModSounds.GUI_RESPAWN.get().getLocation().toString()));
+                    RespawnAtPointPacket.applySelectedKit(player);
                 } else {
                     game.teleportPlayerToLobby(player);
                     game.setLobbyRespawn(player);

@@ -58,6 +58,24 @@ jar {
     finalizedBy 'reobfJar'
 }
 
+// Embed SQLite JDBC into reobfuscated jar (post-process avoids class remapping corruption)
+tasks.whenTaskAdded { task ->
+    if (task.name == 'reobfJar') {
+        task.doLast {
+            def sqliteJar = configurations.runtimeClasspath.find { it.name.startsWith('sqlite-jdbc') }
+            def outFile = file('build/libs/pwp-1.0.0.jar')
+            if (sqliteJar && outFile.exists()) {
+                ant.zip(destfile: outFile, update: 'true') {
+                    zipfileset(src: sqliteJar) {
+                        exclude(name: 'META-INF/**')
+                    }
+                }
+                logger.lifecycle("Embedded SQLite JDBC into pwp-1.0.0.jar")
+            }
+        }
+    }
+}
+
 base {
     archivesName = 'pwp'
 }
@@ -101,12 +119,13 @@ ext {
     ]
 }
 
-private void deployJar(String targetKey) {
+void deployJar(String targetKey) {
     def dir = deployDirs[targetKey]
     if (!dir) {
         logger.lifecycle("  [{}] SKIPPED — path not configured", targetKey)
         return
     }
+
     def modsDir = new File(dir, 'mods')
     if (!modsDir.exists()) {
         modsDir.mkdirs()
@@ -129,13 +148,25 @@ private void deployJar(String targetKey) {
         into modsDir
     }
     logger.lifecycle("  [{}] deployed: {} → {}", targetKey, jarName, modsDir)
+
+    // Copy SQLite JDBC driver if not present
+    def sqliteName = 'sqlite-jdbc-3.45.1.0.jar'
+    if (!new File(modsDir, sqliteName).exists()) {
+        copy {
+            from configurations.runtimeClasspath.find { it.name == sqliteName }
+            into modsDir
+        }
+        logger.lifecycle("  [{}] deployed: {} → {}", targetKey, sqliteName, modsDir)
+    } else {
+        logger.lifecycle("  [{}] {} already present", targetKey, sqliteName)
+    }
 }
 
 ['server', 'lobby', 'template', 'client'].each { key ->
     def taskName = "deployTo${key.capitalize()}"
     tasks.register(taskName) {
         group = 'deploy'
-        description = "Copy jar to ${key} server mods"
+        description = "Copy jar to ${key} deploy target"
         dependsOn 'jar'
         doLast { deployJar(key) }
     }

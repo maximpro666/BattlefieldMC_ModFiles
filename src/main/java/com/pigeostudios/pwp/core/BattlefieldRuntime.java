@@ -3,7 +3,8 @@ package com.pigeostudios.pwp.core;
 import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.ammo.AmmoCooldownManager;
 import com.pigeostudios.pwp.ammo.AmmoService;
-import com.pigeostudios.pwp.integration.PlayerReviveIntegration;
+
+import com.pigeostudios.pwp.service.EconomyService;
 import com.pigeostudios.pwp.state.*;
 import com.pigeostudios.pwp.system.*;
 import com.pigeostudios.pwp.vehicle.VehicleDefinition;
@@ -29,6 +30,11 @@ public class BattlefieldRuntime {
         return INSTANCE;
     }
 
+    private EconomyService getEconomyService() {
+        var reg = PWP.getServiceRegistry();
+        return reg != null ? reg.getEconomy() : null;
+    }
+
     // ===== Реестры =====
     private final VehicleDefinitionRegistry vehicleDefRegistry = new VehicleDefinitionRegistry();
     private final VehicleAdapterRegistry vehicleAdapterRegistry = VehicleAdapterRegistry.getInstance();
@@ -41,7 +47,6 @@ public class BattlefieldRuntime {
     public AmmoCooldownManager getAmmoCooldownManager() { return ammoCooldownManager; }
 
     // ===== State objects =====
-    public final EconomyState economy = new EconomyState();
     public final FrontlineState frontline = new FrontlineState();
     public final PressureState pressure = new PressureState();
     public final VehicleState vehicles = new VehicleState();
@@ -50,62 +55,64 @@ public class BattlefieldRuntime {
     // ===== System objects =====
     private final ActivitySystem activitySystem = new ActivitySystem();
     private final PressureSystem pressureSystem = new PressureSystem();
-    private final EconomySystem economySystem = new EconomySystem();
     private final EscalationSystem escalationSystem = new EscalationSystem();
     private final VehicleUpkeepSystem vehicleUpkeepSystem = new VehicleUpkeepSystem();
 
     private int recalcTickCounter = 0;
     private static final int RECALC_INTERVAL = 20;
 
-    // ===== Экономика: BC =====
-    public int getBC(UUID uuid) { return economy.getBC(uuid); }
-    public int getWC(UUID uuid) { return economy.getWC(uuid); }
+    public VehicleUpkeepSystem getVehicleUpkeepSystem() { return vehicleUpkeepSystem; }
 
-    public void setBC(UUID uuid, int amount) { economy.setBC(uuid, amount); }
-    public void setWC(UUID uuid, int amount) { economy.setWC(uuid, amount); }
+    // ===== Экономика: BC (делегирует в EconomyService) =====
+    public int getBC(UUID uuid) {
+        EconomyService svc = getEconomyService();
+        return svc != null ? svc.getBC(uuid) : 0;
+    }
 
-    public void addBC(UUID uuid, int amount) { economy.addBC(uuid, amount); }
+    public int getWC(UUID uuid) {
+        EconomyService svc = getEconomyService();
+        return svc != null ? svc.getWC(uuid) : 0;
+    }
+
+    public void setBC(UUID uuid, int amount) {
+        EconomyService svc = getEconomyService();
+        if (svc != null) svc.setBC(uuid, amount);
+    }
+
+    public void setWC(UUID uuid, int amount) {
+        EconomyService svc = getEconomyService();
+        if (svc != null) svc.setWC(uuid, amount);
+    }
+
+    public void addBC(UUID uuid, int amount) {
+        EconomyService svc = getEconomyService();
+        if (svc != null) svc.addBC(uuid, amount);
+    }
 
     public void addWC(UUID uuid, int amount) {
-        economy.addWC(uuid, amount);
-        saveWCBatch(uuid);
+        EconomyService svc = getEconomyService();
+        if (svc != null) svc.addWC(uuid, amount);
     }
 
     public boolean deductBC(UUID uuid, int amount) {
-        return economy.deductBC(uuid, amount);
+        EconomyService svc = getEconomyService();
+        return svc != null && svc.deductBC(uuid, amount);
     }
 
     public boolean deductWC(UUID uuid, int amount) {
-        boolean ok = economy.deductWC(uuid, amount);
-        if (ok) saveWCBatch(uuid);
-        return ok;
-    }
-
-    private void saveWCBatch(UUID uuid) {
-        TeamManager tm = PWP.getTeamManager();
-        if (tm == null) return;
-        PlayerCombatData data = tm.getOrCreatePlayerData(uuid);
-        data.setWarCredits(economy.getWC(uuid));
-        tm.setDirty();
-    }
-
-    public void loadFromTeamManager() {
-        TeamManager tm = PWP.getTeamManager();
-        if (tm == null) return;
-        var dataCopy = tm.getPlayerDataCopy();
-        for (Map.Entry<UUID, PlayerCombatData> entry : dataCopy.entrySet()) {
-            int bc = entry.getValue().getBattleCredits();
-            int wc = entry.getValue().getWarCredits();
-            if (bc > 0) economy.setBC(entry.getKey(), bc);
-            if (wc > 0) economy.setWC(entry.getKey(), wc);
-        }
+        EconomyService svc = getEconomyService();
+        return svc != null && svc.deductWC(uuid, amount);
     }
 
     // ===== Vehicle Credits =====
-    public int getVC(Team team) { return economy.getVC(team); }
+    public int getVC(Team team) {
+        EconomyService svc = getEconomyService();
+        return svc != null ? svc.getVC(team) : 0;
+    }
 
     public boolean deductVC(Team team, int amount) {
-        return economy.deductVC(team, amount);
+        EconomyService svc = getEconomyService();
+        return svc != null && svc.deductVC(team, amount);
     }
 
     // ===== Activity Score =====
@@ -141,8 +148,7 @@ public class BattlefieldRuntime {
 
     public void removePressure(UUID vehicleUUID, Team team, VehicleDefinition def) {
         Team t = vehicles.getVehicleTeam(vehicleUUID);
-        String defId = vehicles.getVehicleDefId(vehicleUUID);
-        if (t == null || defId == null) return;
+        if (t == null) return;
         pressureSystem.onVehicleDestroy(pressure, vehicles, vehicleUUID, vehicleDefRegistry);
     }
 
@@ -179,38 +185,41 @@ public class BattlefieldRuntime {
 
     // ===== Sync to clients =====
     public void syncBC(ServerPlayer player) {
-        com.pigeostudios.pwp.network.PacketHandler.CHANNEL.send(
-            net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
-            new com.pigeostudios.pwp.network.BCSyncPacket(economy.getBC(player.getUUID())));
+        EconomyService svc = getEconomyService();
+        if (svc != null) svc.syncBC(player);
     }
 
     public void syncWC(ServerPlayer player) {
-        com.pigeostudios.pwp.network.PacketHandler.CHANNEL.send(
-            net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
-            new com.pigeostudios.pwp.network.WCSyncPacket(economy.getWC(player.getUUID())));
+        EconomyService svc = getEconomyService();
+        if (svc != null) svc.syncWC(player);
     }
 
     public void syncAll(ServerPlayer player) {
         syncBC(player);
         syncWC(player);
+        syncVC(player);
+    }
+
+    public void syncVC(ServerPlayer player) {
+        EconomyService svc = getEconomyService();
+        if (svc != null) svc.syncVC(player);
     }
 
     public void syncBCToAll() {
-        for (ServerPlayer player : PWP.getGameManager().getServer().getPlayerList().getPlayers()) {
-            syncBC(player);
-        }
+        EconomyService svc = getEconomyService();
+        if (svc != null) svc.syncBCToAll();
     }
 
     // ===== Reset =====
     public void resetMatch() {
-        economy.resetMatch();
+        EconomyService svc = getEconomyService();
+        if (svc != null) svc.resetMatch();
         frontline.reset();
         pressure.reset();
         vehicles.reset();
         match.reset();
         activitySystem.reset();
         pressureSystem.reset();
-        economySystem.reset();
         vehicleUpkeepSystem.reset();
         recalcTickCounter = 0;
         ammoService.clear();
@@ -218,7 +227,8 @@ public class BattlefieldRuntime {
     }
 
     public void resetForPlayer(UUID uuid) {
-        economy.resetForPlayer(uuid);
+        EconomyService svc = getEconomyService();
+        if (svc != null) svc.resetForPlayer(uuid);
         frontline.resetForPlayer(uuid);
         ammoCooldownManager.resetPlayer(uuid);
     }
@@ -233,16 +243,12 @@ public class BattlefieldRuntime {
         activitySystem.tick(frontline);
         pressureSystem.tick(pressure);
 
-        TicketManager tm = PWP.getTicketManager();
-        escalationSystem.tick(match, pressure, tm, gm);
+        var ts = PWP.getServiceRegistry().getTickets();
+        escalationSystem.tick(match, pressure, ts, gm);
         recalcTickCounter++;
         if (recalcTickCounter >= RECALC_INTERVAL) {
             recalcTickCounter = 0;
             frontline.recalcActive(gm.getServer());
-        }
-
-        if (PlayerReviveIntegration.isModPresent()) {
-            PlayerReviveIntegration.getInstance().tick(gm.getServer());
         }
 
         var cpManager = PWP.getCapturePointManager();
@@ -253,11 +259,14 @@ public class BattlefieldRuntime {
                     new net.minecraft.resources.ResourceLocation("pwp", "map")));
             if (level != null) {
                 TeamManager teamManager = PWP.getTeamManager();
-                economySystem.tick(level, economy, frontline, gm, teamManager);
+                EconomyService svc = getEconomyService();
+                if (svc != null) svc.tick(level, teamManager, gm);
                 VehicleManager vehicleManager = PWP.getVehicleManager();
                 if (vehicleManager != null) {
                     vehicleUpkeepSystem.tick(level, this, vehicleManager);
                 }
+                var es = PWP.getServiceRegistry().getEvents();
+                if (es != null) es.tick(gm.getServer(), level, gm.getMatchTimeRemaining());
             }
         }
     }

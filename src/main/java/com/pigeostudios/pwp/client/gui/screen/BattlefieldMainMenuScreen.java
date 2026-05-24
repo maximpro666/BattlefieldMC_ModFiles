@@ -10,6 +10,9 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 public class BattlefieldMainMenuScreen extends Screen {
 
     private static final ResourceLocation[] BACKGROUNDS = {
@@ -59,6 +62,26 @@ public class BattlefieldMainMenuScreen extends Screen {
         addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 2, btnW, btnH,
             Component.literal("Quit"), btn -> Minecraft.getInstance().stop(),
             BButton.Variant.DANGER));
+
+        addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 3, btnW, btnH,
+            Component.literal("Replay Mod"), btn -> openReplayMod()));
+    }
+
+    private void openReplayMod() {
+        try {
+            Class<?> replayClass = Class.forName("com.replaymod.replay.ReplayModReplay");
+            Field instanceField = replayClass.getField("instance");
+            Object replayMod = instanceField.get(null);
+
+            Class<?> viewerClass = Class.forName("com.replaymod.replay.gui.screen.GuiReplayViewer");
+            Constructor<?> ctor = viewerClass.getConstructor(replayClass);
+            Object viewer = ctor.newInstance(replayMod);
+
+            Method display = viewerClass.getMethod("display");
+            display.invoke(viewer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

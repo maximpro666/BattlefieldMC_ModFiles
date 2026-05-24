@@ -36,7 +36,7 @@ public class VehicleDeployPacket {
             if (!PacketValidator.checkAndReject(player, PacketValidator.requirePlaying(PWP.getGameManager()))) return;
             if (!PacketValidator.checkAndReject(player, PacketValidator.requireTeamPlayable(player))) return;
 
-            Component result = PWP.getVehicleManager().buyVehicle(player, vehicleId, PWP.getTeamManager());
+            Component result = PWP.getServiceRegistry().getVehicle().buyVehicle(player, vehicleId, PWP.getTeamManager());
             if (result != null) {
                 player.displayClientMessage(result, false);
             }

@@ -18,8 +18,8 @@ import java.util.List;
 
 public class ResupplyScreen extends Screen {
 
-    private static final int PANEL_W = 260;
-    private static final int PANEL_H = 200;
+    private static final int PANEL_W = 300;
+    private static final int PANEL_H = 220;
 
     private float fadeAlpha;
     private long openTime;
@@ -42,26 +42,38 @@ public class ResupplyScreen extends Screen {
         int panelX = cx - PANEL_W / 2;
         int contentY = height / 2 - 30;
 
+        int btnX = panelX + PANEL_W - 110;
+
         if (!weaponEntries.isEmpty()) {
             for (int i = 0; i < weaponEntries.size(); i++) {
                 WeaponEntry entry = weaponEntries.get(i);
                 int y = contentY + i * 24;
 
-                addRenderableWidget(new BButton(panelX + 100, y, 140, 20,
-                    Component.literal("§7" + entry.weaponName),
-                    btn -> {
-                        PacketHandler.CHANNEL.sendToServer(new ResupplyActionPacket(ResupplyActionPacket.Action.RESUPPLY_AMMO));
-                        onClose();
-                    }));
+                if (entry.isRocket) {
+                    addRenderableWidget(new BButton(btnX, y, 100, 20,
+                        Component.literal("§6Buy Rocket"),
+                        btn -> {
+                            PacketHandler.CHANNEL.sendToServer(new ResupplyActionPacket(ResupplyActionPacket.Action.BUY_ROCKET, -1));
+                            onClose();
+                        },
+                        BButton.Variant.PRIMARY));
+                } else {
+                    addRenderableWidget(new BButton(btnX, y, 100, 20,
+                        Component.literal("§aResupply"),
+                        btn -> {
+                            PacketHandler.CHANNEL.sendToServer(new ResupplyActionPacket(ResupplyActionPacket.Action.RESUPPLY_AMMO, entry.slotIndex));
+                            onClose();
+                        }));
+                }
             }
         }
 
         if (hasRocketWeapon) {
             int rocketBtnY = contentY + weaponEntries.size() * 24 + 4;
-            addRenderableWidget(new BButton(panelX + 100, rocketBtnY, 140, 20,
+            addRenderableWidget(new BButton(btnX, rocketBtnY, 100, 20,
                 Component.literal("§6Buy Rocket"),
                 btn -> {
-                    PacketHandler.CHANNEL.sendToServer(new ResupplyActionPacket(ResupplyActionPacket.Action.BUY_ROCKET));
+                    PacketHandler.CHANNEL.sendToServer(new ResupplyActionPacket(ResupplyActionPacket.Action.BUY_ROCKET, -1));
                     onClose();
                 },
                 BButton.Variant.PRIMARY));
@@ -86,10 +98,10 @@ public class ResupplyScreen extends Screen {
             if (isRocketWeapon(id, rocketIds)) {
                 hasRocketWeapon = true;
                 String label = getRocketLabel(id);
-                weaponEntries.add(new WeaponEntry(stack, id, label, true));
+                weaponEntries.add(new WeaponEntry(stack, id, label, true, i));
             } else if (isConventionalWeapon(id)) {
                 String label = getWeaponLabel(id);
-                weaponEntries.add(new WeaponEntry(stack, id, label, false));
+                weaponEntries.add(new WeaponEntry(stack, id, label, false, i));
             }
         }
 
@@ -205,5 +217,5 @@ public class ResupplyScreen extends Screen {
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    private record WeaponEntry(ItemStack stack, String id, String weaponName, boolean isRocket) {}
+    private record WeaponEntry(ItemStack stack, String id, String weaponName, boolean isRocket, int slotIndex) {}
 }

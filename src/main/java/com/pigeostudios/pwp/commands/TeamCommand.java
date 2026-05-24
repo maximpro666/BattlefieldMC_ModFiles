@@ -281,16 +281,16 @@ public class TeamCommand {
             return 0;
         }
 
-        TicketManager tm = PWP.getTicketManager();
-        if (tm == null) return 0;
+        var ts = PWP.getServiceRegistry().getTickets();
+        if (ts == null) return 0;
 
         player.sendSystemMessage(header("=== Team Tickets ==="));
 
         player.sendSystemMessage(Team.NATO.getColoredName()
-            .append(bright(String.format(": %d tickets", tm.getTickets(Team.NATO)))));
+            .append(bright(String.format(": %d tickets", ts.getTickets(Team.NATO)))));
 
         player.sendSystemMessage(Team.RUSSIA.getColoredName()
-            .append(bright(String.format(": %d tickets", tm.getTickets(Team.RUSSIA)))));
+            .append(bright(String.format(": %d tickets", ts.getTickets(Team.RUSSIA)))));
 
         return 1;
     }
@@ -304,9 +304,9 @@ public class TeamCommand {
         }
 
         int amount = IntegerArgumentType.getInteger(context, "amount");
-        TicketManager tm = PWP.getTicketManager();
-        if (tm == null) return 0;
-        tm.setTickets(team, amount);
+        var ts = PWP.getServiceRegistry().getTickets();
+        if (ts == null) return 0;
+        ts.setTickets(team, amount);
 
         context.getSource().sendSuccess(() ->
             success(String.format("Set %s tickets to %d", team.getName(), amount)), true);

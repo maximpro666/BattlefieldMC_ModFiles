@@ -22,7 +22,12 @@ import com.pigeostudios.pwp.data.CentralDatabase;
 import com.pigeostudios.pwp.data.KitConfig;
 import com.pigeostudios.pwp.events.CombatEventHandler;
 import com.pigeostudios.pwp.events.PlayerEventHandler;
+import com.pigeostudios.pwp.events.PunishmentEventHandler;
+import com.pigeostudios.pwp.punishment.StaffManager;
+import com.pigeostudios.pwp.punishment.PunishmentManager;
+import com.pigeostudios.pwp.report.ReportManager;
 import com.pigeostudios.pwp.network.PacketHandler;
+import com.pigeostudios.pwp.service.ServiceRegistry;
 import com.pigeostudios.pwp.system.RoleSystem;
 import com.pigeostudios.pwp.proxy.ProxyMessenger;
 import net.minecraft.core.registries.Registries;
@@ -97,7 +102,7 @@ public class PWP {
     private static SquadManager squadManager;
     private static VehicleManager vehicleManager;
     private static CapturePointManager capturePointManager;
-    private static TicketManager ticketManager;
+    // REMOVED: TicketManager (replaced by TicketService in Iteration 4)
 
     private static PlayerEventHandler playerEventHandler;
     private static ContributionManager contributionManager;
@@ -107,6 +112,8 @@ public class PWP {
     private static RoleSystem roleSystem;
 
     private static BattlefieldRuntime battlefieldRuntime;
+    private static ServiceRegistry serviceRegistry;
+    private static java.util.concurrent.ScheduledExecutorService reportSyncExecutor;
 
     public PWP() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -154,6 +161,10 @@ public class PWP {
             } catch (Exception ignored) {}
         }
 
+        // Initialize service layer (ConfigService, PersistenceService, ..)
+        serviceRegistry = new ServiceRegistry();
+        serviceRegistry.init(event.getServer());
+
         ResourceKey<Level> overworldKey = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("minecraft:overworld"));
         teamManager = event.getServer().getLevel(overworldKey)
             .getDataStorage()
@@ -165,6 +176,9 @@ public class PWP {
 
         CentralDatabase.init();
         teamManager.loadFromCentralDatabase();
+        PunishmentManager.init();
+        StaffManager.init();
+        ReportManager.init();
 
         config = PWPConfig.load(event.getServer());
 
@@ -195,11 +209,38 @@ public class PWP {
 
         playerEventHandler = new PlayerEventHandler(teamManager);
         MinecraftForge.EVENT_BUS.register(playerEventHandler);
+        MinecraftForge.EVENT_BUS.register(new com.pigeostudios.pwp.bleeding.BleedingHandler(teamManager));
         MinecraftForge.EVENT_BUS.register(new CombatEventHandler(teamManager));
         MinecraftForge.EVENT_BUS.register(new com.pigeostudios.pwp.events.AttachmentEventHandler());
+        MinecraftForge.EVENT_BUS.register(new PunishmentEventHandler());
+
+        // Start periodic report count sync to staff players (runs on server thread)
+        var srv = event.getServer();
+        reportSyncExecutor = java.util.concurrent.Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "ReportCountSync");
+            t.setDaemon(true);
+            return t;
+        });
+        reportSyncExecutor.scheduleAtFixedRate(() -> {
+            srv.execute(() -> {
+                try {
+                    if (srv.isShutdown() || !srv.isRunning()) return;
+                    var reports = ReportManager.getAllReports();
+                    var listPacket = new com.pigeostudios.pwp.network.TicketListSyncPacket(reports);
+                    for (var player : srv.getPlayerList().getPlayers()) {
+                        if (StaffManager.isStaff(player.getUUID()) || ReportManager.getReportsByReporter(player.getUUID()).stream().anyMatch(r -> !r.getStatus().isResolved())) {
+                            com.pigeostudios.pwp.network.PacketHandler.CHANNEL.send(
+                                net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player), listPacket);
+                        }
+                    }
+                } catch (Exception ignored) {}
+            });
+        }, 5, 10, java.util.concurrent.TimeUnit.SECONDS);
 
         battlefieldRuntime = BattlefieldRuntime.getInstance();
-        battlefieldRuntime.loadFromTeamManager();
+        if (serviceRegistry != null && serviceRegistry.getEconomy() != null) {
+            serviceRegistry.getEconomy().loadFromTeamManager(PWP.getTeamManager());
+        }
         MinecraftForge.EVENT_BUS.register(battlefieldRuntime);
 
         battlefieldRuntime.getVehicleDefRegistry().loadAll();
@@ -213,7 +254,6 @@ public class PWP {
             new com.pigeostudios.pwp.events.VehicleAccessControl());
 
         capturePointManager = new CapturePointManager();
-        ticketManager = new TicketManager();
         contributionManager = new ContributionManager();
         fobManager = new FOBManager();
         captureParticleManager = new CaptureParticleManager();
@@ -236,6 +276,12 @@ public class PWP {
         }
         var vgm = TeamVoicePlugin.getGroupManager();
         if (vgm != null) vgm.cleanup();
+        if (serviceRegistry != null) serviceRegistry.shutdown();
+        com.pigeostudios.pwp.events.CombatEventHandler.closeKillLog();
+        if (reportSyncExecutor != null) {
+            reportSyncExecutor.shutdown();
+            try { reportSyncExecutor.awaitTermination(3, java.util.concurrent.TimeUnit.SECONDS); } catch (InterruptedException ignored) {}
+        }
         CentralDatabase.close();
     }
 
@@ -264,8 +310,25 @@ public class PWP {
         com.pigeostudios.pwp.commands.RedeployCommand.register(event.getDispatcher());
         com.pigeostudios.pwp.commands.StartMatchCommand.register(event.getDispatcher());
         com.pigeostudios.pwp.commands.GiveCoinsCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.GiveVCCommand.register(event.getDispatcher());
         com.pigeostudios.pwp.commands.FlySpeedCommand.register(event.getDispatcher());
         com.pigeostudios.pwp.commands.DonatorCommand.register(event.getDispatcher());
+
+        // Punishment & moderation commands
+        com.pigeostudios.pwp.commands.WarnCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.KickCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.MuteCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.VoicemuteCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.BanCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.TempbanCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.UnbanCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.UnmuteCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.PunishmentHistoryCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.StaffCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.ReportCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.SpectateCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.RulesCommand.register(event.getDispatcher());
+        com.pigeostudios.pwp.commands.TicketCommand.register(event.getDispatcher());
 
     }
 
@@ -278,11 +341,12 @@ public class PWP {
     public static SquadManager getSquadManager() { return squadManager; }
     public static VehicleManager getVehicleManager() { return vehicleManager; }
     public static CapturePointManager getCapturePointManager() { return capturePointManager; }
-    public static TicketManager getTicketManager() { return ticketManager; }
+    // REMOVED: getTicketManager() (replaced by ServiceRegistry.getTickets())
     public static ContributionManager getContributionManager() { return contributionManager; }
     public static FOBManager getFOBManager() { return fobManager; }
     public static PlayerEventHandler getPlayerEventHandler() { return playerEventHandler; }
 
+    public static ServiceRegistry getServiceRegistry() { return serviceRegistry; }
     public static PWPConfig getConfig() { return config; }
     public static CaptureParticleManager getCaptureParticleManager() { return captureParticleManager; }
     public static RoleSystem getRoleSystem() { return roleSystem; }

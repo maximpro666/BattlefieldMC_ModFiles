@@ -255,7 +255,7 @@ public class VehicleCommand {
         VehicleManager vm = PWP.getVehicleManager();
         TeamManager tm = PWP.getTeamManager();
 
-        Component error = vm.buyVehicle(player, vehicleId, tm);
+        Component error = PWP.getServiceRegistry().getVehicle().buyVehicle(player, vehicleId, tm);
         if (error == null) {
             VehicleDefinition def = vm.getDefinition(vehicleId);
             source.sendSuccess(() -> Component.translatable("pwp.chat.vehicle.bought",

@@ -27,10 +27,12 @@ public class VehicleDataSyncPacket {
             String description = buf.readUtf(512);
             String icon = buf.readUtf(64);
             int ticketCost = buf.readInt();
+            int bcCost = buf.readInt();
+            int vcCost = buf.readInt();
             int minRank = buf.readInt();
             int cooldown = buf.readInt();
             boolean available = buf.readBoolean();
-            vehicles.add(new VehicleData(vehicleId, displayName, description, icon, ticketCost, minRank, cooldown, available));
+            vehicles.add(new VehicleData(vehicleId, displayName, description, icon, ticketCost, bcCost, vcCost, minRank, cooldown, available));
         }
     }
 
@@ -42,6 +44,8 @@ public class VehicleDataSyncPacket {
             buf.writeUtf(v.description());
             buf.writeUtf(v.icon());
             buf.writeInt(v.ticketCost());
+            buf.writeInt(v.bcCost());
+            buf.writeInt(v.vcCost());
             buf.writeInt(v.minRank());
             buf.writeInt(v.cooldown());
             buf.writeBoolean(v.available());

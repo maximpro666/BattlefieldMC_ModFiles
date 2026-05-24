@@ -7,19 +7,23 @@ import com.pigeostudios.pwp.proxy.ProxyMessenger;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 
+import java.nio.file.*;
 import java.sql.*;
 import java.util.*;
 
 public class CentralDatabase {
-    private static final String DB_PATH = "../launcher/database/pwp.db";
+    private static final String DB_PATH = System.getProperty("pwp.db.path", "../launcher/database/pwp.db");
     private static Connection connection;
     private static boolean initialized = false;
 
     public static synchronized void init() {
         if (initialized) return;
         try {
+            Path dbFile = Path.of(DB_PATH);
+            Files.createDirectories(dbFile.getParent());
+
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + DB_PATH);
+            connection = DriverManager.getConnection("jdbc:sqlite:" + dbFile.toAbsolutePath().normalize());
             try (Statement stmt = connection.createStatement()) {
                 stmt.execute("PRAGMA journal_mode=WAL");
                 stmt.execute("PRAGMA synchronous=NORMAL");
@@ -27,10 +31,15 @@ public class CentralDatabase {
             }
             createTables();
             initialized = true;
-            PWP.LOGGER.info("CentralDatabase initialized at {}", DB_PATH);
+            PWP.LOGGER.info("CentralDatabase initialized at {}", dbFile.toAbsolutePath().normalize());
         } catch (Exception e) {
             PWP.LOGGER.error("Failed to initialize CentralDatabase", e);
         }
+    }
+
+    public static synchronized Connection getConnection() {
+        if (!initialized) init();
+        return connection;
     }
 
     private static void createTables() throws SQLException {
@@ -106,6 +115,17 @@ public class CentralDatabase {
                     nato_score INT DEFAULT 0,
                     russia_score INT DEFAULT 0,
                     played_at INTEGER NOT NULL
+                )
+            """);
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS ticket_messages (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ticket_id INTEGER NOT NULL,
+                    sender_uuid TEXT NOT NULL,
+                    sender_name TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    sent_at INTEGER NOT NULL,
+                    is_system INT DEFAULT 0
                 )
             """);
         }
@@ -371,6 +391,33 @@ public class CentralDatabase {
             }
             connection = null;
             initialized = false;
+        }
+    }
+
+    // ===== Functional helpers for punishment/report managers =====
+
+    @FunctionalInterface
+    public interface SqlExecutor { void run(Connection conn) throws SQLException; }
+
+    @FunctionalInterface
+    public interface SqlQuery<T> { T run(Connection conn) throws SQLException; }
+
+    public static synchronized void execute(SqlExecutor task) {
+        if (!initialized) init();
+        try {
+            task.run(connection);
+        } catch (Exception e) {
+            PWP.LOGGER.error("CentralDatabase: execute error", e);
+        }
+    }
+
+    public static synchronized <T> T query(SqlQuery<T> task) {
+        if (!initialized) init();
+        try {
+            return task.run(connection);
+        } catch (Exception e) {
+            PWP.LOGGER.error("CentralDatabase: query error", e);
+            return null;
         }
     }
 }

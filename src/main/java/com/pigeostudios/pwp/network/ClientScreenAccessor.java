@@ -3,6 +3,7 @@ package com.pigeostudios.pwp.network;
 import com.pigeostudios.pwp.client.gui.screen.AdminPanel;
 import com.pigeostudios.pwp.client.gui.screen.ClassSelectionScreen;
 import com.pigeostudios.pwp.client.gui.screen.MatchResultsScreen;
+import com.pigeostudios.pwp.client.gui.screen.ReportScreen;
 import com.pigeostudios.pwp.client.gui.screen.TeamSelectionScreen;
 import net.minecraft.client.Minecraft;
 
@@ -32,5 +33,12 @@ public class ClientScreenAccessor {
     public static void openMatchResults(OpenMatchResultsPacket packet) {
         Minecraft mc = Minecraft.getInstance();
         mc.setScreen(new MatchResultsScreen(packet));
+    }
+
+    public static void openReportScreen() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && mc.level != null) {
+            mc.setScreen(new ReportScreen());
+        }
     }
 }

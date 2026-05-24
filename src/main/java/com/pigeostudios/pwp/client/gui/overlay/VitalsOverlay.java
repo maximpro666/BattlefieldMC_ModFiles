@@ -1,8 +1,10 @@
 package com.pigeostudios.pwp.client.gui.overlay;
 
+import com.pigeostudios.pwp.client.ClientTeamData;
 import com.pigeostudios.pwp.client.gui.UITheme;
 import com.pigeostudios.pwp.client.gui.component.AnimationHelper;
 import com.pigeostudios.pwp.client.gui.component.RenderHelper;
+import com.pigeostudios.pwp.core.Team;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -11,7 +13,7 @@ import net.minecraft.world.entity.player.Player;
 public class VitalsOverlay {
 
     private static final int PANEL_W = 190;
-    private static final int PANEL_H = 28;
+    private static final int PANEL_H = 38;
     private static final int HP_BAR_H = 6;
     private static final int ARMOR_BAR_H = 4;
 
@@ -38,7 +40,7 @@ public class VitalsOverlay {
         smoothArmor = AnimationHelper.lerp(smoothArmor, armorFrac, 0.12f);
 
         int panelX = 6;
-        int panelY = screenHeight - 38;
+        int panelY = screenHeight - 48;
 
         RenderHelper.dropShadow(g, panelX, panelY, PANEL_W, PANEL_H, 3, 80);
         RenderHelper.roundedRect(g, panelX, panelY, PANEL_W, PANEL_H, 3,
@@ -98,6 +100,13 @@ public class VitalsOverlay {
             RenderHelper.gradientRectH(g, armorBarX, armorBarY, armorFillW, ARMOR_BAR_H,
                 0xFF506880, 0xFF90A8C0);
         }
+
+        int balY = panelY + 25;
+        Team team = ClientTeamData.getLocalPlayerTeam();
+        int vc = team == Team.NATO ? ClientTeamData.natoVC : ClientTeamData.russiaVC;
+        String balText = "WC " + ClientTeamData.localPlayerWC + "  BC " + ClientTeamData.localPlayerBC + "  VC " + vc;
+        g.drawString(font, balText, panelX + 4, balY,
+            AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, 220));
     }
 
     private int getHpGradientColor(float fraction) {

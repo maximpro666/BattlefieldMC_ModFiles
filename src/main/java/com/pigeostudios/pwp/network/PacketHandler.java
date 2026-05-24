@@ -334,5 +334,68 @@ public class PacketHandler {
             .encoder(VoteSyncPacket::toBytes)
             .consumerMainThread(VoteSyncPacket::handle)
             .add();
+
+        // ===== Punishment System Packets =====
+        CHANNEL.messageBuilder(HWIDPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(HWIDPacket::new)
+            .encoder(HWIDPacket::toBytes)
+            .consumerMainThread(HWIDPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(ReportSubmitPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(ReportSubmitPacket::new)
+            .encoder(ReportSubmitPacket::toBytes)
+            .consumerMainThread(ReportSubmitPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(ReportCountSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(ReportCountSyncPacket::new)
+            .encoder(ReportCountSyncPacket::toBytes)
+            .consumerMainThread(ReportCountSyncPacket::handle)
+            .add();
+
+        // ===== Ticket System Packets =====
+        CHANNEL.messageBuilder(TicketClaimPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(TicketClaimPacket::new)
+            .encoder(TicketClaimPacket::toBytes)
+            .consumerMainThread(TicketClaimPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(TicketMessagePacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(TicketMessagePacket::new)
+            .encoder(TicketMessagePacket::toBytes)
+            .consumerMainThread(TicketMessagePacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(TicketMessageSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(TicketMessageSyncPacket::new)
+            .encoder(TicketMessageSyncPacket::toBytes)
+            .consumerMainThread(TicketMessageSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(TicketListSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(TicketListSyncPacket::new)
+            .encoder(TicketListSyncPacket::toBytes)
+            .consumerMainThread(TicketListSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(OpenReportScreenPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(OpenReportScreenPacket::new)
+            .encoder(OpenReportScreenPacket::toBytes)
+            .consumerMainThread(OpenReportScreenPacket::handle)
+            .add();
+
+        // ===== Bleeding System Packets =====
+        CHANNEL.messageBuilder(BleedingSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(BleedingSyncPacket::new)
+            .encoder(BleedingSyncPacket::toBytes)
+            .consumerMainThread(BleedingSyncPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(ReviveActionPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(ReviveActionPacket::new)
+            .encoder(ReviveActionPacket::toBytes)
+            .consumerMainThread(ReviveActionPacket::handle)
+            .add();
     }
 }

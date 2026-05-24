@@ -6,5 +6,8 @@
   "server": [
     "IndexedMessageCodecMixin"
   ],
-  "client": []
+  "client": [
+    "ClientPacketListenerMixin",
+    "ForgeLoadingOverlayMixin"
+  ]
 }

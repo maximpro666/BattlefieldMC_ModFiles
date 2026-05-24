@@ -1,35 +1,34 @@
 @echo off
-chcp 65001 >nul
 title PWP - Project Warfare Pigeo
 
 :: ============================================
-:: PWP — Project Warfare Pigeo
+:: PWP - Project Warfare Pigeo
 :: Studio: Pigeo Studios
 :: ============================================
-:: 
-:: Команды:
-::   run_nopause         — сборка + деплой + запуск сервера
-::   run_nopause deploy  — только сборка + деплой
-::   run_nopause server  — только запуск сервера (без сборки)
-::   run_nopause client  — только деплой в клиент
-:: 
+::
+:: Commands:
+::   run_nopause              - build + deploy + start server
+::   run_nopause full         - build + deploy + server + client launch
+::   run_nopause deploy       - build + deploy only
+::   run_nopause server       - start server only (no build)
+::   run_nopause client       - deploy to PrismLauncher only
+::   run_nopause tlauncher    - deploy to TLauncher only
+::
 
-set JAVA_HOME=C:\Users\maska\AppData\Roaming\PrismLauncher\java\java-runtime-gamma
-set JAVA_CMD="%JAVA_HOME%\bin\java.exe"
+:: Load central config
+call "%~dp0config\paths.bat"
 
-:: ----- Пути развёртывания -----
-set DEPLOY_SERVER=C:\Users\maska\OneDrive\Desktop\servar
-set DEPLOY_LOBBY=C:\Users\maska\OneDrive\Desktop\servar
-set DEPLOY_TEMPLATE=C:\Users\maska\OneDrive\Desktop\match-template
-set DEPLOY_CLIENT=C:\Users\maska\AppData\Roaming\PrismLauncher\instances\1.20.1\minecraft
-
-:: ----- Режим -----
+:: ----- Mode selection -----
 if /I "%1"=="deploy" goto deploy_only
 if /I "%1"=="server" goto run_server
 if /I "%1"=="client" goto deploy_client
+if /I "%1"=="tlauncher" goto deploy_tlauncher
+
+set "FULL_MODE=0"
+if /I "%1"=="full" set "FULL_MODE=1"
 
 echo.
-echo === PWP — Project Warfare Pigeo ===
+echo === PWP - Project Warfare Pigeo ===
 echo Studio: Pigeo Studios
 echo Minecraft 1.20.1 Forge
 echo.
@@ -37,50 +36,89 @@ echo Server: %DEPLOY_SERVER%
 echo Client: %DEPLOY_CLIENT%
 echo.
 
-:: ----- Сборка -----
-echo [1/3] Сборка...
+:: ----- Build mod -----
+echo [1/3] Building mod...
+cd /d "%PWP_ROOT%"
 call gradlew build
 if %errorlevel% neq 0 (
-    echo [ERROR] Сборка не удалась
+    echo [ERROR] Mod build failed
     pause
     exit /b 1
 )
 
-:: ----- Деплой -----
+:: ----- Deploy -----
 :deploy_only
-echo [2/3] Деплой...
+echo [2/3] Deploying...
+cd /d "%PWP_ROOT%"
 call gradlew deployAll ^
     -PdeployServerDir="%DEPLOY_SERVER%" ^
     -PdeployLobbyDir="%DEPLOY_LOBBY%" ^
     -PdeployMatchTemplateDir="%DEPLOY_TEMPLATE%" ^
     -PdeployClientDir="%DEPLOY_CLIENT%"
 if %errorlevel% neq 0 (
-    echo [ERROR] Деплой не удался
+    echo [ERROR] Deploy failed
     pause
     exit /b 1
 )
+
+:: Deploy to TLauncher
+if exist "%DEPLOY_CLIENT_TLAUNCHER%" (
+    copy /Y "%PWP_ROOT%\build\libs\pwp-1.0.0.jar" "%DEPLOY_CLIENT_TLAUNCHER%\" >nul
+    echo [tlauncher] deployed
+)
+
 if /I "%1"=="deploy" goto done
 
-:: ----- Запуск сервера -----
+:: ----- Start server -----
 :run_server
-echo [3/3] Запуск сервера...
-cd /d "%DEPLOY_SERVER%"
-%JAVA_CMD% @user_jvm_args.txt @libraries/net/minecraftforge/forge/1.20.1-47.3.0/win_args.txt nogui
-cd /d "%~dp0"
+echo [3/3] Starting server...
+start "Forge Server" /D "%DEPLOY_SERVER%" "%JAVA_CMD%" @user_jvm_args.txt @libraries/net/minecraftforge/forge/1.20.1-47.3.0/win_args.txt nogui
+
+if "%FULL_MODE%"=="1" goto wait_for_server
 goto done
 
-:: ----- Только деплой в клиент -----
+:wait_for_server
+echo Waiting for server on port 25565...
+>nul 2>&1 timeout /t 5
+>nul 2>&1 powershell -Command "try{$s=New-Object System.Net.Sockets.TcpClient;$s.Connect('127.0.0.1',25565);$s.Close();exit 0}catch{exit 1}"
+if %errorlevel% neq 0 (
+    echo Still waiting...
+    goto wait_for_server
+)
+echo Server is ready!
+echo Starting Minecraft client...
+start "" "%PRISM_LAUNCHER%" -l "1.20.1" -s localhost:25565
+goto done
+
+:: ----- Deploy to PrismLauncher only -----
 :deploy_client
-echo Деплой в клиент...
+echo Deploying to PrismLauncher...
+cd /d "%PWP_ROOT%"
 call gradlew deployToClient -PdeployClientDir="%DEPLOY_CLIENT%"
 if %errorlevel% neq 0 (
-    echo [ERROR] Деплой не удался
+    echo [ERROR] Client deploy failed
     pause
     exit /b 1
 )
+goto done
+
+:: ----- Deploy to TLauncher only -----
+:deploy_tlauncher
+echo Deploying to TLauncher...
+if not exist "%DEPLOY_CLIENT_TLAUNCHER%" (
+    echo [ERROR] TLauncher mods folder not found
+    pause
+    exit /b 1
+)
+copy /Y "%PWP_ROOT%\build\libs\pwp-1.0.0.jar" "%DEPLOY_CLIENT_TLAUNCHER%\" >nul
+echo [tlauncher] deployed
 goto done
 
 :done
 echo.
-echo === Готово ===
+echo === Done ===
+if "%FULL_MODE%"=="1" (
+    echo Lobby server + client launched.
+    echo Use /startmatch to start a game.
+)
 pause

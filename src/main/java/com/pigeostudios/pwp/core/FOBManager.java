@@ -78,6 +78,42 @@ public class FOBManager {
         lastFOBTime.remove(uuid);
     }
 
+    // Used by FOBService — places FOB without duplicate validation/BC checks
+    public String placeFOBWithoutChecks(ServerPlayer player, String name, Team team, String validatedOwnerUUID) {
+        UUID uuid = player.getUUID();
+        SavedFOB existing = fobs.stream()
+            .filter(f -> f.ownerUUID.equals(validatedOwnerUUID) && f.teamOrdinal == team.ordinal())
+            .findFirst().orElse(null);
+
+        if (existing != null) {
+            removeFOBBlock(existing);
+            fobs.remove(existing);
+        }
+
+        BlockPos pos = player.blockPosition();
+        SavedFOB fob = new SavedFOB();
+        fob.fobId = nextFobId++;
+        fob.ownerUUID = validatedOwnerUUID;
+        fob.ownerName = player.getGameProfile().getName();
+        fob.name = name;
+        fob.teamOrdinal = team.ordinal();
+        fob.dimension = player.serverLevel().dimension().location().toString();
+        fob.x = pos.getX();
+        fob.y = pos.getY();
+        fob.z = pos.getZ();
+        fob.health = MAX_HEALTH;
+        fob.placedTime = player.serverLevel().getGameTime();
+        fobs.add(fob);
+        registerAmmoProviderForFOB(fob);
+        save();
+        player.serverLevel().setBlock(pos, PWP.RESPAWN_BEACON_BLOCK.get().defaultBlockState(), 3);
+
+        String action = existing != null ? "moved" : "placed";
+        broadcastToTeam(team, "\u00a7a[FOB] \u00a7f" + name + " \u00a7a" + action + " by \u00a7f" + player.getName().getString());
+        syncAll();
+        return null;
+    }
+
     public String canPlaceFOB(ServerPlayer player) {
         UUID uuid = player.getUUID();
         Team team = PWP.getTeamManager().getOrCreatePlayerData(uuid).getTeam();
@@ -90,11 +126,19 @@ public class FOBManager {
         long teamCount = fobs.stream().filter(f -> f.teamOrdinal == team.ordinal()).count();
         if (teamCount >= maxFOBs) return "§cTeam FOB limit reached (" + maxFOBs + ")";
 
+        int fobCost = PWP.getConfig().getFOBCost();
+        if (fobCost > 0) {
+            boolean hasExisting = fobs.stream().anyMatch(f -> f.ownerUUID.equals(uuid.toString()) && f.teamOrdinal == team.ordinal());
+            int requiredBC = hasExisting ? fobCost / 2 : fobCost;
+            int bc = BattlefieldRuntime.getInstance().getBC(uuid);
+            if (bc < requiredBC) return "§cNot enough BC! FOB costs " + requiredBC + " BC";
+        }
+
         BlockPos pos = player.blockPosition();
         return validatePosition(player.serverLevel(), pos, team.ordinal(), uuid.toString());
     }
 
-    public String placeFOB(ServerPlayer player, String name) {
+    public synchronized String placeFOB(ServerPlayer player, String name) {
         UUID uuid = player.getUUID();
         Team team = PWP.getTeamManager().getOrCreatePlayerData(uuid).getTeam();
         if (!team.isPlayable()) return "§cYou must be on a team to place FOBs";
@@ -105,15 +149,14 @@ public class FOBManager {
         int maxFOBs = getMaxFOBsForCurrentMap();
         long teamCount = fobs.stream().filter(f -> f.teamOrdinal == team.ordinal()).count();
         if (teamCount >= maxFOBs) return "§cTeam FOB limit reached (" + maxFOBs + ")";
+        // If squad leader already has a FOB — allow move (existing != null checked later)
+        SavedFOB existing = fobs.stream()
+            .filter(f -> f.ownerUUID.equals(uuid.toString()) && f.teamOrdinal == team.ordinal())
+            .findFirst().orElse(null);
 
         BlockPos pos = player.blockPosition();
         String validation = validatePosition(player.serverLevel(), pos, team.ordinal(), uuid.toString());
         if (validation != null) return validation;
-
-        // If squad leader already has a FOB on same team — remove old one first (move)
-        SavedFOB existing = fobs.stream()
-            .filter(f -> f.ownerUUID.equals(uuid.toString()) && f.teamOrdinal == team.ordinal())
-            .findFirst().orElse(null);
 
         // Check cooldown
         Long lastTime = lastFOBTime.get(uuid);
@@ -122,11 +165,11 @@ public class FOBManager {
             return "§cWait " + remain + "s before placing another FOB";
         }
 
-        // Check economy cost
+        // Check economy cost (L5: atomic deduct, no TOCTOU)
         int fobCost = PWP.getConfig().getFOBCost();
         int requiredBC = existing != null ? fobCost / 2 : fobCost;
         BattlefieldRuntime rt = BattlefieldRuntime.getInstance();
-        if (requiredBC > 0 && rt.getBC(uuid) < requiredBC) {
+        if (requiredBC > 0 && !rt.deductBC(uuid, requiredBC)) {
             return "§cNot enough BC! FOB costs " + requiredBC + " BC";
         }
 
@@ -136,9 +179,7 @@ public class FOBManager {
             broadcastToTeam(team, "§e[FOB] §f" + existing.name + " §eremoved by §f" + player.getName().getString());
         }
 
-        // Deduct cost
         if (requiredBC > 0) {
-            rt.deductBC(uuid, requiredBC);
             rt.syncAll(player);
         }
 
@@ -169,7 +210,7 @@ public class FOBManager {
         return null;
     }
 
-    private String validatePosition(ServerLevel level, BlockPos pos, int teamOrdinal, String skipOwnerUUID) {
+    public String validatePosition(ServerLevel level, BlockPos pos, int teamOrdinal, String skipOwnerUUID) {
         PWPConfig config = PWP.getConfig();
         int minEnemy = config.getMinDistanceFromEnemyBase();
         int minOwn = config.getMinDistanceFromOwnBase();
@@ -359,9 +400,6 @@ public class FOBManager {
     public void onBeaconBroken(BlockPos pos, com.pigeostudios.pwp.blockentity.RespawnBeaconBlockEntity beacon) {
         String ownerUUID = beacon.getOwnerUUID() != null ? beacon.getOwnerUUID().toString() : "";
         String name = beacon.getName();
-        fobs.removeIf(f ->
-            f.ownerUUID.equals(ownerUUID) && f.name.equals(name) &&
-            f.x == pos.getX() && f.y == pos.getY() && f.z == pos.getZ());
         if (fobs.removeIf(f -> f.x == pos.getX() && f.y == pos.getY() && f.z == pos.getZ())) {
             save();
             syncAll();

@@ -40,9 +40,7 @@ public class ItemResolver {
         Item directItem = BuiltInRegistries.ITEM.get(rl);
         if (directItem != null && directItem != Items.AIR) {
             ItemStack stack = new ItemStack(directItem);
-            if (isTacZ) {
-                stack.getOrCreateTag().putInt("SelectFire", 1);
-            }
+            stack.getOrCreateTag().putString("GunFireMode", "AUTO");
             return stack;
         }
 
@@ -53,7 +51,7 @@ public class ItemResolver {
                 ItemStack stack = new ItemStack(tacZGun);
                 CompoundTag tag = new CompoundTag();
                 tag.putString("GunId", weaponId);
-                tag.putInt("SelectFire", 1);
+                tag.putString("GunFireMode", "AUTO");
                 stack.setTag(tag);
                 return stack;
             }

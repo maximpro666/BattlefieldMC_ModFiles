@@ -2,19 +2,19 @@ package com.pigeostudios.pwp.system;
 
 import com.pigeostudios.pwp.core.GameManager;
 import com.pigeostudios.pwp.core.Team;
-import com.pigeostudios.pwp.core.TicketManager;
+import com.pigeostudios.pwp.service.TicketService;
 import com.pigeostudios.pwp.state.EscalationPhase;
 import com.pigeostudios.pwp.state.MatchState;
 import com.pigeostudios.pwp.state.PressureState;
 
 public class EscalationSystem {
     public void tick(MatchState matchState, PressureState pressureState,
-                     TicketManager ticketMgr, GameManager gm) {
-        if (gm == null || ticketMgr == null) return;
+                     TicketService ticketSvc, GameManager gm) {
+        if (gm == null || ticketSvc == null) return;
         int elapsed = gm.getMatchTimeRemaining() > 0 ? 1800 - gm.getMatchTimeRemaining() : 0;
 
-        int natoTickets = ticketMgr.getTickets(Team.NATO);
-        int russiaTickets = ticketMgr.getTickets(Team.RUSSIA);
+        int natoTickets = ticketSvc.getTickets(Team.NATO);
+        int russiaTickets = ticketSvc.getTickets(Team.RUSSIA);
         int maxTickets = Math.max(natoTickets + russiaTickets, 1);
 
         double ticketLossFactor = 1.0 - (double)(natoTickets + russiaTickets) / (maxTickets * 2);

@@ -10,11 +10,12 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import org.joml.Matrix4f;
 
+import static com.pigeostudios.pwp.client.gui.renderer.RenderTypes.LINES_DEPTH;
+
 import java.util.List;
 
 public class CaptureParticles {
 
-    private static final int RING_SEGMENTS = 48;
     private static final double FULL_VIS_DIST = 40.0;
 
     private long startTime = System.currentTimeMillis();
@@ -48,17 +49,15 @@ public class CaptureParticles {
             boolean isCapturing = !isContested && prog > 0.01f && prog < 1.0f
                 && capturerOrdinal >= 0 && capturerOrdinal != ownerOrdinal && capturerOrdinal != 2;
 
-            int ringColor, beamColor;
+            int ringColor;
             float rotSpeed, extraPulse;
 
             if (isContested) {
                 ringColor = 0xDDFF4444;
-                beamColor = 0x99FF4444;
                 rotSpeed = 2.0f;
                 extraPulse = (float)(Math.sin(elapsed * 4.0) * 0.3 + 0.7);
             } else if (isCapturing) {
                 ringColor = 0xEEE07B00;
-                beamColor = 0xAAE07B00;
                 rotSpeed = 1.2f;
                 extraPulse = 1.0f;
             } else {
@@ -67,43 +66,37 @@ public class CaptureParticles {
                     case 1 -> 0xCCAD1C1C;
                     default -> 0xAA888888;
                 };
-                beamColor = switch (ownerOrdinal) {
-                    case 0 -> 0x991C5FAD;
-                    case 1 -> 0x99AD1C1C;
-                    default -> 0x99888888;
-                };
                 rotSpeed = 0.4f;
                 extraPulse = 0.85f;
             }
 
             float alpha = calcAlpha(dist, ringCfg.maxBeamDist);
 
+            // LOD: fewer segments at distance
+            int segments = dist > 80 ? 12 : dist > 40 ? 24 : 48;
+
             // === Outer ring (dashed) ===
-            renderDashedRing(poseStack, bufferSource,
-                cp.x() - camX, cp.y() - camY + 0.06, cp.z() - camZ,
-                zoneRad, (float)ringCfg.outerThickness, elapsed * 0.125f, ringColor, extraPulse * alpha);
+            renderRingStrip(poseStack, bufferSource,
+                cp.x() - camX, cp.y() - camY + 0.05, cp.z() - camZ,
+                zoneRad, (float)ringCfg.outerThickness, elapsed * 0.125f,
+                ringColor, extraPulse * alpha, segments, true);
 
             // === Inner ring (solid) ===
-            renderSolidRing(poseStack, bufferSource,
-                cp.x() - camX, cp.y() - camY + 0.05, cp.z() - camZ,
-                zoneRad * 0.7f, (float)ringCfg.innerThickness, -elapsed * 0.083f, ringColor, extraPulse * alpha * 1.4f);
-
-            // === Dots on outer ring ===
-            renderRingDots(poseStack, bufferSource,
-                cp.x() - camX, cp.y() - camY + 0.07, cp.z() - camZ,
-                zoneRad, ringCfg.ringDotsCount, elapsed * 0.125f, ringColor, extraPulse * alpha);
-
-            // === Beam removed per request ===
+            renderRingStrip(poseStack, bufferSource,
+                cp.x() - camX, cp.y() - camY + 0.04, cp.z() - camZ,
+                zoneRad * 0.7f, (float)ringCfg.innerThickness, -elapsed * 0.083f,
+                ringColor, extraPulse * alpha * 0.8f, segments, false);
         }
     }
 
-    private void renderDashedRing(PoseStack poseStack, MultiBufferSource bufferSource,
+    private void renderRingStrip(PoseStack poseStack, MultiBufferSource bufferSource,
                                   double ox, double oy, double oz,
                                   float radius, float thickness, float rotation,
-                                  int color, float alpha) {
+                                  int color, float alpha, int segments, boolean dashed) {
+        if (thickness < 0.01f) return;
         poseStack.pushPose();
         poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
+        VertexConsumer vc = bufferSource.getBuffer(LINES_DEPTH);
         Matrix4f mat = poseStack.last().pose();
 
         float r = ((color >> 16) & 0xFF) / 255f;
@@ -111,55 +104,31 @@ public class CaptureParticles {
         float b = (color & 0xFF) / 255f;
         float a = ((color >> 24) & 0xFF) / 255f * alpha;
 
-        int segments = 64;
-        int lineLoops = Math.max(1, (int)(thickness * 8));
+        float halfThick = thickness * 0.5f;
+        float rInner = radius - halfThick;
+        float rOuter = radius + halfThick;
+        int step = dashed ? 4 : 1;
 
-        for (int t = 0; t < lineLoops; t++) {
-            float loopRadius = radius - thickness * 0.5f + (t + 0.5f) * thickness / lineLoops;
-            for (int i = 0; i < segments; i += 4) {
-                for (int j = 0; j < 3; j++) {
-                    int idx = i + j;
-                    if (idx >= segments) break;
-                    float a1 = (float)(idx / (double)segments * Math.PI * 2.0) + rotation;
-                    float a2 = (float)((idx + 1) / (double)segments * Math.PI * 2.0) + rotation;
-                    float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
-                    float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
-                    vc.vertex(mat, cos1 * loopRadius, 0, sin1 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
-                    vc.vertex(mat, cos2 * loopRadius, 0, sin2 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
-                }
+        // Draw 2 concentric rings (inner + outer edge) as line segments
+        for (int pass = 0; pass < 2; pass++) {
+            float ringR = (pass == 0) ? rInner : rOuter;
+            for (int i = 0; i < segments; i += step) {
+                int next = Math.min(i + step, segments);
+                float a1 = (float)(i / (double)segments * Math.PI * 2.0) + rotation;
+                float a2 = (float)(next / (double)segments * Math.PI * 2.0) + rotation;
+                float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
+                float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
+                vc.vertex(mat, cos1 * ringR, 0, sin1 * ringR).color(r, g, b, a).normal(0, 1, 0).endVertex();
+                vc.vertex(mat, cos2 * ringR, 0, sin2 * ringR).color(r, g, b, a).normal(0, 1, 0).endVertex();
             }
         }
 
-        poseStack.popPose();
-    }
-
-    private void renderSolidRing(PoseStack poseStack, MultiBufferSource bufferSource,
-                                 double ox, double oy, double oz,
-                                 float radius, float thickness, float rotation,
-                                 int color, float alpha) {
-        poseStack.pushPose();
-        poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
-        Matrix4f mat = poseStack.last().pose();
-
-        float r = ((color >> 16) & 0xFF) / 255f;
-        float g = ((color >> 8) & 0xFF) / 255f;
-        float b = (color & 0xFF) / 255f;
-        float a = ((color >> 24) & 0xFF) / 255f * alpha;
-
-        int segments = 48;
-        int lineLoops = Math.max(1, (int)(thickness * 8));
-
-        for (int t = 0; t < lineLoops; t++) {
-            float loopRadius = radius - thickness * 0.5f + (t + 0.5f) * thickness / lineLoops;
-            for (int i = 0; i < segments; i++) {
-                float a1 = (float)(i / (double)segments * Math.PI * 2.0) + rotation;
-                float a2 = (float)((i + 1) / (double)segments * Math.PI * 2.0) + rotation;
-                float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
-                float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
-                vc.vertex(mat, cos1 * loopRadius, 0, sin1 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
-                vc.vertex(mat, cos2 * loopRadius, 0, sin2 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
-            }
+        // Connect inner to outer at segment boundaries
+        for (int i = 0; i < segments; i += step) {
+            float angle = (float)(i / (double)segments * Math.PI * 2.0) + rotation;
+            float cosA = (float)Math.cos(angle), sinA = (float)Math.sin(angle);
+            vc.vertex(mat, cosA * rInner, 0, sinA * rInner).color(r, g, b, a).normal(0, 1, 0).endVertex();
+            vc.vertex(mat, cosA * rOuter, 0, sinA * rOuter).color(r, g, b, a).normal(0, 1, 0).endVertex();
         }
 
         poseStack.popPose();
@@ -169,9 +138,10 @@ public class CaptureParticles {
                                 double ox, double oy, double oz,
                                 float radius, int count, float rotation,
                                 int color, float alpha) {
+        if (count <= 0) return;
         poseStack.pushPose();
         poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
+        VertexConsumer vc = bufferSource.getBuffer(LINES_DEPTH);
         Matrix4f mat = poseStack.last().pose();
 
         float r = ((color >> 16) & 0xFF) / 255f;
@@ -199,7 +169,7 @@ public class CaptureParticles {
 
         poseStack.pushPose();
         poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
+        VertexConsumer vc = bufferSource.getBuffer(LINES_DEPTH);
         Matrix4f mat = poseStack.last().pose();
 
         float r = ((color >> 16) & 0xFF) / 255f;
@@ -261,49 +231,14 @@ public class CaptureParticles {
                                 VisualsConfig.BaseRingVisual brCfg) {
         float alpha = calcAlpha(dist, brCfg.maxDist);
         float rot = elapsed * 0.05f;
+        int segments = dist > 100 ? 12 : dist > 50 ? 24 : 48;
 
         float ringRad = (float)(baseRadius * brCfg.radiusMultiplier);
-        renderBaseDashedRing(poseStack, bufferSource, ox, oy + 0.06, oz,
-            ringRad, (float)brCfg.outerThickness, rot, color, alpha);
+        renderRingStrip(poseStack, bufferSource, ox, oy + 0.06, oz,
+            ringRad, (float)brCfg.outerThickness, rot, color, alpha, segments, true);
 
-        renderBaseDashedRing(poseStack, bufferSource, ox, oy + 0.05, oz,
-            ringRad * (float)brCfg.innerRingScale, (float)brCfg.innerThickness, rot + 0.5f, color, alpha * 0.35f);
-    }
-
-    private void renderBaseDashedRing(PoseStack poseStack, MultiBufferSource bufferSource,
-                                      double ox, double oy, double oz,
-                                      float radius, float thickness, float rotation,
-                                      int color, float alpha) {
-        poseStack.pushPose();
-        poseStack.translate(ox, oy, oz);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
-        Matrix4f mat = poseStack.last().pose();
-
-        float r = ((color >> 16) & 0xFF) / 255f;
-        float g = ((color >> 8) & 0xFF) / 255f;
-        float b = (color & 0xFF) / 255f;
-        float a = ((color >> 24) & 0xFF) / 255f * alpha;
-
-        int segments = 64;
-        int lineLoops = Math.max(1, (int)(thickness * 8));
-
-        for (int t = 0; t < lineLoops; t++) {
-            float loopRadius = radius - thickness * 0.5f + (t + 0.5f) * thickness / lineLoops;
-            for (int i = 0; i < segments; i += 4) {
-                for (int j = 0; j < 3; j++) {
-                    int idx = i + j;
-                    if (idx >= segments) break;
-                    float a1 = (float)(idx / (double)segments * Math.PI * 2.0) + rotation;
-                    float a2 = (float)((idx + 1) / (double)segments * Math.PI * 2.0) + rotation;
-                    float cos1 = (float)Math.cos(a1), sin1 = (float)Math.sin(a1);
-                    float cos2 = (float)Math.cos(a2), sin2 = (float)Math.sin(a2);
-                    vc.vertex(mat, cos1 * loopRadius, 0, sin1 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
-                    vc.vertex(mat, cos2 * loopRadius, 0, sin2 * loopRadius).color(r, g, b, a).normal(0, 1, 0).endVertex();
-                }
-            }
-        }
-
-        poseStack.popPose();
+        renderRingStrip(poseStack, bufferSource, ox, oy + 0.05, oz,
+            ringRad * (float)brCfg.innerRingScale, (float)brCfg.innerThickness, rot + 0.5f, color, alpha * 0.35f, segments, true);
     }
 
     private void renderBorderWalls(PoseStack poseStack, MultiBufferSource bufferSource,
@@ -363,7 +298,7 @@ public class CaptureParticles {
         float g = (float)cfg.beamGreen;
         float b = (float)cfg.beamBlue;
 
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.LINES);
+        VertexConsumer vc = bufferSource.getBuffer(LINES_DEPTH);
         Matrix4f mat = poseStack.last().pose();
 
         double yBase = 0.06;

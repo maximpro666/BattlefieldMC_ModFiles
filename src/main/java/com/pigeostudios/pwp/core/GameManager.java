@@ -2,6 +2,7 @@ package com.pigeostudios.pwp.core;
 
 import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.commands.StartMatchCommand;
+import com.pigeostudios.pwp.service.EconomyService;
 import com.pigeostudios.pwp.network.GameStateSyncPacket;
 import com.pigeostudios.pwp.network.NotificationPacket;
 import com.pigeostudios.pwp.network.OpenMatchResultsPacket;
@@ -123,16 +124,6 @@ public class GameManager {
         if (currentPhase == GamePhase.LOBBY && phaseTimer <= 0) {
             phaseTimer = COUNTDOWN_SECONDS * 20;
             PWP.LOGGER.info("Initial countdown started: {} seconds", COUNTDOWN_SECONDS);
-            // Safety fallback: if countdown doesn't tick in 10s, force-start it
-            server.execute(() -> {
-                try { Thread.sleep(10_000); } catch (InterruptedException ex) { Thread.currentThread().interrupt(); }
-                server.execute(() -> {
-                    if (currentPhase == GamePhase.LOBBY && phaseTimer > 0 && phaseTimer == COUNTDOWN_SECONDS * 20) {
-                        PWP.LOGGER.warn("Countdown didn't tick, forcing re-init");
-                        phaseTimer = COUNTDOWN_SECONDS * 20;
-                    }
-                });
-            });
         }
     }
 
@@ -191,8 +182,8 @@ public class GameManager {
         var fobMgr = PWP.getFOBManager();
         if (fobMgr != null) fobMgr.clearAll();
 
-        TicketManager ticketMgr = PWP.getTicketManager();
-        if (ticketMgr != null) ticketMgr.resetTickets(map.getTickets());
+        var ticketSvc = PWP.getServiceRegistry().getTickets();
+        if (ticketSvc != null) ticketSvc.resetTickets(map.getTickets());
 
         BattlefieldRuntime.getInstance().resetMatch();
 
@@ -295,9 +286,9 @@ public class GameManager {
         winningTeam = winner;
         phaseTimer = 80;
 
-        TicketManager ticketMgr = PWP.getTicketManager();
-        int natoTk = ticketMgr != null ? ticketMgr.getTickets(Team.NATO) : 0;
-        int russiaTk = ticketMgr != null ? ticketMgr.getTickets(Team.RUSSIA) : 0;
+        var ticketSvc = PWP.getServiceRegistry().getTickets();
+        int natoTk = ticketSvc != null ? ticketSvc.getTickets(Team.NATO) : 0;
+        int russiaTk = ticketSvc != null ? ticketSvc.getTickets(Team.RUSSIA) : 0;
 
         if (currentMap != null) {
             com.pigeostudios.pwp.data.CentralDatabase.recordMatchPlayed(currentMap.getName(),
@@ -309,6 +300,7 @@ public class GameManager {
         sendNotificationToAll(winMsg, "match", 6000);
 
         BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+        EconomyService eco = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getEconomy() : null;
         PWPConfig cfg = PWP.getConfig();
         TeamManager tm = PWP.getTeamManager();
 
@@ -329,10 +321,15 @@ public class GameManager {
                 baseBC += 50;
                 baseWC += 50;
             }
-            runtime.addBC(p.getUUID(), baseBC);
-            runtime.addWC(p.getUUID(), baseWC);
-            pcd.setWarCredits(runtime.getWC(p.getUUID()));
-            pcd.addBattleCredits(baseBC);
+            // Fix C6: use EconomyService (single add + persist), avoid pcd double-add
+            if (eco != null) {
+                eco.addBC(p.getUUID(), baseBC);
+                eco.addWC(p.getUUID(), baseWC);
+            } else {
+                runtime.addBC(p.getUUID(), baseBC);
+                runtime.addWC(p.getUUID(), baseWC);
+            }
+            pcd.setWarCredits(eco != null ? eco.getWC(p.getUUID()) : runtime.getWC(p.getUUID()));
             runtime.syncAll(p);
             bcEarned.put(p.getUUID(), baseBC);
             wcEarned.put(p.getUUID(), baseWC);
@@ -389,6 +386,7 @@ public class GameManager {
             UUID mvpUUID = null;
 
             for (ContributionData cd : allContribs) {
+                if (cd.getKills() == 0 && cd.getAssists() == 0 && cd.getCaptures() == 0) continue;
                 int score = cd.getTotalScore();
                 if (score > maxScore) {
                     maxScore = score;
@@ -441,6 +439,9 @@ public class GameManager {
         captureTicks = 0;
         overtime = false;
         overtimeTicks = 0;
+
+        var evtSvc = PWP.getServiceRegistry().getEvents();
+        if (evtSvc != null) evtSvc.reset();
 
         syncPhaseToAll();
         PWP.LOGGER.info("Game ended. Winner: {}", winner != null ? winner.getName() : "DRAW");
@@ -498,13 +499,14 @@ public class GameManager {
         if (currentPhase == GamePhase.PLAYING) {
             captureTicks++;
 
-            TicketManager tm = PWP.getTicketManager();
+            var ticketSvc = PWP.getServiceRegistry().getTickets();
 
             if (captureTicks % 20 == 0) {
-                if (matchTimeRemaining > 0) {
+                if (!overtime && matchTimeRemaining > 0) {
                     matchTimeRemaining--;
+                }
 
-                    // send time warning notifications
+                if (!overtime) {
                     int[] thresholds = {600, 300, 120, 60, 30, 10};
                     for (int t : thresholds) {
                         if (matchTimeRemaining == t && !sentTimeWarnings.contains(t)) {
@@ -518,15 +520,14 @@ public class GameManager {
                         }
                     }
 
-                    if (matchTimeRemaining <= 0 && tm != null) {
-                        int nTk = tm.getTickets(Team.NATO);
-                        int rTk = tm.getTickets(Team.RUSSIA);
-                        if (nTk > 0 && rTk > 0 && !overtime) {
+                    if (ticketSvc != null && matchTimeRemaining <= 0) {
+                        int nTk = ticketSvc.getTickets(Team.NATO);
+                        int rTk = ticketSvc.getTickets(Team.RUSSIA);
+                        if (nTk > 0 && rTk > 0) {
                             overtime = true;
                             overtimeTicks = 0;
                             sendNotificationToAll("\u041e\u0412\u0415\u0420\u0422\u0410\u0419\u041c!", "match", 4000);
                             LifecycleNotifier.broadcastNotification(server, "match_overtime", 4000);
-                            matchTimeRemaining = 1;
                         } else {
                             Team winner = nTk > rTk ? Team.NATO : (rTk > nTk ? Team.RUSSIA : Team.SPECTATOR);
                             endGame(winner);
@@ -550,14 +551,12 @@ public class GameManager {
 
                 updateLiberateAttachment();
 
-                if (tm != null) {
-                    tm.tick();
-                    tm.syncToAll();
-                }
+                if (ticketSvc != null) ticketSvc.tick(overtime);
 
                 if (!overtime) {
-                    int natoTickets = tm != null ? tm.getTickets(Team.NATO) : 0;
-                    int russiaTickets = tm != null ? tm.getTickets(Team.RUSSIA) : 0;
+                    var ts2 = PWP.getServiceRegistry().getTickets();
+                    int natoTickets = ts2 != null ? ts2.getTickets(Team.NATO) : 0;
+                    int russiaTickets = ts2 != null ? ts2.getTickets(Team.RUSSIA) : 0;
                     if (natoTickets <= OVERTIME_TICKETS || russiaTickets <= OVERTIME_TICKETS) {
                         if (natoTickets > 0 && russiaTickets > 0) {
                             overtime = true;
@@ -569,8 +568,9 @@ public class GameManager {
                 } else {
                     overtimeTicks++;
                     if (overtimeTicks >= MAX_OVERTIME_TICKS) {
-                        int natoTk = tm != null ? tm.getTickets(Team.NATO) : 0;
-                        int russiaTk = tm != null ? tm.getTickets(Team.RUSSIA) : 0;
+                        var ts2 = PWP.getServiceRegistry().getTickets();
+                        int natoTk = ts2 != null ? ts2.getTickets(Team.NATO) : 0;
+                        int russiaTk = ts2 != null ? ts2.getTickets(Team.RUSSIA) : 0;
                         Team winner = natoTk >= russiaTk ? Team.NATO : Team.RUSSIA;
                         endGame(winner);
                     }
@@ -923,6 +923,7 @@ public class GameManager {
             if (tm.getOrCreatePlayerData(p.getUUID()).getTeam() == Team.SPECTATOR) continue;
             tm.syncKitConfig(p);
             tm.syncRank(p);
+            tm.syncVehicles(p);
             BattlefieldRuntime.getInstance().syncAll(p);
             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
                 new com.pigeostudios.pwp.network.OpenLoadoutScreenPacket());
@@ -1045,6 +1046,7 @@ public class GameManager {
             }
         }
         safeTeleport(p, target, x, y, z);
+        com.pigeostudios.pwp.events.CombatEventHandler.applySpawnInvulnerability(p);
     }
 
     public void setMapRespawn(ServerPlayer p, Team team) {

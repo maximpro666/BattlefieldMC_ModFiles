@@ -30,7 +30,7 @@ public class FOBCommand {
             source.sendFailure(Component.literal("Only players can use this command"));
             return 0;
         }
-        String result = PWP.getFOBManager().placeFOB(player, name);
+        String result = PWP.getServiceRegistry().getFOB().placeFOB(player, name);
         if (result != null) {
             source.sendFailure(Component.literal(result));
             return 0;

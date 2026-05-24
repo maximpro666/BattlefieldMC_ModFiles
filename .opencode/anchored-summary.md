@@ -1,5 +1,43 @@
 # Project Warfare Pigeo (PWP) Mod — Anchored Summary
 
+## Session: 2026-05-24 — Kit weapon specs from ECONOMY_BALANCE.md, vehicle definition discovery, vehicle availability pipeline, fix WorldMarkerRenderer crash, cleanup balance doc
+
+### Changes Made
+
+1. **KitConfig.java** — `buildDefault()` rewritten: each kit uses exact weapons from ECONOMY_BALANCE.md §8 (e.g., Rifleman → M4A1/SCAR-L/G36K only, not the full pool). Pistols added to sniper (secondary slot, DMR→tertiary) and heavy armor (alongside shotgun) kits. Unused pool constants kept.
+
+2. **ConfigManager.java** — `extractDefaults()`: replaced 4 hardcoded sample filenames with dynamic `.json` discovery from the resource directory via Java NIO FileSystem API, works in JAR and dev filesystem.
+
+3. **WorldMarkerRenderer.java** — Fixed pre-existing `cannot find symbol cfg` at line 360: replaced `cfg.showDistance` with `VisualsConfig.get().base.showDistance`.
+
+4. **Vehicle availability pipeline** — Cross-package changes:
+   - `VehicleManager.getAvailableVehicles()` sends real `requiredAccessLevel` from vehicle definitions
+   - `TeamManager.syncVehicles()` passes real player rank
+   - `VehicleSyncPacket` includes `available` boolean field
+   - `VehicleEntry` (client) records `available` from packet
+   - `VehicleSelectionScreen` dims locked vehicles, shows `LockBadge` (reused from kit system), prevents click-through
+
+5. **ECONOMY_BALANCE.md** — Removed bug tables (§4.4, 5.4, 6.6, 8.7, 9.2). Removed sections 11–16 (commander/events, weather, anti-abuse, discrepancies, roadmap). Removed `Привязка ранга к спавну техники` note (§3.1) — feature now implemented. Kept functional specs: economy core, tickets, progression, BC, VC, vehicles, ammo, kits (8), FOB, medicine (10).
+
+### Key Files
+- `src/main/java/com/pigeostudios/pwp/data/KitConfig.java`
+- `src/main/java/com/pigeostudios/pwp/config/ConfigManager.java`
+- `src/main/java/com/pigeostudios/pwp/client/gui/renderer/WorldMarkerRenderer.java`
+- `src/main/java/com/pigeostudios/pwp/core/VehicleManager.java`
+- `src/main/java/com/pigeostudios/pwp/core/TeamManager.java`
+- `src/main/java/com/pigeostudios/pwp/network/VehicleSyncPacket.java`
+- `src/main/java/com/pigeostudios/pwp/client/VehicleEntry.java`
+- `src/main/java/com/pigeostudios/pwp/client/gui/screen/VehicleSelectionScreen.java`
+- `ECONOMY_BALANCE.md`
+
+### Design Principles
+- **Vehicle availability**: serverside rank check → network `available` flag → client UI lock state (same pattern as kit system)
+- **Kit weapons**: source of truth is ECONOMY_BALANCE.md, not ad‑hoc pools; pistol required on every kit
+- **Config extraction**: dynamic resource discovery prevents missing vehicle definitions at runtime
+- **Doc cleanup**: balance doc should contain only functional specs, not bug tracking or roadmap
+
+---
+
 ## Session: 2026-05-18 — Fix compilation errors, redesign ESC menu, add /redeploy, fix death handling, rewrite CaptureParticles/WorldMarkerRenderer, design spawn system
 
 ### Design Decisions (NEW)

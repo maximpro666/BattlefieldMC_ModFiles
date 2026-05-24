@@ -2,6 +2,7 @@ package com.pigeostudios.pwp.client;
 
 import com.pigeostudios.pwp.core.Team;
 import com.pigeostudios.pwp.client.VehicleData;
+import com.pigeostudios.pwp.network.TicketListSyncPacket;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +52,12 @@ public class ClientTeamData {
     public static int maxTickets = 100;
     public static List<ClientBeaconData> beacons = new ArrayList<>();
 
+    // Bleeding state (synced from server)
+    public static boolean isBleeding = false;
+    public static int bleedTimeRemaining = 0;
+    public static UUID reviverUUID = null;
+    public static int reviveProgress = 0;
+
     // HUD element visibility toggles
     public static boolean showCompass = true;
     public static boolean showTicketBar = true;
@@ -58,6 +65,7 @@ public class ClientTeamData {
     public static boolean showVitals = true;
     public static boolean showHotbar = true;
     public static boolean showKillFeed = true;
+    public static List<TicketListSyncPacket.TicketEntry> ticketList = new ArrayList<>();
 
     // Vote overlay data
     private static List<String> voteMapNames = new ArrayList<>();

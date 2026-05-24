@@ -113,9 +113,13 @@ public class SquadManager {
     public void leaveSquad(UUID playerId) {
         Squad squad = getPlayerSquad(playerId);
         if (squad != null) {
+            boolean wasLeader = squad.isLeader(playerId);
             squad.removeMember(playerId);
             if (squad.getMemberCount() == 0) {
                 disbandSquad(squad.getSquadId());
+            } else if (wasLeader) {
+                // Transfer leadership to the next member
+                squad.getMembers().stream().findFirst().ifPresent(squad::setLeaderUUID);
             }
         }
     }

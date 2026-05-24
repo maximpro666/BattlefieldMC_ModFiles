@@ -1,15 +1,17 @@
 package com.pigeostudios.pwp.capture;
 
 import com.pigeostudios.pwp.PWP;
+import com.pigeostudios.pwp.capture.*;
 import com.pigeostudios.pwp.core.BattlefieldRuntime;
 import com.pigeostudios.pwp.core.GameManager;
 import com.pigeostudios.pwp.core.ContributionManager;
 import com.pigeostudios.pwp.core.Team;
 import com.pigeostudios.pwp.core.PWPConfig;
-import com.pigeostudios.pwp.core.TicketManager;
+
 import com.pigeostudios.pwp.network.CapturePointSyncPacket;
 import com.pigeostudios.pwp.network.NotificationPacket;
 import com.pigeostudios.pwp.network.PacketHandler;
+import com.pigeostudios.pwp.service.EconomyService;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -159,13 +161,23 @@ public class CaptureProcessor {
                 distributeCaptureRewards(zone, level, dominant);
                 zone.clearCaptureContributions();
                 broadcastCapture(zone, level);
+
+                var tkSvc = PWP.getServiceRegistry().getTickets();
+                if (tkSvc != null) tkSvc.addObjectiveCaptureReward(dominant);
             }
         }
 
-        TicketManager tm = PWP.getTicketManager();
-        if (tm != null) {
-            tm.setBleedRate(Team.NATO, (int) Math.round(Math.max(0, russiaOwned - natoOwned)));
-            tm.setBleedRate(Team.RUSSIA, (int) Math.round(Math.max(0, natoOwned - russiaOwned)));
+        var ts = PWP.getServiceRegistry().getTickets();
+        if (ts != null) {
+            ts.setBleedRate(Team.NATO, (int) Math.round(Math.max(0, russiaOwned - natoOwned)));
+            ts.setBleedRate(Team.RUSSIA, (int) Math.round(Math.max(0, natoOwned - russiaOwned)));
+
+            for (CaptureZone zone : zones) {
+                if (zone.getOwnerTeam().isPlayable() && zone.getCapturingTeam().isPlayable()
+                        && zone.getOwnerTeam() != zone.getCapturingTeam()) {
+                    ts.addDefenseReward(zone.getOwnerTeam());
+                }
+            }
         }
 
         if (changed) syncToAll(level, zones);
@@ -237,7 +249,6 @@ public class CaptureProcessor {
         if (gm == null || !gm.isPlaying()) return;
         PWPConfig cfg = PWP.getConfig();
         if (cfg == null) return;
-        BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
 
         Map<UUID, Double> contribs = zone.getCaptureContributions();
         if (contribs.isEmpty()) return;
@@ -245,22 +256,23 @@ public class CaptureProcessor {
         int totalBC = cfg.getCaptureRewardBC();
         if (totalBC <= 0) return;
 
-        List<Map.Entry<UUID, Double>> sorted = new ArrayList<>(contribs.entrySet());
-        sorted.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
-
-        double total = 0;
-        for (Map.Entry<UUID, Double> e : sorted) total += e.getValue();
-        if (total <= 0) return;
-
-        for (Map.Entry<UUID, Double> e : sorted) {
-            UUID uuid = e.getKey();
-            runtime.addBC(uuid, totalBC);
-            runtime.addActivity(uuid, BattlefieldRuntime.SCORE_CAPTURE);
-            ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
-            if (player != null) {
-                runtime.syncBC(player);
-                NotificationPacket rewardPkt = new NotificationPacket("+" + totalBC + " BC \u0437\u0430 \u0437\u0430\u0445\u0432\u0430\u0442", "success", 3000, "");
-                PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), rewardPkt);
+        // Use EconomyService for proportional distribution (fixes C1)
+        EconomyService svc = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getEconomy() : null;
+        if (svc != null) {
+            svc.distributeCaptureReward(contribs, totalBC, level);
+        } else {
+            // Fallback to old behavior (each gets full amount — bug C1)
+            BattlefieldRuntime runtime = BattlefieldRuntime.getInstance();
+            for (Map.Entry<UUID, Double> e : contribs.entrySet()) {
+                UUID uuid = e.getKey();
+                runtime.addBC(uuid, totalBC);
+                runtime.addActivity(uuid, BattlefieldRuntime.SCORE_CAPTURE);
+                ServerPlayer player = level.getServer().getPlayerList().getPlayer(uuid);
+                if (player != null) {
+                    runtime.syncBC(player);
+                    NotificationPacket rewardPkt = new NotificationPacket("+" + totalBC + " BC \u0437\u0430 \u0437\u0430\u0445\u0432\u0430\u0442", "success", 3000, "");
+                    PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), rewardPkt);
+                }
             }
         }
     }
