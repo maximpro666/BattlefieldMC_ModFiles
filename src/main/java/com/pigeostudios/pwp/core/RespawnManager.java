@@ -251,13 +251,6 @@ public class RespawnManager {
         SavedBeacon beacon = getBeaconByName(player.getUUID(), beaconName);
         if (beacon == null) return;
 
-        Team team = PWP.getTeamManager().getOrCreatePlayerData(player.getUUID()).getTeam();
-        if (team.isPlayable()) {
-            var ts = PWP.getServiceRegistry().getTickets();
-            if (ts != null) ts.deductTicket(team);
-            player.sendSystemMessage(error("-1 ticket for respawn"));
-        }
-
         ServerLevel dest = server.getLevel(net.minecraft.resources.ResourceKey.create(
             net.minecraft.core.registries.Registries.DIMENSION,
             new net.minecraft.resources.ResourceLocation(beacon.dimension)));

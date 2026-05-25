@@ -16,69 +16,62 @@ import net.minecraft.server.level.ServerPlayer;
 public class ReportCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 
-        dispatcher.register(Commands.literal("report")
-            .then(Commands.argument("player", EntityArgument.player())
-                .then(Commands.argument("type", StringArgumentType.word())
-                    .suggests((ctx, builder) -> {
-                        for (ReportType t : ReportType.values()) {
-                            builder.suggest(t.name());
+        var reportRoot = Commands.literal("report");
+
+        // Player subcommand — report another player
+        reportRoot.then(Commands.argument("player", EntityArgument.player())
+            .then(Commands.argument("type", StringArgumentType.word())
+                .suggests((ctx, builder) -> {
+                    for (ReportType t : ReportType.values()) {
+                        builder.suggest(t.name());
+                    }
+                    return builder.buildFuture();
+                })
+                .then(Commands.argument("description", StringArgumentType.greedyString())
+                    .executes(ctx -> {
+                        ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
+                        String typeStr = StringArgumentType.getString(ctx, "type");
+                        String description = StringArgumentType.getString(ctx, "description");
+                        ServerPlayer reporter = ctx.getSource().getPlayer();
+
+                        if (reporter == null) return 0;
+                        if (reporter == target) {
+                            ctx.getSource().sendFailure(Component.literal("§cНельзя отправить репорт на самого себя"));
+                            return 0;
                         }
-                        return builder.buildFuture();
-                    })
-                    .then(Commands.argument("description", StringArgumentType.greedyString())
-                        .executes(ctx -> {
-                            ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
-                            String typeStr = StringArgumentType.getString(ctx, "type");
-                            String description = StringArgumentType.getString(ctx, "description");
-                            ServerPlayer reporter = ctx.getSource().getPlayer();
 
-                            if (reporter == null) return 0;
-                            if (reporter == target) {
-                                ctx.getSource().sendFailure(Component.literal("§cНельзя отправить репорт на самого себя"));
-                                return 0;
-                            }
+                        ReportType type;
+                        try {
+                            type = ReportType.valueOf(typeStr.toUpperCase());
+                        } catch (IllegalArgumentException e) {
+                            ctx.getSource().sendFailure(Component.literal("§cНеизвестный тип нарушения"));
+                            return 0;
+                        }
 
-                            ReportType type;
-                            try {
-                                type = ReportType.valueOf(typeStr.toUpperCase());
-                            } catch (IllegalArgumentException e) {
-                                ctx.getSource().sendFailure(Component.literal("§cНеизвестный тип нарушения"));
-                                return 0;
-                            }
+                        int id = ReportManager.createReport(reporter.getUUID(), target.getUUID(),
+                            target.getName().getString(), type, description);
 
-                            int id = ReportManager.createReport(reporter.getUUID(), target.getUUID(),
-                                target.getName().getString(), type, description);
+                        ReportManager.addSystemMessage(id, "§eTicket #" + id + " created by §f" + reporter.getName().getString()
+                            + "§e for §f" + target.getName().getString() + " §e(" + type.getDisplayName() + ")");
 
-                            ReportManager.addSystemMessage(id, "§eTicket #" + id + " created by §f" + reporter.getName().getString()
-                                + "§e for §f" + target.getName().getString() + " §e(" + type.getDisplayName() + ")");
+                        ReportManager.notifyStaff(ctx.getSource().getServer(), id,
+                            reporter.getName().getString(), target.getName().getString(), type);
 
-                            ReportManager.notifyStaff(ctx.getSource().getServer(), id,
-                                reporter.getName().getString(), target.getName().getString(), type);
-
-                            ctx.getSource().sendSuccess(() -> Component.literal("§aРепорт #" + id + " отправлен. Спасибо!"), false);
-                            return Command.SINGLE_SUCCESS;
-                        })))
-                .executes(ctx -> {
-                    ctx.getSource().sendFailure(Component.literal("§cИспол: /report <игрок> <тип> <описание>"));
-                    return 0;
-                })));
-
-        dispatcher.register(Commands.literal("reports")
+                        ctx.getSource().sendSuccess(() -> Component.literal("§aРепорт #" + id + " отправлен. Спасибо!"), false);
+                        return Command.SINGLE_SUCCESS;
+                    })))
             .executes(ctx -> {
-                if (ctx.getSource().getEntity() instanceof ServerPlayer p) {
-                    com.pigeostudios.pwp.network.PacketHandler.CHANNEL.send(
-                        net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> p),
-                        new com.pigeostudios.pwp.network.OpenReportScreenPacket());
-                }
-                return Command.SINGLE_SUCCESS;
+                ctx.getSource().sendFailure(Component.literal("§cИспол: /report <игрок> <тип> <описание>"));
+                return 0;
             }));
 
-        dispatcher.register(Commands.literal("report")
+        // Staff subcommands — requires staff
+        var staffBranch = Commands.literal("report")
             .requires(ctx -> {
                 if (ctx.getEntity() instanceof ServerPlayer p) return StaffManager.isStaff(p.getUUID());
                 return ctx.hasPermission(2);
-            })
-            .then(Commands.literal("view")
+            });
+        staffBranch.then(Commands.literal("view")
                 .then(Commands.argument("id", IntegerArgumentType.integer(1))
                     .executes(ctx -> {
                         int id = IntegerArgumentType.getInteger(ctx, "id");
@@ -139,6 +132,18 @@ public class ReportCommand {
                             ReportManager.linkPunishment(reportId, punishmentId, mod.getUUID());
                             ctx.getSource().sendSuccess(() -> Component.literal("§aНаказание #" + punishmentId + " привязано к репорту #" + reportId), true);
                             return Command.SINGLE_SUCCESS;
-                        })))));
+                        }))));
+        dispatcher.register(reportRoot);
+        dispatcher.register(staffBranch);
+
+        dispatcher.register(Commands.literal("reports")
+            .executes(ctx -> {
+                if (ctx.getSource().getEntity() instanceof ServerPlayer p) {
+                    com.pigeostudios.pwp.network.PacketHandler.CHANNEL.send(
+                        net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> p),
+                        new com.pigeostudios.pwp.network.OpenReportScreenPacket());
+                }
+                return Command.SINGLE_SUCCESS;
+            }));
     }
 }

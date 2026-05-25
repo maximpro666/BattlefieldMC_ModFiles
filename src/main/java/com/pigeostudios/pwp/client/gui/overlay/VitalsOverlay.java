@@ -69,7 +69,7 @@ public class VitalsOverlay {
         if (fillW > 0) {
             int hpColor = getHpGradientColor(smoothHp);
             RenderHelper.gradientRectH(g, hpBarX, hpBarY, fillW, HP_BAR_H,
-                hpColor, brightenColor(hpColor, 1.2f));
+                hpColor, RenderHelper.lerpColor(hpColor, 0xFFFFFFFF, 0.2f));
 
             if (smoothHp < 0.3f) {
                 regenGlowPhase = (regenGlowPhase + 0.1f) % 1f;
@@ -112,37 +112,12 @@ public class VitalsOverlay {
     private int getHpGradientColor(float fraction) {
         if (fraction > 0.6f) {
             float t = (fraction - 0.6f) / 0.4f;
-            return lerpColor(0xFFCCA030, 0xFF50B050, t);
+            return RenderHelper.lerpColor(0xFFCCA030, 0xFF50B050, t);
         } else if (fraction > 0.3f) {
             float t = (fraction - 0.3f) / 0.3f;
-            return lerpColor(0xFFCC3030, 0xFFCCA030, t);
+            return RenderHelper.lerpColor(0xFFCC3030, 0xFFCCA030, t);
         } else {
             return 0xFFCC3030;
         }
-    }
-
-    private int lerpColor(int colorA, int colorB, float t) {
-        t = Math.max(0f, Math.min(1f, t));
-        int aA = (colorA >> 24) & 0xFF;
-        int rA = (colorA >> 16) & 0xFF;
-        int gA = (colorA >> 8) & 0xFF;
-        int bA = colorA & 0xFF;
-        int aB = (colorB >> 24) & 0xFF;
-        int rB = (colorB >> 16) & 0xFF;
-        int gB = (colorB >> 8) & 0xFF;
-        int bB = colorB & 0xFF;
-        int a = (int) ((1f - t) * aA + t * aB);
-        int r = (int) ((1f - t) * rA + t * rB);
-        int g = (int) ((1f - t) * gA + t * gB);
-        int b = (int) ((1f - t) * bA + t * bB);
-        return (a << 24) | (r << 16) | (g << 8) | b;
-    }
-
-    private int brightenColor(int color, float factor) {
-        int a = (color >> 24) & 0xFF;
-        int r = Math.min(255, (int) (((color >> 16) & 0xFF) * factor));
-        int g = Math.min(255, (int) (((color >> 8) & 0xFF) * factor));
-        int b = Math.min(255, (int) ((color & 0xFF) * factor));
-        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 }

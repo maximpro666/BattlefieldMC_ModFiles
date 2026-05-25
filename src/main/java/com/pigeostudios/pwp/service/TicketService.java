@@ -176,7 +176,6 @@ public class TicketService {
                 if (gm != null) {
                     LifecycleNotifier.broadcastNotification(gm.getServer(), "match_tickets_low", 3000);
                 }
-                break;
             }
         }
     }

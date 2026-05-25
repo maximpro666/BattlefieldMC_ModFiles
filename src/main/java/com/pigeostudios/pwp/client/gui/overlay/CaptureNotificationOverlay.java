@@ -27,7 +27,7 @@ public class CaptureNotificationOverlay {
     private boolean active = false;
     private float fadeAlpha = 0f;
     private float glowPhase = 0f;
-    private BProgressBar bar;
+    private BProgressBar bar = new BProgressBar(0, 0, BAR_W, BAR_H, UITheme.TEAM_NATO);
 
     public void startCapture(String pointName, int capturingTeamOrdinal, int ownerTeamOrdinal, String pointType) {
         this.pointName = pointName != null ? pointName : "";
@@ -115,11 +115,8 @@ public class CaptureNotificationOverlay {
             AnimationHelper.withAlpha(teamColor, (int) (fadeAlpha * 120)));
 
         // ===== PASS 2: Progress bar =====
-        if (bar == null) {
-            bar = new BProgressBar(x, barY, BAR_W, BAR_H, teamColor);
-            bar.setGradient(true);
-            bar.setShowBorder(false);
-        }
+        bar.setGradient(true);
+        bar.setShowBorder(false);
         bar.setPosition(x, barY);
         bar.setFillColor(teamColor);
         bar.setFraction(smoothFraction);

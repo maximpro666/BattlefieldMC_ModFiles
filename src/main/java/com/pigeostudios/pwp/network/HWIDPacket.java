@@ -8,6 +8,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.util.Collections;
 import java.util.function.Supplier;
 
 public class HWIDPacket {
@@ -29,15 +31,7 @@ public class HWIDPacket {
         NetworkEvent.Context ctx = supplier.get();
         ctx.enqueueWork(() -> {
             ServerPlayer player = ctx.getSender();
-            if (player == null || hwid.isEmpty()) return;
-
-            PWP.LOGGER.info("HWID received from {}: {}", player.getName().getString(), hwid);
-
-            if (PunishmentManager.isBannedByHWID(hwid)) {
-                player.connection.disconnect(net.minecraft.network.chat.Component.literal(
-                    "§cВаше оборудование заблокировано на этом сервере.\nHWID ban is active on this account."));
-                return;
-            }
+            if (player == null) return;
 
             String ip = "";
             try {
@@ -47,7 +41,16 @@ public class HWIDPacket {
                 }
             } catch (Exception ignored) {}
 
-            PunishmentManager.setHWID(player.getUUID(), hwid);
+            String serverHwid = generateServerHWID(player, ip);
+            PWP.LOGGER.info("Server-side HWID for {}: {}", player.getName().getString(), serverHwid);
+
+            if (PunishmentManager.isBannedByHWID(serverHwid)) {
+                player.connection.disconnect(net.minecraft.network.chat.Component.literal(
+                    "§cВаше оборудование заблокировано на этом сервере.\nHWID ban is active on this account."));
+                return;
+            }
+
+            PunishmentManager.setHWID(player.getUUID(), serverHwid);
             PunishmentManager.setIP(player.getUUID(), ip);
 
             if (PunishmentManager.isBannedByIP(ip)) {
@@ -56,5 +59,30 @@ public class HWIDPacket {
             }
         });
         return true;
+    }
+
+    public static String generateServerHWID(ServerPlayer player, String ip) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append(ip).append("|");
+            sb.append(player.getUUID()).append("|");
+            var interfaces = NetworkInterface.getNetworkInterfaces();
+            if (interfaces != null) {
+                for (var ni : Collections.list(interfaces)) {
+                    byte[] mac = ni.getHardwareAddress();
+                    if (mac != null && mac.length > 0) {
+                        StringBuilder macStr = new StringBuilder();
+                        for (byte b : mac) macStr.append(String.format("%02X", b));
+                        sb.append(macStr);
+                        break;
+                    }
+                }
+            }
+            sb.append("|").append(System.getProperty("user.name", "unknown"));
+            String raw = sb.toString();
+            return String.format("%08x", raw.hashCode());
+        } catch (Exception e) {
+            return String.format("%08x", (ip + player.getUUID()).hashCode());
+        }
     }
 }

@@ -9,7 +9,6 @@ import com.pigeostudios.pwp.capture.CaptureZone;
 import com.pigeostudios.pwp.core.CapturePointManager;
 import com.pigeostudios.pwp.core.MapConfig;
 import com.pigeostudios.pwp.core.MapPoolManager;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;

@@ -18,14 +18,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class VehicleManager {
     private static final String COOLDOWN_FILE = "config/pwp/vehicle_cooldowns.json";
 
-    private final Set<UUID> spawnedVehicles = new HashSet<>();
-    private final Map<UUID, UUID> vehicleToOwner = new HashMap<>();
-    private final Set<UUID> playersHidingPlaques = new HashSet<>();
-    private final Map<String, Long> cooldowns = new HashMap<>();
+    private final Set<UUID> spawnedVehicles = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, UUID> vehicleToOwner = new ConcurrentHashMap<>();
+    private final Set<UUID> playersHidingPlaques = ConcurrentHashMap.newKeySet();
+    private final Map<String, Long> cooldowns = new ConcurrentHashMap<>();
     private boolean cooldownsLoaded = false;
 
     public VehicleManager() {

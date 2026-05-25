@@ -34,6 +34,8 @@ public class PlayerDataSyncManager {
 
         } catch (Exception e) {
             PWP.LOGGER.error("Failed to export match sync data", e);
+        } finally {
+            CentralDatabase.close();
         }
     }
 
@@ -88,6 +90,8 @@ public class PlayerDataSyncManager {
 
         } catch (Exception e) {
             PWP.LOGGER.error("Failed to import match sync data", e);
+        } finally {
+            CentralDatabase.close();
         }
     }
 
@@ -119,6 +123,4 @@ public class PlayerDataSyncManager {
         }
     }
 
-    public static void cleanupSyncDir() {
-    }
 }

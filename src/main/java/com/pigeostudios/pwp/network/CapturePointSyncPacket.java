@@ -1,16 +1,11 @@
 package com.pigeostudios.pwp.network;
 
 import com.pigeostudios.pwp.client.CapturePointData;
-import com.pigeostudios.pwp.client.ClientMarkerData;
 import com.pigeostudios.pwp.client.ClientTeamData;
-import com.pigeostudios.pwp.core.MarkerData;
-import com.pigeostudios.pwp.core.MarkerData.MarkerType;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
-
-import java.util.UUID;
 
 import java.util.*;
 import java.util.function.Supplier;

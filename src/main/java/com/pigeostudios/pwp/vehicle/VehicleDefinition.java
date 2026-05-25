@@ -64,7 +64,11 @@ public class VehicleDefinition {
     public EntityType<?> resolveEntityType() {
         if (entityType == null || entityType.isEmpty()) return null;
         ResourceLocation id = new ResourceLocation(entityType);
-        return BuiltInRegistries.ENTITY_TYPE.get(id);
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id);
+        if (type == null) return null;
+        ResourceLocation resolvedKey = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+        if (resolvedKey == null || !resolvedKey.equals(id)) return null;
+        return type;
     }
 
     public CompoundTag resolveNbt() {

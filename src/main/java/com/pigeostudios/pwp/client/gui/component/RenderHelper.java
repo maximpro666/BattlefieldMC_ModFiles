@@ -38,19 +38,19 @@ public class RenderHelper {
         int sideAlpha = alpha / 3;
         int cornerAlpha = alpha / 2;
         g.fillGradient(x + 1, y + h, x + w + offset, y + h + offset,
-            withAlpha(0, 0), withAlpha(0, sideAlpha));
+            AnimationHelper.withAlpha(0, 0), AnimationHelper.withAlpha(0, sideAlpha));
         g.fillGradient(x + w, y + 1, x + w + offset, y + h + offset,
-            withAlpha(0, 0), withAlpha(0, sideAlpha));
+            AnimationHelper.withAlpha(0, 0), AnimationHelper.withAlpha(0, sideAlpha));
         g.fill(x + w, y + h, x + w + offset, y + h + offset,
-            withAlpha(0, cornerAlpha));
+            AnimationHelper.withAlpha(0, cornerAlpha));
     }
 
     public static void glow(GuiGraphics g, int x, int y, int w, int h, int color, int spread, float intensity) {
         if (spread <= 0 || intensity <= 0.01f) return;
         int baseAlpha = Math.min((color >> 24) & 0xFF, 160);
-        int a1 = withAlpha(color, (int)(baseAlpha * 0.6f * intensity));
-        int a2 = withAlpha(color, (int)(baseAlpha * 0.3f * intensity));
-        int a3 = withAlpha(color, (int)(baseAlpha * 0.1f * intensity));
+        int a1 = AnimationHelper.withAlpha(color, (int)(baseAlpha * 0.6f * intensity));
+        int a2 = AnimationHelper.withAlpha(color, (int)(baseAlpha * 0.3f * intensity));
+        int a3 = AnimationHelper.withAlpha(color, (int)(baseAlpha * 0.1f * intensity));
 
         g.fill(x - spread, y - spread, x + w + spread, y - spread + 1, a3);
         g.fill(x - spread, y + h + spread - 1, x + w + spread, y + h + spread, a3);
@@ -72,20 +72,15 @@ public class RenderHelper {
     public static void glowBar(GuiGraphics g, int x, int y, int w, int h, int color, int spread) {
         if (spread <= 0 || w <= 0) return;
         int baseAlpha = Math.min((color >> 24) & 0xFF, 120);
-        int a1 = withAlpha(color, (int)(baseAlpha * 0.6f));
-        int a2 = withAlpha(color, (int)(baseAlpha * 0.3f));
-        int a3 = withAlpha(color, (int)(baseAlpha * 0.1f));
+        int a1 = AnimationHelper.withAlpha(color, (int)(baseAlpha * 0.6f));
+        int a2 = AnimationHelper.withAlpha(color, (int)(baseAlpha * 0.3f));
+        int a3 = AnimationHelper.withAlpha(color, (int)(baseAlpha * 0.1f));
         g.fill(x + w, y, x + w + spread, y + h, a3);
         g.fill(x + w, y, x + w + 2, y + h, a2);
         g.fill(x + w, y, x + w + 1, y + h, a1);
     }
 
-    private static int withAlpha(int color, int alpha) {
-        int a = Math.min(0xFF, Math.max(0, alpha));
-        return (a << 24) | (color & 0x00FFFFFF);
-    }
-
-    private static int lerpColor(int c1, int c2, float t) {
+    public static int lerpColor(int c1, int c2, float t) {
         t = Math.max(0, Math.min(1, t));
         int a = (int)(((c1 >> 24) & 0xFF) * (1 - t) + ((c2 >> 24) & 0xFF) * t);
         int r = (int)(((c1 >> 16) & 0xFF) * (1 - t) + ((c2 >> 16) & 0xFF) * t);

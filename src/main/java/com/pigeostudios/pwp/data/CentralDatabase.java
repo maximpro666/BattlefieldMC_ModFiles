@@ -3,7 +3,6 @@ package com.pigeostudios.pwp.data;
 import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.core.PlayerCombatData;
 import com.pigeostudios.pwp.core.Team;
-import com.pigeostudios.pwp.proxy.ProxyMessenger;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 
@@ -252,8 +251,17 @@ public class CentralDatabase {
     }
 
     public static synchronized void saveAllPlayers(Map<UUID, PlayerCombatData> players) {
-        for (Map.Entry<UUID, PlayerCombatData> e : players.entrySet()) {
-            savePlayer(e.getKey(), e.getValue());
+        try {
+            connection.setAutoCommit(false);
+            for (Map.Entry<UUID, PlayerCombatData> e : players.entrySet()) {
+                savePlayer(e.getKey(), e.getValue());
+            }
+            connection.commit();
+        } catch (Exception e) {
+            try { connection.rollback(); } catch (Exception ignored) {}
+            PWP.LOGGER.error("CentralDatabase: failed to save all players, rolled back", e);
+        } finally {
+            try { connection.setAutoCommit(true); } catch (Exception ignored) {}
         }
     }
 

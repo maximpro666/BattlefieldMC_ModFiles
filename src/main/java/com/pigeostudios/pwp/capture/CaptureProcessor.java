@@ -162,12 +162,14 @@ public class CaptureProcessor {
                 zone.clearCaptureContributions();
                 broadcastCapture(zone, level);
 
-                var tkSvc = PWP.getServiceRegistry().getTickets();
+                var capReg = PWP.getServiceRegistry();
+                var tkSvc = capReg != null ? capReg.getTickets() : null;
                 if (tkSvc != null) tkSvc.addObjectiveCaptureReward(dominant);
             }
         }
 
-        var ts = PWP.getServiceRegistry().getTickets();
+        var procReg = PWP.getServiceRegistry();
+        var ts = procReg != null ? procReg.getTickets() : null;
         if (ts != null) {
             ts.setBleedRate(Team.NATO, (int) Math.round(Math.max(0, russiaOwned - natoOwned)));
             ts.setBleedRate(Team.RUSSIA, (int) Math.round(Math.max(0, natoOwned - russiaOwned)));

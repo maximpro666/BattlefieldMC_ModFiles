@@ -5,7 +5,6 @@ import com.pigeostudios.pwp.core.Team;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class AmmoService {
     private final List<IAmmoProvider> providers = new ArrayList<>();
@@ -15,7 +14,8 @@ public class AmmoService {
         providers.add(provider);
         long key = provider.getChunkKey();
         if (key != Long.MIN_VALUE) {
-            spatialIndex.computeIfAbsent(key, k -> new ArrayList<>()).add(provider);
+            List<IAmmoProvider> list = spatialIndex.computeIfAbsent(key, k -> new ArrayList<>());
+            if (!list.contains(provider)) list.add(provider);
         }
     }
 
@@ -70,6 +70,10 @@ public class AmmoService {
         return providers.size();
     }
 
+    private static long chunkKey(int cx, int cz) {
+        return ((long) cx << 32) | (cz & 0xFFFFFFFFL);
+    }
+
     private List<IAmmoProvider> getProvidersInRange(ServerPlayer player) {
         int cx = player.blockPosition().getX() >> 4;
         int cz = player.blockPosition().getZ() >> 4;
@@ -78,7 +82,7 @@ public class AmmoService {
 
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
-                long key = ((long) (cx + dx) << 32) | ((cz + dz) & 0xFFFFFFFFL);
+                long key = chunkKey(cx + dx, cz + dz);
                 List<IAmmoProvider> bucket = spatialIndex.get(key);
                 if (bucket != null) {
                     for (IAmmoProvider p : bucket) {

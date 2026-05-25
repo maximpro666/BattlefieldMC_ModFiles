@@ -23,7 +23,9 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class FOBManager {
@@ -34,21 +36,8 @@ public class FOBManager {
     private final List<SavedFOB> fobs = new ArrayList<>();
     private int nextFobId = 0;
     private static final long FOB_COOLDOWN_MS = 30_000;
-    private final Map<UUID, Long> lastFOBTime = new HashMap<>();
-
-    public static class SavedFOB {
-        public int fobId;
-        public String ownerUUID;
-        public String ownerName;
-        public String name;
-        public int teamOrdinal;
-        public String dimension;
-        public int x, y, z;
-        public float health;
-        public long placedTime;
-    }
-
-    private final Map<Integer, FOBAmmoProvider> fobAmmoProviders = new HashMap<>();
+    private final Map<UUID, Long> lastFOBTime = new ConcurrentHashMap<>();
+    private final Map<Integer, FOBAmmoProvider> fobAmmoProviders = new ConcurrentHashMap<>();
 
     public FOBManager() {
         load();
@@ -79,7 +68,7 @@ public class FOBManager {
     }
 
     // Used by FOBService — places FOB without duplicate validation/BC checks
-    public String placeFOBWithoutChecks(ServerPlayer player, String name, Team team, String validatedOwnerUUID) {
+    public synchronized String placeFOBWithoutChecks(ServerPlayer player, String name, Team team, String validatedOwnerUUID) {
         UUID uuid = player.getUUID();
         SavedFOB existing = fobs.stream()
             .filter(f -> f.ownerUUID.equals(validatedOwnerUUID) && f.teamOrdinal == team.ordinal())
@@ -276,7 +265,7 @@ public class FOBManager {
         return PWP.getConfig().getMaxFOBsPerTeam();
     }
 
-    public boolean damageFOB(int fobId, float damage) {
+    public synchronized boolean damageFOB(int fobId, float damage) {
         SavedFOB fob = getFOBById(fobId);
         if (fob == null) return false;
         fob.health = Math.max(0, fob.health - damage);
@@ -290,7 +279,7 @@ public class FOBManager {
         return false;
     }
 
-    public boolean removeFOB(int fobId) {
+    public synchronized boolean removeFOB(int fobId) {
         SavedFOB fob = getFOBById(fobId);
         if (fob == null) return false;
         fobs.removeIf(f -> f.fobId == fobId);
@@ -301,7 +290,7 @@ public class FOBManager {
         return true;
     }
 
-    public boolean removeFOBByName(ServerPlayer player, String name) {
+    public synchronized boolean removeFOBByName(ServerPlayer player, String name) {
         UUID uuid = player.getUUID();
         boolean removed = fobs.removeIf(f ->
             f.ownerUUID.equals(uuid.toString()) && f.name.equals(name));
@@ -361,7 +350,7 @@ public class FOBManager {
         return points;
     }
 
-    public void clearAll() {
+    public synchronized void clearAll() {
         for (int id : List.copyOf(fobAmmoProviders.keySet())) {
             unregisterAmmoProviderForFOB(id);
         }
@@ -369,6 +358,18 @@ public class FOBManager {
         save();
         syncAll();
         PWP.LOGGER.info("All FOBs cleared");
+    }
+
+    public static class SavedFOB {
+        public int fobId;
+        public String ownerUUID;
+        public String ownerName;
+        public String name;
+        public int teamOrdinal;
+        public String dimension;
+        public int x, y, z;
+        public float health;
+        public long placedTime;
     }
 
     public void tickFOBs() {
@@ -397,10 +398,19 @@ public class FOBManager {
         PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
-    public void onBeaconBroken(BlockPos pos, com.pigeostudios.pwp.blockentity.RespawnBeaconBlockEntity beacon) {
+    public synchronized void onBeaconBroken(BlockPos pos, com.pigeostudios.pwp.blockentity.RespawnBeaconBlockEntity beacon) {
         String ownerUUID = beacon.getOwnerUUID() != null ? beacon.getOwnerUUID().toString() : "";
         String name = beacon.getName();
-        if (fobs.removeIf(f -> f.x == pos.getX() && f.y == pos.getY() && f.z == pos.getZ())) {
+        SavedFOB removed = null;
+        for (SavedFOB f : fobs) {
+            if (f.x == pos.getX() && f.y == pos.getY() && f.z == pos.getZ()) {
+                removed = f;
+                break;
+            }
+        }
+        if (removed != null) {
+            fobs.remove(removed);
+            unregisterAmmoProviderForFOB(removed.fobId);
             save();
             syncAll();
         }
@@ -427,7 +437,7 @@ public class FOBManager {
         return Math.sqrt(dx * dx + dz * dz);
     }
 
-    private void load() {
+    private synchronized void load() {
         Path path = PWP.getTeamManager().getServer()
             .getWorldPath(LevelResource.ROOT).resolve(FILE_NAME);
         if (!Files.exists(path)) return;
@@ -457,9 +467,10 @@ public class FOBManager {
         }
     }
 
-    private void save() {
+    private synchronized void save() {
         Path path = PWP.getTeamManager().getServer()
             .getWorldPath(LevelResource.ROOT).resolve(FILE_NAME);
+        Path tmp = path.resolveSibling(FILE_NAME + ".tmp");
         try {
             Files.createDirectories(path.getParent());
             JsonArray arr = new JsonArray();
@@ -478,8 +489,13 @@ public class FOBManager {
                 obj.addProperty("placedTime", fob.placedTime);
                 arr.add(obj);
             }
-            try (Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+            try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
                 GSON.toJson(arr, writer);
+            }
+            try {
+                Files.move(tmp, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException e) {
+                Files.move(tmp, path, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException e) {
             PWP.LOGGER.error("Failed to save FOBs: {}", e.getMessage());

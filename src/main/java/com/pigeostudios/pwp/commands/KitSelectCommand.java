@@ -13,10 +13,7 @@ public class KitSelectCommand {
         dispatcher.register(Commands.literal("kit")
             .then(Commands.literal("select")
                 .then(Commands.argument("name", StringArgumentType.word())
-                    .executes(ctx -> selectKit(ctx.getSource(), StringArgumentType.getString(ctx, "name")))))
-            .then(Commands.literal("claim")
-                .then(Commands.argument("name", StringArgumentType.word())
-                    .executes(ctx -> claimKit(ctx.getSource(), StringArgumentType.getString(ctx, "name"))))));
+                    .executes(ctx -> selectKit(ctx.getSource(), StringArgumentType.getString(ctx, "name"))))));
     }
 
     private static int selectKit(CommandSourceStack source, String name) {
@@ -33,17 +30,4 @@ public class KitSelectCommand {
         return 1;
     }
 
-    private static int claimKit(CommandSourceStack source, String name) {
-        if (!(source.getEntity() instanceof ServerPlayer player)) {
-            source.sendFailure(Component.translatable("pwp.chat.error.player_only"));
-            return 0;
-        }
-        Component result = PWP.getKitManager().claimKit(player, name, PWP.getTeamManager());
-        if (result != null) {
-            source.sendFailure(result);
-            return 0;
-        }
-        source.sendSuccess(() -> Component.translatable("pwp.chat.kit.obtained", name), false);
-        return 1;
-    }
 }

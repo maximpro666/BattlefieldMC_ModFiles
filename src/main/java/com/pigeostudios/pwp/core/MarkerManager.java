@@ -96,7 +96,11 @@ public class MarkerManager {
     }
 
     public void syncToAll() {
-        for (ServerPlayer player : PWP.getGameManager().getServer().getPlayerList().getPlayers()) {
+        var gm = PWP.getGameManager();
+        if (gm == null) return;
+        var server = gm.getServer();
+        if (server == null) return;
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             syncToPlayer(player);
         }
     }

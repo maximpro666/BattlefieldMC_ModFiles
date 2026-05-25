@@ -27,7 +27,6 @@ public class BButton extends Button {
         this.variant = variant;
     }
 
-    public BButton variant(Variant v) { this.variant = v; return this; }
     public BButton setVariant(Variant v) { this.variant = v; return this; }
 
     @Override

@@ -2,7 +2,6 @@ package com.pigeostudios.pwp.service;
 
 import com.google.gson.*;
 import com.pigeostudios.pwp.PWP;
-import com.pigeostudios.pwp.vehicle.VehicleDefinition;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 

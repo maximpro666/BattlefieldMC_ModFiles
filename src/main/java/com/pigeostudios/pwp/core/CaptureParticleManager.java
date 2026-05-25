@@ -41,8 +41,6 @@ public class CaptureParticleManager {
             }
             if (!hasNearbyPlayers) continue;
 
-            int teamOrdinal = zone.getOwnerTeam().ordinal();
-
             // Calculate radius from half-diagonal of the zone
             BlockPos min = zone.getMin();
             BlockPos max = zone.getMax();

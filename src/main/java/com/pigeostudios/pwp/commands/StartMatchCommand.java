@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 public class StartMatchCommand {
-    private static final String MATCH_ADDRESS = "127.0.0.1:25566";
     private static final int TIMEOUT_SECONDS = 300;
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -102,7 +101,8 @@ public class StartMatchCommand {
                     Process stopProc = stopPb.start();
                     stopProc.waitFor(15, TimeUnit.SECONDS);
                     // Wait a bit for port to be free
-                    String[] parts = MATCH_ADDRESS.split(":");
+                    String matchAddr = com.pigeostudios.pwp.PWP.getConfig().getMatchAddress();
+                    String[] parts = matchAddr.split(":");
                     String host = parts[0];
                     int port = Integer.parseInt(parts[1]);
                     for (int i = 0; i < 15; i++) {
@@ -153,7 +153,7 @@ public class StartMatchCommand {
                 outputReader.start();
 
                 // Wait for script to report "Match server ready" in output
-                String[] parts = MATCH_ADDRESS.split(":");
+                String[] parts = com.pigeostudios.pwp.PWP.getConfig().getMatchAddress().split(":");
                 String host = parts[0];
                 int port = Integer.parseInt(parts[1]);
                 long deadline = System.currentTimeMillis() + (TIMEOUT_SECONDS * 1000L);
@@ -194,7 +194,7 @@ public class StartMatchCommand {
                     // Write match_active.flag so late joiners can be auto-transferred
                     try {
                         Path flag = launcherDir.resolve("match_active.flag");
-                        Files.writeString(flag, MATCH_ADDRESS);
+                        Files.writeString(flag, com.pigeostudios.pwp.PWP.getConfig().getMatchAddress());
                         com.pigeostudios.pwp.PWP.LOGGER.info("Written match_active.flag");
                     } catch (Exception e) {
                         com.pigeostudios.pwp.PWP.LOGGER.warn("Failed to write match_active.flag: {}", e.getMessage());
@@ -208,7 +208,7 @@ public class StartMatchCommand {
                     server.execute(() -> {
                         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
-                                new TransferPacket(MATCH_ADDRESS));
+                                new TransferPacket(com.pigeostudios.pwp.PWP.getConfig().getMatchAddress()));
                         }
                         com.pigeostudios.pwp.PWP.LOGGER.info("Transfer packet sent to all players");
                     });

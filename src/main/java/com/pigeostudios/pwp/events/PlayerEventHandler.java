@@ -11,7 +11,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,7 +19,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -34,7 +32,9 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import net.minecraft.server.MinecraftServer;
 
@@ -55,22 +55,27 @@ public class PlayerEventHandler {
     private static final AtomicLong lastPortCheck = new AtomicLong(0);
     private static final long PORT_CACHE_TTL_MS = 10_000L;
 
+    private static CompletableFuture<Void> portCheckFuture = CompletableFuture.completedFuture(null);
+
     private static boolean isMatchPortReachable(int port) {
         long now = System.currentTimeMillis();
         if (now - lastPortCheck.get() < PORT_CACHE_TTL_MS) {
             Boolean cached = matchPortCache.get(port);
             if (cached != null) return cached;
         }
-        try (Socket s = new Socket()) {
-            s.connect(new InetSocketAddress("127.0.0.1", port), 500);
-            matchPortCache.put(port, true);
-            lastPortCheck.set(now);
-            return true;
-        } catch (Exception e) {
-            matchPortCache.put(port, false);
-            lastPortCheck.set(now);
-            return false;
-        }
+        if (!portCheckFuture.isDone()) return matchPortCache.getOrDefault(port, false);
+        portCheckFuture = CompletableFuture.runAsync(() -> {
+            long t = System.currentTimeMillis();
+            try (Socket s = new Socket()) {
+                s.connect(new InetSocketAddress("127.0.0.1", port), 500);
+                matchPortCache.put(port, true);
+                lastPortCheck.set(t);
+            } catch (Exception e) {
+                matchPortCache.put(port, false);
+                lastPortCheck.set(t);
+            }
+        });
+        return matchPortCache.getOrDefault(port, false);
     }
 
     static {
@@ -120,9 +125,9 @@ public class PlayerEventHandler {
             // H7: collect upkeep debt on reconnect
             var upkeepSystem = BattlefieldRuntime.getInstance().getVehicleUpkeepSystem();
             if (upkeepSystem != null) {
-                int debt = upkeepSystem.collectDebt(player.getUUID());
-                if (debt > 0 && eco != null) {
-                    eco.deductBC(player.getUUID(), debt);
+                int debt = upkeepSystem.getDebt(player.getUUID());
+                if (debt > 0 && eco != null && eco.deductBC(player.getUUID(), debt)) {
+                    upkeepSystem.clearDebt(player.getUUID());
                     player.sendSystemMessage(Component.literal("§cUpkeep debt collected: -" + debt + " BC"));
                 }
             }
@@ -231,7 +236,10 @@ public class PlayerEventHandler {
         }
     }
 
+    private static final AtomicBoolean autoStartInProgress = new AtomicBoolean(false);
+
     private static void checkAndAutoStartCycle(MinecraftServer srv) {
+        if (!autoStartInProgress.compareAndSet(false, true)) return;
         try {
             Path flagFile = Path.of(System.getProperty("user.dir")).resolve("../launcher/match_cycle_done.flag").normalize();
             if (Files.exists(flagFile)) {
@@ -243,16 +251,15 @@ public class PlayerEventHandler {
                 PWP.LOGGER.info("Auto-starting next match in 5s...");
                 new Thread(() -> {
                     try { Thread.sleep(4000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-                    srv.execute(() -> {
-                        LifecycleNotifier.broadcastNotification(srv, "auto_start", 4000);
-                    });
+                    srv.execute(() -> LifecycleNotifier.broadcastNotification(srv, "auto_start", 4000));
                     try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-                    srv.execute(() -> {
-                        srv.getCommands().performPrefixedCommand(srv.createCommandSourceStack(), "startmatch");
-                    });
+                    srv.execute(() -> srv.getCommands().performPrefixedCommand(srv.createCommandSourceStack(), "startmatch"));
                 }, "AutoMatchStarter").start();
+            } else {
+                autoStartInProgress.set(false);
             }
         } catch (Exception e) {
+            autoStartInProgress.set(false);
             PWP.LOGGER.error("Failed to check cycle flag", e);
         }
     }

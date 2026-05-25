@@ -3,6 +3,7 @@ package com.pigeostudios.pwp.bleeding;
 import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.core.*;
 import com.pigeostudios.pwp.network.*;
+import com.pigeostudios.pwp.service.EconomyService;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -51,7 +52,7 @@ public class BleedingHandler {
         bleedingPlayers.put(victim.getUUID(), state);
 
         victim.setHealth((float) cfg.getBleedingHealth());
-        victim.setForcedPose(net.minecraft.world.entity.Pose.SLEEPING);
+        victim.setForcedPose(net.minecraft.world.entity.Pose.SWIMMING);
 
         victim.setCustomName(net.minecraft.network.chat.Component.literal("\u00a7c\u271a \u0422\u0420\u0415\u0411\u0423\u0415\u0422 \u041f\u041e\u041c\u041e\u0429\u0418"));
         victim.setCustomNameVisible(true);
@@ -70,6 +71,24 @@ public class BleedingHandler {
     private void doRevive(ServerPlayer player) {
         BleedingState state = bleedingPlayers.remove(player.getUUID());
         if (state == null) return;
+
+        if (state.reviverUUID != null) {
+            ContributionManager contrib = PWP.getContributionManager();
+            if (contrib != null) {
+                String name = player.getServer().getPlayerList().getPlayer(state.reviverUUID) != null
+                    ? player.getServer().getPlayerList().getPlayer(state.reviverUUID).getName().getString()
+                    : "unknown";
+                contrib.addRevive(state.reviverUUID, name);
+            }
+            EconomyService eco = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getEconomy() : null;
+            if (eco != null) {
+                ServerPlayer reviver = player.getServer().getPlayerList().getPlayer(state.reviverUUID);
+                if (reviver != null) {
+                    eco.addBCAndActivity(reviver.getUUID(), 10, BattlefieldRuntime.SCORE_HEAL);
+                    eco.syncBC(reviver);
+                }
+            }
+        }
 
         clearBleeding(player);
 
@@ -169,7 +188,7 @@ public class BleedingHandler {
         BleedingState state = bleedingPlayers.get(player.getUUID());
         if (state == null || !state.isBleeding()) return;
 
-        player.setForcedPose(net.minecraft.world.entity.Pose.SLEEPING);
+        player.setForcedPose(net.minecraft.world.entity.Pose.SWIMMING);
 
         state.bleedTimeRemaining--;
         state.downedTime++;

@@ -38,7 +38,7 @@ public class TempbanCommand {
                             int id = PunishmentManager.issuePunishment(target.getUUID(),
                                 punisherUuid, PunishmentType.TEMP_BAN, WarnCategory.GENERAL, reason, seconds);
 
-                            target.connection.disconnect(Component.literal(
+                            if (target.connection != null) target.connection.disconnect(Component.literal(
                                 "§cВы временно забанены.\n§7Срок: " + hours + "ч\n§7Причина: " + reason));
 
                             ctx.getSource().sendSuccess(() -> Component.literal("§aИгрок " + target.getName().getString() + " забанен на " + hours + "ч\n§7Причина: " + reason), true);

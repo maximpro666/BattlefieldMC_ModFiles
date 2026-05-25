@@ -28,10 +28,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TeamManager extends SavedData {
     private static final String DATA_NAME = "pwp_data";
-    private final Map<UUID, PlayerCombatData> playerData = new HashMap<>();
+    private final Map<UUID, PlayerCombatData> playerData = new ConcurrentHashMap<>();
     private KitManager kitManager;
     private SquadManager squadManager;
     private VehicleManager vehicleManager;
@@ -95,8 +96,6 @@ public class TeamManager extends SavedData {
         to.setWins(Math.max(to.getWins(), from.getWins()));
         to.setRating(Math.max(to.getRating(), from.getRating()));
         to.setRankOrdinal(Math.max(to.getRankOrdinal(), from.getRankOrdinal()));
-        to.setBattleCredits(Math.max(to.getBattleCredits(), from.getBattleCredits()));
-        to.setWarCredits(Math.max(to.getWarCredits(), from.getWarCredits()));
         to.setCallsign(from.getCallsign());
         to.setDisplayName(from.getDisplayName());
         to.setHasReceivedDogTag(from.hasReceivedDogTag());
@@ -137,13 +136,9 @@ public class TeamManager extends SavedData {
         String actualName = player.getName().getString();
 
         String rankPrefix = "";
-        try {
-            Rank rank = Rank.fromOrdinal(data.getRankOrdinal());
-            rankPrefix = rank.getPrefix(russian);
-            data.setRankPrefix(rankPrefix);
-        } catch (Exception e) {
-            PWP.LOGGER.warn("Failed to load Rank enum: {}", e.getMessage());
-        }
+        Rank rank = Rank.fromOrdinal(data.getRankOrdinal());
+        rankPrefix = rank.getPrefix(russian);
+        data.setRankPrefix(rankPrefix);
 
         String fullName;
         if (!callsign.isEmpty()) {

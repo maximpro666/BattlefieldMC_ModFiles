@@ -226,7 +226,7 @@ public class PWP {
                 try {
                     if (srv.isShutdown() || !srv.isRunning()) return;
                     var reports = ReportManager.getAllReports();
-                    var listPacket = new com.pigeostudios.pwp.network.TicketListSyncPacket(reports);
+                    var listPacket = new com.pigeostudios.pwp.network.TicketListSyncPacket(reports, srv);
                     for (var player : srv.getPlayerList().getPlayers()) {
                         if (StaffManager.isStaff(player.getUUID()) || ReportManager.getReportsByReporter(player.getUUID()).stream().anyMatch(r -> !r.getStatus().isResolved())) {
                             com.pigeostudios.pwp.network.PacketHandler.CHANNEL.send(

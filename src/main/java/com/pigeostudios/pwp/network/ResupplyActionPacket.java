@@ -63,6 +63,14 @@ public class ResupplyActionPacket {
     private static final int RESUPPLY_AMMO_COST = 5;
 
     private static void handleResupplyAmmo(ServerPlayer player, BattlefieldRuntime rt, int slotIndex) {
+        if (RESUPPLY_AMMO_COST > 0) {
+            if (!rt.deductBC(player.getUUID(), RESUPPLY_AMMO_COST)) {
+                player.displayClientMessage(error("Not enough BC! Need " + RESUPPLY_AMMO_COST + " BC for resupply"), false);
+                return;
+            }
+            rt.syncBC(player);
+        }
+
         boolean refilled = false;
         List<String> refilledWeapons = new ArrayList<>();
 
@@ -124,13 +132,6 @@ public class ResupplyActionPacket {
         }
 
         if (refilled) {
-            if (RESUPPLY_AMMO_COST > 0) {
-                if (!rt.deductBC(player.getUUID(), RESUPPLY_AMMO_COST)) {
-                    player.displayClientMessage(error("Not enough BC! Need " + RESUPPLY_AMMO_COST + " BC for resupply"), false);
-                    return;
-                }
-                rt.syncBC(player);
-            }
             player.inventoryMenu.broadcastChanges();
             String weaponList = String.join(", ", refilledWeapons);
             player.displayClientMessage(accent("Resupplied: " + weaponList + " (" + RESUPPLY_AMMO_COST + " BC)"), false);

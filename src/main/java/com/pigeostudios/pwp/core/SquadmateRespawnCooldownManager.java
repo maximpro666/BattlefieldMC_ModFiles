@@ -76,7 +76,8 @@ public class SquadmateRespawnCooldownManager {
 
     private static boolean isWithinRadius(ServerPlayer player, FOBManager.SavedFOB fob, int radius) {
         double dx = player.getX() - fob.x;
+        double dy = player.getY() - fob.y;
         double dz = player.getZ() - fob.z;
-        return (dx * dx + dz * dz) < (double) (radius * radius);
+        return (dx * dx + dy * dy + dz * dz) < (double) (radius * radius);
     }
 }

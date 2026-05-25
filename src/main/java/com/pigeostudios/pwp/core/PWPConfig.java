@@ -47,6 +47,9 @@ public class PWPConfig {
     private int fobCostSP = 100;
     private boolean beaconsEnabled = false;
 
+    private String proxyAddress = "127.0.0.1:25565";
+    private String matchAddress = "127.0.0.1:25566";
+
     private boolean bleedingEnabled = true;
     private int bleedoutTimeSeconds = 30;
     private int reviveTimeSeconds = 6;
@@ -100,6 +103,8 @@ public class PWPConfig {
     public int getMaxFOBsPerTeam() { return maxFOBsPerTeam; }
     public int getFOBCost() { return fobCostSP; }
     public boolean isBeaconsEnabled() { return beaconsEnabled; }
+    public String getProxyAddress() { return proxyAddress; }
+    public String getMatchAddress() { return matchAddress; }
 
     public boolean isBleedingEnabled() { return bleedingEnabled; }
     public int getBleedoutTimeSeconds() { return bleedoutTimeSeconds; }

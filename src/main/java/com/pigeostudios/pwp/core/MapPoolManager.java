@@ -623,7 +623,7 @@ public class MapPoolManager {
         try {
             server.getPlayerList().saveAll();
             for (ServerLevel level : server.getAllLevels()) {
-                try { level.save(null, true, level.noSave()); } catch (Exception ignored) {}
+                try { level.save(null, true, false); } catch (Exception ignored) {}
             }
         } catch (Exception e) {
             PWP.LOGGER.error("Failed to save before maintenance: {}", e.getMessage());

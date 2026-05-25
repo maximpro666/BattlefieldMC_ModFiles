@@ -338,14 +338,16 @@ public class EconomyService {
     public void loadForPlayer(UUID uuid) {
         int dbBc = persistence.loadBC(uuid);
         int dbWc = persistence.loadWC(uuid);
-        if (dbBc > 0 || bc.containsKey(uuid)) {
-            bc.put(uuid, Math.max(bc.getOrDefault(uuid, 0), Math.min(dbBc, config.getBCCap())));
-        } else if (dbBc > 0) {
+        int existingBc = bc.getOrDefault(uuid, 0);
+        if (dbBc > 0 && dbBc > existingBc) {
+            bc.put(uuid, Math.min(dbBc, config.getBCCap()));
+        } else if (!bc.containsKey(uuid)) {
             bc.put(uuid, Math.min(dbBc, config.getBCCap()));
         }
-        if (dbWc > 0 || wc.containsKey(uuid)) {
-            wc.put(uuid, Math.max(wc.getOrDefault(uuid, 0), dbWc));
-        } else if (dbWc > 0) {
+        int existingWc = wc.getOrDefault(uuid, 0);
+        if (dbWc > 0 && dbWc > existingWc) {
+            wc.put(uuid, dbWc);
+        } else if (!wc.containsKey(uuid)) {
             wc.put(uuid, dbWc);
         }
     }

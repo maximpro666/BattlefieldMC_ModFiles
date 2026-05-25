@@ -18,7 +18,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
 import java.util.Collection;
-import java.util.List;
 
 public class VehicleCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {

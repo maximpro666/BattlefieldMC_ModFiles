@@ -48,9 +48,10 @@ public class VehicleService {
         if (gm == null) return 1.0;
         int matchTime = gm.getMatchTimeRemaining();
         if (matchTime <= 0) return 1.0;
+        double progress = 1.0 - (matchTime / 1800.0);
         var dm = PWP.getServiceRegistry().getConfig().getEconomy().difficultyMultipliers;
-        if (matchTime >= 160000) return dm.hardVehiclePrice;
-        if (matchTime >= 90000) return dm.normalVehiclePrice;
+        if (progress >= 0.75) return dm.hardVehiclePrice;
+        if (progress >= 0.50) return dm.normalVehiclePrice;
         return dm.easyVehiclePrice;
     }
 
@@ -94,6 +95,7 @@ public class VehicleService {
 
         // Cooldown check
         VehicleManager vm = PWP.getVehicleManager();
+        if (vm == null) return Component.translatable("pwp.chat.vehicle.error");
         if (vm.isOnCooldown(playerTeam, vehicleId)) {
             return Component.translatable("pwp.chat.vehicle.cooldown", 0);
         }
@@ -166,10 +168,22 @@ public class VehicleService {
         Entity ent = type.create(level);
         if (ent == null) return Component.translatable("pwp.chat.vehicle.create_error");
 
-        // Entity created — now deduct
-        if (bcCost > 0) economy.deductBC(player.getUUID(), bcCost);
-        if (vcCost > 0) economy.deductVC(playerTeam, vcCost);
-        if (ticketCost > 0 && ticketSvc != null) ticketSvc.deductVehicleSpawnCost(playerTeam, ticketCost);
+        // Entity created — now deduct with rollback
+        if (bcCost > 0 && !economy.deductBC(player.getUUID(), bcCost)) {
+            ent.discard();
+            return Component.translatable("pwp.chat.vehicle.insufficient_bc", bcCost);
+        }
+        if (vcCost > 0 && !economy.deductVC(playerTeam, vcCost)) {
+            if (bcCost > 0) economy.addBC(player.getUUID(), bcCost);
+            ent.discard();
+            return Component.translatable("pwp.chat.vehicle.insufficient_vc", vcCost);
+        }
+        if (ticketCost > 0 && ticketSvc != null && !ticketSvc.deductVehicleSpawnCost(playerTeam, ticketCost)) {
+            if (bcCost > 0) economy.addBC(player.getUUID(), bcCost);
+            if (vcCost > 0) economy.addVC(playerTeam, vcCost);
+            ent.discard();
+            return Component.translatable("pwp.chat.vehicle.insufficient_tickets", ticketCost);
+        }
 
         // Finish setup
         if (nbt != null) ent.load(nbt);

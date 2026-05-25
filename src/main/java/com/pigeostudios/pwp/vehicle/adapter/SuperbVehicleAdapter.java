@@ -56,7 +56,13 @@ public class SuperbVehicleAdapter implements IVehicleAdapter {
 
     @Override
     public int getSeatCount(Entity entity) {
-        return entity.getPassengers().size() + 1;
+        try {
+            CompoundTag tag = new CompoundTag();
+            entity.saveWithoutId(tag);
+            if (tag.contains("maxPassengers")) return tag.getInt("maxPassengers") + 1;
+            if (tag.contains("MaxPassengers")) return tag.getInt("MaxPassengers") + 1;
+        } catch (Exception ignored) {}
+        return Math.max(entity.getPassengers().size() + 2, 3);
     }
 
     @Override

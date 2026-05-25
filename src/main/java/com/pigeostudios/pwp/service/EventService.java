@@ -1,7 +1,6 @@
 package com.pigeostudios.pwp.service;
 
 import com.pigeostudios.pwp.PWP;
-import com.pigeostudios.pwp.core.LifecycleNotifier;
 import com.pigeostudios.pwp.core.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -21,10 +20,7 @@ public class EventService {
     private final Map<MatchEventType, Integer> durationOverrides = new HashMap<>();
 
     public EventService() {
-        this.enabled = true;
-        this.minInterval = 120;
-        this.maxInterval = 300;
-        this.secondsUntilNextEvent = 180 + new Random().nextInt(120);
+        this.enabled = false;
     }
 
     public void applyConfig(int minInterval, int maxInterval, Map<MatchEventType, Integer> weights, Map<MatchEventType, Integer> durations) {
@@ -40,26 +36,6 @@ public class EventService {
     public void setEnabled(boolean v) { this.enabled = v; }
 
     public void tick(MinecraftServer server, ServerLevel mapLevel, int matchTimeRemaining) {
-        if (!enabled || server == null) return;
-        tickCounter++;
-        if (tickCounter < TICK_INTERVAL) return;
-        tickCounter = 0;
-
-        // tick active events
-        tickActiveEvents(server, mapLevel);
-
-        // countdown to next event
-        if (secondsUntilNextEvent > 0) {
-            secondsUntilNextEvent--;
-            return;
-        }
-
-        // pick & fire
-        MatchEventType type = pickEvent(matchTimeRemaining);
-        if (type == null) return;
-
-        int duration = getDuration(type);
-        fireEvent(server, mapLevel, type, duration);
     }
 
     private void tickActiveEvents(MinecraftServer server, ServerLevel mapLevel) {
@@ -120,19 +96,12 @@ public class EventService {
 
     private void fireEvent(MinecraftServer server, ServerLevel mapLevel, MatchEventType type, int duration) {
         activeEvents.add(new ActiveEvent(type, duration * 20));
-        broadcastEventStart(server, type, duration);
 
         var w2 = com.pigeostudios.pwp.integration.Weather2Integration.getInstance();
         switch (type) {
             case REINFORCEMENTS -> {
                 var ts = PWP.getServiceRegistry().getTickets();
                 if (ts != null) { ts.addTickets(Team.NATO, 15); ts.addTickets(Team.RUSSIA, 15); }
-            }
-            case BOUNTY_HUNTER -> {
-                ServerPlayer top = findTopPlayer(server);
-                if (top != null) {
-                    LifecycleNotifier.broadcastNotification(server, type.getStartKey() + "." + top.getScoreboardName(), 4000);
-                }
             }
             case SANDSTORM -> {
                 if (w2.isModPresent() && mapLevel != null) {
@@ -157,19 +126,10 @@ public class EventService {
             case RAINSTORM  -> { if (w2.isModPresent() && mapLevel != null) w2.stopStorm(mapLevel); }
             default -> {}
         }
-        broadcastEventEnd(server, ae.type);
     }
 
     private void tickEffect(MinecraftServer server, ServerLevel mapLevel, ActiveEvent ae) {
         // Weather effects maintained by Weather2Integration automatically
-    }
-
-    private void broadcastEventStart(MinecraftServer server, MatchEventType type, int duration) {
-        LifecycleNotifier.broadcastNotification(server, type.getStartKey(), duration * 1000);
-    }
-
-    private void broadcastEventEnd(MinecraftServer server, MatchEventType type) {
-        LifecycleNotifier.broadcastToAll(server, type.getEndKey());
     }
 
     private ServerPlayer findTopPlayer(MinecraftServer server) {

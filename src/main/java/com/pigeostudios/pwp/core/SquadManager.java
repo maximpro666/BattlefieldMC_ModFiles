@@ -1,18 +1,18 @@
 package com.pigeostudios.pwp.core;
 
 import com.pigeostudios.pwp.PWP;
-import com.pigeostudios.pwp.core.TeamVoicePlugin;
 import com.pigeostudios.pwp.network.PacketHandler;
 import com.pigeostudios.pwp.network.SquadSyncPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SquadManager {
-    private Map<Integer, Squad> squads = new HashMap<>();
+    private Map<Integer, Squad> squads = new ConcurrentHashMap<>();
     private int nextSquadId = 0;
-    private Map<UUID, Set<Invitation>> invitations = new HashMap<>();
+    private Map<UUID, Set<Invitation>> invitations = new ConcurrentHashMap<>();
     private static final long INVITE_TIMEOUT_MS = 30000;
 
     public static class Invitation {
@@ -83,12 +83,13 @@ public class SquadManager {
     }
 
     public void invitePlayer(UUID invitedUUID, Squad squad) {
-        Set<Invitation> invites = invitations.computeIfAbsent(invitedUUID, k -> new HashSet<>());
+        Set<Invitation> invites = invitations.computeIfAbsent(invitedUUID, k -> ConcurrentHashMap.newKeySet());
         invites.add(new Invitation(squad.getLeaderUUID(), squad.getSquadId()));
     }
 
     public Invitation getInvitation(UUID playerUUID, int squadId) {
-        Set<Invitation> invites = invitations.getOrDefault(playerUUID, new HashSet<>());
+        Set<Invitation> invites = invitations.get(playerUUID);
+        if (invites == null) return null;
         for (Invitation inv : invites) {
             if (inv.squadId == squadId && !inv.isExpired()) {
                 return inv;
@@ -106,8 +107,10 @@ public class SquadManager {
     }
 
     public void removeInvitation(UUID playerUUID, int squadId) {
-        Set<Invitation> invites = invitations.getOrDefault(playerUUID, new HashSet<>());
-        invites.removeIf(inv -> inv.squadId == squadId);
+        Set<Invitation> invites = invitations.get(playerUUID);
+        if (invites != null) {
+            invites.removeIf(inv -> inv.squadId == squadId);
+        }
     }
 
     public void leaveSquad(UUID playerId) {
@@ -166,18 +169,9 @@ public class SquadManager {
         int playerSquadId = ps != null ? ps.getSquadId() : -1;
         String playerSquadName = ps != null ? ps.getName() : "";
 
-        List<Integer> squadIds = new ArrayList<>();
-        List<String> squadNames = new ArrayList<>();
-        List<Integer> squadSizes = new ArrayList<>();
-        for (Squad s : getAllSquads()) {
-            squadIds.add(s.getSquadId());
-            squadNames.add(s.getName());
-            squadSizes.add(s.getMemberCount());
-        }
-
         PacketHandler.CHANNEL.send(
             PacketDistributor.PLAYER.with(() -> player),
-            new SquadSyncPacket(playerSquadId, playerSquadName, squadIds, squadNames, squadSizes)
+            new SquadSyncPacket(playerSquadId, playerSquadName)
         );
     }
 

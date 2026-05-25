@@ -34,7 +34,7 @@ public class BanCommand {
                         int id = PunishmentManager.issuePunishment(target.getUUID(),
                             punisherUuid, PunishmentType.PERM_BAN, WarnCategory.GENERAL, reason, 0);
 
-                        target.connection.disconnect(Component.literal(
+                        if (target.connection != null) target.connection.disconnect(Component.literal(
                             "§cВы навсегда забанены на этом сервере.\n§7Причина: " + reason));
 
                         ctx.getSource().sendSuccess(() -> Component.literal("§aИгрок " + target.getName().getString() + " забанен навсегда\n§7Причина: " + reason), true);

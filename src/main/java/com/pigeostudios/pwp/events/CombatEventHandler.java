@@ -33,6 +33,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -301,11 +302,12 @@ public class CombatEventHandler {
         // Lethal damage — bleed if possible, die if bypass
         if (bleedingEnabled && victim.getHealth() - event.getAmount() <= 0f
                 && !shouldBypassBleeding(source, victim)) {
-            if (attacker == null || (attacker != victim
-                    && !teamManager.isFriendly(attacker, victim))) {
+            if (attacker == null || attacker == victim
+                    || !teamManager.isFriendly(attacker, victim)) {
                 event.setCanceled(true);
+                ServerPlayer bleedAttacker = (attacker == victim || !(attacker instanceof ServerPlayer)) ? null : (ServerPlayer) attacker;
                 com.pigeostudios.pwp.bleeding.BleedingHandler.getInstance()
-                    .startBleeding(victim, attacker, source);
+                    .startBleeding(victim, bleedAttacker, source);
                 return;
             }
         }
@@ -673,20 +675,14 @@ public class CombatEventHandler {
     }
 
     // Anti-abuse #4/#5: heal tracking for rate-limit and reward
-    private final Map<UUID, Integer> healCountThisMin = new ConcurrentHashMap<>();
-    private int healRateTickCounter = 0;
     private static final int HEAL_RATE_LIMIT = 5;
-    // Track last health to detect healing via tick comparison
+    private static final long HEAL_WINDOW_MS = 60_000;
+    private final Map<UUID, List<Long>> healTimestamps = new ConcurrentHashMap<>();
     private final Map<UUID, Float> lastPlayerHealth = new ConcurrentHashMap<>();
 
     private void tickHealTracking() {
         if (serverInstance == null) return;
-        healRateTickCounter++;
-        boolean resetCounts = false;
-        if (healRateTickCounter >= 1200) {
-            healRateTickCounter = 0;
-            resetCounts = true;
-        }
+        long now = System.currentTimeMillis();
         GameManager gm = PWP.getGameManager();
         boolean isPlaying = gm != null && gm.isPlaying();
         EconomyService eco = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getEconomy() : null;
@@ -694,15 +690,22 @@ public class CombatEventHandler {
             UUID uuid = player.getUUID();
             float currentHp = player.getHealth();
             Float lastHp = lastPlayerHealth.get(uuid);
-            if (isPlaying && lastHp != null && currentHp > lastHp) {
+            if (isPlaying && lastHp != null && currentHp > lastHp + 0.001f) {
                 float healed = currentHp - lastHp;
-                // Try to find who healed them: nearest friendly player within 10 blocks
+                // Skip small regen ticks (natural regen is 0.5 HP)
+                if (healed < 1.5f) continue;
                 ServerPlayer healer = findNearestFriendlyHealer(player, gm);
                 if (healer != null && healer != player && eco != null) {
                     var cfg = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getConfig() : null;
                     int reward = cfg != null ? cfg.getHealRewardBC() : 1;
-                    int count = healCountThisMin.merge(healer.getUUID(), 1, Integer::sum);
-                    if (count <= HEAL_RATE_LIMIT) {
+                    List<Long> timestamps = healTimestamps.get(healer.getUUID());
+                    if (timestamps == null) {
+                        timestamps = new ArrayList<>();
+                        healTimestamps.put(healer.getUUID(), timestamps);
+                    }
+                    timestamps.removeIf(t -> now - t > HEAL_WINDOW_MS);
+                    if (timestamps.size() < HEAL_RATE_LIMIT) {
+                        timestamps.add(now);
                         eco.addBCAndActivity(healer.getUUID(), reward, BattlefieldRuntime.SCORE_HEAL);
                         eco.syncBC(healer);
                     }
@@ -710,7 +713,6 @@ public class CombatEventHandler {
             }
             lastPlayerHealth.put(uuid, currentHp);
         }
-        if (resetCounts) healCountThisMin.clear();
     }
 
     private ServerPlayer findNearestFriendlyHealer(ServerPlayer patient, GameManager gm) {

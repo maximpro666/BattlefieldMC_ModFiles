@@ -64,8 +64,7 @@ public class BProgressBar {
             int useW = Math.min(drawW, x + width - this.x);
             
             if (gradient) {
-                int brightColor = brightenColor(fillColor, 1.2f);
-                RenderHelper.gradientRectH(g, x, y, useW, height, fillColor, brightColor);
+                RenderHelper.gradientRectH(g, x, y, useW, height, fillColor, RenderHelper.lerpColor(fillColor, 0xFFFFFFFF, 0.2f));
             } else {
                 g.fill(x, y, x + useW, y + height,
                     pulse ? AnimationHelper.withAlpha(fillColor, (int)(0xCC + 0x33 * Math.sin(pulsePhase * Math.PI)))
@@ -96,15 +95,6 @@ public class BProgressBar {
             var font = Minecraft.getInstance().font;
             g.drawString(font, pct, x + width + 4, y + (height - font.lineHeight) / 2, UITheme.TEXT_MUTED);
         }
-    }
-
-    private int brightenColor(int color, float factor) {
-        int a = (color >> 24) & 0xFF;
-        int r = Math.min(255, (int)(((color >> 16) & 0xFF) * factor));
-        int g = Math.min(255, (int)(((color >> 8) & 0xFF) * factor));
-        int b = Math.min(255, (int)((color & 0xFF) * factor));
-        
-        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     public float getFraction() { return targetFraction; }

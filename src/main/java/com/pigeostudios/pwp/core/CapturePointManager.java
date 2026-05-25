@@ -13,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CapturePointManager {
     private final ZoneDataManager zoneData;
@@ -102,7 +101,7 @@ public class CapturePointManager {
                 BlockPos center = new BlockPos(entry.x, entry.y, entry.z);
                 int radius = (int) Math.ceil(entry.radius);
                 int captureSec = (int) Math.ceil(entry.captureSpeed * 10);
-                String id = "map_" + entry.hashCode();
+                String id = "map_" + entry.name + "_" + entry.x + "_" + entry.y + "_" + entry.z;
                 if (zoneData.getZone(id, dimension) != null) return;
                 CaptureZone zone = new CaptureZone(id, name, dimension,
                     center.offset(-radius, -radius, -radius),

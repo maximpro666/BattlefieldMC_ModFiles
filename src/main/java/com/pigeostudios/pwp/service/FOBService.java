@@ -62,7 +62,12 @@ public class FOBService {
     }
 
     private int getFOBCost() {
-        return config.getEconomy().fob.costNormal;
+        GameManager gm = PWP.getGameManager();
+        if (gm == null) return config.getEconomy().fob.costNormal;
+        double progress = 1.0 - (gm.getMatchTimeRemaining() / 1800.0);
+        var dm = config.getEconomy().difficultyMultipliers;
+        double multiplier = progress >= 0.75 ? dm.hardVehiclePrice : progress >= 0.50 ? dm.normalVehiclePrice : dm.easyVehiclePrice;
+        return (int) Math.round(config.getEconomy().fob.costNormal * multiplier);
     }
 
     private int getMaxFOBs() {

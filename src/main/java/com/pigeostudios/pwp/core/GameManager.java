@@ -590,7 +590,7 @@ public class GameManager {
             // Send players back to lobby via TransferPacket
             for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                 PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
-                    new TransferPacket("127.0.0.1:25565"));
+                    new TransferPacket(PWP.getConfig().getProxyAddress()));
                 sendNotificationToPlayer(p, "\u0412\u043e\u0437\u0432\u0440\u0430\u0449\u0435\u043d\u0438\u0435 \u0432 \u043b\u043e\u0431\u0431\u0438...", "info", 4000);
             }
             // Signal lobby server to auto-start next match

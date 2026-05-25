@@ -37,7 +37,7 @@ public class KillFeedOverlay {
 
         public float getAlpha(long now) {
             long remaining = expireAt - now;
-            return (float) Math.min(1.0, remaining / (double) FADE_MS);
+            return (float) Math.max(0, Math.min(1.0, remaining / (double) FADE_MS));
         }
     }
 

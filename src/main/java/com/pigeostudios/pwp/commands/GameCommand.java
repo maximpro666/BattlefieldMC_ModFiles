@@ -73,6 +73,7 @@ public class GameCommand {
 
     private static int endGame(CommandContext<CommandSourceStack> context) {
         GameManager game = PWP.getGameManager();
+        if (game == null) { return 0; }
 
         if (!game.isPlaying()) {
             context.getSource().sendFailure(
@@ -80,7 +81,8 @@ public class GameCommand {
             return 0;
         }
 
-        var ts = PWP.getServiceRegistry().getTickets();
+        var reg = PWP.getServiceRegistry();
+        var ts = reg != null ? reg.getTickets() : null;
         Team winner = Team.NATO;
         if (ts != null) {
             int nt = ts.getTickets(Team.NATO);

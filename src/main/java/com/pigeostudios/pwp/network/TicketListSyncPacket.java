@@ -5,6 +5,7 @@ import com.pigeostudios.pwp.report.Report;
 import com.pigeostudios.pwp.report.ReportStatus;
 import com.pigeostudios.pwp.report.ReportType;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
@@ -31,12 +32,17 @@ public class TicketListSyncPacket {
         }
     }
 
-    public TicketListSyncPacket(List<Report> reports) {
+    public TicketListSyncPacket(List<Report> reports, MinecraftServer server) {
         this.tickets = new ArrayList<>();
         for (Report r : reports) {
+            String reporterName = r.getTargetName();
+            if (server != null) {
+                var reporterPlayer = server.getPlayerList().getPlayer(r.getReporterUuid());
+                reporterName = reporterPlayer != null ? reporterPlayer.getName().getString() : r.getReporterUuid().toString().substring(0, 8);
+            }
             tickets.add(new TicketEntry(
                 r.getId(),
-                "UUID:" + r.getReporterUuid().toString(),
+                reporterName,
                 r.getTargetName(),
                 r.getType().getDisplayName(),
                 r.getStatus().getDisplayName(),

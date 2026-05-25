@@ -26,6 +26,7 @@ public class VehicleUpkeepSystem {
     private final Map<UUID, Integer> upkeepDebt = new HashMap<>();
 
     public void tick(ServerLevel level, BattlefieldRuntime runtime, VehicleManager vehicleManager) {
+        if (vehicleManager == null) return;
         GameManager gm = PWP.getGameManager();
         if (gm == null || gm.getServer() == null) return;
 
@@ -65,27 +66,28 @@ public class VehicleUpkeepSystem {
             int bcCost = def.getUpkeep().getBcCost();
             ServerPlayer owner = gm.getServer().getPlayerList().getPlayer(ownerId);
 
-            // H8 fix: use atomic deduct from EconomyService (no TOCTOU)
-            if (owner != null) {
-                boolean deducted;
-                if (eco != null) {
-                    deducted = eco.deductBC(ownerId, bcCost);
-                } else {
-                    // H8: atomic check-and-deduct for old EconomyState
-                    deducted = runtime.deductBC(ownerId, bcCost);
-                }
-                if (deducted) {
-                    missedPayments.remove(vehicleId);
+            boolean deducted = false;
+            if (eco != null) {
+                deducted = eco.deductBC(ownerId, bcCost);
+            } else {
+                deducted = runtime.deductBC(ownerId, bcCost);
+            }
+            if (deducted) {
+                missedPayments.remove(vehicleId);
+                if (owner != null) {
                     owner.sendSystemMessage(Component.translatable("pwp.chat.upkeep.charged", bcCost, def.getDisplayName()));
-                } else {
-                    handleMissedPayment(vehicleId, owner, def, toDespawn);
                 }
             } else {
-                // H7 fix: track debt for offline players
-                int debt = upkeepDebt.merge(ownerId, bcCost, Integer::sum);
+                upkeepDebt.merge(ownerId, bcCost, (a, b) -> Math.min(a + b, 100000));
                 int misses = missedPayments.merge(vehicleId, 1, Integer::sum);
+                if (owner != null) {
+                    owner.sendSystemMessage(Component.translatable("pwp.chat.upkeep.insufficient", def.getDisplayName(), misses));
+                }
                 if (misses >= 3) {
                     toDespawn.add(vehicleId);
+                    if (owner != null) {
+                        owner.sendSystemMessage(Component.translatable("pwp.chat.upkeep.despawned", def.getDisplayName()));
+                    }
                 }
             }
         }
@@ -113,18 +115,12 @@ public class VehicleUpkeepSystem {
     }
 
     // H7: collect debt on reconnect
-    public int collectDebt(UUID playerUuid) {
-        Integer debt = upkeepDebt.remove(playerUuid);
-        return debt != null ? debt : 0;
+    public int getDebt(UUID playerUuid) {
+        return upkeepDebt.getOrDefault(playerUuid, 0);
     }
 
-    private void handleMissedPayment(UUID vehicleId, ServerPlayer owner, VehicleDefinition def, List<UUID> toDespawn) {
-        int misses = missedPayments.merge(vehicleId, 1, Integer::sum);
-        owner.sendSystemMessage(Component.translatable("pwp.chat.upkeep.insufficient", def.getDisplayName(), misses));
-        if (misses >= 3) {
-            toDespawn.add(vehicleId);
-            owner.sendSystemMessage(Component.translatable("pwp.chat.upkeep.despawned", def.getDisplayName()));
-        }
+    public void clearDebt(UUID playerUuid) {
+        upkeepDebt.remove(playerUuid);
     }
 
     public void reset() {

@@ -7,6 +7,10 @@ group = 'com.pigeostudios.pwp'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
 minecraft {
     mappings channel: 'official', version: '1.20.1'
 

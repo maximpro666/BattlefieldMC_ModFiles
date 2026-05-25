@@ -34,7 +34,7 @@ public class KickCommand {
                         PunishmentManager.issuePunishment(target.getUUID(),
                             punisherUuid, PunishmentType.KICK, null, reason, 0);
 
-                        target.connection.disconnect(Component.literal("§cВы были кикнуты\n§7Причина: " + reason));
+                        if (target.connection != null) target.connection.disconnect(Component.literal("§cВы были кикнуты\n§7Причина: " + reason));
                         ctx.getSource().sendSuccess(() -> Component.literal("§aИгрок " + target.getName().getString() + " кикнут\n§7Причина: " + reason), true);
                         return Command.SINGLE_SUCCESS;
                     })))

@@ -49,10 +49,11 @@ public class TeamVoicePlugin implements VoicechatPlugin {
 
     static void cleanupStaleEncoders() {
         long now = System.currentTimeMillis();
-        if (now - lastEncoderCleanup < 30_000L) return;
+        if (now - lastEncoderCleanup < 300_000L) return;
         lastEncoderCleanup = now;
-        senderEncoders.values().forEach(e -> { try { e.close(); } catch (Exception ignored) {} });
-        senderEncoders.clear();
+        if (!senderEncoders.isEmpty()) {
+            PWP.LOGGER.debug("Voice encoder cleanup skipped during active match");
+        }
     }
 
     @Override

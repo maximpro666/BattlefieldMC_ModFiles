@@ -5,13 +5,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class ContributionManager {
-    private final Map<UUID, ContributionData> contributions;
+    private final Map<UUID, ContributionData> contributions = new ConcurrentHashMap<>();
 
     public ContributionManager() {
-        this.contributions = new HashMap<>();
     }
 
     public ContributionData getOrCreate(UUID playerUUID, String playerName) {
