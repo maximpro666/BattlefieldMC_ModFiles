@@ -5,6 +5,7 @@ import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
@@ -33,9 +34,13 @@ public class TransferPacket {
                     return;
                 }
             }
-            ServerAddress serverAddress = ServerAddress.parseString(address);
-            ServerData serverData = new ServerData(address, address, false);
-            ConnectScreen.startConnecting(null, mc, serverAddress, serverData, false);
+            // Clean disconnect first so Replay Mod and other mods can save before transfer
+            if (mc.getConnection() != null) {
+                mc.getConnection().getConnection().disconnect(Component.literal("Transferring to lobby"));
+            }
+            ConnectScreen.startConnecting(null, mc,
+                ServerAddress.parseString(address),
+                new ServerData(address, address, false), false);
         });
         ctx.get().setPacketHandled(true);
     }

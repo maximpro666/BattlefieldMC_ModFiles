@@ -1,5 +1,6 @@
 package com.pigeostudios.pwp.client.gui.screen;
 
+import com.pigeostudios.pwp.client.gui.I18n;
 import com.pigeostudios.pwp.client.gui.UITheme;
 import com.pigeostudios.pwp.client.gui.component.*;
 import net.minecraft.client.Minecraft;
@@ -47,7 +48,7 @@ public class BattlefieldMainMenuScreen extends Screen {
         int gap  = 8;
 
         addRenderableWidget(new BButton(cx - btnW / 2, startY, btnW, btnH,
-            Component.literal("Play"), btn -> {
+            Component.literal(I18n.get("pwp.ui.main_menu.play")), btn -> {
                 Minecraft mc = Minecraft.getInstance();
                 ServerAddress addr = ServerAddress.parseString("127.0.0.1:25565");
                 ServerData data = new ServerData("127.0.0.1:25565", "127.0.0.1:25565", false);
@@ -56,15 +57,15 @@ public class BattlefieldMainMenuScreen extends Screen {
             BButton.Variant.PRIMARY));
 
         addRenderableWidget(new BButton(cx - btnW / 2, startY + btnH + gap, btnW, btnH,
-            Component.literal("Settings"), btn ->
+            Component.literal(I18n.get("pwp.ui.main_menu.settings")), btn ->
                 Minecraft.getInstance().setScreen(new SettingsMenuScreen())));
 
         addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 2, btnW, btnH,
-            Component.literal("Quit"), btn -> Minecraft.getInstance().stop(),
+            Component.literal(I18n.get("pwp.ui.main_menu.quit")), btn -> Minecraft.getInstance().stop(),
             BButton.Variant.DANGER));
 
         addRenderableWidget(new BButton(cx - btnW / 2, startY + (btnH + gap) * 3, btnW, btnH,
-            Component.literal("Replay Mod"), btn -> openReplayMod()));
+            Component.literal(I18n.get("pwp.ui.main_menu.replay")), btn -> openReplayMod()));
     }
 
     private void openReplayMod() {
@@ -118,8 +119,8 @@ public class BattlefieldMainMenuScreen extends Screen {
         }
 
         int logoY = Math.max(60, height / 2 - 100) + (int)logoFloat;
-        String line1 = "BATTLEFIELD";
-        String sub   = "TACTICAL COMBAT";
+        String line1 = I18n.get("pwp.ui.main_menu.title");
+        String sub   = I18n.get("pwp.ui.main_menu.subtitle");
         int w1 = font.width(line1) * 2;
         int w2 = font.width(sub);
         int cx = width / 2;

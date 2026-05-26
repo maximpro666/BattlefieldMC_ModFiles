@@ -1,6 +1,7 @@
 package com.pigeostudios.pwp.client.gui.overlay;
 
 import com.pigeostudios.pwp.client.ClientTeamData;
+import com.pigeostudios.pwp.client.gui.I18n;
 import com.pigeostudios.pwp.client.gui.UITheme;
 import com.pigeostudios.pwp.client.gui.component.AnimationHelper;
 import com.pigeostudios.pwp.client.gui.component.RenderHelper;
@@ -33,7 +34,7 @@ public class BleedingOverlay {
         renderVignette(g, screenWidth, screenHeight);
 
         boolean isRu = "ru".equals(ClientTeamData.language);
-        String title = isRu ? "\u0418\u0421\u0422\u0415\u041a\u0410\u0415\u0422 \u041a\u0420\u041e\u0412\u042c\u042e" : "BLEEDING OUT";
+        String title = isRu ? "\u0418\u0421\u0422\u0415\u041a\u0410\u0415\u0422 \u041a\u0420\u041e\u0412\u042c\u042e" : I18n.get("pwp.ui.hud.bleeding");
         int titleCol = AnimationHelper.withAlpha(0xFFFF4444, 200 + (int)(55f * (float)Math.sin(System.currentTimeMillis() / 300d)));
         g.drawString(font, title, cx - font.width(title) / 2, screenHeight / 2 - 50, titleCol);
 
@@ -91,7 +92,7 @@ public class BleedingOverlay {
                 AnimationHelper.withAlpha(0xFF50B050, 200), AnimationHelper.withAlpha(0xFF307030, 160));
         }
 
-        String label = isRu ? "\u0421\u041f\u0410\u0421\u0410\u042e\u0422..." : "BEING REVIVED...";
+        String label = isRu ? "\u0421\u041f\u0410\u0421\u0410\u042e\u0422..." : I18n.get("pwp.ui.hud.revived");
         g.drawString(font, label, cx - font.width(label) / 2, by - 12,
             AnimationHelper.withAlpha(0xFF50E050, 220));
     }

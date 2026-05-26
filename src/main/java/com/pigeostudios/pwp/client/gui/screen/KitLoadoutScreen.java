@@ -57,10 +57,10 @@ public class KitLoadoutScreen extends Screen {
 
         String[] icons = {"\uD83D\uDD2B", "\uD83D\uDD27", "\uD83D\uDC8A", "\uD83D\uDCA3"};
         String[][] weaponSlots = {
-            {"primary", "Primary"},
-            {"secondary", "Secondary"},
-            {"special", "Special"},
-            {"grenade", "Grenade"},
+            {"primary", I18n.get("pwp.ui.kit_loadout.slot_primary")},
+            {"secondary", I18n.get("pwp.ui.kit_loadout.slot_secondary")},
+            {"special", I18n.get("pwp.ui.kit_loadout.slot_special")},
+            {"grenade", I18n.get("pwp.ui.kit_loadout.slot_grenade")},
         };
 
         if (kit.weapons != null) {
@@ -101,13 +101,13 @@ public class KitLoadoutScreen extends Screen {
         g.fill(0, 0, width, height,
             AnimationHelper.withAlpha(UITheme.BG_SCREEN, (int)(fadeAlpha * 0xCC)));
 
-        topBar.render(g, width, "QUICK LOADOUT",
+        topBar.render(g, width, I18n.get("pwp.ui.kit_loadout.title"),
             com.pigeostudios.pwp.client.ClientTeamData.localPlayerWC,
             com.pigeostudios.pwp.client.ClientTeamData.localPlayerBC,
             com.pigeostudios.pwp.client.ClientTeamData.localPlayerRank);
 
         BreadcrumbNav.render(g, width, TopBar.TOP_H,
-            List.of("SPAWN", "CLASSES", "KITS", "LOADOUT"), alpha);
+            List.of(I18n.get("pwp.ui.kit_loadout.breadcrumb_spawn"), I18n.get("pwp.ui.kit_loadout.breadcrumb_classes"), I18n.get("pwp.ui.kit_loadout.breadcrumb_kits"), I18n.get("pwp.ui.kit_loadout.breadcrumb_loadout")), alpha);
 
         KitConfig cfg = KitConfig.get();
         KitConfig.KitDef currentKit = cfg != null && cfg.classes != null && cfg.classes.containsKey(classId)
@@ -146,7 +146,7 @@ public class KitLoadoutScreen extends Screen {
         if (saved) {
             g.fill(btnX, contentY, btnX + btnW, contentY + 32,
                 AnimationHelper.withAlpha(UITheme.STATUS_OK, (int)(fadeAlpha * 0xDD)));
-            String svTxt = "\u2713 Loadout Saved";
+            String svTxt = I18n.get("pwp.ui.kit_loadout.saved");
             g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, contentY + 11, 0xFFFFFFFF);
         } else {
             int btnBg = AnimationHelper.blendColors(UITheme.ACCENT, 0xFFFF8C0A, btnHov ? 1f : 0f);
@@ -154,7 +154,7 @@ public class KitLoadoutScreen extends Screen {
                 AnimationHelper.withAlpha(btnBg, alpha));
             g.fill(btnX, contentY, btnX + 2, contentY + 32,
                 AnimationHelper.withAlpha(0x33000000, alpha));
-            String svTxt = "Save Loadout";
+            String svTxt = I18n.get("pwp.ui.kit_loadout.save_btn");
             g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, contentY + 11, 0xFFFFFFFF);
         }
 

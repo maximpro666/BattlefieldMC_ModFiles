@@ -1,6 +1,7 @@
 package com.pigeostudios.pwp.client.gui.component;
 
 import com.pigeostudios.pwp.client.ClientTeamData;
+import com.pigeostudios.pwp.client.gui.I18n;
 import com.pigeostudios.pwp.client.gui.UITheme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -39,7 +40,7 @@ public class StatusBar {
             AnimationHelper.withAlpha(dotColor, alpha));
         x += 10;
 
-        String connText = connected ? "CONNECTED" : "OFFLINE";
+        String connText = connected ? I18n.get("pwp.ui.status_bar.connected") : I18n.get("pwp.ui.status_bar.offline");
         g.drawString(font, connText, x, ty,
             AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, alpha));
         x += font.width(connText) + 8;
@@ -52,7 +53,7 @@ public class StatusBar {
         int    teamColor = team.equals("NATO") ? UITheme.TEAM_NATO
                          : team.equals("RUSSIA") ? UITheme.TEAM_RUSSIA
                          : UITheme.TEXT_MUTED;
-        String teamStr = "Team ";
+        String teamStr = I18n.get("pwp.ui.status_bar.team");
         g.drawString(font, teamStr, x, ty,
             AnimationHelper.withAlpha(UITheme.TEXT_MUTED, alpha));
         x += font.width(teamStr);
@@ -75,9 +76,9 @@ public class StatusBar {
         }
 
         if (!kitName.isEmpty()) {
-            g.drawString(font, "Kit: ", x, ty,
+            g.drawString(font, I18n.get("pwp.ui.status_bar.kit"), x, ty,
                 AnimationHelper.withAlpha(UITheme.TEXT_MUTED, alpha));
-            x += font.width("Kit: ");
+            x += font.width(I18n.get("pwp.ui.status_bar.kit"));
             g.drawString(font, kitName, x, ty,
                 AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
         }

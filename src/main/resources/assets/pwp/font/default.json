@@ -12,12 +12,6 @@
       "advances": {
         " ": 4
       }
-    },
-    {
-      "type": "bitmap",
-      "file": "minecraft:font/glyph_sprite_sheet.png",
-      "ascent": 8,
-      "chars": ["\u0000-\u00FF"]
     }
   ]
 }

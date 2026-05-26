@@ -38,6 +38,7 @@ public class KitConfig {
         public List<String> secondary = new ArrayList<>();
         public List<String> special   = new ArrayList<>();
         public List<String> grenade   = new ArrayList<>();
+        public List<String> medical   = new ArrayList<>();
     }
 
     public static class AttachmentLimit {
@@ -225,6 +226,15 @@ public class KitConfig {
                                 List<String> primary, List<String> secondary,
                                 List<String> special, List<String> grenade,
                                 KitArmor armor, int rank, int spCost, String team) {
+        addKit(cfg, classId, classDisplay, classIcon, kitId, kitDisplay, description,
+            primary, secondary, special, grenade, List.of("marbledsfirstaid:bandaid_box"), armor, rank, spCost, team);
+    }
+
+    private static void addKit(KitConfig cfg, String classId, String classDisplay, String classIcon,
+                                String kitId, String kitDisplay, String description,
+                                List<String> primary, List<String> secondary,
+                                List<String> special, List<String> grenade, List<String> medical,
+                                KitArmor armor, int rank, int spCost, String team) {
         ClassConfig cl = cfg.classes.get(classId);
         if (cl == null) {
             cl = new ClassConfig();
@@ -239,6 +249,7 @@ public class KitConfig {
         kit.weapons.secondary = secondary;
         kit.weapons.special = special;
         kit.weapons.grenade = grenade;
+        kit.weapons.medical = medical;
         kit.armor = armor;
         kit.requirements.rank = rank;
         kit.requirements.sp_cost = spCost;
@@ -261,114 +272,120 @@ public class KitConfig {
 
         // ── ASSAULT ─────────────────────────────────
 
-        addKit(cfg, "nato_assault", "Assault", "warborn:nato_helmet",
-            "rifleman", "Rifleman", "Standard NATO rifleman.",
+        addKit(cfg, "nato_assault", "Assault // Штурмовик", "warborn:nato_helmet",
+            "rifleman", "Rifleman // Стрелок", "Standard NATO rifleman. // Стандартный стрелок НАТО.",
             List.of("tacz:m4a1","tacz:scar_l","tacz:g36k"),
             List.of("tacz:m1911","tacz:glock_17"),
             List.of(), List.of("warbornexplosives:m67"), natoA, 0, 0, "NATO");
 
-        addKit(cfg, "nato_assault", "Assault", "warborn:nato_sqad_leader_helmet",
-            "breacher", "Breacher", "CQB assault operator with explosives.",
+        addKit(cfg, "nato_assault", "Assault // Штурмовик", "warborn:nato_sqad_leader_helmet",
+            "breacher", "Breacher // Подрывник", "CQB assault operator with explosives. // Штурмовик CQB с взрывчаткой.",
             List.of("tacz:hk_mp5a5","tacz:vector45"),
             List.of("tacz:deagle"),
             List.of("superbwarfare:c4_bomb"),
             List.of("warbornexplosives:m67"), natoA, 1, 2, "NATO");
 
-        addKit(cfg, "nato_assault", "Assault", "warborn:beta7_helmet",
-            "shock_trooper", "Shock Trooper", "Elite NATO assault unit.",
+        addKit(cfg, "nato_assault", "Assault // Штурмовик", "warborn:beta7_helmet",
+            "shock_trooper", "Shock Trooper // Шок-войска", "Elite NATO assault unit. // Элитный штурмовой отряд НАТО.",
             List.of("tacz:hk416a5","tacz:scar_l"),
             List.of("tacz:glock_17"),
             List.of(),
-            List.of("warbornexplosives:m67"), natoA, 4, 4, "NATO");
+            List.of("warbornexplosives:m67"),
+            List.of("marbledsfirstaid:medkit"), natoA, 4, 4, "NATO");
 
         // ── MEDIC ───────────────────────────────────
 
-        addKit(cfg, "nato_medic", "Medic", "warborn:beta7_helmet",
-            "combat_medic", "Combat Medic", "Medical support with smoke screening.",
+        addKit(cfg, "nato_medic", "Medic // Медик", "warborn:beta7_helmet",
+            "combat_medic", "Combat Medic // Полевой медик", "Medical support with smoke screening. // Медицинская поддержка с дымовым прикрытием.",
             List.of("tacz:m4a1"),
             List.of("tacz:m1911"),
             List.of(),
-            List.of("warbornexplosives:m18_smoke"), natoA, 0, 0, "NATO");
+            List.of("warbornexplosives:m18_smoke"),
+            List.of("marbledsfirstaid:medkit"), natoA, 0, 0, "NATO");
 
-        addKit(cfg, "nato_medic", "Medic", "warborn:beta7_nvg_helmet",
-            "field_surgeon", "Field Surgeon", "Veteran NATO medic.",
+        addKit(cfg, "nato_medic", "Medic // Медик", "warborn:beta7_nvg_helmet",
+            "field_surgeon", "Field Surgeon // Хирург", "Veteran NATO medic. // Ветеран-медик НАТО.",
             List.of("tacz:hk_mp5a5"),
             List.of("tacz:m1911"),
             List.of(),
-            List.of("warbornexplosives:m18_smoke"), natoA, 2, 0, "NATO");
+            List.of("warbornexplosives:m18_smoke"),
+            List.of("marbledsfirstaid:medkit", "marbledsfirstaid:morphine"), natoA, 2, 0, "NATO");
 
         // ── ENGINEER ────────────────────────────────
 
-        addKit(cfg, "nato_engineer", "Engineer", "warborn:nato_ukr_helmet",
-            "combat_engineer", "Combat Engineer", "Repair and demolition specialist.",
+        addKit(cfg, "nato_engineer", "Engineer // Инженер", "warborn:nato_ukr_helmet",
+            "combat_engineer", "Combat Engineer // Сапёр", "Repair and demolition specialist. // Специалист по ремонту и подрыву.",
             List.of("tacz:m4a1"),
             List.of("tacz:glock_17"),
             List.of("superbwarfare:repair_tool","superbwarfare:claymore_mine"),
             List.of("warbornexplosives:m67"), natoA, 1, 3, "NATO");
 
-        addKit(cfg, "nato_engineer", "Engineer", "warborn:nato_ukr_helmet",
-            "anti_tank", "Anti-Tank", "Heavy anti-armor specialist.",
+        addKit(cfg, "nato_engineer", "Engineer // Инженер", "warborn:nato_ukr_helmet",
+            "anti_tank", "Anti-Tank // ПТ-стрелок", "Heavy anti-armor specialist. // Специалист по тяжёлой бронетехнике.",
             List.of("tacz:scar_l"),
             List.of("tacz:glock_17"),
             List.of("superbwarfare:rpg","superbwarfare:c4_bomb"),
             List.of("warbornexplosives:m67"), natoA, 2, 3, "NATO");
 
-        addKit(cfg, "nato_engineer", "Engineer", "warborn:nato_ukr_helmet",
-            "sapper", "Sapper", "Elite combat engineer with heavy armor.",
+        addKit(cfg, "nato_engineer", "Engineer // Инженер", "warborn:nato_ukr_helmet",
+            "sapper", "Sapper // Инженер-сапёр", "Elite combat engineer with heavy armor. // Элитный инженер с тяжёлой бронёй.",
             List.of("tacz:g36k"),
             List.of("tacz:deagle"),
             List.of("superbwarfare:repair_tool","superbwarfare:c4_bomb","superbwarfare:claymore_mine"),
-            List.of("warbornexplosives:m67"), natoA, 4, 4, "NATO");
+            List.of("warbornexplosives:m67"),
+            List.of("marbledsfirstaid:medkit"), natoA, 4, 4, "NATO");
 
         // ── SUPPORT ─────────────────────────────────
 
-        addKit(cfg, "nato_support", "Support", "warborn:nato_mg_helmet",
-            "machinegunner", "Machinegunner", "Suppressive fire with heavy machine guns.",
+        addKit(cfg, "nato_support", "Support // Поддержка", "warborn:nato_mg_helmet",
+            "machinegunner", "Machinegunner // Пулемётчик", "Suppressive fire with heavy machine guns. // Подавление огнём из тяжёлых пулемётов.",
             List.of("tacz:m249"),
             List.of("tacz:m1911"),
             List.of(), List.of(), natoA, 2, 3, "NATO");
 
-        addKit(cfg, "nato_support", "Support", "warborn:nato_mg_helmet",
-            "heavy_gunner", "Heavy Gunner", "Elite suppression specialist.",
+        addKit(cfg, "nato_support", "Support // Поддержка", "warborn:nato_mg_helmet",
+            "heavy_gunner", "Heavy Gunner // Тяжёлый пулемётчик", "Elite suppression specialist. // Элитный специалист подавления.",
             List.of("tacz:m249"),
             List.of("tacz:glock_17"),
             List.of("superbwarfare:m18_smoke_grenade"),
-            List.of(), natoA, 4, 4, "NATO");
+            List.of(),
+            List.of("marbledsfirstaid:medkit"), natoA, 4, 4, "NATO");
 
         // ── SNIPER ─────────────────────────────────
 
-        addKit(cfg, "nato_sniper", "Sniper", "warborn:beta7_nvg_helmet",
-            "scout_sniper", "Scout Sniper", "Long-range reconnaissance.",
+        addKit(cfg, "nato_sniper", "Sniper // Снайпер", "warborn:beta7_nvg_helmet",
+            "scout_sniper", "Scout Sniper // Снайпер-разведчик", "Long-range reconnaissance. // Дальняя разведка.",
             List.of("tacz:ai_awp"),
             List.of("tacz:glock_17"),
             List.of("tacz:mk14"),
             List.of(), natoA, 2, 4, "NATO");
 
-        addKit(cfg, "nato_sniper", "Sniper", "warborn:beta7_helmet",
-            "heavy_sniper", "Heavy Sniper", "Anti-material sniper specialist.",
+        addKit(cfg, "nato_sniper", "Sniper // Снайпер", "warborn:beta7_helmet",
+            "heavy_sniper", "Heavy Sniper // Крупнокалиберный снайпер", "Anti-material sniper specialist. // Специалист по поражению техники.",
             List.of("tacz:m95"),
             List.of("tacz:m1911"),
             List.of(),
             List.of("warbornexplosives:m67"), natoA, 4, 5, "NATO");
 
-        addKit(cfg, "nato_sniper", "Sniper", "warborn:beta7_nvg_helmet",
-            "ghost", "Ghost", "Elite stealth sniper with advanced equipment.",
+        addKit(cfg, "nato_sniper", "Sniper // Снайпер", "warborn:beta7_nvg_helmet",
+            "ghost", "Ghost // Призрак", "Elite stealth sniper with advanced equipment. // Элитный снайпер-невидимка с продвинутым снаряжением.",
             List.of("tacz:m700"),
             List.of("tacz:deagle"),
             List.of("tacz:mk14"),
-            List.of(), natoA, 5, 5, "NATO");
+            List.of(),
+            List.of("marbledsfirstaid:medkit"), natoA, 5, 5, "NATO");
 
         // ── HEAVY AT ────────────────────────────────
 
-        addKit(cfg, "nato_heavy_at", "Heavy AT", "warborn:nato_ukr_helmet",
-            "rpg_gunner", "RPG Gunner", "Anti-vehicle infantry with rocket launcher.",
+        addKit(cfg, "nato_heavy_at", "Heavy AT // Тяжёлый ПТ", "warborn:nato_ukr_helmet",
+            "rpg_gunner", "RPG Gunner // РПГ-стрелок", "Anti-vehicle infantry with rocket launcher. // Противотанковая пехота с РПГ.",
             List.of("tacz:scar_l"),
             List.of("tacz:m1911"),
             List.of("superbwarfare:rpg"),
             List.of(), natoA, 1, 5, "NATO");
 
-        addKit(cfg, "nato_heavy_at", "Heavy AT", "warborn:nato_ukr_helmet",
-            "javelin_operator", "Javelin Operator", "Advanced anti-armor missile specialist.",
+        addKit(cfg, "nato_heavy_at", "Heavy AT // Тяжёлый ПТ", "warborn:nato_ukr_helmet",
+            "javelin_operator", "Javelin Operator // Оператор Javelin", "Advanced anti-armor missile specialist. // Специалист по ПТРК Javelin.",
             List.of("tacz:p90"),
             List.of("tacz:glock_17"),
             List.of("superbwarfare:javelin"),
@@ -376,18 +393,20 @@ public class KitConfig {
 
         // ── HEAVY ARMOR ─────────────────────────────
 
-        addKit(cfg, "nato_heavy_armor", "Heavy Armor", "warborn:nato_mg_helmet",
-            "juggernaut", "Juggernaut", "Heavy assault infantry with fortified armor.",
+        addKit(cfg, "nato_heavy_armor", "Heavy Armor // Тяжёлая броня", "warborn:nato_mg_helmet",
+            "juggernaut", "Juggernaut // Джаггернаут", "Heavy assault infantry with fortified armor. // Тяжёлая штурмовая пехота с усиленной бронёй.",
             List.of("tacz:m249"),
             List.of("tacz:aa12","tacz:m1911"),
-            List.of(), List.of(), natoA, 2, 5, "NATO");
+            List.of(), List.of(),
+            List.of("marbledsfirstaid:medkit"), natoA, 2, 5, "NATO");
 
-        addKit(cfg, "nato_heavy_armor", "Heavy Armor", "warborn:beta7_helmet",
-            "bulwark", "Bulwark", "Elite heavy assault operator.",
+        addKit(cfg, "nato_heavy_armor", "Heavy Armor // Тяжёлая броня", "warborn:beta7_helmet",
+            "bulwark", "Bulwark // Оплот", "Elite heavy assault operator. // Элитный тяжёлый штурмовик.",
             List.of("tacz:m249"),
             List.of("tacz:m870","tacz:glock_17"),
             List.of("superbwarfare:c4_bomb","superbwarfare:m18_smoke_grenade"),
-            List.of(), natoA, 5, 5, "NATO");
+            List.of(),
+            List.of("marbledsfirstaid:medkit"), natoA, 5, 5, "NATO");
 
         // ═══════════════════════════════════════════════
         // RUSSIA
@@ -395,115 +414,121 @@ public class KitConfig {
 
         // ── SHTURMOVIK ──────────────────────────────
 
-        addKit(cfg, "ru_assault", "Shturmovik", "warborn:ru_helmet",
-            "shturmovik", "Shturmovik", "Standard Russian frontline assault infantry.",
+        addKit(cfg, "ru_assault", "Shturmovik // Штурмовик", "warborn:ru_helmet",
+            "shturmovik", "Shturmovik // Штурмовик", "Standard Russian frontline assault infantry. // Стандартный российский штурмовик.",
             List.of("tacz:ak47","tacz:type_81"),
             List.of("superbwarfare:glock_18","tacz:glock_17"),
             List.of(),
             List.of("warbornexplosives:f_1","warbornexplosives:rgd_5"), ruA, 0, 0, "RUSSIA");
 
-        addKit(cfg, "ru_assault", "Shturmovik", "warborn:shturmovikv2_helmet",
-            "storm_group", "Storm Group", "Close-quarters assault detachment.",
+        addKit(cfg, "ru_assault", "Shturmovik // Штурмовик", "warborn:shturmovikv2_helmet",
+            "storm_group", "Storm Group // Штурмовая группа", "Close-quarters assault detachment. // Отряд CQB штурма.",
             List.of("tacz:hk_mp5a5","tacz:p90"),
             List.of("tacz:cz75"),
             List.of("superbwarfare:c4_bomb"),
             List.of("warbornexplosives:f_1"), ruA, 1, 2, "RUSSIA");
 
-        addKit(cfg, "ru_assault", "Shturmovik", "warborn:squad_lider_ru_helmet",
-            "guardsman", "Guardsman", "Elite assault operator for breakthrough attacks.",
+        addKit(cfg, "ru_assault", "Shturmovik // Штурмовик", "warborn:squad_lider_ru_helmet",
+            "guardsman", "Guardsman // Гвардеец", "Elite assault operator for breakthrough attacks. // Элитный штурмовик для прорывов.",
             List.of("tacz:qbz_191","tacz:ak47"),
             List.of("superbwarfare:glock_18"),
             List.of("superbwarfare:rpg","superbwarfare:c4_bomb"),
-            List.of("warbornexplosives:rgn"), ruA, 4, 4, "RUSSIA");
+            List.of("warbornexplosives:rgn"),
+            List.of("marbledsfirstaid:medkit"), ruA, 4, 4, "RUSSIA");
 
         // ── MEDIK ───────────────────────────────────
 
-        addKit(cfg, "ru_medic", "Medik", "warborn:ru_helmet",
-            "polevoy_medik", "Polevoy Medik", "Russian combat medic with smoke support.",
+        addKit(cfg, "ru_medic", "Medik // Медик", "warborn:ru_helmet",
+            "polevoy_medik", "Polevoy Medik // Полевой медик", "Russian combat medic with smoke support. // Российский полевой медик с дымовой поддержкой.",
             List.of("tacz:ak47"),
             List.of("superbwarfare:glock_18"),
             List.of(),
-            List.of("warbornexplosives:rdg_2"), ruA, 0, 0, "RUSSIA");
+            List.of("warbornexplosives:rdg_2"),
+            List.of("marbledsfirstaid:medkit"), ruA, 0, 0, "RUSSIA");
 
-        addKit(cfg, "ru_medic", "Medik", "warborn:shturmovikv2_helmet",
-            "sanitar", "Sanitar", "Veteran field medic.",
+        addKit(cfg, "ru_medic", "Medik // Медик", "warborn:shturmovikv2_helmet",
+            "sanitar", "Sanitar // Санитар", "Veteran field medic. // Ветеран-медик.",
             List.of("tacz:hk_mp5a5"),
             List.of("tacz:cz75"),
             List.of(),
-            List.of("warbornexplosives:rdg_2"), ruA, 2, 0, "RUSSIA");
+            List.of("warbornexplosives:rdg_2"),
+            List.of("marbledsfirstaid:medkit", "marbledsfirstaid:morphine"), ruA, 2, 0, "RUSSIA");
 
         // ── SAPER ───────────────────────────────────
 
-        addKit(cfg, "ru_engineer", "Saper", "warborn:razvetchik_helmet",
-            "combat_saper", "Combat Saper", "Explosives and repair specialist.",
+        addKit(cfg, "ru_engineer", "Saper // Сапёр", "warborn:razvetchik_helmet",
+            "combat_saper", "Combat Saper // Сапёр", "Explosives and repair specialist. // Специалист по взрывчатке и ремонту.",
             List.of("tacz:ak47"),
             List.of("superbwarfare:glock_18"),
             List.of("superbwarfare:repair_tool","warbornexplosives:pmn_1"),
             List.of("warbornexplosives:rgd_5"), ruA, 1, 3, "RUSSIA");
 
-        addKit(cfg, "ru_engineer", "Saper", "warborn:razvetchik_helmet",
-            "anti_tank_saper", "Anti-Tank Saper", "Dedicated anti-vehicle specialist.",
+        addKit(cfg, "ru_engineer", "Saper // Сапёр", "warborn:razvetchik_helmet",
+            "anti_tank_saper", "Anti-Tank Saper // ПТ-сапёр", "Dedicated anti-vehicle specialist. // Специалист по уничтожению техники.",
             List.of("tacz:type_81"),
             List.of("superbwarfare:glock_18"),
             List.of("superbwarfare:rpg","superbwarfare:c4_bomb"),
             List.of(), ruA, 2, 3, "RUSSIA");
 
-        addKit(cfg, "ru_engineer", "Saper", "warborn:razvetchik_helmet",
-            "heavy_saper", "Heavy Saper", "Elite combat engineer with heavy armor.",
+        addKit(cfg, "ru_engineer", "Saper // Сапёр", "warborn:razvetchik_helmet",
+            "heavy_saper", "Heavy Saper // Тяжёлый сапёр", "Elite combat engineer with heavy armor. // Элитный инженер с тяжёлой бронёй.",
             List.of("tacz:qbz_191"),
             List.of("tacz:deagle"),
             List.of("superbwarfare:repair_tool","superbwarfare:c4_bomb","superbwarfare:claymore_mine"),
-            List.of("warbornexplosives:m67"), ruA, 4, 4, "RUSSIA");
+            List.of("warbornexplosives:m67"),
+            List.of("marbledsfirstaid:medkit"), ruA, 4, 4, "RUSSIA");
 
         // ── PODDERZHKA ──────────────────────────────
 
-        addKit(cfg, "ru_support", "Podderzhka", "warborn:mashinegunner_ru_helmet",
-            "pulemetchik", "Pulemetchik", "Machine gunner specialized in area denial.",
+        addKit(cfg, "ru_support", "Podderzhka // Поддержка", "warborn:mashinegunner_ru_helmet",
+            "pulemetchik", "Pulemetchik // Пулемётчик", "Machine gunner specialized in area denial. // Пулемётчик для подавления территории.",
             List.of("tacz:rpk"),
             List.of("tacz:cz75"),
             List.of(), List.of(), ruA, 2, 3, "RUSSIA");
 
-        addKit(cfg, "ru_support", "Podderzhka", "warborn:mashinegunner_ru_helmet",
-            "heavy_gunner", "Heavy Gunner", "Elite heavy suppression specialist.",
+        addKit(cfg, "ru_support", "Podderzhka // Поддержка", "warborn:mashinegunner_ru_helmet",
+            "heavy_gunner", "Heavy Gunner // Тяжёлый пулемётчик", "Elite heavy suppression specialist. // Элитный специалист подавления.",
             List.of("tacz:rpk"),
             List.of("superbwarfare:glock_18"),
             List.of("superbwarfare:m18_smoke_grenade"),
-            List.of(), ruA, 4, 4, "RUSSIA");
+            List.of(),
+            List.of("marbledsfirstaid:medkit"), ruA, 4, 4, "RUSSIA");
 
         // ── SNAYPER ─────────────────────────────────
 
-        addKit(cfg, "ru_sniper", "Snayper", "warborn:razvetchik_helmet",
-            "razvedchik_sniper", "Razvedchik Sniper", "Recon sniper for stealth operations.",
+        addKit(cfg, "ru_sniper", "Snayper // Снайпер", "warborn:razvetchik_helmet",
+            "razvedchik_sniper", "Razvedchik Sniper // Снайпер-разведчик", "Recon sniper for stealth operations. // Разведчик-снайпер для скрытных операций.",
             List.of("tacz:kar98"),
             List.of("tacz:cz75"),
             List.of("tacz:sks_tactical"),
             List.of(), ruA, 2, 4, "RUSSIA");
 
-        addKit(cfg, "ru_sniper", "Snayper", "warborn:shturmovikv2_helmet",
-            "anti_material_sniper", "Anti-Material Sniper", "Heavy-caliber anti-material sniper.",
+        addKit(cfg, "ru_sniper", "Snayper // Снайпер", "warborn:shturmovikv2_helmet",
+            "anti_material_sniper", "Anti-Material Sniper // ПТ-снайпер", "Heavy-caliber anti-material sniper. // Крупнокалиберный снайпер для поражения техники.",
             List.of("tacz:m107"),
             List.of("tacz:cz75"),
             List.of(),
             List.of("warbornexplosives:f_1"), ruA, 4, 5, "RUSSIA");
 
-        addKit(cfg, "ru_sniper", "Snayper", "warborn:shturmovikv2_helmet",
-            "spetsnaz_sniper", "Spetsnaz Sniper", "Elite special forces sniper.",
+        addKit(cfg, "ru_sniper", "Snayper // Снайпер", "warborn:shturmovikv2_helmet",
+            "spetsnaz_sniper", "Spetsnaz Sniper // Снайпер спецназа", "Elite special forces sniper. // Элитный снайпер спецназа.",
             List.of("tacz:m700"),
             List.of("tacz:deagle"),
             List.of("tacz:sks_tactical"),
-            List.of(), ruA, 5, 5, "RUSSIA");
+            List.of(),
+            List.of("marbledsfirstaid:medkit"), ruA, 5, 5, "RUSSIA");
 
         // ── HEAVY AT ────────────────────────────────
 
-        addKit(cfg, "ru_heavy_at", "Heavy AT", "warborn:razvetchik_helmet",
-            "rpg_gunner", "RPG Gunner", "Anti-vehicle infantry with rocket launcher.",
+        addKit(cfg, "ru_heavy_at", "Heavy AT // Тяжёлый ПТ", "warborn:razvetchik_helmet",
+            "rpg_gunner", "RPG Gunner // РПГ-стрелок", "Anti-vehicle infantry with rocket launcher. // Противотанковая пехота с РПГ.",
             List.of("tacz:ak47"),
             List.of("tacz:cz75"),
             List.of("superbwarfare:rpg"),
             List.of(), ruA, 1, 5, "RUSSIA");
 
-        addKit(cfg, "ru_heavy_at", "Heavy AT", "warborn:razvetchik_helmet",
-            "igla_operator", "Igla Operator", "Anti-air missile specialist.",
+        addKit(cfg, "ru_heavy_at", "Heavy AT // Тяжёлый ПТ", "warborn:razvetchik_helmet",
+            "igla_operator", "Igla Operator // Оператор Игла", "Anti-air missile specialist. // Специалист по ПЗРК Игла.",
             List.of("tacz:p90"),
             List.of("superbwarfare:glock_18"),
             List.of("superbwarfare:igla_9k38"),
@@ -511,18 +536,20 @@ public class KitConfig {
 
         // ── HEAVY ARMOR ─────────────────────────────
 
-        addKit(cfg, "ru_heavy_armor", "Heavy Armor", "warborn:mashinegunner_ru_helmet",
-            "juggernaut", "Juggernaut", "Heavy assault infantry with fortified armor.",
+        addKit(cfg, "ru_heavy_armor", "Heavy Armor // Тяжёлая броня", "warborn:mashinegunner_ru_helmet",
+            "juggernaut", "Juggernaut // Джаггернаут", "Heavy assault infantry with fortified armor. // Тяжёлая штурмовая пехота с усиленной бронёй.",
             List.of("tacz:rpk"),
             List.of("tacz:aa12","tacz:cz75"),
-            List.of(), List.of(), ruA, 2, 5, "RUSSIA");
+            List.of(), List.of(),
+            List.of("marbledsfirstaid:medkit"), ruA, 2, 5, "RUSSIA");
 
-        addKit(cfg, "ru_heavy_armor", "Heavy Armor", "warborn:squad_lider_ru_helmet",
-            "bulwark", "Bulwark", "Elite heavy assault operator.",
+        addKit(cfg, "ru_heavy_armor", "Heavy Armor // Тяжёлая броня", "warborn:squad_lider_ru_helmet",
+            "bulwark", "Bulwark // Оплот", "Elite heavy assault operator. // Элитный тяжёлый штурмовик.",
             List.of("tacz:rpk"),
             List.of("tacz:m870","superbwarfare:glock_18"),
             List.of("superbwarfare:c4_bomb","superbwarfare:m18_smoke_grenade"),
-            List.of(), ruA, 5, 5, "RUSSIA");
+            List.of(),
+            List.of("marbledsfirstaid:medkit"), ruA, 5, 5, "RUSSIA");
 
         return cfg;
     }

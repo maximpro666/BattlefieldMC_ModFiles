@@ -30,11 +30,7 @@ public class PWPConfig {
     private int winRewardWC = 50;
     private int captureRewardBC = 150;
     private int spawnProtectionTicks = 100;
-    private int maxBeaconsPerPlayer = 3;
     private int respawnDelay = 5;
-    private int minDistanceFromEnemyBase = 50;
-    private int minDistanceFromCapturePoint = 30;
-    private int minDistanceFromOwnBase = 10;
     private int ticketsPerMap = 100;
     private int regenCooldownSeconds = 300;
     private int baseRadius = 30;
@@ -45,8 +41,9 @@ public class PWPConfig {
     private int maxTeamDifference = 1;
     private int maxFOBsPerTeam = 3;
     private int fobCostSP = 100;
-    private boolean beaconsEnabled = false;
-
+    private int minDistanceFromEnemyBase = 100;
+    private int minDistanceFromOwnBase = 50;
+    private int minDistanceFromCapturePoint = 30;
     private String proxyAddress = "127.0.0.1:25565";
     private String matchAddress = "127.0.0.1:25566";
 
@@ -56,6 +53,9 @@ public class PWPConfig {
     private float healthAfterRevive = 10.0f;
     private float bleedingHealth = 10.0f;
     private java.util.List<String> bleedingBypassSources = new java.util.ArrayList<>(java.util.Arrays.asList("fellOutOfWorld", "genericKill", "outOfBorder"));
+
+    private String tosUrl = "https://maximpro666.github.io/PWP-policy/terms-of-service.html";
+    private String privacyUrl = "https://maximpro666.github.io/PWP-policy/privacy-policy.html";
 
     private Map<String, String> messages = new LinkedHashMap<>();
 
@@ -87,11 +87,7 @@ public class PWPConfig {
     public int getWinRewardWC() { return winRewardWC; }
     public int getCaptureRewardBC() { return captureRewardBC; }
     public int getSpawnProtectionTicks() { return spawnProtectionTicks; }
-    public int getMaxBeaconsPerPlayer() { return maxBeaconsPerPlayer; }
     public int getRespawnDelay() { return respawnDelay; }
-    public int getMinDistanceFromEnemyBase() { return minDistanceFromEnemyBase; }
-    public int getMinDistanceFromCapturePoint() { return minDistanceFromCapturePoint; }
-    public int getMinDistanceFromOwnBase() { return minDistanceFromOwnBase; }
     public int getTicketsPerMap() { return ticketsPerMap; }
     public int getRegenCooldownSeconds() { return regenCooldownSeconds; }
     public int getBaseRadius() { return baseRadius; }
@@ -102,7 +98,11 @@ public class PWPConfig {
     public int getMaxTeamDifference() { return maxTeamDifference; }
     public int getMaxFOBsPerTeam() { return maxFOBsPerTeam; }
     public int getFOBCost() { return fobCostSP; }
-    public boolean isBeaconsEnabled() { return beaconsEnabled; }
+    public int getMinDistanceFromEnemyBase() { return minDistanceFromEnemyBase; }
+    public int getMinDistanceFromOwnBase() { return minDistanceFromOwnBase; }
+    public int getMinDistanceFromCapturePoint() { return minDistanceFromCapturePoint; }
+    public String getTosUrl() { return tosUrl; }
+    public String getPrivacyUrl() { return privacyUrl; }
     public String getProxyAddress() { return proxyAddress; }
     public String getMatchAddress() { return matchAddress; }
 

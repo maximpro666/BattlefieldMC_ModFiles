@@ -97,7 +97,6 @@ public class VehicleUpkeepSystem {
             Entity vehicle = level.getEntity(id);
             if (vehicle != null) vehicle.discard();
             vehicleManager.unregisterSpawnedVehicle(id);
-            runtime.trackVehicleDestroy(id);
             missedPayments.remove(id);
             vehicleTickers.remove(id);
             // Anti-abuse #3: collect upkeep debt on despawn

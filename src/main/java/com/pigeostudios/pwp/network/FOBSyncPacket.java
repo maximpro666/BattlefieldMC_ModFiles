@@ -53,7 +53,6 @@ public class FOBSyncPacket {
         context.enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 ClientTeamData.fobs = fobs;
-                com.pigeostudios.pwp.client.journeymap.JourneyMapIntegration.updateFOBWaypoints(fobs);
             });
         });
         return true;

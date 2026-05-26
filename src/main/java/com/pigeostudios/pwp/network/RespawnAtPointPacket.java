@@ -1,7 +1,12 @@
 package com.pigeostudios.pwp.network;
 
 import com.pigeostudios.pwp.PWP;
-import com.pigeostudios.pwp.core.*;
+import com.pigeostudios.pwp.core.GameManager;
+import com.pigeostudios.pwp.core.TeamManager;
+import com.pigeostudios.pwp.core.Team;
+import com.pigeostudios.pwp.core.FOBManager;
+import com.pigeostudios.pwp.core.SquadmateRespawnCooldownManager;
+import com.pigeostudios.pwp.core.PlayerCombatData;
 import com.pigeostudios.pwp.data.KitConfigServerHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -16,6 +21,8 @@ import net.minecraftforge.network.PacketDistributor;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import com.pigeostudios.pwp.core.RateLimiter;
+import com.pigeostudios.pwp.core.PacketValidator;
 import static com.pigeostudios.pwp.core.ChatHelper.*;
 
 public class RespawnAtPointPacket {
@@ -23,7 +30,6 @@ public class RespawnAtPointPacket {
     public static final String TYPE_BASE      = "BASE";
     public static final String TYPE_SQUADMATE = "SQUADMATE";
     public static final String TYPE_FOB       = "FOB";
-    public static final String TYPE_BEACON    = "BEACON";
 
     private final String type;
     private final UUID   targetUUID;
@@ -66,7 +72,6 @@ public class RespawnAtPointPacket {
                 case TYPE_BASE -> handleBase(player);
                 case TYPE_SQUADMATE -> handleSquadmate(player, level);
                 case TYPE_FOB -> handleFOB(player, level);
-                case TYPE_BEACON -> handleBeacon(player);
                 default -> player.sendSystemMessage(error("Unknown spawn type: " + type));
             }
         });
@@ -141,15 +146,6 @@ public class RespawnAtPointPacket {
         player.setGameMode(GameType.SURVIVAL);
         player.teleportTo(dest, target.x + 0.5, target.y + 1, target.z + 0.5,
                 player.getYRot(), player.getXRot());
-        applySelectedKit(player);
-        closeScreen(player);
-    }
-
-    private void handleBeacon(ServerPlayer player) {
-        RespawnManager respawnManager = PWP.getRespawnManager();
-        if (respawnManager == null) return;
-        player.setGameMode(GameType.SURVIVAL);
-        respawnManager.respawnPlayerAtBeacon(player, targetName);
         applySelectedKit(player);
         closeScreen(player);
     }

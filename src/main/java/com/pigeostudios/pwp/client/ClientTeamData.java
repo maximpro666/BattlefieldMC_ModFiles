@@ -1,5 +1,6 @@
 package com.pigeostudios.pwp.client;
 
+import com.pigeostudios.pwp.core.MarkerData;
 import com.pigeostudios.pwp.core.Team;
 import com.pigeostudios.pwp.client.VehicleData;
 import com.pigeostudios.pwp.network.TicketListSyncPacket;
@@ -12,7 +13,6 @@ import java.util.UUID;
 
 public class ClientTeamData {
 
-    public record ClientBeaconData(String name, double x, double y, double z, int teamOrdinal) {}
     private static Team localPlayerTeam = Team.SPECTATOR;
     private static int localPlayerKills = 0;
     private static int localPlayerDeaths = 0;
@@ -50,7 +50,7 @@ public class ClientTeamData {
     public static float guiScale = 1.0f;
     public static float guiOpacity = 1.0f;
     public static int maxTickets = 100;
-    public static List<ClientBeaconData> beacons = new ArrayList<>();
+    public static List<MarkerData> tacticalMarkers = new ArrayList<>();
 
     // Bleeding state (synced from server)
     public static boolean isBleeding = false;
@@ -65,6 +65,7 @@ public class ClientTeamData {
     public static boolean showVitals = true;
     public static boolean showHotbar = true;
     public static boolean showKillFeed = true;
+    public static boolean useCustomMenu = true;
     public static List<TicketListSyncPacket.TicketEntry> ticketList = new ArrayList<>();
 
     // Vote overlay data

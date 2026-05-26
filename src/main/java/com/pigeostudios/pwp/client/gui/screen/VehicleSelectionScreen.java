@@ -99,23 +99,23 @@ public class VehicleSelectionScreen extends Screen {
         Team team = ClientTeamData.getLocalPlayerTeam();
         int vc = team == Team.NATO ? ClientTeamData.natoVC : team == Team.RUSSIA ? ClientTeamData.russiaVC : 0;
 
-        g.drawString(font, "VEHICLE DEPLOY", 16, 8, AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
+        g.drawString(font, I18n.get("pwp.ui.vehicle_selection.title"), 16, 8, AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
 
-        String count = vehicles.size() + " vehicle" + (vehicles.size() != 1 ? "s" : "");
-        g.drawString(font, count, 16 + font.width("VEHICLE DEPLOY") + 12, 8,
+        String count = I18n.get("pwp.ui.vehicle_selection.count", vehicles.size());
+        g.drawString(font, count, 16 + font.width(I18n.get("pwp.ui.vehicle_selection.title")) + 12, 8,
             AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fadeAlpha * 150)));
 
-        String bal = "R" + rank + "  \u00a7e" + bc + "BC\u00a7r  \u00a76" + vc + "VC";
+        String bal = I18n.get("pwp.ui.vehicle_selection.balance", rank, bc, vc);
         int bw = font.width(bal);
         g.drawString(font, bal, width - bw - 16, 8,
             AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, alpha));
 
-        BreadcrumbNav.render(g, width, topH, List.of("VEHICLE SPAWN"), alpha);
+        BreadcrumbNav.render(g, width, topH, List.of(I18n.get("pwp.ui.vehicle_selection.breadcrumb")), alpha);
     }
 
     private void renderLeftPanel(GuiGraphics g, int mx, int my, float fade, int alpha, int leftW) {
         if (vehicles.isEmpty()) {
-            String msg = "No vehicles available";
+            String msg = I18n.get("pwp.ui.vehicle_selection.none");
             g.drawString(font, msg, (leftW - font.width(msg)) / 2, height / 2,
                 AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int)(fade * 200)));
             return;
@@ -152,7 +152,7 @@ public class VehicleSelectionScreen extends Screen {
         }
         g.disableScissor();
 
-        String hint = "Scroll to browse \u2022 Click to select";
+        String hint = I18n.get("pwp.ui.vehicle_selection.hint");
         g.drawString(font, hint, (leftW - font.width(hint)) / 2, height - StatusBar.STATUS_H - 16,
             AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 100)));
     }
@@ -164,7 +164,7 @@ public class VehicleSelectionScreen extends Screen {
 
         VehicleEntry sel = findSelected();
         if (sel == null) {
-            String msg = "Select a vehicle to preview";
+            String msg = I18n.get("pwp.ui.vehicle_selection.preview");
             g.drawString(font, msg, x + (w - font.width(msg)) / 2, height / 2,
                 AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
             return;
@@ -172,7 +172,7 @@ public class VehicleSelectionScreen extends Screen {
 
         boolean locked = !isAvailable(sel);
 
-        String name = sel.name().toUpperCase();
+        String name = I18n.localize(sel.name()).toUpperCase();
         g.drawString(font, name, x, y, AnimationHelper.withAlpha(locked ? UITheme.TEXT_MUTED : UITheme.ACCENT, alpha));
         y += 14;
 
@@ -184,9 +184,9 @@ public class VehicleSelectionScreen extends Screen {
 
         if (locked && (rankBlocked || bcBlocked || vcBlocked)) {
             String reason;
-            if (rankBlocked) reason = "\u26A0 Requires Rank " + sel.minRankOrdinal();
-            else if (bcBlocked) reason = "\u26A0 Requires " + sel.bcCost() + " BC";
-            else reason = "\u26A0 Requires " + sel.vcCost() + " VC";
+            if (rankBlocked) reason = I18n.get("pwp.ui.vehicle_selection.rank_req", sel.minRankOrdinal());
+            else if (bcBlocked) reason = I18n.get("pwp.ui.vehicle_selection.bc_req", sel.bcCost());
+            else reason = I18n.get("pwp.ui.vehicle_selection.vc_req", sel.vcCost());
             g.drawString(font, reason, x, y, AnimationHelper.withAlpha(UITheme.STATUS_WARN, (int)(fade * 200)));
             y += 14;
         }
@@ -195,10 +195,10 @@ public class VehicleSelectionScreen extends Screen {
         y += 12;
 
         String[][] info = {
-            {"RANK", String.valueOf(sel.minRankOrdinal())},
-            {"BC COST", String.valueOf(sel.bcCost())},
-            {"VC COST", String.valueOf(sel.vcCost())},
-            {"TICKETS", String.valueOf(sel.ticketCost())},
+            {I18n.get("pwp.ui.vehicle_selection.stat_rank"), String.valueOf(sel.minRankOrdinal())},
+            {I18n.get("pwp.ui.vehicle_selection.stat_bc"), String.valueOf(sel.bcCost())},
+            {I18n.get("pwp.ui.vehicle_selection.stat_vc"), String.valueOf(sel.vcCost())},
+            {I18n.get("pwp.ui.vehicle_selection.stat_tickets"), String.valueOf(sel.ticketCost())},
         };
         int cellW = Math.max(60, (w - 8) / 2);
         for (int row = 0; row < 2; row++) {
@@ -233,7 +233,7 @@ public class VehicleSelectionScreen extends Screen {
             : 0xFF333333;
         g.fill(x, btnY, x + btnW, btnY + 28, AnimationHelper.withAlpha(btnBg, alpha));
         g.fill(x, btnY, x + 2, btnY + 28, AnimationHelper.withAlpha(0x33000000, alpha));
-        String label = canSpawn ? "> SPAWN " + sel.name().toUpperCase() : "> LOCKED";
+        String label = canSpawn ? I18n.get("pwp.ui.vehicle_selection.spawn", I18n.localize(sel.name()).toUpperCase()) : I18n.get("pwp.ui.vehicle_selection.locked_btn");
         g.drawString(font, label, x + btnW / 2 - font.width(label) / 2, btnY + 10,
             AnimationHelper.withAlpha(canSpawn ? 0xFFFFFFFF : UITheme.TEXT_MUTED, alpha));
     }
@@ -243,7 +243,7 @@ public class VehicleSelectionScreen extends Screen {
         g.fill(0, y0, width, height, AnimationHelper.withAlpha(UITheme.BG_PANEL, (int)(fade * 0xEE)));
         g.fill(0, y0, width, y0 + 1, AnimationHelper.withAlpha(UITheme.BORDER, alpha));
 
-        String cnt = vehicles.size() + " vehicle" + (vehicles.size() != 1 ? "s" : "");
+        String cnt = I18n.get("pwp.ui.vehicle_selection.count", vehicles.size());
         g.drawString(font, cnt, 10, y0 + (StatusBar.STATUS_H - font.lineHeight) / 2,
             AnimationHelper.withAlpha(UITheme.TEXT_MUTED, alpha));
     }
@@ -276,11 +276,11 @@ public class VehicleSelectionScreen extends Screen {
             g.fill(x, y, x + 3, y + CARD_H, AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
         }
 
-        String name = v.name().toUpperCase();
+        String name = I18n.localize(v.name()).toUpperCase();
         g.drawString(font, name, x + 8, y + 6,
             AnimationHelper.withAlpha(locked ? UITheme.TEXT_MUTED : UITheme.TEXT_PRIMARY, alpha));
 
-        String req = "R" + v.minRankOrdinal() + "  " + v.bcCost() + "BC  " + v.vcCost() + "VC";
+        String req = I18n.get("pwp.ui.vehicle_selection.card_rank", v.minRankOrdinal()) + "  " + I18n.get("pwp.ui.vehicle_selection.card_bc", v.bcCost()) + "  " + I18n.get("pwp.ui.vehicle_selection.card_vc", v.vcCost());
         g.drawString(font, req, x + 8, y + 20,
             AnimationHelper.withAlpha(locked ? UITheme.STATUS_DANGER : UITheme.TEXT_MUTED, (int)(fade * 160)));
 
@@ -292,18 +292,18 @@ public class VehicleSelectionScreen extends Screen {
             boolean rBlock = ClientTeamData.localPlayerRank < v.minRankOrdinal();
             boolean bcBlock = ClientTeamData.localPlayerBC < v.bcCost();
             boolean vcBlock = tvc < v.vcCost();
-            if (rBlock) { status = "RANK " + v.minRankOrdinal(); statusColor = UITheme.STATUS_WARN; }
-            else if (bcBlock) { status = v.bcCost() + " BC"; statusColor = UITheme.STATUS_WARN; }
-            else if (vcBlock) { status = v.vcCost() + " VC"; statusColor = UITheme.STATUS_WARN; }
-            else { status = "COOLDOWN"; statusColor = UITheme.TEXT_MUTED; }
+            if (rBlock) { status = I18n.get("pwp.ui.vehicle_selection.card_rank", v.minRankOrdinal()); statusColor = UITheme.STATUS_WARN; }
+            else if (bcBlock) { status = I18n.get("pwp.ui.vehicle_selection.card_bc", v.bcCost()); statusColor = UITheme.STATUS_WARN; }
+            else if (vcBlock) { status = I18n.get("pwp.ui.vehicle_selection.card_vc", v.vcCost()); statusColor = UITheme.STATUS_WARN; }
+            else { status = I18n.get("pwp.ui.vehicle_selection.cooldown"); statusColor = UITheme.TEXT_MUTED; }
         } else {
-            status = "AVAILABLE";
+            status = I18n.get("pwp.ui.vehicle_selection.available");
             statusColor = UITheme.STATUS_OK;
         }
         g.drawString(font, status, x + 8, y + 34,
             AnimationHelper.withAlpha(statusColor, (int)(fade * 180)));
 
-        String ticket = "T" + v.ticketCost();
+        String ticket = I18n.get("pwp.ui.vehicle_selection.ticket", v.ticketCost());
         g.drawString(font, ticket, x + CARD_W - font.width(ticket) - 8, y + CARD_H - 12,
             AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 140)));
     }

@@ -1,7 +1,7 @@
 package com.pigeostudios.pwp.core;
 
-import com.google.gson.*;
 import com.pigeostudios.pwp.PWP;
+import com.pigeostudios.pwp.data.CentralDatabase;
 import com.pigeostudios.pwp.vehicle.VehicleDefinition;
 import com.pigeostudios.pwp.vehicle.VehicleDefinitionRegistry;
 import com.pigeostudios.pwp.vehicle.adapter.VehicleAdapterRegistry;
@@ -13,16 +13,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class VehicleManager {
-    private static final String COOLDOWN_FILE = "config/pwp/vehicle_cooldowns.json";
-
     private final Set<UUID> spawnedVehicles = ConcurrentHashMap.newKeySet();
     private final Map<UUID, UUID> vehicleToOwner = new ConcurrentHashMap<>();
     private final Set<UUID> playersHidingPlaques = ConcurrentHashMap.newKeySet();
@@ -30,7 +24,7 @@ public class VehicleManager {
     private boolean cooldownsLoaded = false;
 
     public VehicleManager() {
-        loadCooldowns();
+        // Cooldowns loaded lazily on first access from CentralDatabase
     }
 
     // ===== Vehicle Lookup =====
@@ -130,6 +124,7 @@ public class VehicleManager {
     // ===== Cooldowns =====
 
     public boolean isOnCooldown(Team team, String vehicleId) {
+        ensureCooldownsLoaded();
         String key = team.name() + ":" + vehicleId;
         Long expiry = cooldowns.get(key);
         if (expiry == null) return false;
@@ -142,6 +137,7 @@ public class VehicleManager {
     }
 
     public void setCooldown(Team team, String vehicleId, int seconds) {
+        ensureCooldownsLoaded();
         String key = team.name() + ":" + vehicleId;
         cooldowns.put(key, System.currentTimeMillis() + seconds * 1000L);
         saveCooldowns();
@@ -230,8 +226,6 @@ public class VehicleManager {
         registerSpawnedVehicle(ent, player.getUUID());
         setCooldown(playerTeam, vehicleId, def.getCooldownSeconds());
 
-        runtime.trackVehicleSpawn(ent.getUUID(), playerTeam, vehicleId);
-
         PWP.LOGGER.info("Player {} bought vehicle {} for team {}", player.getName().getString(), vehicleId, playerTeam);
         return null;
     }
@@ -273,37 +267,31 @@ public class VehicleManager {
         return result;
     }
 
-    // ===== Cooldown Persistence =====
+    // ===== Cooldown Persistence (CentralDatabase) =====
+
+    private void ensureCooldownsLoaded() {
+        if (cooldownsLoaded) return;
+        cooldownsLoaded = true;
+        loadCooldowns();
+    }
 
     private void loadCooldowns() {
         try {
-            Path path = Paths.get(COOLDOWN_FILE);
-            if (Files.exists(path)) {
-                String content = Files.readString(path);
-                JsonObject obj = JsonParser.parseString(content).getAsJsonObject();
-                long now = System.currentTimeMillis();
-                for (String key : obj.keySet()) {
-                    long expiry = obj.get(key).getAsLong();
-                    if (expiry > now) cooldowns.put(key, expiry);
-                }
-            }
+            CentralDatabase.init();
+            Map<String, Long> loaded = CentralDatabase.loadVehicleCooldowns();
+            cooldowns.putAll(loaded);
+            PWP.LOGGER.info("Loaded {} vehicle cooldowns from CentralDatabase", loaded.size());
         } catch (Exception e) {
-            PWP.LOGGER.warn("Failed to load vehicle cooldowns: {}", e.getMessage());
+            PWP.LOGGER.warn("Failed to load vehicle cooldowns from CentralDatabase: {}", e.getMessage());
         }
     }
 
     private void saveCooldowns() {
         try {
-            Path configPath = Paths.get("config/pwp");
-            Files.createDirectories(configPath);
-            JsonObject obj = new JsonObject();
-            long now = System.currentTimeMillis();
-            for (Map.Entry<String, Long> e : cooldowns.entrySet()) {
-                if (e.getValue() > now) obj.addProperty(e.getKey(), e.getValue());
-            }
-            Files.writeString(Paths.get(COOLDOWN_FILE), new GsonBuilder().setPrettyPrinting().create().toJson(obj));
+            CentralDatabase.init();
+            CentralDatabase.saveVehicleCooldowns(cooldowns);
         } catch (Exception e) {
-            PWP.LOGGER.warn("Failed to save vehicle cooldowns: {}", e.getMessage());
+            PWP.LOGGER.warn("Failed to save vehicle cooldowns to CentralDatabase: {}", e.getMessage());
         }
     }
 }

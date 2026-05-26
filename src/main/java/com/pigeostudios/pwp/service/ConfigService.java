@@ -132,22 +132,6 @@ public class ConfigService {
     }
 
     // ════════════════════════════════════════
-    // Events Config
-    // ════════════════════════════════════════
-
-    public static class EventTypeConfig {
-        public int weight = -1;
-        public int duration = -1;
-    }
-
-    public static class EventsConfig {
-        public boolean enabled = true;
-        public int minInterval = 120;
-        public int maxInterval = 300;
-        public Map<String, EventTypeConfig> types = new HashMap<>();
-    }
-
-    // ════════════════════════════════════════
     // Progression Config
     // ════════════════════════════════════════
 
@@ -186,21 +170,18 @@ public class ConfigService {
     private final EconomyConfig economy;
     private TicketsConfig tickets;
     private final ProgressionConfig progression;
-    private EventsConfig events;
     private boolean initialized;
 
     public ConfigService() {
         this.economy = new EconomyConfig();
         this.tickets = new TicketsConfig();
         this.progression = new ProgressionConfig();
-        this.events = new EventsConfig();
     }
 
     public void load() {
         loadEconomyConfig();
         loadTicketsConfig();
         loadProgressionConfig();
-        loadEventsConfig();
         initialized = true;
         PWP.LOGGER.info("ConfigService loaded all configs");
     }
@@ -274,24 +255,6 @@ public class ConfigService {
         tickets = loaded;
     }
 
-    private void loadEventsConfig() {
-        Path path = Paths.get(CONFIG_DIR, "events.json");
-        if (Files.exists(path)) {
-            try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
-                EventsConfig loaded = GSON.fromJson(reader, EventsConfig.class);
-                if (loaded != null) {
-                    events = loaded;
-                    PWP.LOGGER.info("ConfigService: loaded events.json");
-                    return;
-                }
-            } catch (IOException e) {
-                PWP.LOGGER.warn("ConfigService: failed to read events.json: {}", e.getMessage());
-            }
-        }
-        PWP.LOGGER.warn("ConfigService: events.json not found, using defaults");
-        saveDefaults(Paths.get(CONFIG_DIR, "events.json"), events);
-    }
-
     private void mergeProgression(ProgressionConfig loaded) {
         if (loaded.ranks != null && !loaded.ranks.isEmpty()) progression.ranks = loaded.ranks;
         if (loaded.xpBySource != null) progression.xpBySource = loaded.xpBySource;
@@ -315,7 +278,6 @@ public class ConfigService {
     public EconomyConfig getEconomy() { return economy; }
     public TicketsConfig getTickets() { return tickets; }
     public ProgressionConfig getProgression() { return progression; }
-    public EventsConfig getEvents() { return events; }
     public boolean isInitialized() { return initialized; }
 
     // Convenience — BC rewards

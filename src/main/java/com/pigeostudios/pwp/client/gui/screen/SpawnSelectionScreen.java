@@ -24,7 +24,6 @@ public class SpawnSelectionScreen extends Screen {
 
     private final List<OpenSpawnSelectionScreenPacket.SquadmateInfo> squadmates;
     private final List<FOBData> fobs;
-    private final List<OpenSpawnSelectionScreenPacket.BeaconInfo> beacons;
     private final int teamOrdinal;
     private final String selectedKit;
 
@@ -38,13 +37,11 @@ public class SpawnSelectionScreen extends Screen {
 
     public SpawnSelectionScreen(List<OpenSpawnSelectionScreenPacket.SquadmateInfo> squadmates,
                                  List<FOBData> fobs,
-                                 List<OpenSpawnSelectionScreenPacket.BeaconInfo> beacons,
                                  int teamOrdinal,
                                  String selectedKit) {
         super(Component.literal("Spawn Selection"));
         this.squadmates  = squadmates  != null ? squadmates  : List.of();
         this.fobs        = fobs        != null ? fobs        : List.of();
-        this.beacons     = beacons     != null ? beacons     : List.of();
         this.teamOrdinal = teamOrdinal;
         this.selectedKit = selectedKit != null ? selectedKit : "";
     }
@@ -73,8 +70,6 @@ public class SpawnSelectionScreen extends Screen {
             entries.add(new SpawnEntry("sm_" + sm.uuid(), sm.callsign(), "SQUADMATE", sm.teamOrdinal(), sm.cooldownTicks(), sm.cooldownTicks() == 0, "Squadmate", sm.uuid()));
         for (var fob : fobs)
             entries.add(new SpawnEntry("fob_" + fob.fobId(), fob.name(), "FOB", fob.teamOrdinal(), 0, fob.health() > 0, fob.name(), null, fob.x(), fob.z()));
-        for (var b : beacons)
-            entries.add(new SpawnEntry("beacon_" + b.name(), b.name(), "BEACON", b.teamOrdinal(), 0, true, "Beacon", null, b.x(), b.z()));
     }
 
     @Override
@@ -157,7 +152,6 @@ public class SpawnSelectionScreen extends Screen {
             case "BASE" -> UITheme.TEAM_NATO;
             case "FOB" -> UITheme.ACCENT;
             case "SQUADMATE" -> UITheme.STATUS_OK;
-            case "BEACON" -> 0xFF8B5CF6;
             default -> UITheme.TEXT_SECONDARY;
         };
         int leftBar = selected ? UITheme.ACCENT : typeColor;
@@ -208,7 +202,6 @@ public class SpawnSelectionScreen extends Screen {
             case "BASE" -> UITheme.TEAM_NATO;
             case "FOB" -> UITheme.ACCENT;
             case "SQUADMATE" -> UITheme.STATUS_OK;
-            case "BEACON" -> 0xFF8B5CF6;
             default -> UITheme.TEXT_SECONDARY;
         };
 
@@ -395,7 +388,6 @@ public class SpawnSelectionScreen extends Screen {
             case "BASE" -> RespawnAtPointPacket.TYPE_BASE;
             case "SQUADMATE" -> RespawnAtPointPacket.TYPE_SQUADMATE;
             case "FOB" -> RespawnAtPointPacket.TYPE_FOB;
-            case "BEACON" -> RespawnAtPointPacket.TYPE_BEACON;
             default -> RespawnAtPointPacket.TYPE_BASE;
         };
         UUID targetId = e.squadUuid != null ? e.squadUuid : UUID.randomUUID();

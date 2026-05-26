@@ -40,6 +40,10 @@ public class PlayerCombatData {
     private boolean hasChosenTeam = false;
     private boolean hasReceivedDogTag = false;
 
+    private boolean hasAcceptedTOS = false;
+
+    public boolean hasAcceptedTOS() { return hasAcceptedTOS; }
+    public synchronized void setHasAcceptedTOS(boolean v) { this.hasAcceptedTOS = v; }
     public boolean hasReceivedDogTag() { return hasReceivedDogTag; }
     public synchronized void setHasReceivedDogTag(boolean v) { this.hasReceivedDogTag = v; }
 
@@ -215,6 +219,7 @@ public class PlayerCombatData {
         this.prefix = "";
         this.suffix = "";
         this.displayName = "";
+        this.hasAcceptedTOS = false;
         this.battleCredits = 0;
         this.callsign = "";
         this.rankPrefix = "";
@@ -252,6 +257,7 @@ public class PlayerCombatData {
         tag.putString("SelectedKit", selectedKit);
         tag.putString("SelectedRole", selectedRole);
         tag.putString("SelectedLoadout", selectedLoadout);
+        tag.putBoolean("HasAcceptedTOS", hasAcceptedTOS);
         tag.putBoolean("HasReceivedDogTag", hasReceivedDogTag);
         {
             CompoundTag attTag = new CompoundTag();
@@ -313,6 +319,7 @@ public class PlayerCombatData {
         this.selectedKit = tag.contains("SelectedKit") ? tag.getString("SelectedKit") : "";
         this.selectedRole = tag.contains("SelectedRole") ? tag.getString("SelectedRole") : "";
         this.selectedLoadout = tag.contains("SelectedLoadout") ? tag.getString("SelectedLoadout") : "";
+        this.hasAcceptedTOS = tag.contains("HasAcceptedTOS") && tag.getBoolean("HasAcceptedTOS");
         this.hasReceivedDogTag = tag.contains("HasReceivedDogTag") && tag.getBoolean("HasReceivedDogTag");
         if (tag.contains("SavedAttachments")) {
             CompoundTag attTag = tag.getCompound("SavedAttachments");

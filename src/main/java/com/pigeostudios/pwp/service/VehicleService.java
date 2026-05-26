@@ -193,8 +193,6 @@ public class VehicleService {
 
         vm.registerSpawnedVehicle(ent, player.getUUID());
         vm.setCooldown(playerTeam, vehicleId, def.getCooldownSeconds());
-        runtime.trackVehicleSpawn(ent.getUUID(), playerTeam, vehicleId);
-
         PWP.LOGGER.info("Player {} bought vehicle {} for team {}",
             player.getName().getString(), vehicleId, playerTeam);
         return null;

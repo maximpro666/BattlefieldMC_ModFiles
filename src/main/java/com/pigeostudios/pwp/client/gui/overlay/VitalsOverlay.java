@@ -1,6 +1,7 @@
 package com.pigeostudios.pwp.client.gui.overlay;
 
 import com.pigeostudios.pwp.client.ClientTeamData;
+import com.pigeostudios.pwp.client.gui.I18n;
 import com.pigeostudios.pwp.client.gui.UITheme;
 import com.pigeostudios.pwp.client.gui.component.AnimationHelper;
 import com.pigeostudios.pwp.client.gui.component.RenderHelper;
@@ -55,7 +56,7 @@ public class VitalsOverlay {
             AnimationHelper.withAlpha(0xFFE05050, 255));
 
         int displayHpInt = Math.round(displayHp);
-        String hpText = displayHpInt + " HP";
+        String hpText = displayHpInt + I18n.get("pwp.ui.hud.hp");
         g.drawString(font, hpText, panelX + 16, hpY,
             AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, 240));
 
@@ -85,7 +86,7 @@ public class VitalsOverlay {
         g.drawString(font, "\u2666", panelX + 4, armorY + 1,
             AnimationHelper.withAlpha(0xFF5090E0, 255));
 
-        String armorText = armorVal + " ARM";
+        String armorText = armorVal + I18n.get("pwp.ui.hud.armor");
         g.drawString(font, armorText, panelX + 16, armorY,
             AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, 220));
 
@@ -104,7 +105,7 @@ public class VitalsOverlay {
         int balY = panelY + 25;
         Team team = ClientTeamData.getLocalPlayerTeam();
         int vc = team == Team.NATO ? ClientTeamData.natoVC : ClientTeamData.russiaVC;
-        String balText = "WC " + ClientTeamData.localPlayerWC + "  BC " + ClientTeamData.localPlayerBC + "  VC " + vc;
+        String balText = I18n.get("pwp.ui.hud.balance", ClientTeamData.localPlayerWC, ClientTeamData.localPlayerBC, vc);
         g.drawString(font, balText, panelX + 4, balY,
             AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, 220));
     }

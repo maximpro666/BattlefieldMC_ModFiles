@@ -294,8 +294,7 @@ public class MapPoolManager {
     }
 
     private void teleportToLobby(ServerPlayer p) {
-        ServerLevel lobby = server.getLevel(ResourceKey.create(Registries.DIMENSION, new ResourceLocation("pwp", "lobby")));
-        if (lobby == null) lobby = server.overworld();
+        ServerLevel lobby = server.overworld();
         p.teleportTo(lobby, 0, 100, 0, 0, 0);
     }
 

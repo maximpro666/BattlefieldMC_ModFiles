@@ -1,6 +1,7 @@
 package com.pigeostudios.pwp.client.gui.component;
 
 import com.pigeostudios.pwp.client.ClientTeamData;
+import com.pigeostudios.pwp.client.gui.I18n;
 import com.pigeostudios.pwp.client.gui.UITheme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -31,10 +32,10 @@ public class TopBar {
         var font = Minecraft.getInstance().font;
         int y = (TOP_H - font.lineHeight) / 2;
 
-        g.drawString(font, "BATTLEFIELD", 8, y,
+        g.drawString(font, I18n.get("pwp.ui.topbar.battlefield"), 8, y,
             AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
 
-        int dotX = 8 + font.width("BATTLEFIELD") + 4;
+        int dotX = 8 + font.width(I18n.get("pwp.ui.topbar.battlefield")) + 4;
         g.drawString(font, "\u00B7", dotX, y,
             AnimationHelper.withAlpha(UITheme.BORDER, alpha));
         int nameX = dotX + font.width("\u00B7") + 4;
@@ -45,9 +46,9 @@ public class TopBar {
         String team = getTeamLabel();
         int teamColor = getTeamColor();
 
-        String rankStr  = "Rank " + rank;
-        String spStr    = "SP " + sp;
-        String bcStr    = "BC " + bc;
+        String rankStr  = I18n.get("pwp.ui.topbar.rank", rank);
+        String spStr    = I18n.get("pwp.ui.topbar.sp", sp);
+        String bcStr    = I18n.get("pwp.ui.topbar.bc", bc);
 
         int rx = screenW - 8;
 

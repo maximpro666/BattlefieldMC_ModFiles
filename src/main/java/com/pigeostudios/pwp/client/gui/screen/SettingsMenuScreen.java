@@ -3,7 +3,6 @@ package com.pigeostudios.pwp.client.gui.screen;
 import com.pigeostudios.pwp.client.ClientTeamData;
 import com.pigeostudios.pwp.client.gui.I18n;
 import com.pigeostudios.pwp.client.gui.UITheme;
-import com.pigeostudios.pwp.client.gui.VisualsConfig;
 import com.pigeostudios.pwp.client.gui.component.AnimationHelper;
 import com.pigeostudios.pwp.client.gui.component.BButton;
 import com.pigeostudios.pwp.client.gui.component.BSlider;
@@ -39,7 +38,6 @@ public class SettingsMenuScreen extends Screen {
 
     private int genCardY, genCardH, genContentY;
     private int dispCardY, dispCardH, dispContentY;
-    private int smCardY, smCardH, smContentY;
     private int lx, rx, py, phActual;
     private int scrollOffs, maxScroll, footerY;
     private final Map<AbstractWidget, Integer> widgetBaseY = new HashMap<>();
@@ -64,14 +62,10 @@ public class SettingsMenuScreen extends Screen {
         dispContentY = dispCardY + CH + CP;
 
         genCardH = CH + CP + RH * 5 + GP * 4 + CP;
-        dispCardH = CH + CP + RH * 6 + GP * 5 + CP;
-
-        smContentY = dispCardY + dispCardH + 8;
-        smCardY = smContentY - CH - CP;
-        smCardH = CH + CP + RH * 8 + GP * 7 + CP;
+        dispCardH = CH + CP + RH * 7 + GP * 6 + CP;
 
         // │ panel & scroll sizing │
-        int contentBottom = Math.max(genCardY + genCardH, smCardY + smCardH);
+        int contentBottom = Math.max(genCardY + genCardH, dispCardY + dispCardH);
         int neededH = contentBottom - py + 20;
         int maxH = height - py - 10;
         phActual = Math.min(Math.max(neededH, 120), maxH);
@@ -128,62 +122,7 @@ public class SettingsMenuScreen extends Screen {
         addRenderableWidget(new BToggle(rx, dispContentY + (RH + GP) * 3, CW, RH, lit(I18n.get("pwp.ui.show_vitals")), ClientTeamData.showVitals, v -> ClientTeamData.showVitals = v));
         addRenderableWidget(new BToggle(rx, dispContentY + (RH + GP) * 4, CW, RH, lit(I18n.get("pwp.ui.show_hotbar")), ClientTeamData.showHotbar, v -> ClientTeamData.showHotbar = v));
         addRenderableWidget(new BToggle(rx, dispContentY + (RH + GP) * 5, CW, RH, lit(I18n.get("pwp.ui.show_killfeed")), ClientTeamData.showKillFeed, v -> ClientTeamData.showKillFeed = v));
-
-        // ── RIGHT: SQUAD MARKERS ──
-        VisualsConfig.SquadMarkerVisual sc = VisualsConfig.get().squadMarker;
-        addRenderableWidget(new BToggle(rx, smContentY, CW, RH, lit(I18n.get("pwp.ui.show_squad_markers")), sc.enabled, v -> { sc.enabled = v; VisualsConfig.get().squadMarker = sc; }));
-
-        BSlider[] sz = {null};
-        sz[0] = new BSlider(rx, smContentY + (RH + GP), CW, RH,
-            lit(I18n.get("pwp.ui.marker_size", (int)(sc.size * 100))),
-            (float)((sc.size - 0.1) / 1.9),
-            v -> { VisualsConfig.get().squadMarker.size = 0.1 + v * 1.9; sz[0].setMessage(lit(I18n.get("pwp.ui.marker_size", (int)(VisualsConfig.get().squadMarker.size * 100)))); });
-        addRenderableWidget(sz[0]);
-
-        BSlider[] mo = {null};
-        mo[0] = new BSlider(rx, smContentY + (RH + GP) * 2, CW, RH,
-            lit(I18n.get("pwp.ui.marker_opacity", (int)(sc.opacity * 100))),
-            (float)((sc.opacity - 0.05) / 0.95),
-            v -> { VisualsConfig.get().squadMarker.opacity = 0.05 + v * 0.95; mo[0].setMessage(lit(I18n.get("pwp.ui.marker_opacity", (int)(VisualsConfig.get().squadMarker.opacity * 100)))); });
-        addRenderableWidget(mo[0]);
-
-        int[] cv = {0, 0xFFFFFFFF, 0xFFFFFF00, 0xFF00FF00, 0xFFFF8C00};
-        String[] cn = {loc("Team // Команда"), loc("White // Белый"), loc("Yellow // Желтый"), loc("Green // Зеленый"), loc("Orange // Оранжевый")};
-        int[] ci = {0};
-        for (int i = 0; i < cv.length; i++) { if (cv[i] == sc.color) { ci[0] = i; break; } }
-        addRenderableWidget(new BButton(rx, smContentY + (RH + GP) * 3, CW, RH,
-            lit(I18n.get("pwp.ui.marker_color", cn[ci[0]])),
-            btn -> { ci[0] = (ci[0] + 1) % cn.length; VisualsConfig.get().squadMarker.color = cv[ci[0]]; btn.setMessage(lit(I18n.get("pwp.ui.marker_color", cn[ci[0]]))); }));
-
-        int[] lv = {0, 0xFFE8750A, 0xFFFFFFFF, 0xFFFFFF00, 0xFFFF8C00};
-        String[] ln = {loc("Gold // Золотой"), loc("Team // Команда"), loc("White // Белый"), loc("Yellow // Желтый"), loc("Orange // Оранжевый")};
-        int[] li = {0};
-        for (int i = 0; i < lv.length; i++) { if (lv[i] == sc.leaderColor) { li[0] = i; break; } }
-        addRenderableWidget(new BButton(rx, smContentY + (RH + GP) * 4, CW, RH,
-            lit(I18n.get("pwp.ui.marker_leader_color", ln[li[0]])),
-            btn -> { li[0] = (li[0] + 1) % ln.length; VisualsConfig.get().squadMarker.leaderColor = lv[li[0]]; btn.setMessage(lit(I18n.get("pwp.ui.marker_leader_color", ln[li[0]]))); }));
-
-        BSlider[] pf = {null};
-        pf[0] = new BSlider(rx, smContentY + (RH + GP) * 5, CW, RH,
-            lit(I18n.get("pwp.ui.marker_proximity_fade", (int)(sc.proximityFadeDist))),
-            (float)(sc.proximityFadeDist / 20.0),
-            v -> { VisualsConfig.get().squadMarker.proximityFadeDist = v * 20.0; pf[0].setMessage(lit(I18n.get("pwp.ui.marker_proximity_fade", (int)(VisualsConfig.get().squadMarker.proximityFadeDist)))); });
-        addRenderableWidget(pf[0]);
-
-        BSlider[] ca = {null};
-        ca[0] = new BSlider(rx, smContentY + (RH + GP) * 6, CW, RH,
-            lit(I18n.get("pwp.ui.marker_crosshair_angle", (int)(sc.crosshairAngle))),
-            (float)(sc.crosshairAngle / 45.0),
-            v -> { VisualsConfig.get().squadMarker.crosshairAngle = v * 45.0; ca[0].setMessage(lit(I18n.get("pwp.ui.marker_crosshair_angle", (int)(VisualsConfig.get().squadMarker.crosshairAngle)))); });
-        addRenderableWidget(ca[0]);
-
-        String[] shapeNames = {"DIAMOND", "CHEVRON", "SQUARE"};
-        String[] shapeLabels = {loc("Diamond // Ромб"), loc("Chevron // Шеврон"), loc("Square // Квадрат")};
-        int[] si = {0};
-        for (int i = 0; i < shapeNames.length; i++) { if (shapeNames[i].equals(sc.shape)) { si[0] = i; break; } }
-        addRenderableWidget(new BButton(rx, smContentY + (RH + GP) * 7, CW, RH,
-            lit(I18n.get("pwp.ui.marker_shape", shapeLabels[si[0]])),
-            btn -> { si[0] = (si[0] + 1) % shapeNames.length; VisualsConfig.get().squadMarker.shape = shapeNames[si[0]]; btn.setMessage(lit(I18n.get("pwp.ui.marker_shape", shapeLabels[si[0]]))); }));
+        addRenderableWidget(new BToggle(rx, dispContentY + (RH + GP) * 6, CW, RH, lit(I18n.get("pwp.ui.use_custom_menu")), ClientTeamData.useCustomMenu, v -> ClientTeamData.useCustomMenu = v));
 
         // ── capture base Y positions & apply scroll ──
         widgetBaseY.clear();
@@ -276,9 +215,6 @@ public class SettingsMenuScreen extends Screen {
         drawCard(g, rx, dispCardY - so, CW, dispCardH, I18n.get("pwp.ui.hud_elements"), 1);
         drawUnderline(g, rx, dispCardY + CH + 1 - so, CW, 1);
 
-        drawCard(g, rx, smCardY - so, CW, smCardH, I18n.get("pwp.ui.squad_markers"), 2);
-        drawUnderline(g, rx, smCardY + CH + 1 - so, CW, 2);
-
         super.render(g, mx, my, pt);
 
         g.disableScissor();
@@ -313,7 +249,7 @@ public class SettingsMenuScreen extends Screen {
     public void renderBackground(GuiGraphics g) { }
 
     @Override
-    public void onClose() { VisualsConfig.save(); super.onClose(); }
+    public void onClose() { super.onClose(); }
 
     @Override
     public boolean isPauseScreen() { return false; }

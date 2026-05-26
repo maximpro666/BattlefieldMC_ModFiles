@@ -85,9 +85,17 @@ if %errorlevel% neq 0 (
     echo Still waiting...
     goto wait_for_server
 )
+
+:: Wait for mod initialization (server_ready.flag written by PWP onServerStarted)
+echo Waiting for mod initialisation...
+:wait_for_ready
+>nul 2>&1 timeout /t 2
+if not exist "%DEPLOY_SERVER%\server_ready.flag" (
+    goto wait_for_ready
+)
 echo Server is ready!
 echo Starting Minecraft client...
-start "" "%PRISM_LAUNCHER%" -l "1.20.1" -s localhost:25565
+start "" "%PRISM_LAUNCHER%" -l "1.20.1" -s 127.0.0.1:25565
 goto done
 
 :: ----- Deploy to PrismLauncher only -----

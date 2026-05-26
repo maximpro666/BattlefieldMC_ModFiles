@@ -14,7 +14,6 @@ public class VehicleDefinitionRegistry {
         for (VehicleDefinition def : loaded) {
             if (def.getId() != null) {
                 definitions.put(def.getId(), def);
-                PWP.LOGGER.info("Loaded vehicle definition: {}", def.getId());
             } else {
                 PWP.LOGGER.warn("Skipping vehicle definition without id");
             }

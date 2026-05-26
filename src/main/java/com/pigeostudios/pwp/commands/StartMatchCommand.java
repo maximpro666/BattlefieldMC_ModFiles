@@ -99,7 +99,7 @@ public class StartMatchCommand {
                     stopPb.directory(launcherDir.toFile());
                     stopPb.redirectErrorStream(true);
                     Process stopProc = stopPb.start();
-                    stopProc.waitFor(15, TimeUnit.SECONDS);
+                    stopProc.waitFor(5, TimeUnit.SECONDS);
                     // Wait a bit for port to be free
                     String matchAddr = com.pigeostudios.pwp.PWP.getConfig().getMatchAddress();
                     String[] parts = matchAddr.split(":");

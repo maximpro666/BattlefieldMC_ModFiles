@@ -1,36 +1,19 @@
 package com.pigeostudios.pwp.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.pigeostudios.pwp.PWP;
-import com.pigeostudios.pwp.blockentity.RespawnBeaconBlockEntity;
 import com.pigeostudios.pwp.client.gui.ClientGuiHandler;
-import com.pigeostudios.pwp.client.gui.renderer.CaptureParticles;
-import com.pigeostudios.pwp.client.gui.renderer.CustomNametagRenderer;
-import com.pigeostudios.pwp.client.gui.renderer.SquadMarkerRenderer;
-import com.pigeostudios.pwp.client.gui.renderer.TacticalMarkerRenderer;
-import com.pigeostudios.pwp.client.gui.renderer.WorldMarkerRenderer;
 import com.pigeostudios.pwp.client.gui.screen.ClassSelectionScreen;
 import com.pigeostudios.pwp.client.gui.screen.ResupplyScreen;
 import com.pigeostudios.pwp.client.gui.screen.VehicleSelectionScreen;
-import com.pigeostudios.pwp.client.journeymap.JourneyMapIntegration;
 import com.pigeostudios.pwp.core.GameManager;
 import com.pigeostudios.pwp.core.Team;
-import com.pigeostudios.pwp.network.PacketHandler;
-import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderNameTagEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -39,11 +22,6 @@ import org.lwjgl.glfw.GLFW;
 @Mod.EventBusSubscriber(modid = "pwp", bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class ClientSetup {
 
-    private static final WorldMarkerRenderer markerRenderer = new WorldMarkerRenderer();
-    private static final CaptureParticles captureParticles = new CaptureParticles();
-    private static final CustomNametagRenderer nametagRenderer = new CustomNametagRenderer();
-    private static final SquadMarkerRenderer squadMarkerRenderer = new SquadMarkerRenderer();
-    private static final TacticalMarkerRenderer tacticalMarkerRenderer = new TacticalMarkerRenderer();
     public static final KeyMapping OPEN_KIT_VEHICLE_KEY = new KeyMapping(
         "key.pwp.open_kit_vehicle",
         GLFW.GLFW_KEY_G,
@@ -74,8 +52,19 @@ public class ClientSetup {
         "key.categories.pwp"
     );
 
+    public static final KeyMapping TOGGLE_CUSTOM_MENU_KEY = new KeyMapping(
+        "key.pwp.toggle_custom_menu",
+        GLFW.GLFW_KEY_F6,
+        "key.categories.pwp"
+    );
+
     @Mod.EventBusSubscriber(modid = "pwp", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModBus {
+        @SubscribeEvent
+        public static void onClientSetup(FMLClientSetupEvent event) {
+            DiscordRPCHandler.initOnClient();
+        }
+
         @SubscribeEvent
         public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
             event.register(OPEN_KIT_VEHICLE_KEY);
@@ -83,17 +72,7 @@ public class ClientSetup {
             event.register(SQUAD_VOICE_KEY);
             event.register(TEAM_VOICE_KEY);
             event.register(REQUEST_AMMO_KEY);
-        }
-
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event) {
-            JourneyMapIntegration.init();
-        }
-
-        @SubscribeEvent
-        public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
-            event.registerBlockEntityRenderer(PWP.RESPAWN_BEACON_BLOCK_ENTITY.get(),
-                RespawnBeaconBlockRenderer::new);
+            event.register(TOGGLE_CUSTOM_MENU_KEY);
         }
     }
 
@@ -155,6 +134,17 @@ public class ClientSetup {
             }
         }
 
+        if (TOGGLE_CUSTOM_MENU_KEY.consumeClick()) {
+            ClientTeamData.useCustomMenu = !ClientTeamData.useCustomMenu;
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null) {
+                String msg = ClientTeamData.useCustomMenu
+                    ? "\u00a7a[\u00a76PWP\u00a7a] Custom menu \u00a7aON"
+                    : "\u00a7e[\u00a76PWP\u00a7e] Custom menu \u00a7cOFF";
+                mc.player.displayClientMessage(Component.literal(msg), true);
+            }
+        }
+
         ClientVoiceHandler.reinforcePtt();
     }
 
@@ -178,39 +168,4 @@ public class ClientSetup {
         return dx * dx + dz * dz <= radius * radius;
     }
 
-    @SubscribeEvent
-    public static void onClientLevelRender(RenderLevelStageEvent event) {
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
-            PoseStack poseStack = event.getPoseStack();
-            MultiBufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-            Camera camera = event.getCamera();
-            float partialTick = event.getPartialTick();
-            Vec3 camPos = camera.getPosition();
-
-            captureParticles.render(poseStack, bufferSource,
-                camPos.x, camPos.y, camPos.z, partialTick);
-
-            squadMarkerRenderer.render(poseStack, bufferSource, camera, partialTick);
-
-            tacticalMarkerRenderer.render(poseStack, bufferSource, camera, partialTick);
-
-            markerRenderer.render(poseStack, bufferSource, camera, partialTick);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderNameTag(RenderNameTagEvent event) {
-        if (event.getEntity() instanceof Player) {
-            event.setResult(Event.Result.DENY);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderNametag(RenderLivingEvent.Post<?, ?> event) {
-        if (event.getEntity() instanceof Player player && !player.isSpectator()) {
-            Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-            float partialTick = Minecraft.getInstance().getFrameTime();
-            nametagRenderer.renderNametag(event.getPoseStack(), event.getMultiBufferSource(), player, camera, partialTick);
-        }
-    }
 }

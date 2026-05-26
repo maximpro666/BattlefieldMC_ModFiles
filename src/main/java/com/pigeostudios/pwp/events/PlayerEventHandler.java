@@ -4,6 +4,7 @@ import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.core.*;
 import com.pigeostudios.pwp.core.TeamVoicePlugin;
 import com.pigeostudios.pwp.network.OpenTeamSelectionScreenPacket;
+import com.pigeostudios.pwp.network.OpenTOSScreenPacket;
 import com.pigeostudios.pwp.network.PacketHandler;
 import com.pigeostudios.pwp.network.RespawnAtPointPacket;
 import com.pigeostudios.pwp.proxy.ProxyMessenger;
@@ -112,13 +113,39 @@ public class PlayerEventHandler {
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             PunishmentEventHandler.checkBanOnLogin(player);
+
+            // Sync player data first so loading screen can complete
             teamManager.fullSyncPlayer(player);
+
+            // TOS acceptance check — load from CentralDatabase (single source of truth)
+            var pcdTos = teamManager.getOrCreatePlayerData(player.getUUID());
+            if (!pcdTos.hasAcceptedTOS()) {
+                var dbData = com.pigeostudios.pwp.data.CentralDatabase.loadPlayer(player.getUUID());
+                if (dbData != null && dbData.hasAcceptedTOS()) {
+                    pcdTos.setHasAcceptedTOS(true);
+                    pcdTos.setCallsign(dbData.getCallsign());
+                    pcdTos.setDisplayName(dbData.getDisplayName());
+                    pcdTos.setRankOrdinal(dbData.getRankOrdinal());
+                }
+            }
+            if (!pcdTos.hasAcceptedTOS()) {
+                PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+                    new OpenTOSScreenPacket("https://maximpro666.github.io/PWP-policy/terms-of-service.html",
+                        "https://maximpro666.github.io/PWP-policy/privacy-policy.html"));
+                player.setGameMode(GameType.SPECTATOR);
+                return;
+            }
             var eco = PWP.getServiceRegistry() != null ? PWP.getServiceRegistry().getEconomy() : null;
             if (eco != null) {
                 eco.loadForPlayer(player.getUUID());
                 // D10: daily login bonus
                 if (eco.checkAndAwardDailyBonus(player.getUUID())) {
                     Component bonusMsg = Component.literal("§a+10 WC §7— ежедневный бонус!");
+                    player.displayClientMessage(bonusMsg, false);
+                }
+                // Weekly login bonus
+                if (eco.checkAndAwardWeeklyBonus(player.getUUID())) {
+                    Component bonusMsg = Component.literal("§a+50 WC §7— еженедельный бонус!");
                     player.displayClientMessage(bonusMsg, false);
                 }
             }
@@ -192,21 +219,19 @@ public class PlayerEventHandler {
 
             var pcd = teamManager.getOrCreatePlayerData(player.getUUID());
             if (!pcd.hasReceivedDogTag()) {
-                if (hasDogTagInCurios(player)) {
-                    pcd.setHasReceivedDogTag(true);
-                    teamManager.setDirty();
-                } else if (pcd.getDisplayName().isEmpty() && pcd.getCallsign().isEmpty()) {
+                // First join: give dog tag, mark in DB
+                if (pcd.getDisplayName().isEmpty() && pcd.getCallsign().isEmpty()) {
                     player.sendSystemMessage(Component.translatable("pwp.chat.welcome.title"));
                     player.sendSystemMessage(Component.translatable("pwp.chat.welcome.set_callsign"));
-                    if (ensureDogTag(player)) {
-                        pcd.setHasReceivedDogTag(true);
-                        teamManager.setDirty();
-                    }
                 }
-            } else if (!hasDogTagInCurios(player)) {
                 if (ensureDogTag(player)) {
+                    pcd.setHasReceivedDogTag(true);
                     teamManager.setDirty();
+                    teamManager.syncPlayerToDatabase(player.getUUID());
                 }
+            } else if (dogTagItem != null && curiosDetected) {
+                // Ensure dog tag exists (rename if found, re-give if lost)
+                ensureDogTag(player);
             }
             PWP.LOGGER.info("Synced team data for player: {}", player.getName().getString());
             // Check cycle flag BEFORE checkAndAutoStartCycle deletes it
@@ -223,10 +248,19 @@ public class PlayerEventHandler {
                     try {
                         String target = Files.readString(matchFlag).trim();
                         if (!target.isEmpty()) {
-                            com.pigeostudios.pwp.network.PacketHandler.CHANNEL.send(
-                                net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
-                                new com.pigeostudios.pwp.network.TransferPacket(target));
-                            PWP.LOGGER.info("Late joiner {} transferred to {}", player.getName().getString(), target);
+                            int port = -1;
+                            int colonIdx = target.lastIndexOf(':');
+                            if (colonIdx >= 0) {
+                                try { port = Integer.parseInt(target.substring(colonIdx + 1)); } catch (NumberFormatException ignored) {}
+                            }
+                            if (port >= 0 && port <= 65535 && !isMatchPortReachable(port)) {
+                                PWP.LOGGER.warn("Match server {} not reachable, keeping {} on lobby", target, player.getName().getString());
+                            } else {
+                                com.pigeostudios.pwp.network.PacketHandler.CHANNEL.send(
+                                    net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
+                                    new com.pigeostudios.pwp.network.TransferPacket(target));
+                                PWP.LOGGER.info("Late joiner {} transferred to {}", player.getName().getString(), target);
+                            }
                         }
                     } catch (Exception e) {
                         PWP.LOGGER.error("Failed to read match_active.flag", e);
@@ -245,9 +279,12 @@ public class PlayerEventHandler {
             if (Files.exists(flagFile)) {
                 Files.delete(flagFile);
                 LifecycleNotifier.broadcastNotification(srv, "cycle_detected", 4000);
-                PWP.LOGGER.info("Match cycle flag detected, importing sync data...");
-                // Import all player data + vehicle cooldowns from the finished match
-                srv.execute(() -> PlayerDataSyncManager.importMatchData(srv));
+                PWP.LOGGER.info("Match cycle flag detected, loading sync data from CentralDatabase...");
+                // Data is already in CentralDatabase from real-time sync during match
+                srv.execute(() -> {
+                    var tm = PWP.getTeamManager();
+                    if (tm != null) tm.loadFromCentralDatabase();
+                });
                 PWP.LOGGER.info("Auto-starting next match in 5s...");
                 new Thread(() -> {
                     try { Thread.sleep(4000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
@@ -255,6 +292,7 @@ public class PlayerEventHandler {
                     try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
                     srv.execute(() -> srv.getCommands().performPrefixedCommand(srv.createCommandSourceStack(), "startmatch"));
                 }, "AutoMatchStarter").start();
+                autoStartInProgress.set(false);
             } else {
                 autoStartInProgress.set(false);
             }
@@ -285,15 +323,6 @@ public class PlayerEventHandler {
                 return;
             }
             if (player.level().getBlockState(pos).getBlock() == PWP.RESPAWN_BEACON_BLOCK.get()) {
-                // Check for player-placed beacon (has block entity with owner)
-                if (player.level().getBlockEntity(pos) instanceof com.pigeostudios.pwp.blockentity.RespawnBeaconBlockEntity beacon
-                        && beacon.getOwnerUUID() != null) {
-                    PWP.getRespawnManager().onBeaconBroken(pos, beacon);
-                    com.pigeostudios.pwp.network.NotificationPacket bcnPkt = new com.pigeostudios.pwp.network.NotificationPacket(
-                        "\u2699 \u041c\u0430\u044f\u043a " + beacon.getName() + " \u0440\u0430\u0437\u0440\u0443\u0448\u0435\u043d!", "error", 4000, "");
-                    com.pigeostudios.pwp.network.PacketHandler.CHANNEL.send(
-                        net.minecraftforge.network.PacketDistributor.ALL.noArg(), bcnPkt);
-                }
                 // Check for FOB — remove from manager on block break
                 String dim = player.serverLevel().dimension().location().toString();
                 com.pigeostudios.pwp.core.FOBManager.SavedFOB fob = PWP.getFOBManager().getFOBAt(pos, dim);
@@ -404,31 +433,6 @@ public class PlayerEventHandler {
         }
     }
 
-    private boolean hasDogTagInCurios(ServerPlayer player) {
-        if (dogTagItem == null || !curiosDetected) return false;
-        try {
-            Optional<?> opt = getCuriosHandler(player);
-            if (opt.isEmpty()) return false;
-            Object handler = opt.get();
-            Map<String, ?> curiosMap = (Map<String, ?>) curiosGetCurios.invoke(handler);
-            for (Map.Entry<String, ?> entry : curiosMap.entrySet()) {
-                Object stacksHandler = entry.getValue();
-                if (stacksHandler == null) continue;
-                Object stacks = curiosGetStacks.invoke(stacksHandler);
-                int size = (int) curiosGetSlots.invoke(stacks);
-                for (int i = 0; i < size; i++) {
-                    ItemStack existing = (ItemStack) curiosGetStackInSlot.invoke(stacks, i);
-                    if (!existing.isEmpty() && existing.getItem() == dogTagItem) {
-                        return true;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            PWP.LOGGER.warn("Failed to check dog tag in curios: {}", e.getMessage());
-        }
-        return false;
-    }
-
     private Optional<?> getCuriosHandler(ServerPlayer player) {
         if (!curiosDetected) return Optional.empty();
         try {
@@ -445,7 +449,10 @@ public class PlayerEventHandler {
 
     @SuppressWarnings("unchecked")
     private boolean ensureDogTag(ServerPlayer player) {
-        return setDogTagName(player, player.getName().getString());
+        var pcd = PWP.getTeamManager().getOrCreatePlayerData(player.getUUID());
+        String callsign = pcd.getCallsign();
+        String name = (callsign != null && !callsign.isEmpty()) ? callsign : player.getName().getString();
+        return setDogTagName(player, name);
     }
 
     @SuppressWarnings("unchecked")
@@ -492,4 +499,5 @@ public class PlayerEventHandler {
         }
         return false;
     }
+
 }

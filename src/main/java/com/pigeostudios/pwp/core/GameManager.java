@@ -2,6 +2,7 @@ package com.pigeostudios.pwp.core;
 
 import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.commands.StartMatchCommand;
+import com.pigeostudios.pwp.data.CentralDatabase;
 import com.pigeostudios.pwp.service.EconomyService;
 import com.pigeostudios.pwp.network.GameStateSyncPacket;
 import com.pigeostudios.pwp.network.NotificationPacket;
@@ -55,7 +56,6 @@ public class GameManager {
     }
 
     private static final ResourceLocation LOBBY_DIMENSION_ID = new ResourceLocation("minecraft", "overworld");
-    private static final ResourceLocation MATCH_LOBBY_DIMENSION_ID = new ResourceLocation("pwp", "lobby");
     private static final BlockPos LOBBY_SPAWN = new BlockPos(136, 68, -140);
     private static final int VOTE_SECONDS = 30;
     private static final int COUNTDOWN_SECONDS = 15;
@@ -75,7 +75,6 @@ public class GameManager {
     private int captureTicks;
     private int matchTimeRemaining;
     private Set<Integer> sentTimeWarnings;
-    private boolean lastLiberateAttachment;
     /** Match index used to determine team rotation parity */
     private int currentMatchIndex;
     private boolean mapReady;
@@ -101,10 +100,10 @@ public class GameManager {
         this.captureTicks = 0;
         this.matchTimeRemaining = 0;
         this.sentTimeWarnings = new HashSet<>();
-        this.lastLiberateAttachment = false;
         this.currentMatchIndex = 0;
         this.mapReady = false;
         this.borderManager = new BorderManager();
+        applyLobbyRules();
     }
 
     public boolean isMapReady() { return mapReady; }
@@ -440,9 +439,6 @@ public class GameManager {
         overtime = false;
         overtimeTicks = 0;
 
-        var evtSvc = PWP.getServiceRegistry().getEvents();
-        if (evtSvc != null) evtSvc.reset();
-
         syncPhaseToAll();
         PWP.LOGGER.info("Game ended. Winner: {}", winner != null ? winner.getName() : "DRAW");
     }
@@ -489,11 +485,22 @@ public class GameManager {
             if (phaseTimer % 20 == 0 && phaseTimer > 0) {
                 int sec = phaseTimer / 20;
                 if (sec <= 5 || sec % 10 == 0) {
-                    sendNotificationToAll("\u0418\u0433\u0440\u0430 \u043d\u0430\u0447\u043d\u0435\u0442\u0441\u044f \u0447\u0435\u0440\u0435\u0437 " + sec + "\u0441", "warning", 3000);
+                    sendNotificationToAll("Игра начнётся через " + sec + "с", "warning", 3000);
                     PWP.LOGGER.info("Game starts in {}s", sec);
                 }
             }
             if (phaseTimer <= 0) startGame();
+        }
+
+        if (currentPhase == GamePhase.LOBBY && phaseTimer <= 0) {
+            if (!ProxyMessenger.isMatchServer() && PWP.getConfig().isAutoStartVoting()) {
+                int onlinePlayers = server.getPlayerList().getPlayers().size();
+                int minPlayers = PWP.getConfig().getMinPlayersToStart();
+                if (onlinePlayers >= minPlayers) {
+                    PWP.LOGGER.info("Auto-starting voting ({} players >= {} min)", onlinePlayers, minPlayers);
+                    startVotingWithAutoStart();
+                }
+            }
         }
 
         if (currentPhase == GamePhase.PLAYING) {
@@ -549,8 +556,6 @@ public class GameManager {
                     if (mapLevel != null) borderManager.tick(mapLevel);
                 }
 
-                updateLiberateAttachment();
-
                 if (ticketSvc != null) ticketSvc.tick(overtime);
 
                 if (!overtime) {
@@ -583,8 +588,8 @@ public class GameManager {
 
     private void finishMatchCycle() {
         if (ProxyMessenger.isMatchServer()) {
-            // Export player data + vehicle cooldowns BEFORE transferring players
-            PlayerDataSyncManager.exportMatchData(server);
+            // Player data and vehicle cooldowns are already synced to CentralDatabase
+            // in real-time during the match. No explicit export needed.
 
             sendNotificationToAll("\u041c\u0430\u0442\u0447 \u0437\u0430\u0432\u0435\u0440\u0448\u0430\u0435\u0442\u0441\u044f, \u0432\u043e\u0437\u0432\u0440\u0430\u0442 \u0432 \u043b\u043e\u0431\u0431\u0438...", "match", 4000);
             // Send players back to lobby via TransferPacket
@@ -608,8 +613,7 @@ public class GameManager {
         }
 
         teleportAllToLobby();
-        borderManager.setZones(null);
-        currentDimKey = null;
+        applyLobbyRules();
         currentMap = null;
 
         startVoting();
@@ -624,21 +628,15 @@ public class GameManager {
         MapPoolManager pool = PWP.getMapPoolManager();
         pool.clearVotes();
 
-        // Read selected map from flag file (written by lobby server after voting)
-        try {
-            Path launcherDir = StartMatchCommand.findLauncherDir();
-            Path flagFile = launcherDir.resolve("pwp_selected_map.txt");
-            if (Files.exists(flagFile)) {
-                String mapName = Files.readString(flagFile).trim();
-                Files.deleteIfExists(flagFile);
-                if (!mapName.isEmpty() && pool.selectMap(mapName)) {
-                    PWP.LOGGER.info("Selected map from flag file: {}", mapName);
-                } else {
-                    PWP.LOGGER.warn("Flag file contained '{}' but selectMap failed, falling back", mapName);
-                }
+        // Read selected map from CentralDatabase (written by lobby server after voting)
+        String mapName = CentralDatabase.getSelectedMap();
+        if (mapName != null) {
+            CentralDatabase.clearSelectedMap();
+            if (!mapName.isEmpty() && pool.selectMap(mapName)) {
+                PWP.LOGGER.info("Selected map from CentralDatabase: {}", mapName);
+            } else {
+                PWP.LOGGER.warn("CentralDatabase contained '{}' but selectMap failed, falling back", mapName);
             }
-        } catch (Exception e) {
-            PWP.LOGGER.warn("Failed to read selected map flag: {}", e.getMessage());
         }
 
         MapConfig map = pool.getCurrentMap().orElse(null);
@@ -674,10 +672,7 @@ public class GameManager {
         MapPoolManager pool = PWP.getMapPoolManager();
         pool.clearVotes();
 
-        // Clean up stale flag file from previous match
-        try {
-            Files.deleteIfExists(StartMatchCommand.findLauncherDir().resolve("pwp_selected_map.txt"));
-        } catch (Exception ignored) {}
+        CentralDatabase.clearSelectedMap();
 
         List<String> recentPlayed;
         try {
@@ -737,16 +732,10 @@ public class GameManager {
         String mapName = pool.getCurrentMap().map(MapConfig::getName).orElse("?");
         sendNotificationToAll("\u0418\u0433\u0440\u0430 \u043d\u0430\u0447\u043d\u0435\u0442\u0441\u044f \u0447\u0435\u0440\u0435\u0437 " + COUNTDOWN_SECONDS + "\u0441 \u043d\u0430 " + mapName, "success", 4000);
 
-        // Write selected map name to launcher directory for match server
+        // Write selected map name to CentralDatabase for match server
         if (!mapName.equals("?")) {
-            try {
-                Path launcherDir = StartMatchCommand.findLauncherDir();
-                Path flagFile = launcherDir.resolve("pwp_selected_map.txt");
-                Files.writeString(flagFile, mapName);
-                PWP.LOGGER.info("Wrote selected map '{}' to {}", mapName, flagFile);
-            } catch (Exception e) {
-                PWP.LOGGER.warn("Failed to write selected map flag: {}", e.getMessage());
-            }
+            CentralDatabase.setSelectedMap(mapName);
+            PWP.LOGGER.info("Wrote selected map '{}' to CentralDatabase", mapName);
         }
 
         if (pendingAutoStart) {
@@ -839,26 +828,34 @@ public class GameManager {
         ServerLevel l = getLobbyWorld();
         if (l == null) return;
         gamerule(l, "doMobSpawning", "false");
-        gamerule(l, "doDaylightCycle", "false");
+        gamerule(l, "doPatrolSpawning", "false");
+        gamerule(l, "doTraderSpawning", "false");
+        gamerule(l, "doWardenSpawning", "false");
         gamerule(l, "doWeatherCycle", "false");
         gamerule(l, "mobGriefing", "false");
         gamerule(l, "doFireTick", "false");
         gamerule(l, "keepInventory", "true");
         gamerule(l, "naturalRegeneration", "true");
         gamerule(l, "fallDamage", "false");
+        gamerule(l, "randomTickSpeed", "0");
+        // World border to prevent new chunk generation beyond lobby
+        if (ProxyMessenger.isMatchServer()) {
+            l.getWorldBorder().setCenter(136, 116);
+            l.getWorldBorder().setSize(500);
+        } else {
+            l.getWorldBorder().setCenter(136, -140);
+            l.getWorldBorder().setSize(500);
+        }
     }
 
     private void applyMapConfig(MapConfig map, int zOffset) {
         ServerLevel l = getMapWorld(map);
         if (l == null) return;
-        gamerule(l, "naturalRegeneration", map.hasRegen() ? "true" : "false");
+        gamerule(l, "naturalRegeneration", "false");
         gamerule(l, "doImmediateRespawn", map.hasRespawn() ? "false" : "true");
         gamerule(l, "doMobSpawning", "false");
         gamerule(l, "mobGriefing", "false");
         gamerule(l, "doFireTick", "true");
-        boolean daylight = map.hasDaylightCycle();
-        gamerule(l, "doDaylightCycle", daylight ? "true" : "false");
-        if (!daylight) l.setDayTime(6000);
         gamerule(l, "doWeatherCycle", "false");
         gamerule(l, "keepInventory", "false");
         gamerule(l, "fallDamage", "true");
@@ -868,35 +865,6 @@ public class GameManager {
 
     private void gamerule(ServerLevel l, String rule, String val) {
         server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withLevel(l), "gamerule " + rule + " " + val);
-    }
-
-    private void updateLiberateAttachment() {
-        boolean nearBeacon = false;
-        int radiusSq = 15 * 15;
-        RespawnManager rm = PWP.getRespawnManager();
-        TeamManager tm = PWP.getTeamManager();
-        if (rm != null && tm != null) {
-            for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-                Team team = tm.getOrCreatePlayerData(p.getUUID()).getTeam();
-                if (!team.isPlayable()) continue;
-                for (var b : rm.getBeaconsInDimension(p.level().dimension().location().toString())) {
-                    if (b.teamOrdinal != team.ordinal()) continue;
-                    double dx = p.getX() - b.x;
-                    double dz = p.getZ() - b.z;
-                    if (dx * dx + dz * dz <= radiusSq) {
-                        nearBeacon = true;
-                        break;
-                    }
-                }
-                if (nearBeacon) break;
-            }
-        }
-        ServerLevel mapLevel = getMapWorldNoFallback(currentMap);
-        if (mapLevel == null) return;
-        if (nearBeacon == lastLiberateAttachment) return;
-        lastLiberateAttachment = nearBeacon;
-        server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
-            "gamerule liberateAttachment " + (nearBeacon ? "true" : "false"));
     }
 
     // ========== Teleport ==========
@@ -913,6 +881,7 @@ public class GameManager {
                 if (assigned == Team.NATO) natoCount++;
                 else russiaCount++;
                 tm.updatePlayerDisplayName(p);
+                tm.syncPlayerTeam(p);
             }
         }
     }
@@ -1098,36 +1067,17 @@ public class GameManager {
 
     // ========== World Resolution ==========
 
-    private static ResourceLocation getEffectiveLobbyId() {
-        if (ProxyMessenger.isMatchServer()) return MATCH_LOBBY_DIMENSION_ID;
-        return LOBBY_DIMENSION_ID;
-    }
-
     private ServerLevel getOrCreateLobbyWorld() {
-        ResourceLocation id = getEffectiveLobbyId();
-        ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, id);
-        ServerLevel w = server.getLevel(key);
-        if (w == null && !lobbyLoaded) {
-            lobbyLoaded = true;
-            server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), "execute in " + id + " run say Lobby loaded");
-            w = server.getLevel(key);
-        }
-        return w != null ? w : server.overworld();
-    }
-
-    private ServerLevel getMapWorldNoFallback(MapConfig map) {
-        if (currentDimKey != null) return server.getLevel(currentDimKey);
-        return server.getLevel(DynamicDimensionManager.getDimKey());
+        return server.overworld();
     }
 
     private ServerLevel getMapWorld(MapConfig map) {
-        ServerLevel l = getMapWorldNoFallback(map);
+        ServerLevel l = server.getLevel(DynamicDimensionManager.getDimKey());
         return l != null ? l : server.overworld();
     }
 
     private ServerLevel getLobbyWorld() {
-        ServerLevel w = server.getLevel(ResourceKey.create(Registries.DIMENSION, getEffectiveLobbyId()));
-        return w != null ? w : server.overworld();
+        return server.overworld();
     }
 
     // ========== Broadcast ==========

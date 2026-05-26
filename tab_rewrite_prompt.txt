@@ -1,0 +1,783 @@
+# Prompt for Claude: Rewrite Custom Tab (Scoreboard) System
+
+## Task
+Полностью переписать логику и дизайн кастомного TAB оверлея (Scoreboard) в Minecraft Forge моде BattlefieldMC.
+
+## Требования к переписыванию
+1. **Рефакторинг архитектуры** — улучшить структуру кода, разделение ответственности, убрать дублирование
+2. **Новый дизайн** — переработать визуальный стиль: цвета, расположение, анимации, шрифты
+3. **Оптимизация рендера** — улучшить производительность рендера
+4. **Новые фичи** — добавить:
+   - Отображение класса/набора игрока (класс)
+   - Статус голосового чата (говорит/молчит)
+   - Иконку доната (Vip/Elite/General)
+   - Отображение аватарок скинов
+   - Прогресс-бар доната
+   - Сортировку по убийствам, смерти, K/D, пингу (клик по заголовку)
+   - Поиск/фильтр игроков
+   - Индикатор лидера отряда
+   - Отображение своего отряда с подсветкой
+   - Статистику матча сверху (тикеты, время, счёт)
+
+## Важно
+- Сохранить совместимость с существующими API: `ClientTeamData.playerDataMap`, `PlayerListEntry`, `ScoreboardDataProvider`, `RankDefinition`, `PlayerScoreboardData`
+- Использовать те же утилиты: `UITheme`, `AnimationHelper`, `RenderHelper`, `GuiGraphics`
+- TAB key handler уже есть в `ClientSetup.java` (не менять)
+- Отмена ванильного `PLAYER_LIST` уже есть в `ClientGuiHandler.java`
+
+---
+
+## Все файлы текущей реализации
+
+### 1. BattlefieldTabOverlay.java
+```java
+package com.pigeostudios.pwp.client.gui.overlay;
+
+import com.pigeostudios.pwp.client.gui.scoreboard.ScoreboardRenderer;
+import net.minecraft.client.gui.GuiGraphics;
+
+public class BattlefieldTabOverlay {
+
+    private final ScoreboardRenderer scoreboardRenderer = new ScoreboardRenderer();
+
+    public boolean isVisible() {
+        return scoreboardRenderer.isVisible();
+    }
+
+    public void setVisible(boolean v) {
+        scoreboardRenderer.setVisible(v);
+    }
+
+    public void scrollBy(int delta) {
+        scoreboardRenderer.scrollBy(delta);
+    }
+
+    public void tick() {
+        scoreboardRenderer.tick();
+    }
+
+    public void render(GuiGraphics g, int screenWidth, int screenHeight) {
+        scoreboardRenderer.render(g, screenWidth, screenHeight, 0f);
+    }
+}
+```
+
+### 2. ScoreboardRenderer.java
+```java
+package com.pigeostudios.pwp.client.gui.scoreboard;
+
+import com.pigeostudios.pwp.client.gui.UITheme;
+import com.pigeostudios.pwp.client.gui.component.AnimationHelper;
+import com.pigeostudios.pwp.client.gui.component.RenderHelper;
+import com.pigeostudios.pwp.client.gui.scoreboard.data.PlayerScoreboardData;
+import com.pigeostudios.pwp.client.gui.scoreboard.data.RankDefinition;
+import com.pigeostudios.pwp.client.gui.scoreboard.data.ScoreboardDataProvider;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+
+import java.util.*;
+
+public class ScoreboardRenderer {
+
+    private static final int ROW_H = 15;
+    private static final int SECTION_H = 17;
+    private static final int PADDING = 6;
+    private static final int ICON_SIZE = 11;
+    private static final int TEAM_HEADER_H = 20;
+    private static final int COL_HEADER_H = 14;
+    private static final int COLUMNS_GAP = 24;
+    private static final int PANEL_TOP = 18;
+
+    private static final int COL_RANK = 32;
+    private static final int COL_NAME = 90;
+    private static final int COL_KILLS = 30;
+    private static final int COL_DEATHS = 30;
+    private static final int COL_KD = 36;
+    private static final int COL_PING = 34;
+    private static final int COL_GAP = 4;
+
+    private boolean visible = false;
+    private float prevAlpha = 0f;
+    private float targetAlpha = 0f;
+    private int scrollOffset = 0;
+    private int maxScroll = 0;
+
+    public void setVisible(boolean v) {
+        this.visible = v;
+        this.targetAlpha = v ? 1f : 0f;
+        if (v) scrollOffset = 0;
+    }
+
+    public boolean isVisible() { return visible; }
+    public float getAlpha() { return prevAlpha; }
+
+    public void scrollBy(int delta) {
+        scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset + delta));
+    }
+
+    public void tick() {
+        prevAlpha = AnimationHelper.lerp(prevAlpha, targetAlpha, 0.18f);
+    }
+
+    public void render(GuiGraphics g, int screenWidth, int screenHeight, float partialTick) {
+        if (prevAlpha < 0.02f) return;
+        int alpha = (int) (prevAlpha * 255);
+
+        Font font = Minecraft.getInstance().font;
+        List<PlayerScoreboardData> players = ScoreboardDataProvider.buildPlayerList();
+        if (players.isEmpty()) return;
+
+        List<PlayerScoreboardData> nato = new ArrayList<>();
+        List<PlayerScoreboardData> russia = new ArrayList<>();
+        for (PlayerScoreboardData p : players) {
+            if (p.teamOrdinal == 0) nato.add(p);
+            else if (p.teamOrdinal == 1) russia.add(p);
+        }
+
+        sortBySquad(nato);
+        sortBySquad(russia);
+
+        Map<String, List<PlayerScoreboardData>> natoGrouped = groupBySquad(nato);
+        Map<String, List<PlayerScoreboardData>> russiaGrouped = groupBySquad(russia);
+
+        int minColW = COL_RANK + COL_NAME + COL_KILLS + COL_DEATHS + COL_KD + COL_PING + COL_GAP * 5 + PADDING * 2;
+        int availableW = screenWidth - PADDING * 2 - COLUMNS_GAP;
+        int colW = Math.max(minColW, Math.min(availableW / 2, 460));
+        if (colW * 2 + COLUMNS_GAP > screenWidth) {
+            colW = (screenWidth - COLUMNS_GAP) / 2;
+        }
+
+        int totalW = colW * 2 + COLUMNS_GAP;
+        int panelX = screenWidth / 2 - totalW / 2;
+        int panelY = PANEL_TOP;
+
+        int natoRows = countRows(natoGrouped);
+        int russiaRows = countRows(russiaGrouped);
+        int maxRows = Math.max(natoRows, russiaRows);
+        int contentH = maxRows * ROW_H + PADDING * 2;
+        int maxH = screenHeight - panelY - PADDING - TEAM_HEADER_H - COL_HEADER_H;
+        if (maxH <= 0) return;
+        int panelH = Math.min(contentH, maxH);
+
+        maxScroll = Math.max(0, contentH - maxH);
+
+        RenderHelper.dropShadow(g, panelX, panelY, totalW, panelH + TEAM_HEADER_H + COL_HEADER_H, 5, (int) (alpha * 0.7f));
+        RenderHelper.roundedRect(g, panelX, panelY, totalW, panelH + TEAM_HEADER_H + COL_HEADER_H, 4,
+            AnimationHelper.withAlpha(UITheme.BG_SCREEN, alpha));
+
+        drawTeamColumn(g, font, panelX, panelY, colW, panelH, natoGrouped, "NATO", nato.size(), alpha, UITheme.TEAM_NATO);
+        drawTeamColumn(g, font, panelX + colW + COLUMNS_GAP, panelY, colW, panelH, russiaGrouped, "RUSSIA", russia.size(), alpha, UITheme.TEAM_RUSSIA);
+
+        if (maxScroll > 0) {
+            String scrollHint = (scrollOffset > 0 ? "\u25B2 " : "") + "\u25BC";
+            int hintW = font.width(scrollHint);
+            g.drawString(font, scrollHint, screenWidth / 2 - hintW / 2,
+                panelY + panelH + TEAM_HEADER_H + COL_HEADER_H + 3,
+                AnimationHelper.withAlpha(0xFF808080, alpha));
+        }
+    }
+
+    private void sortBySquad(List<PlayerScoreboardData> list) {
+        list.sort((a, b) -> {
+            int sqCmp = a.squad.compareTo(b.squad);
+            if (sqCmp != 0) return sqCmp;
+            int rCmp = Integer.compare(b.rankId, a.rankId);
+            if (rCmp != 0) return rCmp;
+            return Integer.compare(b.kills, a.kills);
+        });
+    }
+
+    private Map<String, List<PlayerScoreboardData>> groupBySquad(List<PlayerScoreboardData> list) {
+        Map<String, List<PlayerScoreboardData>> grouped = new LinkedHashMap<>();
+        for (PlayerScoreboardData p : list) {
+            String squad = p.squad != null && !p.squad.isEmpty() ? p.squad : "\u2014";
+            grouped.computeIfAbsent(squad, k -> new ArrayList<>()).add(p);
+        }
+        return grouped;
+    }
+
+    private int countRows(Map<String, List<PlayerScoreboardData>> grouped) {
+        int rows = 0;
+        for (Map.Entry<String, List<PlayerScoreboardData>> section : grouped.entrySet()) {
+            rows++;
+            rows += section.getValue().size();
+        }
+        return rows;
+    }
+
+    private void drawTeamColumn(GuiGraphics g, Font font, int x, int panelY, int colW, int panelH,
+                                 Map<String, List<PlayerScoreboardData>> grouped, String teamName,
+                                 int playerCount, int alpha, int teamColor) {
+        int headerY = panelY;
+
+        int headerBg = teamColor & 0x00FFFFFF | 0x44000000;
+        RenderHelper.roundedRect(g, x, headerY, colW, TEAM_HEADER_H, 3,
+            AnimationHelper.withAlpha(headerBg, Math.min(255, alpha)));
+
+        g.fill(x, headerY + TEAM_HEADER_H - 2, x + colW, headerY + TEAM_HEADER_H,
+            AnimationHelper.withAlpha(teamColor, alpha / 2));
+
+        String headerText = teamName;
+        int hw = font.width(headerText);
+        g.drawString(font, headerText, x + PADDING, headerY + 5,
+            AnimationHelper.withAlpha(teamColor, alpha));
+
+        String countStr = "(" + playerCount + ")";
+        g.drawString(font, countStr, x + PADDING + hw + 4, headerY + 5,
+            AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int) (alpha * 0.8f)));
+
+        int colHeaderY = headerY + TEAM_HEADER_H;
+        g.fill(x, colHeaderY, x + colW, colHeaderY + COL_HEADER_H,
+            AnimationHelper.withAlpha(UITheme.BG_SURFACE, (int) (alpha * 0.85f)));
+
+        drawColumnHeaders(g, font, x, colHeaderY, colW, alpha);
+
+        g.fill(x, colHeaderY + COL_HEADER_H - 1, x + colW, colHeaderY + COL_HEADER_H,
+            AnimationHelper.withAlpha(UITheme.BORDER, alpha / 3));
+
+        if (panelH > 0) {
+            g.enableScissor(x, colHeaderY + COL_HEADER_H, x + colW, colHeaderY + COL_HEADER_H + panelH);
+        }
+
+        int cy = colHeaderY + COL_HEADER_H - scrollOffset;
+        int rowX = x + PADDING;
+
+        for (Map.Entry<String, List<PlayerScoreboardData>> section : grouped.entrySet()) {
+            if (cy + SECTION_H > colHeaderY + COL_HEADER_H - ROW_H &&
+                cy < colHeaderY + COL_HEADER_H + panelH) {
+                String sqLabel = section.getKey();
+                g.drawString(font, sqLabel, rowX, cy + 3,
+                    AnimationHelper.withAlpha(UITheme.SQUAD_LABEL, alpha));
+                g.fill(x + PADDING, cy + SECTION_H - 1, x + colW - PADDING, cy + SECTION_H,
+                    AnimationHelper.withAlpha(UITheme.SQUAD_LINE, alpha));
+            }
+            cy += SECTION_H;
+
+            for (PlayerScoreboardData pd : section.getValue()) {
+                if (cy + ROW_H > colHeaderY + COL_HEADER_H - ROW_H &&
+                    cy < colHeaderY + COL_HEADER_H + panelH) {
+                    drawPlayerRow(g, font, x, cy, colW, pd, alpha);
+                }
+                cy += ROW_H;
+            }
+        }
+
+        if (panelH > 0) {
+            g.disableScissor();
+        }
+    }
+
+    private void drawColumnHeaders(GuiGraphics g, Font font, int x, int y, int colW, int alpha) {
+        int cx = x + PADDING + ICON_SIZE + 4;
+        int ty = y + 4;
+        int hdrColor = AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int) (alpha * 0.8f));
+
+        g.drawString(font, "Rank", cx, ty, hdrColor);
+        cx += COL_RANK + COL_GAP;
+        g.drawString(font, "Name", cx, ty, hdrColor);
+        cx += COL_NAME + COL_GAP;
+        g.drawString(font, "K", cx, ty, hdrColor);
+        cx += COL_KILLS + COL_GAP;
+        g.drawString(font, "D", cx, ty, hdrColor);
+        cx += COL_DEATHS + COL_GAP;
+        g.drawString(font, "K/D", cx, ty, hdrColor);
+        cx += COL_KD + COL_GAP;
+        g.drawString(font, "Ping", cx, ty, hdrColor);
+    }
+
+    private void drawPlayerRow(GuiGraphics g, Font font, int x, int rowY, int colW,
+                                PlayerScoreboardData pd, int alpha) {
+        int rowX = x + PADDING;
+
+        if (pd.isSelf) {
+            g.fill(x, rowY, x + colW, rowY + ROW_H,
+                AnimationHelper.withAlpha(UITheme.SELF_BG, alpha));
+            g.fill(x, rowY, x + 3, rowY + ROW_H,
+                AnimationHelper.withAlpha(UITheme.ACCENT, (int) (alpha * 0.8f)));
+        }
+
+        RankDefinition rankDef = RankDefinition.get(pd.rankId);
+        int iconY = rowY + (ROW_H - ICON_SIZE) / 2;
+        g.blit(rankDef.iconTexture, rowX + 2, iconY, 0, rankDef.getIconVOffset(),
+            ICON_SIZE, ICON_SIZE, 16, 160);
+
+        int cx = rowX + 2 + ICON_SIZE + 2;
+
+        String rankStr = rankDef.shortName;
+        g.drawString(font, rankStr, cx, rowY + 4, AnimationHelper.withAlpha(rankDef.color, alpha));
+        cx += COL_RANK + COL_GAP;
+
+        String nameStr = truncateText(font, pd.callsign, COL_NAME);
+        g.drawString(font, nameStr, cx, rowY + 4, AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, alpha));
+        cx += COL_NAME + COL_GAP;
+
+        String killsStr = String.valueOf(pd.kills);
+        g.drawString(font, killsStr, cx, rowY + 4, AnimationHelper.withAlpha(UITheme.TEXT_PRIMARY, alpha));
+        cx += COL_KILLS + COL_GAP;
+
+        String deathsStr = String.valueOf(pd.deaths);
+        g.drawString(font, deathsStr, cx, rowY + 4, AnimationHelper.withAlpha(UITheme.TEXT_MUTED, alpha));
+        cx += COL_DEATHS + COL_GAP;
+
+        float kd = pd.deaths > 0 ? (float) pd.kills / pd.deaths : pd.kills;
+        String kdStr = String.format("%.1f", kd);
+        int kdColor = kd >= 2.0f ? UITheme.STATUS_OK : kd >= 1.0f ? UITheme.STATUS_WARN : UITheme.STATUS_DANGER;
+        g.drawString(font, kdStr, cx, rowY + 4, AnimationHelper.withAlpha(kdColor, alpha));
+        cx += COL_KD + COL_GAP;
+
+        String pingStr = formatPing(pd.pingMs);
+        int pingColor;
+        if (pd.pingMs < 80) pingColor = UITheme.PING_LOW;
+        else if (pd.pingMs < 200) pingColor = UITheme.PING_MID;
+        else pingColor = UITheme.PING_HIGH;
+        g.drawString(font, pingStr, cx, rowY + 4, AnimationHelper.withAlpha(pingColor, alpha));
+    }
+
+    private String formatPing(int ms) {
+        if (ms >= 1000) return (ms / 1000) + "s";
+        return ms + "ms";
+    }
+
+    private String truncateText(Font font, String text, int maxWidth) {
+        if (font.width(text) <= maxWidth) return text;
+        String result = text;
+        while (font.width(result + "...") > maxWidth && result.length() > 1) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result + "...";
+    }
+}
+```
+
+### 3. ScoreboardDataProvider.java
+```java
+package com.pigeostudios.pwp.client.gui.scoreboard.data;
+
+import com.pigeostudios.pwp.client.ClientTeamData;
+import com.pigeostudios.pwp.client.PlayerListEntry;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.PlayerInfo;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+public class ScoreboardDataProvider {
+
+    public static List<PlayerScoreboardData> buildPlayerList() {
+        List<PlayerScoreboardData> result = new ArrayList<>();
+        Map<UUID, PlayerListEntry> map = ClientTeamData.playerDataMap;
+        if (map == null || map.isEmpty()) return result;
+
+        Minecraft mc = Minecraft.getInstance();
+        UUID localUuid = mc.player != null ? mc.player.getUUID() : null;
+
+        for (Map.Entry<UUID, PlayerListEntry> entry : map.entrySet()) {
+            UUID uuid = entry.getKey();
+            PlayerListEntry ple = entry.getValue();
+
+            PlayerScoreboardData data = new PlayerScoreboardData();
+            data.rankId = ple.rank();
+            data.callsign = ple.callsign() != null ? ple.callsign() : "";
+            data.squad = ple.squadName() != null && !ple.squadName().isEmpty() ? ple.squadName() : ple.squad();
+            data.teamOrdinal = ple.teamOrdinal();
+            data.kills = ple.kills();
+            data.deaths = ple.deaths();
+            data.isSelf = uuid.equals(localUuid);
+
+            PlayerInfo playerInfo = mc.getConnection() != null ? mc.getConnection().getPlayerInfo(uuid) : null;
+            if (playerInfo != null) {
+                data.nick = playerInfo.getProfile().getName();
+                data.pingMs = playerInfo.getLatency();
+            } else {
+                data.nick = "";
+                data.pingMs = 0;
+            }
+
+            data.donateLevel = switch (ple.donatTier()) {
+                case 1 -> PlayerScoreboardData.DonateLevel.VIP;
+                case 2 -> PlayerScoreboardData.DonateLevel.ELITE;
+                case 3 -> PlayerScoreboardData.DonateLevel.GENERAL;
+                default -> PlayerScoreboardData.DonateLevel.NONE;
+            };
+            data.donateBarProgress = 0f;
+
+            result.add(data);
+        }
+
+        return result;
+    }
+}
+```
+
+### 4. PlayerScoreboardData.java
+```java
+package com.pigeostudios.pwp.client.gui.scoreboard.data;
+
+public class PlayerScoreboardData {
+    public enum DonateLevel {
+        NONE, VIP, ELITE, GENERAL
+    }
+
+    public String nick;
+    public String callsign;
+    public String squad;
+    public int rankId;
+    public int teamOrdinal;
+    public int kills;
+    public int deaths;
+    public DonateLevel donateLevel = DonateLevel.NONE;
+    public float donateBarProgress = 0f;
+    public int pingMs;
+    public boolean isSelf;
+    public transient int sortKey;
+
+    public PlayerScoreboardData() {}
+
+    public float getKD() {
+        if (deaths == 0) return kills;
+        return (float) kills / (float) deaths;
+    }
+}
+```
+
+### 5. RankDefinition.java
+```java
+package com.pigeostudios.pwp.client.gui.scoreboard.data;
+
+import net.minecraft.resources.ResourceLocation;
+
+public class RankDefinition {
+    private static final ResourceLocation RANK_SPRITESHEET = new ResourceLocation("pwp", "textures/gui/ranks/ranks.png");
+
+    private static final RankDefinition[] RANKS = {
+        new RankDefinition("Pvt", "Private", 0xFF506070, 0),
+        new RankDefinition("PFC", "Private First Class", 0xFF586878, 1),
+        new RankDefinition("Cpl", "Corporal", 0xFF607080, 2),
+        new RankDefinition("Sgt", "Sergeant", 0xFF708090, 3),
+        new RankDefinition("SSgt", "Staff Sergeant", 0xFF7890A0, 4),
+        new RankDefinition("Lt", "Lieutenant", 0xFFA080E0, 5),
+        new RankDefinition("Cpt", "Captain", 0xFFB890E8, 6),
+        new RankDefinition("Maj", "Major", 0xFFC8A0F0, 7),
+        new RankDefinition("Col", "Colonel", 0xFFE8750A, 8),
+        new RankDefinition("Gen", "General", 0xFFC8A050, 9)
+    };
+
+    public final String shortName;
+    public final String fullName;
+    public final ResourceLocation iconTexture;
+    public final int color;
+    public final int sortWeight;
+
+    public RankDefinition(String shortName, String fullName, int color, int sortWeight) {
+        this.shortName = shortName;
+        this.fullName = fullName;
+        this.iconTexture = RANK_SPRITESHEET;
+        this.color = color;
+        this.sortWeight = sortWeight;
+    }
+
+    public static RankDefinition get(int rankId) {
+        if (rankId >= 0 && rankId < RANKS.length) {
+            return RANKS[rankId];
+        }
+        return RANKS[0];
+    }
+
+    public int getIconVOffset() {
+        return sortWeight * 16;
+    }
+
+    public static int count() {
+        return RANKS.length;
+    }
+}
+```
+
+### 6. PlayerListEntry.java (record from сервера)
+```java
+package com.pigeostudios.pwp.client;
+
+import java.util.UUID;
+
+public record PlayerListEntry(int rank, String callsign, String squad, int kills, int deaths, int teamOrdinal, String squadName, int donatTier, boolean isSquadLeader, boolean hasReceivedDogTag) {
+    public PlayerListEntry(int rank, String callsign, String squad, int kills, int deaths, int teamOrdinal, String squadName) {
+        this(rank, callsign, squad, kills, deaths, teamOrdinal, squadName, 0, false, false);
+    }
+
+    public PlayerListEntry(int rank, String callsign, String squad, int kills, int deaths, int teamOrdinal, String squadName, int donatTier) {
+        this(rank, callsign, squad, kills, deaths, teamOrdinal, squadName, donatTier, false, false);
+    }
+}
+```
+
+### 7. UITheme.java (цвета)
+```java
+package com.pigeostudios.pwp.client.gui;
+
+public final class UITheme {
+    private UITheme() {}
+
+    public static final int BG_SCREEN        = 0xCC0A0A0A;
+    public static final int BG_PANEL         = 0xDD141414;
+    public static final int BG_SURFACE       = 0xDD1C1C1C;
+    public static final int BG_SLOT          = 0xDD242424;
+    public static final int BG_HUD           = 0xD20F0F0F;
+    public static final int BG_BLACK         = 0xFF000000;
+    public static final int BG_TOOLTIP       = 0xDD0D0D0D;
+    public static final int BG_OVERLAY       = 0xBB000000;
+
+    public static final int TEXT_PRIMARY      = 0xFFEFEFEF;
+    public static final int TEXT_SECONDARY    = 0xFFB0B0B0;
+    public static final int TEXT_MUTED        = 0xFF808080;
+
+    public static final int ACCENT            = 0xFFE07B00;
+    public static final int ACCENT_DIM        = 0x80E07B00;
+    public static final int ACCENT_GHOST      = 0x26E07B00;
+
+    public static final int BORDER            = 0xFF2E2E2E;
+    public static final int BORDER_ALT        = 0x0AFFFFFF;
+    public static final int BORDER_ACTIVE     = ACCENT;
+
+    public static final int TEAM_NATO         = 0xFF1C5FAD;
+    public static final int TEAM_NATO_BG      = 0xAA0D2A55;
+    public static final int TEAM_NATO_BAR     = 0xFF1C5FAD;
+    public static final int NATO              = TEAM_NATO;
+
+    public static final int TEAM_RUSSIA       = 0xFFAD1C1C;
+    public static final int TEAM_RUSSIA_BG    = 0xAA550D0D;
+    public static final int TEAM_RUSSIA_BAR   = 0xFFAD1C1C;
+
+    public static final int HUD_HP_BG         = 0xDD1A1A1A;
+    public static final int HUD_HP_FULL       = 0xFF50B050;
+    public static final int HUD_HP_MID        = 0xFFCCA030;
+    public static final int HUD_HP_LOW        = 0xFFCC3030;
+    public static final int HUD_AMMO_BG       = 0xD2141414;
+    public static final int HUD_AMMO_TEXT     = 0xFFEFEFEF;
+    public static final int HUD_MINIMAP_BG    = 0xCC0A0A0A;
+    public static final int HUD_MINIMAP_BORDER= 0xFF2E2E2E;
+
+    public static final int MENU_BUTTON_BG    = 0xCC141414;
+    public static final int MENU_BUTTON_HOVER = 0xCC1C1C1C;
+
+    public static final int LOADING_BAR_BG    = 0xFF1A1A1A;
+    public static final int LOADING_BAR_FILL  = ACCENT;
+
+    public static final int MARKER_POINT      = 0xFFD4D4D4;
+    public static final int MARKER_ATTACK     = 0xFFE05050;
+    public static final int MARKER_DEFEND     = 0xFF5090E0;
+    public static final int MARKER_OBSERVE    = 0xFF60C060;
+    public static final int MARKER_BG         = 0xD20A0A0A;
+
+    public static final int NAMETAG_RANK      = ACCENT;
+    public static final int NAMETAG_SPECTATOR = 0xD23A3A3A;
+
+    public static final int STATUS_DANGER     = 0xFFCC3030;
+    public static final int STATUS_WARN       = 0xFFCCA030;
+    public static final int STATUS_OK         = 0xFF50B050;
+
+    public static final int COMPASS_CARDINAL  = TEXT_PRIMARY;
+    public static final int COMPASS_TICK      = 0xFF484848;
+    public static final int COMPASS_TEXT      = TEXT_SECONDARY;
+    public static final int COMPASS_CURSOR    = ACCENT;
+
+    public static final int KILLFEED_KILLER   = ACCENT;
+    public static final int KILLFEED_VICTIM   = TEXT_SECONDARY;
+
+    public static final int MAP_COOLDOWN     = 0xFFCC3030;
+    public static final int MAP_COOLDOWN_BG  = 0xD2550000;
+
+    public static final int ALPHA_FULL   = 255;
+    public static final int ALPHA_HIGH   = 221;
+    public static final int ALPHA_SCREEN = 204;
+    public static final int ALPHA_HUD    = 210;
+    public static final int ALPHA_MID    = 170;
+    public static final int ALPHA_DIM    = 128;
+    public static final int ALPHA_LOW    = 102;
+    public static final int ALPHA_LINE   = 64;
+    public static final int ALPHA_GHOST  = 38;
+
+    public static final int RANK_GOLD = 0xFFE8750A;
+    public static final int RANK_GOLD_DIM = 0xFFC8A050;
+    public static final int RANK_SILVER = 0xFF8090A0;
+    public static final int RANK_SILVER_DIM = 0xFF607080;
+    public static final int DONATE_VIP = 0xFFE8750A;
+    public static final int DONATE_ELITE_A = 0xFFA080E0;
+    public static final int DONATE_ELITE_B = 0xFF3090D0;
+    public static final int DONATE_GENERAL = 0xFFE07B00;
+    public static final int SQUAD_LABEL = ACCENT;
+    public static final int SQUAD_LINE = 0x40E07B00;
+    public static final int SELF_BG = 0x26E07B00;
+    public static final int SELF_BORDER = ACCENT;
+    public static final int PING_LOW = 0xFF50B050;
+    public static final int PING_MID = 0xFFCCA030;
+    public static final int PING_HIGH = 0xFFCC3030;
+    public static final int NAMETAG_BAR_BG = 0x40000000;
+    public static final int NAMETAG_BAR_BASE = 0xFF808080;
+
+    public static final int VOICE_LOCAL  = 0xFF50B050;
+    public static final int VOICE_SQUAD  = 0xFF5090E0;
+    public static final int VOICE_TEAM   = 0xFFE07B00;
+    public static final int VOICE_INACTIVE = 0x66808080;
+
+    public static int getTeamColor(int teamOrdinal) {
+        if (teamOrdinal == 0) return TEAM_NATO;
+        if (teamOrdinal == 1) return TEAM_RUSSIA;
+        return TEXT_PRIMARY;
+    }
+
+    public static int getNotificationColor(String type) { ... }
+    public static String getNotificationIcon(String type) { ... }
+}
+```
+
+### 8. AnimationHelper.java
+```java
+package com.pigeostudios.pwp.client.gui.component;
+
+import com.pigeostudios.pwp.client.ClientTeamData;
+import net.minecraft.util.Mth;
+
+public class AnimationHelper {
+    private static float cachedOpacity = 1.0f;
+
+    public static void updateOpacityCache() {
+        cachedOpacity = ClientTeamData.guiOpacity;
+    }
+    public static float easeInOutCubic(float t) { ... }
+    public static float easeOutCubic(float t) { ... }
+    public static float easeOutElastic(float t) { ... }
+    public static float lerp(float a, float b, float t) {
+        return a + (b - a) * t;
+    }
+    public static float lerpAngle(float a, float b, float t) { ... }
+    public static float smoothStep(float edge0, float edge1, float x) { ... }
+    public static float pingPong(float value, float max) { ... }
+
+    public static int withAlpha(int color, int alpha) {
+        int a = Math.min(255, Math.max(0, (int)(alpha * cachedOpacity)));
+        return (a & 0xFF) << 24 | (color & 0xFFFFFF);
+    }
+
+    public static int blendColors(int base, int overlay, float overlayAlpha) { ... }
+    public static int hpColor(float fraction) { ... }
+}
+```
+
+### 9. RenderHelper.java
+```java
+package com.pigeostudios.pwp.client.gui.component;
+
+import com.pigeostudios.pwp.client.gui.UITheme;
+import net.minecraft.client.gui.GuiGraphics;
+
+public class RenderHelper {
+    public static void gradientRectH(GuiGraphics g, int x, int y, int w, int h, int colorLeft, int colorRight) { ... }
+    public static void gradientRectV(GuiGraphics g, int x, int y, int w, int h, int colorTop, int colorBottom) { ... }
+    public static void roundedRect(GuiGraphics g, int x, int y, int w, int h, int radius, int color) {
+        if (w <= 0 || h <= 0) return;
+        radius = Math.min(radius, Math.min(w / 2, h / 2));
+        g.fill(x + radius, y, x + w - radius, y + h, color);
+        g.fill(x, y + radius, x + radius, y + h - radius, color);
+        g.fill(x + w - radius, y + radius, x + w, y + h - radius, color);
+        g.fill(x + radius, y, x + w - radius, y + radius, color);
+        g.fill(x + radius, y + h - radius, x + w - radius, y + h, color);
+    }
+    public static void dropShadow(GuiGraphics g, int x, int y, int w, int h, int offset, int alpha) { ... }
+    public static void glow(GuiGraphics g, int x, int y, int w, int h, int color, int spread, float intensity) { ... }
+    public static void glowBar(GuiGraphics g, int x, int y, int w, int h, int color, int spread) { ... }
+    public static int lerpColor(int c1, int c2, float t) { ... }
+}
+```
+
+### 10. ClientTeamData.java (только релевантные поля)
+```java
+package com.pigeostudios.pwp.client;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class ClientTeamData {
+    public static final Map<UUID, PlayerListEntry> playerDataMap = new HashMap<>();
+    public static int localPlayerRank = 0;
+    public static String localPlayerSquad = "";
+    public static float guiOpacity = 1.0f;
+    public static int natoTickets = 0;
+    public static int russiaTickets = 0;
+    public static int matchTimeSeconds = 0;
+    // ... остальные поля не важны для таба
+}
+```
+
+### 11. ClientSetup.java (только обработка TAB)
+```java
+@SubscribeEvent
+public static void onKeyInput(InputEvent.Key event) {
+    int key = event.getKey();
+    int action = event.getAction();
+
+    if (key == GLFW.GLFW_KEY_TAB) {
+        if (action == GLFW.GLFW_PRESS) {
+            ClientGuiHandler.getTabOverlay().setVisible(true);
+        } else if (action == GLFW.GLFW_RELEASE) {
+            ClientGuiHandler.getTabOverlay().setVisible(false);
+        }
+    }
+    // ... остальные клавиши
+}
+
+@SubscribeEvent
+public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
+    if (ClientGuiHandler.getTabOverlay().isVisible()) {
+        double delta = event.getScrollDelta();
+        ClientGuiHandler.getTabOverlay().scrollBy((int) -delta * 15);
+        event.setCanceled(true);
+    }
+}
+```
+
+### 12. ClientGuiHandler.java (только релевантные части)
+```java
+public class ClientGuiHandler {
+    private static final BattlefieldTabOverlay tabOverlay = new BattlefieldTabOverlay();
+
+    public static BattlefieldTabOverlay getTabOverlay() { return tabOverlay; }
+
+    @SubscribeEvent
+    public static void onPreRenderHUD(RenderGuiOverlayEvent.Pre event) {
+        // Отменяем ванильный PLAYER_LIST и другие
+        if (event.getOverlay() == VanillaGuiOverlay.PLAYER_LIST.type() || ...) {
+            event.setCanceled(true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPostRenderAnyOverlay(RenderGuiOverlayEvent.Post event) {
+        // Рендерим таб поверх всего
+        tabOverlay.render(g, w, h);
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        tabOverlay.tick();
+    }
+}
+```
+
+---
+
+## Формат ответа Claude
+Напиши ПОЛНОСТЬЮ переписанные файлы:
+1. `BattlefieldTabOverlay.java` — фасад (можно расширить)
+2. `ScoreboardRenderer.java` — полностью переписать с новой логикой и дизайном
+3. `PlayerScoreboardData.java` — добавить новые поля если нужно
+4. `ScoreboardDataProvider.java` — добавить новые данные если нужно
+
+Новые файлы которые нужно создать:
+5. `ScoreboardSortMode.java` — enum для режимов сортировки
+6. `ScoreboardSearchBar.java` — компонент поиска
+
+Не менять: `UITheme.java`, `AnimationHelper.java`, `RenderHelper.java`, `ClientTeamData.java`, `PlayerListEntry.java`, `RankDefinition.java`, `ClientSetup.java`, `ClientGuiHandler.java`

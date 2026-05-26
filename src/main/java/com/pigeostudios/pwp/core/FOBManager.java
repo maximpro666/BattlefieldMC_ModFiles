@@ -398,24 +398,6 @@ public class FOBManager {
         PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
-    public synchronized void onBeaconBroken(BlockPos pos, com.pigeostudios.pwp.blockentity.RespawnBeaconBlockEntity beacon) {
-        String ownerUUID = beacon.getOwnerUUID() != null ? beacon.getOwnerUUID().toString() : "";
-        String name = beacon.getName();
-        SavedFOB removed = null;
-        for (SavedFOB f : fobs) {
-            if (f.x == pos.getX() && f.y == pos.getY() && f.z == pos.getZ()) {
-                removed = f;
-                break;
-            }
-        }
-        if (removed != null) {
-            fobs.remove(removed);
-            unregisterAmmoProviderForFOB(removed.fobId);
-            save();
-            syncAll();
-        }
-    }
-
     private void broadcastToTeam(Team team, String message) {
         if (team == Team.SPECTATOR) return;
         net.minecraft.network.chat.Component msg = net.minecraft.network.chat.Component.literal(message);

@@ -15,22 +15,17 @@ public class OpenSpawnSelectionScreenPacket {
 
     public record SquadmateInfo(UUID uuid, String callsign, int teamOrdinal, int cooldownTicks) {}
 
-    public record BeaconInfo(String name, double x, double y, double z, int teamOrdinal) {}
-
     private final List<SquadmateInfo> squadmates;
     private final List<FOBData>       fobs;
-    private final List<BeaconInfo>    beacons;
     private final int                 teamOrdinal;
     private final String              selectedKit;
 
     public OpenSpawnSelectionScreenPacket(List<SquadmateInfo> squadmates,
                                           List<FOBData> fobs,
-                                          List<BeaconInfo> beacons,
                                           int teamOrdinal,
                                           String selectedKit) {
         this.squadmates  = squadmates  != null ? squadmates  : new ArrayList<>();
         this.fobs        = fobs        != null ? fobs        : new ArrayList<>();
-        this.beacons     = beacons     != null ? beacons     : new ArrayList<>();
         this.teamOrdinal = teamOrdinal;
         this.selectedKit = selectedKit != null ? selectedKit : "";
     }
@@ -58,16 +53,6 @@ public class OpenSpawnSelectionScreenPacket {
             float  health     = buf.readFloat();
             fobs.add(new FOBData(fobId, name, x, y, z, worldKey, teamOrd, health));
         }
-        int bSize = buf.readInt();
-        this.beacons = new ArrayList<>(bSize);
-        for (int i = 0; i < bSize; i++) {
-            String name    = buf.readUtf(128);
-            double x       = buf.readDouble();
-            double y       = buf.readDouble();
-            double z       = buf.readDouble();
-            int    teamOrd = buf.readInt();
-            beacons.add(new BeaconInfo(name, x, y, z, teamOrd));
-        }
         this.teamOrdinal = buf.readInt();
         this.selectedKit = buf.readUtf(64);
     }
@@ -91,14 +76,6 @@ public class OpenSpawnSelectionScreenPacket {
             buf.writeInt(f.teamOrdinal());
             buf.writeFloat(f.health());
         }
-        buf.writeInt(beacons.size());
-        for (BeaconInfo b : beacons) {
-            buf.writeUtf(b.name(), 128);
-            buf.writeDouble(b.x());
-            buf.writeDouble(b.y());
-            buf.writeDouble(b.z());
-            buf.writeInt(b.teamOrdinal());
-        }
         buf.writeInt(teamOrdinal);
         buf.writeUtf(selectedKit, 64);
     }
@@ -110,8 +87,8 @@ public class OpenSpawnSelectionScreenPacket {
                 try {
                     Class<?> helper = Class.forName("com.pigeostudios.pwp.client.gui.screen.SpawnScreenHelper");
                     helper.getMethod("openSpawnSelectionScreen",
-                            List.class, List.class, List.class, int.class, String.class)
-                         .invoke(null, squadmates, fobs, beacons, teamOrdinal, selectedKit);
+                            List.class, List.class, int.class, String.class)
+                         .invoke(null, squadmates, fobs, teamOrdinal, selectedKit);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -123,7 +100,6 @@ public class OpenSpawnSelectionScreenPacket {
 
     public List<SquadmateInfo> getSquadmates() { return squadmates; }
     public List<FOBData>       getFobs()        { return fobs; }
-    public List<BeaconInfo>    getBeacons()     { return beacons; }
     public int                 getTeamOrdinal() { return teamOrdinal; }
     public String              getSelectedKit() { return selectedKit; }
 }

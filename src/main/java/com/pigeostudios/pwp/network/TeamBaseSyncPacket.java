@@ -43,6 +43,5 @@ public class TeamBaseSyncPacket {
         ClientTeamData.setNatoBase(natoX, natoY, natoZ);
         ClientTeamData.setRussiaBase(russiaX, russiaY, russiaZ);
         ClientTeamData.setBaseRadius(baseRadius);
-        com.pigeostudios.pwp.client.journeymap.JourneyMapIntegration.updateBaseWaypoints();
     }
 }

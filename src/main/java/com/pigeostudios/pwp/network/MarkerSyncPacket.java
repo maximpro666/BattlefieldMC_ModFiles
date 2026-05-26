@@ -1,6 +1,6 @@
 package com.pigeostudios.pwp.network;
 
-import com.pigeostudios.pwp.client.ClientMarkerData;
+import com.pigeostudios.pwp.client.ClientTeamData;
 import com.pigeostudios.pwp.core.MarkerData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -58,8 +58,7 @@ public class MarkerSyncPacket {
 
     public static void handle(MarkerSyncPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            ClientMarkerData.setMarkers(msg.markers);
-            com.pigeostudios.pwp.client.journeymap.JourneyMapIntegration.updateMarkerWaypoints();
+            ClientTeamData.tacticalMarkers = msg.markers;
         });
         ctx.get().setPacketHandled(true);
     }

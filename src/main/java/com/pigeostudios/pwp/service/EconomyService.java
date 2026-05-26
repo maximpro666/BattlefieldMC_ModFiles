@@ -4,6 +4,7 @@ import com.pigeostudios.pwp.PWP;
 import com.pigeostudios.pwp.capture.CaptureZone;
 import com.pigeostudios.pwp.capture.ZoneDataManager;
 import com.pigeostudios.pwp.core.*;
+import com.pigeostudios.pwp.data.CentralDatabase;
 import com.pigeostudios.pwp.network.BCSyncPacket;
 import com.pigeostudios.pwp.network.NotificationPacket;
 import com.pigeostudios.pwp.network.PacketHandler;
@@ -32,9 +33,12 @@ public class EconomyService {
     private int frontlineTickCounter;
     private int vcTickCounter;
 
-    // D10: daily bonus tracking
+    // D10: daily/weekly bonus tracking (backed by CentralDatabase)
     private final ConcurrentHashMap<UUID, String> lastDailyBonusDate = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, String> lastWeeklyBonusDate = new ConcurrentHashMap<>();
+    private boolean bonusDataLoaded = false;
     private static final int DAILY_LOGIN_BONUS = 10;
+    private static final int WEEKLY_LOGIN_BONUS = 50;
 
     private static final int FRONTLINE_RADIUS = 30;
     private static final int VC_INTERVAL_TICKS = 1200; // 60s
@@ -350,6 +354,27 @@ public class EconomyService {
         } else if (!wc.containsKey(uuid)) {
             wc.put(uuid, dbWc);
         }
+        // Load bonus claim dates from CentralDatabase
+        ensureBonusDataLoaded();
+        String dailyDate = CentralDatabase.getBonusClaim(uuid, "daily");
+        if (dailyDate != null) lastDailyBonusDate.put(uuid, dailyDate);
+        String weeklyDate = CentralDatabase.getBonusClaim(uuid, "weekly");
+        if (weeklyDate != null) lastWeeklyBonusDate.put(uuid, weeklyDate);
+    }
+
+    private void ensureBonusDataLoaded() {
+        if (bonusDataLoaded) return;
+        bonusDataLoaded = true;
+        try {
+            Map<UUID, String> dailyClaims = CentralDatabase.loadAllBonusClaims("daily");
+            lastDailyBonusDate.putAll(dailyClaims);
+            Map<UUID, String> weeklyClaims = CentralDatabase.loadAllBonusClaims("weekly");
+            lastWeeklyBonusDate.putAll(weeklyClaims);
+            PWP.LOGGER.info("Loaded {} daily and {} weekly bonus claims from CentralDatabase",
+                dailyClaims.size(), weeklyClaims.size());
+        } catch (Exception e) {
+            PWP.LOGGER.warn("Failed to load bonus claims from CentralDatabase: {}", e.getMessage());
+        }
     }
 
     // D10: award daily login bonus if not yet claimed today (UTC)
@@ -365,6 +390,25 @@ public class EconomyService {
             return newVal;
         });
         lastDailyBonusDate.put(uuid, today);
+        CentralDatabase.saveBonusClaim(uuid, "daily", today);
+        return true;
+    }
+
+    // Weekly login bonus: awarded once per ISO week (Monday–Sunday)
+    public boolean checkAndAwardWeeklyBonus(UUID uuid) {
+        String currentWeek = java.time.LocalDate.now(java.time.ZoneOffset.UTC)
+            .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+            .toString();
+        String lastWeek = lastWeeklyBonusDate.get(uuid);
+        if (currentWeek.equals(lastWeek)) return false;
+        wc.compute(uuid, (k, v) -> {
+            int current = v == null ? 0 : v;
+            int newVal = current + WEEKLY_LOGIN_BONUS;
+            persistence.saveWC(uuid, newVal);
+            return newVal;
+        });
+        lastWeeklyBonusDate.put(uuid, currentWeek);
+        CentralDatabase.saveBonusClaim(uuid, "weekly", currentWeek);
         return true;
     }
 

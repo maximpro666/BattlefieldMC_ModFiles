@@ -1,15 +1,15 @@
 package com.pigeostudios.pwp.client.gui.component;
 
+import com.pigeostudios.pwp.client.gui.I18n;
 import com.pigeostudios.pwp.client.gui.UITheme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
 public class SortControl {
-
     public enum SortMode {
-        DEFAULT("Default"),
-        NAME("Name A-Z"),
-        AVAILABILITY("Unlocked");
+        DEFAULT(I18n.get("pwp.ui.sort.default")),
+        NAME(I18n.get("pwp.ui.sort.name_az")),
+        AVAILABILITY(I18n.get("pwp.ui.sort.unlocked"));
 
         public final String label;
         SortMode(String label) { this.label = label; }
@@ -19,7 +19,6 @@ public class SortControl {
             return vals[(ordinal() + 1) % vals.length];
         }
     }
-
     private SortMode currentMode = SortMode.DEFAULT;
     private float hoverAlpha = 0f;
 

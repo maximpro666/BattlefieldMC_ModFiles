@@ -14,7 +14,6 @@ import com.mojang.logging.LogUtils;
 import com.pigeostudios.pwp.blockentity.RespawnBeaconBlockEntity;
 import com.pigeostudios.pwp.commands.*;
 import com.pigeostudios.pwp.commands.FOBCommand;
-import com.pigeostudios.pwp.commands.DeployCommand;
 import com.pigeostudios.pwp.commands.KitSelectCommand;
 import com.pigeostudios.pwp.core.*;
 import com.pigeostudios.pwp.core.ModSounds;
@@ -77,6 +76,10 @@ public class PWP {
     public static final RegistryObject<Block> RESPAWN_BEACON_BLOCK = BLOCKS.register("respawn_beacon",
         () -> new RespawnBeaconBlock(Block.Properties.copy(Blocks.BEACON).noOcclusion()));
 
+    public static final RegistryObject<BlockEntityType<RespawnBeaconBlockEntity>> RESPAWN_BEACON_BLOCK_ENTITY =
+        BLOCK_ENTITIES.register("respawn_beacon_block_entity",
+            () -> BlockEntityType.Builder.of(RespawnBeaconBlockEntity::new, RESPAWN_BEACON_BLOCK.get()).build(null));
+
     public static final RegistryObject<Item> RESPAWN_BEACON_ITEM = ITEMS.register("respawn_beacon",
         () -> new BlockItem(RESPAWN_BEACON_BLOCK.get(), new Item.Properties()));
 
@@ -89,15 +92,10 @@ public class PWP {
             })
             .build());
 
-    public static final RegistryObject<BlockEntityType<RespawnBeaconBlockEntity>> RESPAWN_BEACON_BLOCK_ENTITY =
-        BLOCK_ENTITIES.register("respawn_beacon",
-            () -> BlockEntityType.Builder.of(RespawnBeaconBlockEntity::new, RESPAWN_BEACON_BLOCK.get()).build(null));
-
     private static TeamManager teamManager;
     private static MapPoolManager mapPoolManager;
     private static GameManager gameManager;
     private static MarkerManager markerManager;
-    private static RespawnManager respawnManager;
     private static KitManager kitManager;
     private static SquadManager squadManager;
     private static VehicleManager vehicleManager;
@@ -133,14 +131,11 @@ public class PWP {
 
     @SubscribeEvent
     public void onServerAboutToStart(ServerAboutToStartEvent event) {
-        MapDimensionGenerator.generateDimensionDatapacks(event.getServer());
     }
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         CombatEventHandler.setServer(event.getServer());
-        MapPoolManager temp = new MapPoolManager(event.getServer());
-        temp.loadConfig();
     }
 
     @SubscribeEvent
@@ -157,7 +152,7 @@ public class PWP {
                 stopPb.directory(launcherDir.toFile());
                 stopPb.redirectErrorStream(true);
                 Process stopProc = stopPb.start();
-                stopProc.waitFor(10, TimeUnit.SECONDS);
+                stopProc.waitFor(3, TimeUnit.SECONDS);
             } catch (Exception ignored) {}
         }
 
@@ -201,8 +196,6 @@ public class PWP {
         }
 
         markerManager = new MarkerManager();
-        respawnManager = new RespawnManager(event.getServer());
-
         kitManager = teamManager.getKitManager();
         squadManager = teamManager.getSquadManager();
         vehicleManager = teamManager.getVehicleManager();
@@ -264,6 +257,10 @@ public class PWP {
                 Files.write(Path.of("match_ready.flag"), "ready".getBytes());
             } catch (Exception ignored) {}
         }
+        // Generic ready flag for bat script (not just match server)
+        try {
+            Files.write(Path.of("server_ready.flag"), "ready".getBytes());
+        } catch (Exception ignored) {}
 
         LOGGER.info("Team System initialized");
     }
@@ -292,7 +289,6 @@ public class PWP {
         GameCommand.register(event.getDispatcher());
         LobbyCommand.register(event.getDispatcher());
         MarkerCommand.register(event.getDispatcher());
-        RespawnCommand.register(event.getDispatcher());
         RankCommand.register(event.getDispatcher());
         KitCommand.register(event.getDispatcher());
         SquadCommand.register(event.getDispatcher());
@@ -302,7 +298,6 @@ public class PWP {
         EconomyCommand.register(event.getDispatcher());
         CallsignCommand.register(event.getDispatcher());
         FOBCommand.register(event.getDispatcher());
-        DeployCommand.register(event.getDispatcher());
         KitSelectCommand.register(event.getDispatcher());
         com.pigeostudios.pwp.commands.AdminNotifyCommand.register(event.getDispatcher());
         com.pigeostudios.pwp.commands.AdminCommand.register(event.getDispatcher());
@@ -336,7 +331,6 @@ public class PWP {
     public static MapPoolManager getMapPoolManager() { return mapPoolManager; }
     public static GameManager getGameManager() { return gameManager; }
     public static MarkerManager getMarkerManager() { return markerManager; }
-    public static RespawnManager getRespawnManager() { return respawnManager; }
     public static KitManager getKitManager() { return kitManager; }
     public static SquadManager getSquadManager() { return squadManager; }
     public static VehicleManager getVehicleManager() { return vehicleManager; }

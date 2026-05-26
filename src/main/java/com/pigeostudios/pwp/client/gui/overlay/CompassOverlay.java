@@ -65,7 +65,7 @@ public class CompassOverlay {
             while (relAngle < -180f) relAngle += 360f;
             if (Math.abs(relAngle) > VIEW_RANGE / 2f) continue;
 
-            int tickX = centerX + (int) (relAngle / 180f * (COMPASS_W / 2));
+            int tickX = centerX + (int) (relAngle / VIEW_RANGE * COMPASS_W);
             if (tickX < compassX || tickX > compassX + COMPASS_W) continue;
 
             // Tick mark

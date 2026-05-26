@@ -4,6 +4,7 @@ import com.pigeostudios.pwp.client.gui.screen.AdminPanel;
 import com.pigeostudios.pwp.client.gui.screen.ClassSelectionScreen;
 import com.pigeostudios.pwp.client.gui.screen.MatchResultsScreen;
 import com.pigeostudios.pwp.client.gui.screen.ReportScreen;
+import com.pigeostudios.pwp.client.gui.screen.TOSAgreementScreen;
 import com.pigeostudios.pwp.client.gui.screen.TeamSelectionScreen;
 import net.minecraft.client.Minecraft;
 
@@ -40,5 +41,10 @@ public class ClientScreenAccessor {
         if (mc.player != null && mc.level != null) {
             mc.setScreen(new ReportScreen());
         }
+    }
+
+    public static void openTOS(String tosUrl, String privacyUrl) {
+        Minecraft mc = Minecraft.getInstance();
+        mc.setScreen(new TOSAgreementScreen(tosUrl, privacyUrl));
     }
 }

@@ -2,8 +2,10 @@ package com.pigeostudios.pwp.client.gui.screen;
 
 import com.pigeostudios.pwp.client.gui.I18n;
 import com.pigeostudios.pwp.client.gui.UITheme;
+import com.pigeostudios.pwp.client.ClientTeamData;
 import com.pigeostudios.pwp.client.gui.component.AnimationHelper;
 import com.pigeostudios.pwp.client.gui.component.BScrollPanel;
+import com.pigeostudios.pwp.core.Team;
 import com.pigeostudios.pwp.client.gui.component.ClassCard;
 import com.pigeostudios.pwp.client.gui.component.SortControl;
 import com.pigeostudios.pwp.data.KitConfig;
@@ -171,21 +173,21 @@ public class ClassSelectionScreen extends Screen {
         int panelX = width / 2 - panelW / 2;
 
         // Back + title
-        g.drawString(font, "SELECT YOUR CLASS", panelX, 18,
+        g.drawString(font, I18n.get("pwp.ui.class_selection.title"), panelX, 18,
                 AnimationHelper.withAlpha(UITheme.TEXT_MUTED, alpha));
 
-        int sortBtnX = panelX + font.width("SELECT YOUR CLASS") + 16;
+        int sortBtnX = panelX + font.width(I18n.get("pwp.ui.class_selection.title")) + 16;
         int sortBtnY = 18 - (font.lineHeight + 4) / 2;
         sortControl.render(g, sortBtnX, sortBtnY, mx, my, fadeAlpha);
 
-        g.drawString(font, classes.size() + " classes available", panelX + panelW - font.width(classes.size() + " classes available"), 18,
+        g.drawString(font, I18n.get("pwp.ui.class_selection.count", classes.size()), panelX + panelW - font.width(I18n.get("pwp.ui.class_selection.count", classes.size())), 18,
                 AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fadeAlpha * 150)));
 
         if (classes.isEmpty()) {
             String msg = com.pigeostudios.pwp.client.ClientTeamData.getLocalPlayerTeam()
                 == com.pigeostudios.pwp.core.Team.SPECTATOR
-                ? "Select a team first"
-                : "No classes available";
+                ? I18n.get("pwp.ui.class_selection.select_team")
+                : I18n.get("pwp.ui.class_selection.none");
             int mw = font.width(msg);
             g.drawString(font, msg, width / 2 - mw / 2, height / 2,
                     AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 200)));
@@ -261,6 +263,9 @@ public class ClassSelectionScreen extends Screen {
     @Override
     public void tick() {
         if (classes.isEmpty()) {
+            if (ClientTeamData.getLocalPlayerTeam() == Team.SPECTATOR) {
+                return;
+            }
             KitConfig cfg = KitConfig.get();
             if (cfg != null && cfg.classes != null && !cfg.classes.isEmpty()) {
                 init();

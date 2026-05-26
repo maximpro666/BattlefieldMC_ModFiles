@@ -11,18 +11,41 @@ import java.sql.*;
 import java.util.*;
 
 public class CentralDatabase {
-    private static final String DB_PATH = System.getProperty("pwp.db.path", "../launcher/database/pwp.db");
+    private static Path dbPath;
     private static Connection connection;
     private static boolean initialized = false;
+
+    private static Path resolveDbPath() {
+        String override = System.getProperty("pwp.db.path");
+        if (override != null) return Path.of(override).toAbsolutePath().normalize();
+
+        // Try to resolve relative to launcher directory (shared between lobby and match server)
+        Path[] candidates = {
+            Path.of(System.getProperty("user.dir")).resolve("../launcher/database/pwp.db"),
+            Path.of(System.getProperty("user.dir")).resolve("launcher/database/pwp.db"),
+            Path.of("").toAbsolutePath().resolve("../launcher/database/pwp.db"),
+        };
+        for (Path p : candidates) {
+            Path abs = p.toAbsolutePath().normalize();
+            if (abs.getParent() != null) {
+                try {
+                    Files.createDirectories(abs.getParent());
+                    return abs;
+                } catch (Exception ignored) {}
+            }
+        }
+        // Absolute fallback inside the mod files project
+        return Path.of("").toAbsolutePath().resolve("launcher/database/pwp.db").normalize();
+    }
 
     public static synchronized void init() {
         if (initialized) return;
         try {
-            Path dbFile = Path.of(DB_PATH);
-            Files.createDirectories(dbFile.getParent());
+            dbPath = resolveDbPath();
+            Files.createDirectories(dbPath.getParent());
 
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + dbFile.toAbsolutePath().normalize());
+            connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
             try (Statement stmt = connection.createStatement()) {
                 stmt.execute("PRAGMA journal_mode=WAL");
                 stmt.execute("PRAGMA synchronous=NORMAL");
@@ -30,7 +53,7 @@ public class CentralDatabase {
             }
             createTables();
             initialized = true;
-            PWP.LOGGER.info("CentralDatabase initialized at {}", dbFile.toAbsolutePath().normalize());
+            PWP.LOGGER.info("CentralDatabase initialized at {}", dbPath);
         } catch (Exception e) {
             PWP.LOGGER.error("Failed to initialize CentralDatabase", e);
         }
@@ -67,7 +90,8 @@ public class CentralDatabase {
                     selected_role TEXT DEFAULT '',
                     selected_loadout TEXT DEFAULT '',
                     has_received_dog_tag INT DEFAULT 0,
-                    has_chosen_team INT DEFAULT 0
+                    has_chosen_team INT DEFAULT 0,
+                    has_accepted_tos INT DEFAULT 0
                 )
             """);
             stmt.execute("""
@@ -127,7 +151,42 @@ public class CentralDatabase {
                     is_system INT DEFAULT 0
                 )
             """);
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS vehicle_cooldowns (
+                    cooldown_key TEXT PRIMARY KEY,
+                    expiry_ms INTEGER NOT NULL
+                )
+            """);
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS match_state (
+                    state_key TEXT PRIMARY KEY,
+                    state_value TEXT NOT NULL
+                )
+            """);
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS bonus_claims (
+                    uuid TEXT NOT NULL,
+                    bonus_type TEXT NOT NULL,
+                    claim_date TEXT NOT NULL,
+                    PRIMARY KEY (uuid, bonus_type)
+                )
+            """);
+
+            // Migration: add columns that may be missing if the table was created by an older version
+            try {
+                stmt.execute("ALTER TABLE player_data ADD COLUMN has_accepted_tos INT DEFAULT 0");
+            } catch (SQLException ignored) {}
+            try {
+                stmt.execute("ALTER TABLE player_data ADD COLUMN has_chosen_team INT DEFAULT 0");
+            } catch (SQLException ignored) {}
+            try {
+                stmt.execute("ALTER TABLE player_data ADD COLUMN has_received_dog_tag INT DEFAULT 0");
+            } catch (SQLException ignored) {}
         }
+    }
+
+    public static synchronized boolean isInitialized() {
+        return initialized;
     }
 
     public static synchronized void savePlayer(UUID uuid, PlayerCombatData data) {
@@ -139,7 +198,7 @@ public class CentralDatabase {
                  prefix, suffix, display_name, battle_credits, war_credits,
                  callsign, is_admin, donat_tier, player_title,
                  loadout_config, selected_kit, selected_role, selected_loadout,
-                 has_received_dog_tag, has_chosen_team)
+                 has_received_dog_tag, has_chosen_team, has_accepted_tos)
                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """;
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -166,6 +225,7 @@ public class CentralDatabase {
                 ps.setString(21, data.getSelectedLoadout());
                 ps.setInt(22, data.hasReceivedDogTag() ? 1 : 0);
                 ps.setInt(23, data.hasChosenTeam() ? 1 : 0);
+                ps.setInt(24, data.hasAcceptedTOS() ? 1 : 0);
                 ps.executeUpdate();
             }
 
@@ -304,6 +364,7 @@ public class CentralDatabase {
         data.setSelectedLoadout(rs.getString("selected_loadout"));
         data.setHasReceivedDogTag(rs.getInt("has_received_dog_tag") == 1);
         data.setHasChosenTeam(rs.getInt("has_chosen_team") == 1);
+        data.setHasAcceptedTOS(rs.getInt("has_accepted_tos") == 1);
 
         loadStringSet(uuid, "unlocked_kits", "kit_name", data.getUnlockedKits());
         loadStringSet(uuid, "unlocked_roles", "role_id", data.getUnlockedRoles());
@@ -400,6 +461,150 @@ public class CentralDatabase {
             connection = null;
             initialized = false;
         }
+    }
+
+    // ===== Vehicle Cooldowns =====
+
+    public static synchronized void saveVehicleCooldowns(Map<String, Long> cooldowns) {
+        if (!initialized) init();
+        try (PreparedStatement del = connection.prepareStatement("DELETE FROM vehicle_cooldowns")) {
+            del.executeUpdate();
+        } catch (Exception e) {
+            PWP.LOGGER.warn("CentralDatabase: failed to clear vehicle_cooldowns", e);
+            return;
+        }
+        if (cooldowns.isEmpty()) return;
+        String sql = "INSERT OR REPLACE INTO vehicle_cooldowns (cooldown_key, expiry_ms) VALUES (?,?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            long now = System.currentTimeMillis();
+            for (Map.Entry<String, Long> e : cooldowns.entrySet()) {
+                if (e.getValue() > now) {
+                    ps.setString(1, e.getKey());
+                    ps.setLong(2, e.getValue());
+                    ps.addBatch();
+                }
+            }
+            ps.executeBatch();
+        } catch (Exception e) {
+            PWP.LOGGER.error("CentralDatabase: failed to save vehicle cooldowns", e);
+        }
+    }
+
+    public static synchronized Map<String, Long> loadVehicleCooldowns() {
+        if (!initialized) init();
+        Map<String, Long> result = new HashMap<>();
+        long now = System.currentTimeMillis();
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT cooldown_key, expiry_ms FROM vehicle_cooldowns")) {
+            while (rs.next()) {
+                long expiry = rs.getLong("expiry_ms");
+                if (expiry > now) {
+                    result.put(rs.getString("cooldown_key"), expiry);
+                }
+            }
+        } catch (Exception e) {
+            PWP.LOGGER.error("CentralDatabase: failed to load vehicle cooldowns", e);
+        }
+        return result;
+    }
+
+    // ===== Match State (map selection, etc.) =====
+
+    public static synchronized void setMatchState(String key, String value) {
+        if (!initialized) init();
+        String sql = "INSERT OR REPLACE INTO match_state (state_key, state_value) VALUES (?,?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, key);
+            ps.setString(2, value);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            PWP.LOGGER.error("CentralDatabase: failed to set match state '{}'", key, e);
+        }
+    }
+
+    public static synchronized String getMatchState(String key) {
+        if (!initialized) init();
+        String sql = "SELECT state_value FROM match_state WHERE state_key=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, key);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("state_value");
+            }
+        } catch (Exception e) {
+            PWP.LOGGER.error("CentralDatabase: failed to get match state '{}'", key, e);
+        }
+        return null;
+    }
+
+    public static synchronized void removeMatchState(String key) {
+        if (!initialized) init();
+        try (PreparedStatement ps = connection.prepareStatement("DELETE FROM match_state WHERE state_key=?")) {
+            ps.setString(1, key);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            PWP.LOGGER.error("CentralDatabase: failed to remove match state '{}'", key, e);
+        }
+    }
+
+    public static synchronized void setSelectedMap(String mapName) {
+        setMatchState("selected_map", mapName);
+    }
+
+    public static synchronized String getSelectedMap() {
+        return getMatchState("selected_map");
+    }
+
+    public static synchronized void clearSelectedMap() {
+        removeMatchState("selected_map");
+    }
+
+    // ===== Bonus Claims (daily, weekly) =====
+
+    public static synchronized void saveBonusClaim(UUID uuid, String bonusType, String claimDate) {
+        if (!initialized) init();
+        String sql = "INSERT OR REPLACE INTO bonus_claims (uuid, bonus_type, claim_date) VALUES (?,?,?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, bonusType);
+            ps.setString(3, claimDate);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            PWP.LOGGER.error("CentralDatabase: failed to save bonus claim {} for {}", bonusType, uuid, e);
+        }
+    }
+
+    public static synchronized String getBonusClaim(UUID uuid, String bonusType) {
+        if (!initialized) init();
+        String sql = "SELECT claim_date FROM bonus_claims WHERE uuid=? AND bonus_type=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, bonusType);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("claim_date");
+            }
+        } catch (Exception e) {
+            PWP.LOGGER.error("CentralDatabase: failed to get bonus claim {} for {}", bonusType, uuid, e);
+        }
+        return null;
+    }
+
+    public static synchronized Map<UUID, String> loadAllBonusClaims(String bonusType) {
+        if (!initialized) init();
+        Map<UUID, String> result = new HashMap<>();
+        String sql = "SELECT uuid, claim_date FROM bonus_claims WHERE bonus_type=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, bonusType);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    try {
+                        result.put(UUID.fromString(rs.getString("uuid")), rs.getString("claim_date"));
+                    } catch (Exception ignored) {}
+                }
+            }
+        } catch (Exception e) {
+            PWP.LOGGER.error("CentralDatabase: failed to load bonus claims for type {}", bonusType, e);
+        }
+        return result;
     }
 
     // ===== Functional helpers for punishment/report managers =====

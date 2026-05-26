@@ -2,8 +2,6 @@ package com.pigeostudios.pwp.service;
 
 import com.pigeostudios.pwp.PWP;
 import net.minecraft.server.MinecraftServer;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ServiceRegistry {
     private static ServiceRegistry INSTANCE;
@@ -16,7 +14,6 @@ public class ServiceRegistry {
     private KitService kitService;
     private TicketService ticketService;
     private AntiAbuseService antiAbuseService;
-    private EventService eventService;
 
     private boolean initialized;
 
@@ -44,31 +41,9 @@ public class ServiceRegistry {
         kitService = new KitService(economyService);
         ticketService = new TicketService(configService);
         antiAbuseService = new AntiAbuseService();
-        eventService = new EventService();
-        applyEventConfig();
 
         initialized = true;
         PWP.LOGGER.info("ServiceRegistry initialized");
-    }
-
-    private void applyEventConfig() {
-        var cfg = configService.getEvents();
-        if (cfg == null) return;
-        eventService.setEnabled(cfg.enabled);
-        Map<MatchEventType, Integer> weights = new HashMap<>();
-        Map<MatchEventType, Integer> durations = new HashMap<>();
-        if (cfg.types != null) {
-            for (var entry : cfg.types.entrySet()) {
-                try {
-                    MatchEventType type = MatchEventType.valueOf(entry.getKey().toUpperCase());
-                    if (entry.getValue().weight >= 0) weights.put(type, entry.getValue().weight);
-                    if (entry.getValue().duration >= 0) durations.put(type, entry.getValue().duration);
-                } catch (IllegalArgumentException e) {
-                    PWP.LOGGER.warn("ServiceRegistry: unknown event type in config: {}", entry.getKey());
-                }
-            }
-        }
-        eventService.applyConfig(cfg.minInterval, cfg.maxInterval, weights, durations);
     }
 
     public void shutdown() {
@@ -90,7 +65,6 @@ public class ServiceRegistry {
     public KitService getKit() { return kitService; }
     public TicketService getTickets() { return ticketService; }
     public AntiAbuseService getAntiAbuse() { return antiAbuseService; }
-    public EventService getEvents() { return eventService; }
 
     public boolean isInitialized() { return initialized; }
 }

@@ -106,7 +106,6 @@ public class CapturePointSyncPacket {
                 pointRadii.get(i), pointTypes.get(i)));
         }
         ClientTeamData.capturePoints = points;
-        com.pigeostudios.pwp.client.journeymap.JourneyMapIntegration.updateCapturePointWaypoints(points);
     }
 
     public List<Integer> getPointIds() { return pointIds; }

@@ -99,6 +99,7 @@ public class TeamManager extends SavedData {
         to.setCallsign(from.getCallsign());
         to.setDisplayName(from.getDisplayName());
         to.setHasReceivedDogTag(from.hasReceivedDogTag());
+        if (from.hasAcceptedTOS()) to.setHasAcceptedTOS(true);
         to.setAdmin(from.isAdmin());
         to.setDonatTier(from.getDonatTier());
         to.setPlayerTitle(from.getPlayerTitle());
@@ -113,10 +114,17 @@ public class TeamManager extends SavedData {
     }
 
     public void syncToDatabase() {
-        if (ProxyMessenger.isMatchServer()) return;
         CentralDatabase.init();
         CentralDatabase.saveAllPlayers(playerData);
         PWP.LOGGER.info("Synced {} players to CentralDatabase", playerData.size());
+    }
+
+    public void syncPlayerToDatabase(UUID playerId) {
+        PlayerCombatData data = playerData.get(playerId);
+        if (data != null) {
+            CentralDatabase.init();
+            CentralDatabase.savePlayer(playerId, data);
+        }
     }
 
     // ===== Player Name Display =====
@@ -283,6 +291,7 @@ public class TeamManager extends SavedData {
         PlayerCombatData data = getOrCreatePlayerData(playerId);
         data.addKill();
         setDirty();
+        syncPlayerToDatabase(playerId);
         // Note: syncPlayerData is called by CombatEventHandler after incrementing
     }
 
@@ -290,6 +299,7 @@ public class TeamManager extends SavedData {
         PlayerCombatData data = getOrCreatePlayerData(playerId);
         data.addDeath();
         setDirty();
+        syncPlayerToDatabase(playerId);
         // Note: syncPlayerData is called by CombatEventHandler after incrementing
     }
 

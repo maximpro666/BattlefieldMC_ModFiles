@@ -108,16 +108,16 @@ public class KitSelectionScreen extends Screen {
             if (!ls.isSelectable()) {
                 var req = entry.getValue().requirements;
                 if (ls == LockState.LOCKED_RANK) {
-                    reason = "Rank " + (req != null ? req.rank : 0) + " required";
+                    reason = I18n.get("pwp.ui.kit_selection.rank_req", req != null ? req.rank : 0);
                 } else if (ls == LockState.LOCKED_COST) {
                     if (req != null && req.sp_cost > 0 && ctx.playerSP < req.sp_cost)
-                        reason = req.sp_cost + " SP required";
+                        reason = I18n.get("pwp.ui.kit_selection.sp_req", req.sp_cost);
                     else if (req != null && req.bc_cost > 0 && ctx.playerBC < req.bc_cost)
-                        reason = req.bc_cost + " BC required";
+                        reason = I18n.get("pwp.ui.kit_selection.bc_req", req.bc_cost);
                     else
-                        reason = "Cost required";
+                        reason = I18n.get("pwp.ui.kit_selection.cost_req");
                 } else {
-                    reason = "Locked";
+                    reason = I18n.get("pwp.ui.kit_selection.locked");
                 }
             }
             lockReasons.add(reason);
@@ -160,14 +160,14 @@ public class KitSelectionScreen extends Screen {
         }
         g.drawString(font, className, x, 14, UITheme.ACCENT);
         x += font.width(className) + 8;
-        g.drawString(font, "\u2014 SELECT KIT", x, 14,
+        g.drawString(font, I18n.get("pwp.ui.kit_selection.select"), x, 14,
                 AnimationHelper.withAlpha(UITheme.TEXT_MUTED, alpha));
-        x += font.width("\u2014 SELECT KIT") + 16;
+        x += font.width(I18n.get("pwp.ui.kit_selection.select")) + 16;
 
         int sortBtnY = 14 - (font.lineHeight + 4) / 2 + 2;
         sortControl.render(g, x, sortBtnY, mx, my, fadeAlpha);
 
-        String count = available + "/" + kitEntries.size() + " available";
+        String count = I18n.get("pwp.ui.kit_selection.count", available, kitEntries.size());
         g.drawString(font, count, width - font.width(count) - 16, 14,
                 AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fadeAlpha * 150)));
     }
@@ -185,7 +185,7 @@ public class KitSelectionScreen extends Screen {
 
     private void renderLeftPanel(GuiGraphics g, int mx, int my, float fade, int alpha, int leftW) {
         if (kitEntries.isEmpty()) {
-            String none = "No kits available";
+            String none = I18n.get("pwp.ui.kit_selection.none");
             g.drawString(font, none, (leftW - font.width(none)) / 2, height / 2,
                     AnimationHelper.withAlpha(UITheme.TEXT_SECONDARY, (int)(fadeAlpha * 200)));
             return;
@@ -219,7 +219,7 @@ public class KitSelectionScreen extends Screen {
             // Equipped badge overlay
             String equippedId = com.pigeostudios.pwp.client.gui.screen.SpawnScreenHelper.getLastSelectedKit();
             if (equippedId != null && equippedId.equals(classId + ":" + kitEntries.get(i).getKey())) {
-                String badge = "EQUIPPED";
+                String badge = I18n.get("pwp.ui.kit_selection.equipped");
                 int bw = font.width(badge);
                 int bx = cx + KitCard.CARD_W - bw - 16;
                 int by = cy + 3;
@@ -234,7 +234,7 @@ public class KitSelectionScreen extends Screen {
         g.disableScissor();
 
         // Hint
-        String hint = "Right-click to select & customize";
+        String hint = I18n.get("pwp.ui.kit_selection.hint");
         g.drawString(font, hint, (leftW - font.width(hint)) / 2, height - 20,
                 AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 120)));
     }
@@ -260,7 +260,7 @@ public class KitSelectionScreen extends Screen {
             }
         }
         if (active == null) {
-            String msg = "Select a kit to preview";
+            String msg = I18n.get("pwp.ui.kit_selection.preview");
             g.drawString(font, msg, x + (w - font.width(msg)) / 2, height / 2,
                     AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
             return;
@@ -297,6 +297,7 @@ public class KitSelectionScreen extends Screen {
                 {"Secondary", active.weapons != null && active.weapons.secondary != null && !active.weapons.secondary.isEmpty() ? active.weapons.secondary.get(0) : null},
                 {"Special", active.weapons != null && active.weapons.special != null && !active.weapons.special.isEmpty() ? active.weapons.special.get(0) : null},
                 {"Grenade", active.weapons != null && active.weapons.grenade != null && !active.weapons.grenade.isEmpty() ? active.weapons.grenade.get(0) : null},
+                {"Medical", active.weapons != null && active.weapons.medical != null && !active.weapons.medical.isEmpty() ? active.weapons.medical.get(0) : null},
         };
 
         int iconX = x;
@@ -316,7 +317,7 @@ public class KitSelectionScreen extends Screen {
         int selBg = AnimationHelper.blendColors(UITheme.ACCENT, 0xFFFF8C0A, selHov ? 1f : 0f);
         g.fill(x, btnY, x + btnW, btnY + 26, AnimationHelper.withAlpha(selBg, alpha));
         g.fill(x, btnY, x + 2, btnY + 26, AnimationHelper.withAlpha(0x33000000, alpha));
-        String selTxt = "Deploy Kit";
+        String selTxt = I18n.get("pwp.ui.kit_selection.deploy");
         g.drawString(font, selTxt, x + btnW / 2 - font.width(selTxt) / 2, btnY + 9, 0xFFFFFFFF);
 
         // Customize button
@@ -330,7 +331,7 @@ public class KitSelectionScreen extends Screen {
         g.fill(btnX2 + btnW - 1, btnY, btnX2 + btnW, btnY + 26, custBorder);
         g.fill(btnX2, btnY, btnX2 + 2, btnY + 26,
                 AnimationHelper.withAlpha(UITheme.ACCENT, (int)(fade * (0x44 + (custHov ? 0x44 : 0)))));
-        String custTxt = "Customize \u2192";
+        String custTxt = I18n.get("pwp.ui.kit_selection.customize");
         g.drawString(font, custTxt, btnX2 + btnW / 2 - font.width(custTxt) / 2, btnY + 9,
                 AnimationHelper.withAlpha(custHov ? UITheme.ACCENT : UITheme.TEXT_SECONDARY, alpha));
     }

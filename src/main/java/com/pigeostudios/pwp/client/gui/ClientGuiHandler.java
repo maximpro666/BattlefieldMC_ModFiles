@@ -123,6 +123,7 @@ public class ClientGuiHandler {
 
     @SubscribeEvent
     public static void onScreenOpen(ScreenEvent.Opening event) {
+        if (!ClientTeamData.useCustomMenu) return;
         if (event.getScreen() instanceof PauseScreen) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.level != null) {

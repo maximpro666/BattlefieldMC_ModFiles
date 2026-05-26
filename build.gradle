@@ -46,6 +46,7 @@ repositories {
     mavenCentral()
     maven { url = 'https://maven.minecraftforge.net/' }
     maven { url = 'https://maven.maxhenkel.de/repository/public' }
+    maven { url = 'https://jitpack.io' }
 }
 
 configurations.all {
@@ -56,18 +57,22 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
     compileOnly 'de.maxhenkel.voicechat:voicechat-api:2.6.0'
     implementation 'org.xerial:sqlite-jdbc:3.45.1.0'
+    implementation files('libs/java-discord-rpc-2.0.2.jar')
+    implementation files('libs/discord-rpc-release-v3.4.0.jar')
 }
 
 jar {
     finalizedBy 'reobfJar'
 }
 
-// Embed SQLite JDBC into reobfuscated jar (post-process avoids class remapping corruption)
+// Embed runtime dependencies into reobfuscated jar (post-process avoids class remapping corruption)
 tasks.whenTaskAdded { task ->
     if (task.name == 'reobfJar') {
         task.doLast {
-            def sqliteJar = configurations.runtimeClasspath.find { it.name.startsWith('sqlite-jdbc') }
             def outFile = file('build/libs/pwp-1.0.0.jar')
+
+            // Embed SQLite JDBC
+            def sqliteJar = configurations.runtimeClasspath.find { it.name.startsWith('sqlite-jdbc') }
             if (sqliteJar && outFile.exists()) {
                 ant.zip(destfile: outFile, update: 'true') {
                     zipfileset(src: sqliteJar) {
@@ -75,6 +80,26 @@ tasks.whenTaskAdded { task ->
                     }
                 }
                 logger.lifecycle("Embedded SQLite JDBC into pwp-1.0.0.jar")
+            }
+
+            // Embed Discord RPC jars (local path to avoid Maven resolution issues)
+            def discordJar = file('libs/java-discord-rpc-2.0.2.jar')
+            if (discordJar.exists() && outFile.exists()) {
+                ant.zip(destfile: outFile, update: 'true') {
+                    zipfileset(src: discordJar) {
+                        exclude(name: 'META-INF/**')
+                    }
+                }
+                logger.lifecycle("Embedded java-discord-rpc into pwp-1.0.0.jar")
+            }
+            def discordNativeJar = file('libs/discord-rpc-release-v3.4.0.jar')
+            if (discordNativeJar.exists() && outFile.exists()) {
+                ant.zip(destfile: outFile, update: 'true') {
+                    zipfileset(src: discordNativeJar) {
+                        exclude(name: 'META-INF/**')
+                    }
+                }
+                logger.lifecycle("Embedded discord-rpc-native into pwp-1.0.0.jar")
             }
         }
     }

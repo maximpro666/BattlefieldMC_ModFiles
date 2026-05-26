@@ -243,12 +243,6 @@ public class PacketHandler {
             .add();
 
         // ===== Spawn System Packets =====
-        CHANNEL.messageBuilder(RespawnBeaconSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
-            .decoder(RespawnBeaconSyncPacket::new)
-            .encoder(RespawnBeaconSyncPacket::toBytes)
-            .consumerMainThread(RespawnBeaconSyncPacket::handle)
-            .add();
-
         CHANNEL.messageBuilder(SquadmateStatusSyncPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
             .decoder(SquadmateStatusSyncPacket::new)
             .encoder(SquadmateStatusSyncPacket::toBytes)
@@ -396,6 +390,19 @@ public class PacketHandler {
             .decoder(ReviveActionPacket::new)
             .encoder(ReviveActionPacket::toBytes)
             .consumerMainThread(ReviveActionPacket::handle)
+            .add();
+
+        // ===== ToS Agreement Packets =====
+        CHANNEL.messageBuilder(OpenTOSScreenPacket.class, nextId++, NetworkDirection.PLAY_TO_CLIENT)
+            .decoder(OpenTOSScreenPacket::new)
+            .encoder(OpenTOSScreenPacket::toBytes)
+            .consumerMainThread(OpenTOSScreenPacket::handle)
+            .add();
+
+        CHANNEL.messageBuilder(TOSAcceptPacket.class, nextId++, NetworkDirection.PLAY_TO_SERVER)
+            .decoder(TOSAcceptPacket::new)
+            .encoder(TOSAcceptPacket::toBytes)
+            .consumerMainThread(TOSAcceptPacket::handle)
             .add();
     }
 }

@@ -16,9 +16,7 @@ public class VehicleDefinition {
     private String category;
     private String certification;
     private Costs costs;
-    private Pressure pressure;
     private Map<String, Integer> ammo;
-    private List<String> phases;
     private Map<String, Integer> populationLimits;
     private String entityType;
     private String nbt;
@@ -32,9 +30,7 @@ public class VehicleDefinition {
     public String getCategory() { return category; }
     public String getCertification() { return certification; }
     public Costs getCosts() { return costs != null ? costs : new Costs(); }
-    public Pressure getPressure() { return pressure != null ? pressure : new Pressure(); }
     public Map<String, Integer> getAmmo() { return ammo != null ? ammo : Collections.emptyMap(); }
-    public List<String> getPhases() { return phases != null ? phases : List.of("TOTAL_WAR"); }
     public Map<String, Integer> getPopulationLimits() { return populationLimits != null ? populationLimits : Map.of("10", 1); }
     public String getEntityType() { return entityType; }
     public String getNbt() { return nbt; }
@@ -64,11 +60,7 @@ public class VehicleDefinition {
     public EntityType<?> resolveEntityType() {
         if (entityType == null || entityType.isEmpty()) return null;
         ResourceLocation id = new ResourceLocation(entityType);
-        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(id);
-        if (type == null) return null;
-        ResourceLocation resolvedKey = BuiltInRegistries.ENTITY_TYPE.getKey(type);
-        if (resolvedKey == null || !resolvedKey.equals(id)) return null;
-        return type;
+        return BuiltInRegistries.ENTITY_TYPE.get(id);
     }
 
     public CompoundTag resolveNbt() {
@@ -81,15 +73,6 @@ public class VehicleDefinition {
         private int deployVC = 0;
         public int getDeployBC() { return deployBC; }
         public int getDeployVC() { return deployVC; }
-    }
-
-    public static class Pressure {
-        private int ground = 0;
-        private int air = 0;
-        private int siege = 0;
-        public int getGround() { return ground; }
-        public int getAir() { return air; }
-        public int getSiege() { return siege; }
     }
 
     private Upkeep upkeep;

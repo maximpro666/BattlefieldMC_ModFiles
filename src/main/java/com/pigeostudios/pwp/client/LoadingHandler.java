@@ -50,6 +50,11 @@ public class LoadingHandler {
     public static void onPlayerLoggedOut(ClientPlayerNetworkEvent.LoggingOut event) {
         com.pigeostudios.pwp.client.gui.screen.SpawnScreenHelper.clear();
         ClientTeamData.resetVoteData();
+        ClientTeamData.receivedKitConfigJson = "";
+        ClientTeamData.isBleeding = false;
+        ClientTeamData.bleedTimeRemaining = 0;
+        ClientTeamData.reviverUUID = null;
+        ClientTeamData.reviveProgress = 0;
         BattlefieldLoadingScreen.show();
         ClientHWID.reset();
     }

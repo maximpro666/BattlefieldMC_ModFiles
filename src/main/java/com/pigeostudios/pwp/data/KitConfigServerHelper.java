@@ -136,6 +136,21 @@ public class KitConfigServerHelper {
             }
         }
 
+        // Place medical items after ammo
+        if (kit.weapons.medical != null && !kit.weapons.medical.isEmpty()) {
+            for (String medId : kit.weapons.medical) {
+                if (ammoSlot >= 36) break;
+                ItemStack medStack = resolveDirect(medId);
+                if (!medStack.isEmpty()) {
+                    if (medId.equals("marbledsfirstaid:medkit") || medId.equals("marbledsfirstaid:bandaid_box")) {
+                        medStack.setCount(3);
+                    }
+                    player.getInventory().setItem(ammoSlot, medStack);
+                    ammoSlot++;
+                }
+            }
+        }
+
         player.inventoryMenu.broadcastChanges();
         return null;
     }

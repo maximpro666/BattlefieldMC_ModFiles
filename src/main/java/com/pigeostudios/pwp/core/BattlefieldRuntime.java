@@ -5,9 +5,10 @@ import com.pigeostudios.pwp.ammo.AmmoCooldownManager;
 import com.pigeostudios.pwp.ammo.AmmoService;
 
 import com.pigeostudios.pwp.service.EconomyService;
-import com.pigeostudios.pwp.state.*;
-import com.pigeostudios.pwp.system.*;
-import com.pigeostudios.pwp.vehicle.VehicleDefinition;
+import com.pigeostudios.pwp.state.FrontlineState;
+import com.pigeostudios.pwp.state.VehicleState;
+import com.pigeostudios.pwp.system.ActivitySystem;
+import com.pigeostudios.pwp.system.VehicleUpkeepSystem;
 import com.pigeostudios.pwp.vehicle.VehicleDefinitionRegistry;
 import com.pigeostudios.pwp.vehicle.adapter.VehicleAdapterRegistry;
 import net.minecraft.server.level.ServerLevel;
@@ -48,14 +49,10 @@ public class BattlefieldRuntime {
 
     // ===== State objects =====
     public final FrontlineState frontline = new FrontlineState();
-    public final PressureState pressure = new PressureState();
     public final VehicleState vehicles = new VehicleState();
-    public final MatchState match = new MatchState();
 
     // ===== System objects =====
     private final ActivitySystem activitySystem = new ActivitySystem();
-    private final PressureSystem pressureSystem = new PressureSystem();
-    private final EscalationSystem escalationSystem = new EscalationSystem();
     private final VehicleUpkeepSystem vehicleUpkeepSystem = new VehicleUpkeepSystem();
 
     private int recalcTickCounter = 0;
@@ -137,51 +134,8 @@ public class BattlefieldRuntime {
         return frontline.getActivityScore(uuid);
     }
 
-    // ===== Dynamic Pressure =====
-    public double getPressure(Team team, PressureType type) {
-        return pressure.get(team, type);
-    }
-
-    public void addPressure(UUID vehicleUUID, Team team, VehicleDefinition def) {
-        pressureSystem.onVehicleSpawn(pressure, vehicles, vehicleUUID, team, def);
-    }
-
-    public void removePressure(UUID vehicleUUID, Team team, VehicleDefinition def) {
-        Team t = vehicles.getVehicleTeam(vehicleUUID);
-        if (t == null) return;
-        pressureSystem.onVehicleDestroy(pressure, vehicles, vehicleUUID, vehicleDefRegistry);
-    }
-
-    public boolean isHighPressure(Team team, PressureType type) {
-        return pressure.isHigh(team, type);
-    }
-
-    // ===== War Escalation =====
-    public EscalationPhase getCurrentEscalation() { return match.getCurrentEscalation(); }
-    public double getEscalationProgress() { return match.getEscalationProgress(); }
-
-    public boolean isVehicleAllowed(VehicleDefinition def) {
-        return match.isVehicleAllowed(def);
-    }
-
-    public boolean isPhaseAtLeast(EscalationPhase phase) {
-        return match.isPhaseAtLeast(phase);
-    }
-
     // ===== Active Frontline Players =====
     public int getActiveFrontlineCount() { return frontline.getActiveCount(); }
-
-    // ===== Vehicle-to-Pressure Tracking =====
-    public void trackVehicleSpawn(UUID vehicleUUID, Team team, String defId) {
-        VehicleDefinition def = vehicleDefRegistry.get(defId);
-        if (def != null) {
-            pressureSystem.onVehicleSpawn(pressure, vehicles, vehicleUUID, team, def);
-        }
-    }
-
-    public void trackVehicleDestroy(UUID vehicleUUID) {
-        pressureSystem.onVehicleDestroy(pressure, vehicles, vehicleUUID, vehicleDefRegistry);
-    }
 
     // ===== Sync to clients =====
     public void syncBC(ServerPlayer player) {
@@ -215,11 +169,8 @@ public class BattlefieldRuntime {
         EconomyService svc = getEconomyService();
         if (svc != null) svc.resetMatch();
         frontline.reset();
-        pressure.reset();
         vehicles.reset();
-        match.reset();
         activitySystem.reset();
-        pressureSystem.reset();
         vehicleUpkeepSystem.reset();
         recalcTickCounter = 0;
         ammoService.clear();
@@ -241,10 +192,7 @@ public class BattlefieldRuntime {
         if (gm == null || !gm.isPlaying()) return;
 
         activitySystem.tick(frontline);
-        pressureSystem.tick(pressure);
 
-        var ts = PWP.getServiceRegistry().getTickets();
-        escalationSystem.tick(match, pressure, ts, gm);
         recalcTickCounter++;
         if (recalcTickCounter >= RECALC_INTERVAL) {
             recalcTickCounter = 0;
@@ -265,8 +213,6 @@ public class BattlefieldRuntime {
                 if (vehicleManager != null) {
                     vehicleUpkeepSystem.tick(level, this, vehicleManager);
                 }
-                var es = PWP.getServiceRegistry().getEvents();
-                if (es != null) es.tick(gm.getServer(), level, gm.getMatchTimeRemaining());
             }
         }
     }

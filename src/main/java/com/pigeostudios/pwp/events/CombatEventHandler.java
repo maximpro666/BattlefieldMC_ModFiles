@@ -564,24 +564,12 @@ public class CombatEventHandler {
             }
         }
 
-        List<OpenSpawnSelectionScreenPacket.BeaconInfo> beacons = new java.util.ArrayList<>();
-        RespawnManager respawnManager = PWP.getRespawnManager();
-        if (respawnManager != null) {
-            for (RespawnManager.SavedBeacon b : respawnManager.getBeaconsInDimension(
-                    player.serverLevel().dimension().location().toString())) {
-                if (java.util.Objects.equals(b.uuid, player.getUUID().toString())) {
-                    beacons.add(new OpenSpawnSelectionScreenPacket.BeaconInfo(
-                            b.name, b.x, b.y, b.z, b.teamOrdinal));
-                }
-            }
-        }
-
         int teamOrd = team != null ? team.ordinal() : 2;
 
         String selectedKit = tm.getOrCreatePlayerData(player.getUUID()).getSelectedKit();
         PacketHandler.CHANNEL.send(
                 net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> player),
-                new OpenSpawnSelectionScreenPacket(squadmates, fobList, beacons, teamOrd, selectedKit));
+                new OpenSpawnSelectionScreenPacket(squadmates, fobList, teamOrd, selectedKit));
     }
 
     @SubscribeEvent
@@ -636,8 +624,6 @@ public class CombatEventHandler {
         NotificationPacket rewardPkt = new NotificationPacket("+" + vBcReward + " BC \u0437\u0430 \u0443\u043d\u0438\u0447\u0442\u043e\u0436\u0435\u043d\u0438\u0435 \u0442\u0435\u0445\u043d\u0438\u043a\u0438", "success", 3000, "");
         PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> killer), rewardPkt);
         if (vm != null) vm.unregisterSpawnedVehicle(ent.getUUID());
-        BattlefieldRuntime.getInstance().trackVehicleDestroy(ent.getUUID());
-
         var tkSvc = PWP.getServiceRegistry().getTickets();
         if (tkSvc != null && vehicleOwnerId != null) {
             Team ownerTeam = teamManager.getOrCreatePlayerData(vehicleOwnerId).getTeam();

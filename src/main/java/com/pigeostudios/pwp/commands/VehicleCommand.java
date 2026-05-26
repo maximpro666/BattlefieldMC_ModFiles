@@ -168,12 +168,6 @@ public class VehicleCommand {
             costs.addProperty("deployVC", 200);
             out.add("costs", costs);
 
-            com.google.gson.JsonObject pressure = new com.google.gson.JsonObject();
-            pressure.addProperty("ground", 5);
-            pressure.addProperty("air", 0);
-            pressure.addProperty("siege", 1);
-            out.add("pressure", pressure);
-
             out.addProperty("cooldownSeconds", 60);
             out.addProperty("ticketCost", 0);
 

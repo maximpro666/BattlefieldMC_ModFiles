@@ -62,7 +62,7 @@ if (Test-Path $serverProps) {
     Write-Host "[launcher] Port set to $port"
 }
 
-# Clean map dimension data but keep lobby world (AutumnLobby)
+# Clean old map dimension data
 Remove-Item -Recurse -Force (Join-Path $temp "world\dimensions\pwp\map") -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force (Join-Path $temp "logs") -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force (Join-Path $temp "crash-reports") -ErrorAction SilentlyContinue

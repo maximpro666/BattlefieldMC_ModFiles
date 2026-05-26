@@ -194,7 +194,7 @@ public class KitCustomizationScreen extends Screen {
                 AnimationHelper.withAlpha(UITheme.BORDER, (int)(fade * 0xAA)));
 
         // Back button
-        String back = "\u2190 Back";
+        String back = I18n.get("pwp.ui.kit_customization.back");
         boolean backHov = mx >= 10 && mx < 10 + font.width(back) + 20 && my >= 8 && my < 8 + 22;
         if (backHov) {
             g.fill(10, 8, 10 + font.width(back) + 20, 30,
@@ -206,7 +206,7 @@ public class KitCustomizationScreen extends Screen {
         // Kit name
         g.drawString(font, name, 120, 12,
                 AnimationHelper.withAlpha(UITheme.ACCENT, alpha));
-        g.drawString(font, "customization", 120 + font.width(name) + 6, 12,
+        g.drawString(font, I18n.get("pwp.ui.kit_customization.subtitle"), 120 + font.width(name) + 6, 12,
                 AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 180)));
 
         // Save button
@@ -216,7 +216,7 @@ public class KitCustomizationScreen extends Screen {
         int svBg = AnimationHelper.blendColors(UITheme.ACCENT, 0xFFFF8C0A, svHov ? 1f : 0f);
         g.fill(btnX, 8, btnX + btnW, 32, AnimationHelper.withAlpha(svBg, alpha));
         g.fill(btnX, 8, btnX + 2, 32, AnimationHelper.withAlpha(0x33000000, alpha));
-        String svTxt = "Save";
+        String svTxt = I18n.get("pwp.ui.kit_customization.save");
         g.drawString(font, svTxt, btnX + btnW / 2 - font.width(svTxt) / 2, 17, 0xFFFFFFFF);
 
         // Deploy button
@@ -225,7 +225,7 @@ public class KitCustomizationScreen extends Screen {
         int dpBg = AnimationHelper.blendColors(UITheme.ACCENT, 0xFFFF8C0A, dpHov ? 1f : 0f);
         g.fill(dpX, 8, dpX + btnW, 32, AnimationHelper.withAlpha(dpBg, alpha));
         g.fill(dpX, 8, dpX + 2, 32, AnimationHelper.withAlpha(0x33000000, alpha));
-        String dpTxt = "Deploy";
+        String dpTxt = I18n.get("pwp.ui.kit_customization.deploy");
         g.drawString(font, dpTxt, dpX + btnW / 2 - font.width(dpTxt) / 2, 17, 0xFFFFFFFF);
     }
 
@@ -269,7 +269,7 @@ public class KitCustomizationScreen extends Screen {
         } else {
             g.drawString(font, "\uD83D\uDD2B", rx + (PREVIEW_W - 16) / 2 - 9, ry + rh / 2 - 8,
                     AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
-            String noItem = currentId.isEmpty() ? "No item" : currentId.replace("_", " ").toUpperCase();
+            String noItem = currentId.isEmpty() ? I18n.get("pwp.ui.kit_customization.no_item") : currentId.replace("_", " ").toUpperCase();
             g.drawString(font, noItem, rx + (PREVIEW_W - 16) / 2 - font.width(noItem) / 2, ry + rh / 2 + 10,
                     AnimationHelper.withAlpha(UITheme.TEXT_MUTED, (int)(fade * 150)));
         }
@@ -328,7 +328,14 @@ public class KitCustomizationScreen extends Screen {
                 case "Grenade" -> "\uD83D\uDCA3";
                 default -> "\u2022";
             };
-            g.drawString(font, icon + " " + key, 14, sy + 8,
+            String slotLabel = switch (key) {
+                case "Primary" -> I18n.get("pwp.ui.kit_customization.slot_primary");
+                case "Secondary" -> I18n.get("pwp.ui.kit_customization.slot_secondary");
+                case "Special" -> I18n.get("pwp.ui.kit_customization.slot_special");
+                case "Grenade" -> I18n.get("pwp.ui.kit_customization.slot_grenade");
+                default -> key;
+            };
+            g.drawString(font, icon + " " + slotLabel, 14, sy + 8,
                     AnimationHelper.withAlpha(isActive ? UITheme.ACCENT : UITheme.TEXT_MUTED, (int)(fade * (isActive ? 255 : 180))));
 
             // Weapon name
@@ -400,7 +407,7 @@ public class KitCustomizationScreen extends Screen {
 
         // Footer back button
         if (my >= 8 && my <= 32) {
-            String back = "\u2190 Back";
+            String back = I18n.get("pwp.ui.kit_customization.back");
             if (mx >= 10 && mx < 10 + font.width(back) + 20) {
                 onClose();
                 return true;
